@@ -1,0 +1,9 @@
+{
+  "type": "ftp",
+  "host": "pms.e-khmer.com",
+  "username": "scusersbnn",
+  "password": "?NwYsAyq",
+  "port": 21,
+  "remotePath": "./pms.e-khmer.com",
+  "uploadOnSave": true
+}
