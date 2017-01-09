@@ -19,7 +19,7 @@ $limit = 10;
 $total_data = null;
 
 $admin_username = 'admin';
-$admin_password = '098f6bcd4621d373cade4e832627b4f6';
+$admin_password = '783aa605875aa00477ecffeeddbbe65d';
 
 $site_url = 'http://www.pms.e-khmer.com/';
 
