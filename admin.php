@@ -87,6 +87,59 @@ if(empty($_SESSION['is_admin_login'])){
   header('Location:'.$admin_file.'?task=login');
   exit;
 }
+//task permission
+if('staff_permission' === $task)
+{
+  $getsrid = (isset($_GET['sr_id']))?$_GET['sr_id']:'';
+  unset($_SESSION['staff_permission']);
+  $error = array();
+  if($_POST)
+  {
+   $staff_function_id = $common->clean_string($_POST['staff_function_id']);
+   $staff_role_id     = $common->clean_string($_POST['staff_role_id']);
+
+   if(empty($staff_function_id))   $error['staff_function_id']=1;
+   if(empty($staff_role_id))       $error['staff_role_id'] =1;
+   $_SESSION['staff_permission'] = $_POST;
+
+   if(0 === count($error) && empty($_POST['id']))
+   {
+     $common->save('staff_permission', $field = ['staff_function_id'=> $staff_function_id, 'staff_role_id'=> $staff_role_id] );
+     //reset session
+     unset($_SESSION['staff_permission']);
+     //Redirect
+     header('location: '.$admin_file.'?task=staff_permission');
+     exit;
+   }
+   if(0 === count($error) && !empty($_POST['id']))
+   {
+     $common->update('ameter number: parameter was ', $field = ['staff_function_id' => $staff_function_id, 'staff_role_id' => $staff_role_id], $conditon = ['id' => $_POST['id']]);
+     //reset session
+     unset($_SESSION['staff_permission']);
+     header('location: '.$admin_file.'?task=staff_permission');
+     exit;
+   }
+   $smarty_appform->assign('error', $error);
+  }
+  if('delete' === $action && !empty($_GET))
+  {
+    $common->delete('staff_permission', $field = ['id'=>$_GET['id']]);
+    header('location: '.$admin_file.'?task=staff_permission');
+    exit;
+  }
+  //action edit staff permission
+  if('edit' === $action && !empty($_GET['id'])) $smarty_appform->assign('edit_staff_permission', getStaffPermissionById($_GET['id']));
+
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $all_staffpermission = ListStaffPermission($kwd);
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('list_Staff_Permission',$all_staffpermission);
+  $smarty_appform->assign('list_staff_role', $common->find('staff_role', $condition = null, $type = 'all'));
+  $smarty_appform->assign('list_staff_function', $common->find('staff_function', $condition = null, $type = 'all'));
+  $smarty_appform->display('admin/staff_permission.tpl');
+  exit;
+}
 //task staff Role
 if('staff_role' === $task)
 {
@@ -103,7 +156,7 @@ if('staff_role' === $task)
         $_SESSION['staff_role'] = '';
         unset($_SESSION['staff_role']);
 				//Redirect
-				header('location:'.$admin_file_name.'?task=staff_role');
+				header('location:'.$admin_file.'?task=staff_role');
 				exit;
 			}
       if(!empty($id) && 0 === count($error))
@@ -112,7 +165,7 @@ if('staff_role' === $task)
         $_SESSION['staff_role'] = '';
         unset($_SESSION['staff_role']);
         //Redirect
-        header('location:'.$admin_file_name.'?task=staff_role');
+        header('location:'.$admin_file.'?task=staff_role');
         exit;
       }
     $smarty_appform->assign('error', $error);
@@ -139,6 +192,7 @@ if('staff_role' === $task)
 //task staff information
 if('staff_info' === $task)
 {
+  if(!empty($_SESSION['staff_info'])) unset($_SESSION['staff_info']);
   $error = array();
 		if($_POST)
 		{
@@ -146,8 +200,10 @@ if('staff_info' === $task)
 			$name     = $common->clean_string($_POST['name']);
       $pass     = $common->clean_string($_POST['password']);
       $gender   = $common->clean_string($_POST['gender']);
-      $phone   = $common->clean_string($_POST['phone']);
+      $phone    = $common->clean_string($_POST['phone']);
       $staff_role   = $common->clean_string($_POST['staff_role']);
+      $old_fle = $common->clean_string($_POST['old_file']);
+      $create_at  = date('Y-m-d h:i:s', time());
       $_SESSION['staff_info'] = $_POST;
       //check validate form
 			if(empty($name))   $error['name'] = 1;
@@ -158,22 +214,84 @@ if('staff_info' === $task)
       {
         $error['password'] = 2;
       }
+      if(!empty($_POST['old_file'])){
+        $image = $old_fle;
+      }else{
+        if(empty($_FILES['image']['name'])){
+          $error['no_image'] = 1;
+        }
+      }
+      if(!empty($_FILES['image']['name']))
+      {
+        if($_FILES['image']['size'] > $allows['SIZE'][0])  $error['size'] = 1;
+        if(!in_array($_FILES['image']['type'], $allows['TYPE']['image'])) $error['type'] = 1;
+      }
 			if(empty($id) && 0 === count($error))
 			{
-				$common->save('staff',$field = ['name' => $name,'password' => $pass,'gender' => $gender,'phone' => $phone,'staff_role_id'=>$staff_role]);
+        if(!empty($_FILES['image']) && !empty($_FILES['image']['name']))
+				{
+					$image = $common->uploadFile($_FILES, time(), IMAGE_PATH, 'image');
+          // echo $image;exit;
+					if($_FILES['image']['error'] > 0)  $error['error'] = 1;
+					//Generate thumbnail
+	        $images = new Zubrag_image;
+	        $images->max_x        = $thumbnail_width;
+	        $images->max_y        = $thumbnail_height;
+	        $images->save_to_file = 1;
+	        $images->image_type   = '-1';
+	        $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
+	        $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
+				}
+          // echo $images;exit;
+          $common->save('staff', $field = ['name'     => $name,
+                                          'password'  => $pass,
+                                          'gender'    => $gender,
+                                          'phone'     => $phone,
+                                          'status'    => 1,
+                                          'photo'     => $image,
+                                          'staff_role_id' =>$staff_role,
+                                          'created_at'   => $create_at]);
         $_SESSION['staff_info'] = '';
         unset($_SESSION['staff_info']);
 				//Redirect
-				header('location:'.$admin_file_name.'?task=staff_info');
+				header('location:'.$admin.'?task=staff_info');
 				exit;
 			}
       if(!empty($id) && 0 === count($error))
       {
-        $common->update('staff_role', $field = ['name' => $title], $condition = ['id' => $id]);
-        $_SESSION['staff_role'] = '';
-        unset($_SESSION['staff_role']);
+        if(empty($_POST['old_fle'])){
+          if(!empty($_FILES['image']) && !empty($_FILES['image']['name']))
+          {
+            $photo = $common->find('staff', $condition = ['id' => $id], $type = 'one');
+            if(!empty($photo['photo']))
+            {
+              @unlink(IMAGE_PATH.$photo['photo']);
+              @unlink(IMAGE_PATH.'thumbnail__'.$photo['photo']);
+            }
+            $image = $common->uploadFile($_FILES, time(), IMAGE_PATH, 'image');
+            if($_FILES['image']['error'] > 0)  $error['error'] = 1;
+            //Generate thumbnail
+            $images = new Zubrag_image;
+            $images->max_x        = $thumbnail_width;
+            $images->max_y        = $thumbnail_height;
+            $images->save_to_file = 1;
+            $images->image_type   = '-1';
+            $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
+            $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
+          }
+        }
+        $common->update('staff', $field = ['name' => $name,
+                                                'password'  => $pass,
+                                                'gender'    => $gender,
+                                                'phone'     => $phone,
+                                                'photo'     => $image,
+                                                'staff_role_id' =>$staff_role
+                                               ],
+        $condition = ['id' => $id]);
+        $_SESSION['staff_info'] = '';
+        unset($_SESSION['staff_info']);
         //Redirect
-        header('location:'.$admin_file_name.'?task=staff_role');
+        header('location:'.$admin_file.'?task=staff_info');
         exit;
       }
     $smarty_appform->assign('error', $error);
@@ -182,12 +300,23 @@ if('staff_info' === $task)
   if('delete' === $action && !empty($_GET['id']))
   {
     $common->delete("staff_role", $field = ['id' => $_GET['id']]);
-    header('location: '.$admin_file.'?task=staff_role');
+    header('location: '.$admin_file.'?task=staff_info');
+    exit;
+  }
+  if('change_status' === $action && !empty($_GET['id']))
+  {
+    if(!empty($_GET['status'] == 1))
+    {
+      $common->update('staff', $field = ['status' => 2], $condition = ['id' => $_GET['id']]);
+    }elseif (!empty($_GET['status'] == 2)) {
+      $common->update('staff', $field = ['status' => 1], $condition = ['id' => $_GET['id']]);
+    }
+    header('location:'.$admin_file.'?task=staff_info');
     exit;
   }
   if('edit' === $action && !empty($_GET['id']))
   {
-    $smarty_appform->assign('edit',$common->find('staff_role', $condition = ['id' => $_GET['id']], $type='one'));
+    $smarty_appform->assign('edit',$common->find('staff', $condition = ['id' => $_GET['id']], $type='one'));
   }
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
 	$results = ListStaffInfo($kwd);
@@ -196,6 +325,62 @@ if('staff_info' === $task)
   $smarty_appform->assign('list_staff', $results);
   $smarty_appform->assign('staff_role', $common->find('staff_role', $condition = null, $type = 'all'));
   $smarty_appform->display('admin/staff_info.tpl');
+  exit;
+}
+//task staff function
+if('staff_function')
+{
+  if(!empty($_SESSION['staff_function'])) unset($_SESSION['staff_function']);
+  $error = array();
+  if($_POST)
+  {
+    $id       = $common->clean_string($_POST['id']);
+    $title    = $common->clean_string($_POST['title']);
+    $task     = $common->clean_string($_POST['task']);
+    $action   = $common->clean_string($_POST['action']);
+
+    $_SESSION['staff_function'] = $_POST;
+    //check validate form
+    if(empty($title))   $error['title'] = 1;
+    if(empty($task))    $error['task'] = 1;
+    if(empty($action))  $error['action'] = 1;
+    if(count($error) === 0 && empty($id))
+    {
+      $common->save('staff_function',$field = ['title' => $title, 'task_name'=>$task,'action_name'=>$action]);
+      $_SESSION['staff_function'] = '';
+      unset($_SESSION['staff_function']);
+      //Redirect
+      header('location:'.$admin_file.'?task=staff_function');
+      exit;
+    }
+    if(count($error) === 0 && !empty($id))
+    {
+      $common->update('staff_function', $field = ['title' => $title,'task_name'=>$task, 'action_name'=>$action], $condition = ['id' => $id]);
+      $_SESSION['staff_function'] = '';
+      unset($_SESSION['staff_function']);
+      //Redirect
+      header('location:'.$admin_file.'?task=staff_function');
+      exit;
+    }
+    $smarty_appform->assign('error', $error);
+  }
+  //action delete staff function
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete("staff_function", $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=staff_function');
+    exit;
+  }
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('edit',$common->find('staff_function', $condition = ['id' => $_GET['id']], $type='one'));
+  }
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+	$list_function = listFunction($kwd);
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('list_function', $list_function);
+  $smarty_appform->display('admin/staff_function.tpl');
   exit;
 }
 //task home

@@ -2,6 +2,8 @@ body{
   background-color: #D5D5D5;
   padding-top: 70px;
 }
+/*fieldset */
+
 .bg-image{
   background: url(/images/bg2.jpg);
   background-repeat: no-repeat center center;

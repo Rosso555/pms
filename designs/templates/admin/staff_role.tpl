@@ -17,11 +17,11 @@
         <div class="panel-body">
           <div class="panel panel-default">
   					<div class="panel-body">
-              <div class="col-sm-8">
+              <div class="col-md-8">
                 <form class="form-inline" role="form" action="{$admin_file_name}?task=staff_role" method="post">
                   <div class="form-group">
-                    <lable>Name :</label>
-                      <input type="text" class="form-control" name="name" value="{$edit.name}{if $smarty.session.staff_role.name|escape}{$smarty.session.staff_role.name|escape}{/if}" />
+                    <label for="">Name:</label>
+                    <input type="text" class="form-control" name="name" value="{$edit.name}{if $smarty.session.staff_role.name|escape}{$smarty.session.staff_role.name|escape}{/if}" />
                   </div>
                   <div class="form-group">
                     {if $edit.id}
@@ -91,7 +91,7 @@
             </tbody>
           </table>
         </div>
-        {include file = "common/paginate.tpl"}
+        <div class="pull-right">{include file = "common/paginate.tpl"}</div>
       </div>
     </div>
   </div>

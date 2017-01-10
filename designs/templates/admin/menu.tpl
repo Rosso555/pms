@@ -19,8 +19,8 @@
           <ul class="dropdown-menu">
             <li><a href="{$admin_file}?task=staff_info"><i class="fa fa-users" aria-hidden="true"></i> Infomation</a></li>
             <li><a href="{$admin_file}?task=staff_role"><i class="fa fa-street-view" aria-hidden="true"></i> Staff Role</a></li>
-            <li><a href="#"><i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> Permission</a></li>
-            <li><a href="#"><i class="fa fa-retweet" aria-hidden="true"></i> Function</a></li>
+            <li><a href="{$admin_file}?task=staff_permission"><i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> Permission</a></li>
+            <li><a href="{$admin_file}?task=staff_function"><i class="fa fa-retweet" aria-hidden="true"></i> Function</a></li>
           </ul>
         </li>
       </ul>
