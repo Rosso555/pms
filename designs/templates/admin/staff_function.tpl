@@ -50,7 +50,7 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>Action Name:</label><span class="text-danger"> *{if $error.action eq 1}Please write action.{/if}</span>
+                  <label>Action Name:</label>
                   <input type="text" class="form-control" name="action" value="{if $edit.action_name}{$edit.action_name}{else}{if $smarty.session.staff_function.action|escape}{$smarty.session.staff_function.action|escape}{/if}{/if}" placeholder="action save.." />
                 </div>
               </div>

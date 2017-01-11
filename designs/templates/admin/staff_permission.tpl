@@ -11,29 +11,42 @@
         <div class="panel-body">
           <div class="panel panel-default">
             <div class="panel-body">
-              <form class="form-inline" role="form" action="{$admin_file}?task=staff_permission" method="GET" style="padding: 1px 0px 12px 1px;">
-                <input type="hidden" name="task" value="staff_permission">
-              <div class="form-group">
-                <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
-                  <i class="fa fa-plus-circle"></i> New Staff Permission
-                </button>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
+                      <i class="fa fa-plus-circle"></i> New Staff Permission
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="row">
+                    <div class="form-group">
+                      <div class="col-md-5">
+                        <select class="form-control" id="the_select">
+                          <option value="">Show by staff role</option>
+                          <option value="">All staff role</option>
+                          {foreach from = $search_by_role item = staff_role}
+                          <option value="{$staff_role.staff_role_name}">{$staff_role.staff_role_name}</option>
+                          {/foreach}
+                        </select>
+                      </div>
+                      <div class="col-md-7">
+                        <form class="form-inline" role="form" action="{$admin_file}" method="GET">
+                          <div class="input-group" style="float: right;">
+                            <input type="hidden" name="task" value="staff_permission">
+                            <input id="search" type="text" class="form-control" name="kwd" value="{$smarty.get.kwd|escape}" placeholder="">
+                            <span class="input-group-btn">
+                              <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> Search</button>
+                            </span>
+                          </div>
+                          </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-                <div class="input-group" style="float: right;">
-                  <input type="text" class="form-control" name="kwd" value="{$smarty.get.kwd|escape}" placeholder="">
-                  <span class="input-group-btn">
-                    <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> Search</button>
-                  </span>
-                </div>
-                <div class="form-group" style="float: right; margin-right: 10px;">
-                  <select class="form-control" id="staff" name="sr_id">
-                    <option value=""> ---Please Select Staff Role--- </option>
-                    {foreach from = $list_staff_role item = staff_role}
-                    <option value="{$staff_role.id}" {if $smarty.get.sr_id eq $staff_role.id}selected{/if}>{$staff_role.title}</option>
-                    {/foreach}
-                  </select>
-                  <p class="help-block">{if $error.staff_role_id eq 1}<font style="color:red;">*&nbsp;Please Input staff Role</font>{/if}</p>
-                </div>
-              </form>
+
               {if $error or $edit_staff_permission.id}
                 <div id="demo" class="collapse in">
               {else}
@@ -57,7 +70,7 @@
                         <div class="form-group">
                           <label for="staff">Staff Role:</label>
                           <select class="form-control" id="staff" name="staff_role_id">
-                            <option value=""> ---Please Select Staff Role--- </option>
+                            <option value="0"> ---Please Select Staff Role--- </option>
                             {foreach from = $list_staff_role item = staff_role}
                             <option value="{$staff_role.id}" {if $edit_staff_permission.staff_role_id eq $staff_role.id}selected{else}{if $smarty.session.staff_permission.staff_role_id eq $staff_role.id}selected{/if}{/if}>{$staff_role.name}</option>
                             {/foreach}
@@ -123,7 +136,7 @@
                               <p>Are you sure you want to delete this staff permission?</p>
                             </div>
                             <div class="modal-footer">
-                              <a href="{$admin_file}?task=staff_permission&amp;action=delete&amp;id={$staff_permission.id}&amp;sr_id={$smarty.get.sr_id|escape}&amp;next={$smarty.get.next|escape}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> Delete</i></a>
+                              <a href="{$admin_file}?task=staff_permission&amp;action=delete&amp;id={$staff_permission.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> Delete</i></a>
                               <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-remove"> Close</i></button>
                             </div>
                           </div>
@@ -146,6 +159,14 @@
       </div><!--panel panel-primary-->
 {/block}
 {block name="javascript"}
+<script type="text/javascript">
+$(function(){
+  $("#the_select").change(function(){
+    window.location='{$admin_file}?task=staff_permission&kwd=' + this.value
+  });
+  document.getElementById("search").value = "";
+});
+</script>
 <script>
 $('#birth_date').datetimepicker({ locale: 'en', format: 'YYYY-MM-DD' });
  $('[data-toggle="popover"]').popover();

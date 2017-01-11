@@ -109,6 +109,7 @@
                 <div class="form-group">
                   <select class="form-control " name="kwd" id="the_select">
                     <option value="">Show active or stoped</option>
+                    <option value="">Show all</option>
                     <option value="1">Active</option>
                     <option value="2">stoped</option>
                   </select>
@@ -209,7 +210,7 @@
 <script type="text/javascript">
 $(function(){
   $("#the_select").change(function(){
-    window.location='http://www.pms.e-khmer.com/admin.php?task=staff_info&kwd=' + this.value
+    window.location='{$admin_file}?task=staff_info&kwd=' + this.value
   });
 });
 </script>

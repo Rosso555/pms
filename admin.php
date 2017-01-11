@@ -14,11 +14,6 @@ $task = $action = $kwd = null;
 if(!empty($_GET['task'])) $task = $_GET['task'];
 if(!empty($_GET['action'])) $action = $_GET['action'];
 if(!empty($_GET['kwd'])) $kwd = $_GET['kwd'];
-if(!empty($_GET['lang'])) $lang = $_GET['lang'];
-if(empty($lang) and empty($_SESSION['lang'])) $lang = 'en';
-if(!empty($lang) and empty($_SESSION['lang'])) $_SESSION['lang'] = $lang;
-if(!empty($lang) and $lang != $_SESSION['lang']) $_SESSION['lang'] = $lang;
-if(empty($lang) and $_SESSION['lang']) $lang = $_SESSION['lang'];
 
 //Smarty
 $smarty_appform = new PMS_SMARTY();
@@ -41,7 +36,29 @@ SmartyPaginate::setUrl('?'.$_SERVER['QUERY_STRING']);
 $database_connect 		 		= new database(DB_HOSTNAME, DB_USER, DB_PASSWORD, DB_DATABASE_NAME);
 $database_connect->debug 	= $debug;
 $connected 				 	 			= & $database_connect->_Connect;
+//Get language By default_lang = 1
+$result = $common->find('language', $condition = ['default_lang' => 1], $type = 'one');
+//Setting language
+if(!empty($_GET['lang'])) $lang = $_GET['lang'];
+if(empty($lang) and empty($_SESSION['lang'])) $lang = $result['lang_name'];
+if(!empty($lang) and empty($_SESSION['lang'])) $_SESSION['lang'] = $lang;
+if(!empty($lang) and $lang != $_SESSION['lang']) $_SESSION['lang'] = $lang;
+if(empty($lang) and $_SESSION['lang']) $lang = $_SESSION['lang'];
+//Smarty assign value
+$smarty_appform->assign('lang_name', $result['lang_name']);
 
+//list menu language
+$smarty_appform->assign('getLanguage', $common->find('language', $condition = null, $type = 'all'));
+//Change language on template
+$smarty_appform->assign('multiLang', getMultilang($lang));
+if(!empty($_GET['deflang']))
+{
+  //Update default_lang to zero
+  updateDefaultLang();
+  if(!empty($_GET['lid'])) $common->update('language', $field = ['default_lang' => 1], $condition = ['id' => $_GET['lid']]);
+  header('location: '.$admin_file);
+  exit;
+}
 //task: login
 if('login' === $task){
   $error = array();
@@ -87,6 +104,200 @@ if(empty($_SESSION['is_admin_login'])){
   header('Location:'.$admin_file.'?task=login');
   exit;
 }
+//task multi_language
+if('multi_language' === $task)
+{
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $key_lang       = $common->clean_string($_POST['key_lang']);
+    $unique_id      = time();
+
+    //add value to session to use in template
+    $_SESSION['translate'] = $_POST;
+
+    //form validation
+    if(empty($key_lang))    $error['key_lang']  = 1;
+    $result = getMultilangByID($_GET['unique_id']);
+
+    if(!empty($key_lang) && $result['key_lang'] !== $key_lang && is_key_lang_exist($key_lang) > 0) $error['is_key_lang_exist'] = 2;
+
+    //Add question
+    if(0 === count($error) && empty($_GET['unique_id']))
+    {
+      foreach ($_POST['title'] as $k => $v) {
+         $common->save('multi_lang', $field = ['unique_id' => $unique_id, 'language_id' => $_POST['language_id'][$k], 'title' => $_POST['title'][$k], 'key_lang' => $key_lang, 'lang' => $_POST['lang'][$k]]);
+      }
+      //unset session
+      unset($_SESSION['translate']);
+      //Redirect
+      header('location: '.$admin_file.'?task=multi_language');
+      exit;
+    }
+    //update question
+    if(0 === count($error) && !empty($_GET['unique_id']))
+    {
+      foreach ($_POST['title'] as $k => $v) {
+        $common->update('multi_lang', $field = ['title' => $_POST['title'][$k], 'key_lang' => $key_lang, 'lang' => $_POST['lang'][$k]], $condition = ['id' => $_POST['id'][$k]]);
+      }
+      //unset session
+      unset($_SESSION['question']);
+      //Redirect
+      header('location: '.$admin_file.'?task=multi_language');
+      exit;
+    }
+
+  }
+  //action delete question
+  if('delete' === $action && !empty($_GET['unique_id']))
+  {
+    $common->delete('multi_lang', $field = ['unique_id' => $_GET['unique_id']]);
+    header('location: '.$admin_file.'?task=multi_language');
+    exit;
+  }
+  //get edit question
+  if('edit' === $action && !empty($_GET['unique_id']))
+  {
+    $smarty_appform->assign('getMultilangByUID', getMultilangByID($_GET['unique_id']));
+  }
+  //Calculate for set limit
+  $result_language = $common->find('language', $condition = null, $type = 'all');
+  $slimit = COUNT($result_language) * 5;
+
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $langs = listMultiLang($kwd, $slimit);
+
+  // var_dump($langs);exit;
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  SmartyPaginate::setLimit($slimit);
+  $smarty_appform->assign('langs', $langs);
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('language', $result_language);
+  $smarty_appform->display('admin/multi_language.tpl');
+  exit;
+}
+//Task Add Language
+if('add_language' === $task)
+{
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $id         = $common->clean_string($_POST['id']);
+    $title      = $common->clean_string($_POST['title']);
+    $language   = $common->clean_string($_POST['language']);
+
+    //add value to session to use in template
+    $_SESSION['add_language'] = $_POST;
+    //form validation
+    if(empty($title))     $error['title'] = 1;
+    if(empty($language))  $error['language'] = 1;
+
+    //Add language
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('language', $field = ['title' => $title, 'lang_name' => $language]);
+      //unset session
+      unset($_SESSION['add_language']);
+      //Redirect
+      header('location: '.$admin_file.'?task=add_language');
+      exit;
+    }
+    //update language
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('language', $field = ['title' => $title, 'lang_name'  => $language], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['add_language']);
+      //Redirect
+      header('location: '.$admin_file.'?task=add_language');
+      exit;
+    }
+  }
+  //action delete language
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('language', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=add_language');
+    exit;
+  }
+  //get edit language
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getLanguageByID', $common->find('language', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $result = listLanguage($kwd);
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('listLanguage', $result);
+  $smarty_appform->display('admin/add_language.tpl');
+  exit;
+}
+//task category
+if('category' === $task)
+{
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $name = $common->clean_string($_POST['name']);
+    $id   = $common->clean_string($_POST['id']);
+
+    //add value to session to use in template
+    $_SESSION['category'] = $_POST;
+    //form validation
+    if(empty($name))  $error['name']  = 1;
+
+    //Add test
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('category', $field = ['name' => $name, 'lang' => $lang]);
+      //unset session
+      unset($_SESSION['category']);
+      //Redirect
+      header('location: '.$admin_file.'?task=category');
+      exit;
+    }
+    //update test
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('category', $field = ['name' => $name, 'lang' => $lang], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['category']);
+      //Redirect
+      header('location: '.$admin_file.'?task=category');
+      exit;
+    }
+  }
+
+  //action delete category
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('category', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=category');
+    exit;
+  }
+  //get edit category
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getCategoryByID', $common->find('category', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $result = listCategory($kwd, $lang);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('listCategory', $result);
+  $smarty_appform->display('admin/category.tpl');
+  exit;
+}
 //task permission
 if('staff_permission' === $task)
 {
@@ -121,7 +332,7 @@ if('staff_permission' === $task)
    }
    $smarty_appform->assign('error', $error);
   }
-  if('delete' === $action && !empty($_GET))
+  if('delete' === $action && !empty($_GET['id']))
   {
     $common->delete('staff_permission', $field = ['id'=>$_GET['id']]);
     header('location: '.$admin_file.'?task=staff_permission');
@@ -129,11 +340,11 @@ if('staff_permission' === $task)
   }
   //action edit staff permission
   if('edit' === $action && !empty($_GET['id'])) $smarty_appform->assign('edit_staff_permission', getStaffPermissionById($_GET['id']));
-
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $all_staffpermission = ListStaffPermission($kwd);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('search_by_role',ListStaffRoleByPermission());
   $smarty_appform->assign('list_Staff_Permission',$all_staffpermission);
   $smarty_appform->assign('list_staff_role', $common->find('staff_role', $condition = null, $type = 'all'));
   $smarty_appform->assign('list_staff_function', $common->find('staff_function', $condition = null, $type = 'all'));
@@ -343,7 +554,6 @@ if('staff_function')
     //check validate form
     if(empty($title))   $error['title'] = 1;
     if(empty($task))    $error['task'] = 1;
-    if(empty($action))  $error['action'] = 1;
     if(count($error) === 0 && empty($id))
     {
       $common->save('staff_function',$field = ['title' => $title, 'task_name'=>$task,'action_name'=>$action]);
