@@ -46,29 +46,6 @@
                 </div>
               </div>
             {/foreach}
-              <!-- <div class="col-md-6">
-                <div class="form-group">
-                  <label for="title"><span style="color: red">*</span> {if $multiLang.multi_language_title_en}{$multiLang.multi_language_title_en}{else}No Translate (Key Lang: multi_language_title_en){/if}:</label>
-                  {if $error.title_en}
-                    <span style="color: red">Please input title English.</span>
-                  {/if}
-                  <input type="text" class="form-control" name="title[]" value="{$getMultilangByUID.title_en}" placeholder="Example: Title, Question, Add Question..." required>
-                  <input type="hidden" value="en" name="lang[]">
-                  <input type="hidden" name="id[]" value="{$getMultilangByUID.id_en}"/>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="title"><span style="color: red">*</span> {if $multiLang.multi_language_title_ge}{$multiLang.multi_language_title_ge}{else}No Translate (Key Lang: multi_language_title_ge){/if}:</label>
-                  {if $error.title_ge}
-                    <span style="color: red">Please input title German.</span>
-                  {/if}
-                  <input type="text" class="form-control" name="title[]" value="{$getMultilangByUID.title_ge}" placeholder="Beispiel: Titel, Frage, Frage hinzufügen..." required>
-                  <input type="hidden" value="ge" name="lang[]">
-                  <input type="hidden" name="id[]" value="{$getMultilangByUID.id_ge}"/>
-                </div>
-              </div> -->
-
             </div>
             <div class="row">
               <div class="col-md-6">
@@ -82,7 +59,6 @@
                   {/if}
                   <input type="text" class="form-control" name="key_lang" value="{if $getMultilangByUID}{foreach from=$getMultilangByUID item=ml name=foo}{if $smarty.foreach.foo.first}{$ml.key_lang}{/if}{/foreach}{else}{if $smarty.session.translate.key_lang}{$smarty.session.translate.key_lang}{/if}{/if}" placeholder="Example: text_title, question_title, add_question..."/>
                 </div>
-
                 <span style="color: red">Note: Please input english key language. Example: text_title, button_save, button_delete...</span>
               </div>
             </div>

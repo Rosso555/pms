@@ -164,12 +164,9 @@ if('multi_language' === $task)
   //Calculate for set limit
   $result_language = $common->find('language', $condition = null, $type = 'all');
   $slimit = COUNT($result_language) * 5;
-
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $langs = listMultiLang($kwd, $slimit);
-
   // var_dump($langs);exit;
-
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
   SmartyPaginate::setLimit($slimit);
@@ -195,11 +192,17 @@ if('add_language' === $task)
     //form validation
     if(empty($title))     $error['title'] = 1;
     if(empty($language))  $error['language'] = 1;
+    $result = $common->find('language', $condition = ['id' => $id], $type = 'one');
+    if(!empty($language) && $result['lang_name'] !== $language && is_lang_name_exist($language) > 0) $error['is_lang_name_exist'] = 2;
 
     //Add language
     if(0 === count($error) && empty($id))
     {
-      $common->save('language', $field = ['title' => $title, 'lang_name' => $language]);
+      $language_id = $common->save('language', $field = ['title' => $title, 'lang_name' => $language]);
+      $result_multil_lang = $common->find('multi_lang', $condition = ['lang' => 'en'], $type = 'all');
+      foreach ($result_multil_lang as $key => $value) {
+        $common->save('multi_lang', $field = ['unique_id' => $value['unique_id'], 'language_id' => $language_id, 'title' => $value['title'], 'key_lang' => $value['key_lang'], 'lang' => $language]);
+      }
       //unset session
       unset($_SESSION['add_language']);
       //Redirect
@@ -210,16 +213,20 @@ if('add_language' === $task)
     if(0 === count($error) && !empty($id))
     {
       $common->update('language', $field = ['title' => $title, 'lang_name'  => $language], $condition = ['id' => $id]);
+      $common->update('multi_lang', $field = ['lang' => $language], $condition = ['language_id' => $id]);
       //unset session
       unset($_SESSION['add_language']);
       //Redirect
       header('location: '.$admin_file.'?task=add_language');
       exit;
     }
+    $smarty_appform->assign('error', $error);
   }
   //action delete language
   if('delete' === $action && !empty($_GET['id']))
   {
+    // $result = $common->find('language', $condition = ['id' => $_GET['id']], $type = 'one');
+    $common->delete('multi_lang', $field = ['language_id' => $_GET['id']]);
     $common->delete('language', $field = ['id' => $_GET['id']]);
     header('location: '.$admin_file.'?task=add_language');
     exit;
@@ -229,7 +236,6 @@ if('add_language' === $task)
   {
     $smarty_appform->assign('getLanguageByID', $common->find('language', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
-
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $result = listLanguage($kwd);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
@@ -275,7 +281,6 @@ if('category' === $task)
       exit;
     }
   }
-
   //action delete category
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -339,7 +344,7 @@ if('staff_permission' === $task)
     exit;
   }
   //action edit staff permission
-  if('edit' === $action && !empty($_GET['id'])) $smarty_appform->assign('edit_staff_permission', getStaffPermissionById($_GET['id']));
+  if('edit' === $action && !empty($_GET['id'])) $smarty_appform->assign('edit_staff_permission', $common->find('staff_permission', $condition = ['id' => $_GET['id']], $type = 'one'));
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $all_staffpermission = ListStaffPermission($kwd);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
@@ -577,14 +582,20 @@ if('staff_function')
   //action delete staff function
   if('delete' === $action && !empty($_GET['id']))
   {
-    $common->delete("staff_function", $field = ['id' => $_GET['id']]);
-    header('location: '.$admin_file.'?task=staff_function');
-    exit;
+    if(!empty($lang) && is_staff_function_exist('staff_permission', $_GET['id']) > 0)
+    {
+      $error['exist_delete'] = 1;
+    }else{
+      $common->delete("staff_function", $field = ['id' => $_GET['id']]);
+      header('location: '.$admin_file.'?task=staff_function');
+      exit;
+    }
   }
   if('edit' === $action && !empty($_GET['id']))
   {
     $smarty_appform->assign('edit',$common->find('staff_function', $condition = ['id' => $_GET['id']], $type='one'));
   }
+  $smarty_appform->assign('error', $error);
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
 	$list_function = listFunction($kwd);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;

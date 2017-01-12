@@ -1,7 +1,7 @@
 {extends file="admin/layout.tpl"}
 {block name="main"}
 <div class="panel panel-primary">
-  <div class="panel-heading"><h4 class="panel-title">Language</h4></div>
+  <div class="panel-heading"><h4 class="panel-title">{if $multiLang.language_header}{$multiLang.language_header}{else}No Translate (Key Lang:language_header){/if}</h4></div>
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
@@ -9,7 +9,7 @@
           <input type="hidden" name="task" value="add_language">
           <div class="form-group">
             <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
-              <i class="fa fa-plus-circle"></i> Add Language
+              <i class="fa fa-plus-circle"></i> {if $multiLang.button_add_lanaguage}{$multiLang.button_add_lanaguage}{else}No Translate (Key Lang:button_add_lanaguage){/if}
             </button>
           </div>
           <div class="input-group" style="float: right;">
@@ -22,25 +22,28 @@
         <div id="demo" class="collapse {if $error or $getLanguageByID|@count > 0} in {/if}">
           <form action="{$admin_file}?task=add_language" method="post">
             <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="title"><span style="color: red">*</span> Title:</label>
-                  {if $error.title}
-                    <span style="color: red">Please input title.</span>
-                  {/if}
-                  <input type="text" class="form-control" name="title" value="{$getLanguageByID.title}" placeholder="Example: English, German" required>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="title"><span style="color: red">*</span> {if $multiLang.text_title_language}{$multiLang.text_title_language}{else}No Translate (Key Lang: text_title_language){/if}:</label>
+                    {if $error.title}
+                      <span style="color: red">Please input title.</span>
+                    {/if}
+                    <input type="text" class="form-control" name="title" value="{$getLanguageByID.title}" placeholder="Example: English, German" required>
+                  </div>
                 </div>
-              </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="title"><span style="color: red">*</span> Short Language:</label>
+                  <label for="title"><span style="color: red">*</span> {if $multiLang.text_short_language}{$multiLang.text_short_language}{else}No Translate (Key Lang:text_short_language){/if}:</label>
                   {if $error.language}
                     <span style="color: red">Please input short language.</span>
+                  {/if}
+                  {if $error.is_lang_name_exist eq 2}
+                    <span style="color: red">Short language is exist.</span>
                   {/if}
                   <input type="text" class="form-control" name="language" value="{$getLanguageByID.lang_name}" placeholder="Example: en, ge" required>
                 </div>
                 <span style="color: red">Note: Please input short Language. Example: (English:en), (German:ge), (French:fr), (Khmer:kh)</span>
-              </div>
+            </div>
             </div>
             <div class="row" style="margin-top: 10px;">
               <div class="col-md-12">
@@ -50,7 +53,7 @@
                     <input type="hidden" name="id" value="{$getLanguageByID.id}">
                     <a href="{$admin_file}?task=add_language" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang: button_cancel){/if}</a>
                   {else}
-                    <button type="submit" name="butsubmit" class="btn btn-danger"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate (Key Lang: button_save){/if}</button>
+                    <button type="submit" name="butsubmit" class="btn btn-info"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate (Key Lang: button_save){/if}</button>
                   {/if}
                 </div>
               </div>
@@ -63,9 +66,9 @@
       <table class="table table-bordered">
         <thead>
           <tr bgcolor="#eeeeee">
-            <th>Title</th>
-            <th>Short Language</th>
-            <th width="130">Action</th>
+            <th>{if $multiLang.text_title_language}{$multiLang.text_title_language}{else}No Translate (Key Lang: text_title_language){/if}</th>
+            <th>{if $multiLang.text_short_language}{$multiLang.text_short_language}{else}No Translate (Key Lang: text_short_language){/if}</th>
+            <th width="130">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang: text_action){/if}</th>
           </tr>
         </thead>
         {if $listLanguage|@count gt 0}
@@ -86,14 +89,14 @@
                   <div class="panel panel-primary modal-content">
                     <div class="panel-heading modal-header">
                       <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <h4 class="panel-title modal-title">Confirmation</h4>
+                      <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h4>
                     </div>
                     <div class="modal-body">
                       <p>Are you sure you want to delete this title <b>({$data.title|escape})</b>.</p>
                     </div>
                     <div class="modal-footer">
-                      <a href="{$admin_file}?task=add_language&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> Delete</i></a>
-                      <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"> Close</i></button>
+                      <a href="{$admin_file}?task=add_language&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}</i></a>
+                      <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</i></button>
                     </div>
                   </div>
                 </div>

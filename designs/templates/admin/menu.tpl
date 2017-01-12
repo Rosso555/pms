@@ -15,44 +15,44 @@
       <ul class="nav navbar-nav">
         <li><a href="#">Link</a></li>
         <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-user-circle-o fa-fw fa-lg" aria-hidden="true"></i> Staff <span class="caret"></span></a>
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-user-circle-o fa-fw fa-lg" aria-hidden="true"></i> {if $multiLang.menu_staff}{$multiLang.menu_staff}{else}No Translate (Key Lang:menu_staff){/if} <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="{$admin_file}?task=staff_info"><i class="fa fa-users" aria-hidden="true"></i> Infomation</a></li>
-            <li><a href="{$admin_file}?task=staff_role"><i class="fa fa-registered" aria-hidden="true"></i> Staff Role</a></li>
-            <li><a href="{$admin_file}?task=staff_permission"><i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> Permission</a></li>
-            <li><a href="{$admin_file}?task=staff_function"><i class="fa fa-retweet" aria-hidden="true"></i> Function</a></li>
+            <li><a href="{$admin_file}?task=staff_info"><i class="fa fa-users" aria-hidden="true"></i> {if $multiLang.menu_information}{$multiLang.menu_information}{else}No Translate (Key Lang:menu_information){/if}</a></li>
+            <li><a href="{$admin_file}?task=staff_role"><i class="fa fa-registered" aria-hidden="true"></i> {if $multiLang.menu_staff_role}{$multiLang.menu_staff_role}{else}No Translate (Key Lang:menu_staff_role){/if}</a></li>
+            <li><a href="{$admin_file}?task=staff_permission"><i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> {if $multiLang.menu_permission}{$multiLang.menu_permission}{else}No Translate (Key Lang:menu_permission){/if}</a></li>
+            <li><a href="{$admin_file}?task=staff_function"><i class="fa fa-retweet" aria-hidden="true"></i> {if $multiLang.menu_function}{$multiLang.menu_function}{else}No Translate (Key Lang:menu_function){/if}</a></li>
           </ul>
         </li>
       </ul>
-      <form class="navbar-form navbar-left">
+      <!-- <form class="navbar-form navbar-left">
         <div class="form-group">
           <input type="text" class="form-control" placeholder="Search">
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
-      </form>
+      </form> -->
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-cog fa-lg" aria-hidden="true"></i> Setting <span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-cog fa-lg" aria-hidden="true"></i> {if $multiLang.menu_setting}{$multiLang.menu_setting}{else}No Translate (Key Lang:menu_setting){/if} <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="{$admin_file}?task=category"><i class="fa fa-bars" aria-hidden="true"></i>&nbsp;{if $multiLang.menu_category}{$multiLang.menu_category}{else}No Translate (Key Lang: menu_category){/if}</a></li>
-            <li><a href="{$admin_file}?task=add_language"><i class="fa fa-language" aria-hidden="true"></i>&nbsp; Add Language</a></li>
-            <li><a href="{$admin_file}?task=multi_language"><i class="fa fa-language" aria-hidden="true"></i>&nbsp; Translate Language</a></li>
+            <li><a href="{$admin_file}?task=add_language"><i class="fa fa-language" aria-hidden="true"></i>&nbsp; {if $multiLang.menu_add_language}{$multiLang.menu_add_language}{else}No Translate (Key Lang: menu_add_language){/if}</a></li>
+            <li><a href="{$admin_file}?task=multi_language"><i class="fa fa-language" aria-hidden="true"></i>&nbsp; {if $multiLang.menu_translate_language}{$multiLang.menu_translate_language}{else}No Translate (Key Lang:menu_translate_language){/if}</a></li>
             <li role="separator" class="divider"></li>
-            <li class="header_menu"><a><i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>&nbsp; Default Language</a></li>
+            <li class="header_menu"><a><i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>&nbsp; {if $multiLang.menu_default_language}{$multiLang.menu_default_language}{else}No Translate (Key Lang:menu_default_language){/if}</a></li>
 						{foreach from=$getLanguage item=v}
 						<li><a href="{$admin_file}?deflang={$v.lang_name}&amp;lid={$v.id}"> &nbsp;&nbsp;&nbsp;{$v.title} {if $lang_name eq $v.lang_name}<i class="fa fa-check" aria-hidden="true"></i>{/if} </a></li>
 						{/foreach}
           </ul>
         </li>
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-flag" aria-hidden="true"></i> language <span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-flag" aria-hidden="true"></i> {if $multiLang.menu_language}{$multiLang.menu_language}{else}No Translate (Key Lang: menu_language){/if} <span class="caret"></span></a>
           <ul class="dropdown-menu">
             {foreach from=$getLanguage item=v}
             <li><a href="{$admin_file}?lang={$v.lang_name}"><i class="fa fa-angle-right" aria-hidden="true"></i>&nbsp; {$v.title}</a></li>
             {/foreach}
           </ul>
         </li>
-        <li><a href="{$admin_file}?task=logout"><i class="fa fa-sign-out fa-lg" aria-hidden="true"></i> Logout</a></li>
+        <li><a href="{$admin_file}?task=logout"><i class="fa fa-sign-out fa-lg" aria-hidden="true"></i> {if $multiLang.menu_logout}{$multiLang.menu_logout}{else}No Translate (Key Lang:menu_logout){/if}</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

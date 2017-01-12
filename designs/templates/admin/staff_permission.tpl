@@ -4,10 +4,10 @@
   <div class="col-lg-12">
     <ul class="breadcrumb">
       <li><a href="{$admin_file_name}"><i class="fa fa-fw fa-home"></i></a></li>
-      <li class="active">Staff Permission</li>
+      <li class="active">{if $multiLang.text_staff_permision_header}{$multiLang.text_staff_permision_header}{else}No Translate (Key Lang:text_staff_permision_header){/if}</li>
     </ul>
     <div class="panel panel-primary">
-        <div class="panel-heading"><h4 class="panel-title">Staff Permission</h4></div>
+        <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_staff_permision_header}{$multiLang.text_staff_permision_header}{else}No Translate (Key Lang:text_staff_permision_header){/if}</h4></div>
         <div class="panel-body">
           <div class="panel panel-default">
             <div class="panel-body">
@@ -15,7 +15,7 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
-                      <i class="fa fa-plus-circle"></i> New Staff Permission
+                      <i class="fa fa-plus-circle"></i> {if $multiLang.text_new_staff_permission}{$multiLang.text_new_staff_permission}{else}No Translate (Key Lang:text_new_staff_permission){/if}
                     </button>
                   </div>
                 </div>
@@ -37,7 +37,7 @@
                             <input type="hidden" name="task" value="staff_permission">
                             <input id="search" type="text" class="form-control" name="kwd" value="{$smarty.get.kwd|escape}" placeholder="">
                             <span class="input-group-btn">
-                              <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> Search</button>
+                              <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
                             </span>
                           </div>
                           </form>
@@ -56,7 +56,7 @@
                     <div class="row">
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label for="staff_function">Staff Function:</label>
+                          <label for="staff_function">{if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}:</label>
                           <select class="form-control" id="staff_function" name="staff_function_id">
                             <option value=""> ---Please Select Staff Functon--- </option>
                             {foreach from = $list_staff_function item = staff_function}
@@ -68,7 +68,7 @@
                       </div>
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label for="staff">Staff Role:</label>
+                          <label for="staff">{if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}:</label>
                           <select class="form-control" id="staff" name="staff_role_id">
                             <option value="0"> ---Please Select Staff Role--- </option>
                             {foreach from = $list_staff_role item = staff_role}
@@ -100,9 +100,9 @@
               <table class="table table-striped">
                 <thead>
                   <tr bgcolor="#eeeeee">
-                  <th>Function</th>
-                  <th>Role</th>
-                  <th>Action</th>
+                  <th>{if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}</th>
+                  <th>{if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}</th>
+                  <th>{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if}</th>
                   </tr>
                 </thead>
                 {if $list_Staff_Permission|@count gt 0}
@@ -120,9 +120,9 @@
                       </a>
                     </td>
                     <td width="100px">
-                      <a href="{$admin_file}?task=staff_permission&amp;action=edit&amp;id={$staff_permission.id|escape}&amp;sr_id={$smarty.get.sr_id|escape}&amp;next={$smarty.get.next|escape}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="Edit"><i class="fa fa-edit"></i></a>
+                      <a href="{$admin_file}?task=staff_permission&amp;action=edit&amp;id={$staff_permission.id|escape}&amp;sr_id={$smarty.get.sr_id|escape}&amp;next={$smarty.get.next|escape}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
                       <!-- Trigger the modal with a button -->
-                      <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$staff_permission.id}" data-toggle1="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></button>
+                      <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$staff_permission.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}"><i class="fa fa-trash-o"></i></button>
                       <!-- Modal -->
                       <div class="modal fade" id="myModal_{$staff_permission.id}" role="dialog">
                         <div class="modal-dialog">
@@ -130,14 +130,14 @@
                           <div class="panel panel-primary modal-content">
                             <div class="panel-heading modal-header">
                               <button type="button" class="close" data-dismiss="modal">&times;</button>
-                              <h4 class="panel-title modal-title">Confirmation</h4>
+                              <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h4>
                             </div>
                             <div class="modal-body">
                               <p>Are you sure you want to delete this staff permission?</p>
                             </div>
                             <div class="modal-footer">
-                              <a href="{$admin_file}?task=staff_permission&amp;action=delete&amp;id={$staff_permission.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> Delete</i></a>
-                              <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-remove"> Close</i></button>
+                              <a href="{$admin_file}?task=staff_permission&amp;action=delete&amp;id={$staff_permission.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}</i></a>
+                              <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-remove"> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</i></button>
                             </div>
                           </div>
                         </div>

@@ -1,4 +1,50 @@
 <?php
+function is_staff_function_exist($table_name, $id)
+{
+  //these values are set in setup.php
+  global $debug, $connected;
+  $result = true;
+  try
+  {
+    $sql = 'SELECT COUNT(*) as total FROM '.$table_name.' WHERE staff_function_id = :id';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch();
+    return $row['total'];
+  } catch(PDOException $e) {
+    $result = false;
+    if ($debug)
+    {
+      echo 'ERROR:  is_staff_function_exist' . $e->getMessage();
+      exit;
+    }
+  }
+  return $result;
+}
+/**
+ * [is_lang_name_exist]
+ * @param  [type]  $lang_name
+ * @return boolean
+ * @author In khemarak
+ */
+function is_lang_name_exist($lang_name)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count FROM `language` WHERE lang_name = :lang_name ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':lang_name', (string)$lang_name, PDO::PARAM_STR);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: is_lang_name_exist'.$e->getMessage();
+  }
+  return $result;
+}
 /**
  * listCategory
  * @param  string $kwd keyword

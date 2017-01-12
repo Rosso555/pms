@@ -102,33 +102,33 @@ function updateDefaultLang()
  * @author In khemarak
  */
  function listMultiLang($kwd = "", $slimit)
- {
-   global $debug, $connected, $limit, $offset, $total_data;
-   $result = true;
-   try {
-     $condition = '';
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try {
+    $condition = '';
 
-     if(!empty($slimit)) $limit = $slimit;
-     if(!empty($kwd)) $condition .= ' WHERE key_lang LIKE :kwd ';
+    if(!empty($slimit)) $limit = $slimit;
+    if(!empty($kwd)) $condition .= ' WHERE key_lang LIKE :kwd ';
 
-     $sql = ' SELECT ml.*, l.title AS language_title, (SELECT COUNT(*) FROM `multi_lang` ml INNER JOIN language l ON l.id = ml.language_id '.$condition.') AS total
-                 FROM `multi_lang` ml
-                 INNER JOIN language l ON l.id = ml.language_id '.$condition.' ORDER BY key_lang DESC LIMIT :offset, :limit ';
-     $stmt = $connected->prepare($sql);
-     if(!empty($kwd)) $stmt->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
-     // $stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
-     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-     $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-     $stmt->execute();
-     $row = $stmt->fetchAll();
-     if (count($row) > 0) $total_data = $row[0]['total'];
-     return $row;
-   } catch (Exception $e) {
-     $result = false;
-     if($debug)  echo 'Errors: listMultiLang'.$e->getMessage();
-   }
-   return $result;
- }
+    $sql = ' SELECT ml.*, l.title AS language_title, (SELECT COUNT(*) FROM `multi_lang` ml INNER JOIN language l ON l.id = ml.language_id '.$condition.') AS total
+                FROM `multi_lang` ml
+                INNER JOIN language l ON l.id = ml.language_id '.$condition.' ORDER BY key_lang DESC LIMIT :offset, :limit ';
+    $stmt = $connected->prepare($sql);
+    if(!empty($kwd)) $stmt->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    // $stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
+    $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetchAll();
+    if (count($row) > 0) $total_data = $row[0]['total'];
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listMultiLang'.$e->getMessage();
+  }
+  return $result;
+}
 /**
  * [listLanguage]
  * @param  [string] $kwd
