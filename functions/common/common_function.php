@@ -1,4 +1,65 @@
 <?php
+function is_staff_permission_exist($table_name, $role_id, $function_id)
+{
+  //these values are set in setup.php
+  global $debug, $connected;
+  $result = true;
+  try
+  {
+    $sql = 'SELECT COUNT(*) as total FROM '.$table_name.' WHERE staff_role_id = :staff_role_id && staff_function_id = :staff_function_id';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':staff_role_id', (int)$role_id, PDO::PARAM_INT);
+    $stmt->bindValue(':staff_function_id', (int)$function_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch();
+    return $row['total'];
+  } catch(PDOException $e) {
+    $result = false;
+    if ($debug)
+    {
+      echo 'ERROR:  is_staff_role_exist' . $e->getMessage();
+      exit;
+    }
+  }
+  return $result;
+}
+/**
+ * [is_staff_role_exist ]
+ * @param  [string]  $table_name
+ * @param  [int]  $id
+ * @return boolean
+ * @author In khemarak
+ */
+function is_staff_role_exist($table_name, $id)
+{
+  //these values are set in setup.php
+  global $debug, $connected;
+  $result = true;
+  try
+  {
+    $sql = 'SELECT COUNT(*) as total FROM '.$table_name.' WHERE staff_role_id = :id';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch();
+    return $row['total'];
+  } catch(PDOException $e) {
+    $result = false;
+    if ($debug)
+    {
+      echo 'ERROR:  is_staff_role_exist' . $e->getMessage();
+      exit;
+    }
+  }
+  return $result;
+}
+/**
+ * [is_staff_function_exist ]
+ * @param  [string]  $table_name
+ * @param  [int]  $id
+ * @return boolean
+ * @author In khemarak
+ */
 function is_staff_function_exist($table_name, $id)
 {
   //these values are set in setup.php

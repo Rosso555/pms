@@ -12,6 +12,13 @@
       <strong>Warning!</strong> Please write staff role.
     </div>
     {/if}
+    {if $error.exist_delete eq 1}
+      <div class="alert alert-danger alert-dismissible"  id="{if $error.exist_delete eq 1}flash{/if}">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        <strong>warning!</strong> sorry you can not delete this record!
+      </div>
+    {/if}
     <div class="panel panel-primary">
       <div class="panel-heading"><h3 class="panel-title">{if $multiLang.text_staff_role_header}{$multiLang.text_staff_role_header}{else}No Translate (Key Lang:text_staff_role_header){/if}</h3></div>
         <div class="panel-body">
@@ -78,8 +85,8 @@
   								      </div>
     								    <div class="modal-footer">
                           <CENTER>
-    								    		<button type="button" data-dismiss="modal" class="btn btn-danger pull-left"><i class="fa fa-close"></i> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</button>
-    											  <a href="{$admin_file_name}?task=staff_role&amp;action=delete&amp;id={$v.id}" class="btn btn-primary pull-left"><i class="fa fa-trash-o"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</a>
+                            <a href="{$admin_file_name}?task=staff_role&amp;action=delete&amp;id={$v.id}" class="btn btn-primary pull-left"><i class="fa fa-trash-o"></i> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</a>
+    								    		<button type="button" data-dismiss="modal" class="btn btn-danger pull-left"><i class="fa fa-close"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
                           </CENTER>
     								    </div>
   								    </div>
@@ -98,6 +105,11 @@
 </div>
 {/block}
 {block name="javascript"}
+<script type="text/javascript">
+  $(document).ready(function(){
+      $( "#flash" ).fadeIn( 50 ).delay( 3000 ).fadeOut( 500 );
+  });
+</script>
 <script>
  $('[data-toggle="popover"]').popover();
 	$(function () {

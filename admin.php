@@ -320,12 +320,17 @@ if('staff_permission' === $task)
 
    if(0 === count($error) && empty($_POST['id']))
    {
-     $common->save('staff_permission', $field = ['staff_function_id'=> $staff_function_id, 'staff_role_id'=> $staff_role_id] );
-     //reset session
-     unset($_SESSION['staff_permission']);
-     //Redirect
-     header('location: '.$admin_file.'?task=staff_permission');
-     exit;
+     if(!empty($lang) && is_staff_permission_exist('staff_permission', $staff_role_id, $staff_function_id) > 0)
+     {
+       $error['exist_save'] = 1;
+     }else{
+       $common->save('staff_permission', $field = ['staff_function_id'=> $staff_function_id, 'staff_role_id'=> $staff_role_id] );
+       //reset session
+       unset($_SESSION['staff_permission']);
+       //Redirect
+       header('location: '.$admin_file.'?task=staff_permission');
+       exit;
+    }
    }
    if(0 === count($error) && !empty($_POST['id']))
    {
@@ -389,14 +394,20 @@ if('staff_role' === $task)
   //action delete staff role
   if('delete' === $action && !empty($_GET['id']))
   {
-    $common->delete("staff_role", $field = ['id' => $_GET['id']]);
-    header('location: '.$admin_file.'?task=staff_role');
-    exit;
+    if(!empty($lang) && is_staff_role_exist('staff_permission', $_GET['id']) > 0)
+    {
+      $error['exist_delete'] = 1;
+    }else{
+      $common->delete("staff_role", $field = ['id' => $_GET['id']]);
+      header('location: '.$admin_file.'?task=staff_role');
+      exit;
+    }
   }
   if('edit' === $action && !empty($_GET['id']))
   {
     $smarty_appform->assign('edit',$common->find('staff_role', $condition = ['id' => $_GET['id']], $type='one'));
   }
+  $smarty_appform->assign('error', $error);
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
 	$results = ListStaffRole($kwd);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
@@ -544,7 +555,7 @@ if('staff_info' === $task)
   exit;
 }
 //task staff function
-if('staff_function')
+if('staff_function' === $task)
 {
   if(!empty($_SESSION['staff_function'])) unset($_SESSION['staff_function']);
   $error = array();

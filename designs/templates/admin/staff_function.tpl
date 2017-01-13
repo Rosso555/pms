@@ -9,7 +9,8 @@
     {if $error.exist_delete eq 1}
       <div class="alert alert-danger alert-dismissible"  id="{if $error.exist_delete eq 1}flash{/if}">
         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-        <strong>warning!</strong>sorry you can not delete this record!
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        <strong>warning!</strong> sorry you can not delete this record!
       </div>
     {/if}
     <div class="panel panel-primary">

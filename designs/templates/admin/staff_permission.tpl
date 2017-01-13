@@ -6,6 +6,13 @@
       <li><a href="{$admin_file_name}"><i class="fa fa-fw fa-home"></i></a></li>
       <li class="active">{if $multiLang.text_staff_permision_header}{$multiLang.text_staff_permision_header}{else}No Translate (Key Lang:text_staff_permision_header){/if}</li>
     </ul>
+    {if $error.exist_save eq 1}
+      <div class="alert alert-danger alert-dismissible"  id="{if $error.exist_save eq 1}flash{/if}">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        <strong>warning!</strong>Your have assign permisstion already please exit!
+      </div>
+    {/if}
     <div class="panel panel-primary">
         <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_staff_permision_header}{$multiLang.text_staff_permision_header}{else}No Translate (Key Lang:text_staff_permision_header){/if}</h4></div>
         <div class="panel-body">
@@ -46,7 +53,6 @@
                   </div>
                 </div>
               </div>
-
               {if $error or $edit_staff_permission.id}
                 <div id="demo" class="collapse in">
               {else}
@@ -159,6 +165,11 @@
       </div><!--panel panel-primary-->
 {/block}
 {block name="javascript"}
+<script type="text/javascript">
+  $(document).ready(function(){
+      $( "#flash" ).fadeIn( 50 ).delay( 3000 ).fadeOut( 500 );
+  });
+</script>
 <script type="text/javascript">
 $(function(){
   $("#the_select").change(function(){
