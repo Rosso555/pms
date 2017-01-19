@@ -34,18 +34,18 @@
             <div class="collapse" id="collapseExample">
             {/if}
               <div class="form-group">
-                <label>{if $multiLang.text_staff_full_name}{$multiLang.text_staff_full_name}{else}No Translate (Key Lang:text_staff_full_name){/if}:</label><span class="text-danger"> *{if $error.name eq 1}Please write name.{/if}</span>
+                <label>{if $multiLang.text_staff_full_name}{$multiLang.text_staff_full_name}{else}No Translate (Key Lang:text_staff_full_name){/if}:</label><span class="text-danger"> *{if $error.name eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_staff_full_name}{$multiLang.text_staff_full_name}{else}No Translate (Key Lang:text_staff_full_name){/if}.{/if}</span>
                 <input type="text" class="form-control" name="name" value="{if $edit.name}{$edit.name}{else}{if $smarty.session.staff_info.name|escape}{$smarty.session.staff_info.name|escape}{/if}{/if}" />
               </div>
               <div class="form-group">
                 <label>{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}: </label>
                 <span class="text-danger">
-                  {if $error.pass eq 1}Please write password.{/if}
-                  {if $error.password eq 2}Your password is not valid.{/if}
+                  {if $error.pass eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}.{/if}
+                  {if $error.password eq 2}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if}.{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}{/if}
                 </span>
                 <input type="password" id='password' class="form-control" name="password" value="{if $edit.password}{$edit.password}{else}{if $smarty.session.staff_info.password|escape}{$smarty.session.staff_info.password|escape}{/if}{/if}" />
                 <input type="checkbox" onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'"> {if $multiLang.text_show_password}{$multiLang.text_show_password}{else}No Translate (Key Lang:text_show_password){/if}
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-danger">* More than 8 character with number and letter</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-danger">* {if $multiLang.text_invalid_pass}{$multiLang.text_invalid_pass}{else}No Translate (Key Lang:text_invalid_pass){/if}</span>
               </div>
               <label>Gender</label><span class="text-danger"> *{if $error.gender}Please choice gender.{/if}</span>
               <div class="radio">
@@ -57,13 +57,13 @@
                 </label>
               </div>
               <div class="form-group">
-                <label>{if $multiLang.text_phone}{$multiLang.text_phone}{else}No Translate (Key Lang:text_phone){/if}:</label><span class="text-danger"> *{if $error.phone eq 1}Please write phone number.{/if}</span>
+                <label>{if $multiLang.text_phone}{$multiLang.text_phone}{else}No Translate (Key Lang:text_phone){/if}:</label><span class="text-danger"> *{if $error.phone eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_phone}{$multiLang.text_phone}{else}No Translate (Key Lang:text_phone){/if}.{/if}</span>
                 <input type="text" class="form-control" name="phone" value="{if $edit.phone}{$edit.phone}{else}{if $smarty.session.staff_info.phone|escape}{$smarty.session.staff_info.phone|escape}{/if}{/if}" placeholder="+855 123 456" />
               </div>
               <div class="form-group">
-                <label>{if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}</label><span class="text-danger"> *{if $error.staff_role eq 1}Please choice position.{/if}</span>
+                <label>{if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}</label><span class="text-danger"> *{if $error.staff_role eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}.{/if}</span>
                 <select class="form-control select2" name="staff_role" style="width:100%">
-                  <option value="">Choice staff role</option>
+                  <option value="">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate (Key Lang:text_please_select){/if} {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}</option>
                   {foreach item=v from=$staff_role}
                   <option value="{$v.id}" {if $edit.staff_role_id eq $v.id} selected{/if}{if $smarty.session.staff_info.staff_role eq $v.id}selected{/if}>{$v.name}</option>
                   {/foreach}
@@ -73,9 +73,9 @@
                 <div class="col-md-2">
                 <div class="form-group">
                   <label>{if $multiLang.text_upload_photos}{$multiLang.text_upload_photos}{else}No Translate (Key Lang:text_upload_photos){/if} :</label></br>
-                  <span class="text-danger">{if $error.no_image}Please insert photo.{/if}</span>
-                  {if $error.type eq 1}<div class="text-danger">Sorry type note support!</div>{/if}
-                  {if $error.size eq 1}<div class="text-danger">Sorry type size support!</div>{/if}
+                  <span class="text-danger">{if $error.no_image}{if $multiLang.text_browse}{$multiLang.text_browse}{else}No Translate (Key Lang:text_browse){/if} {if $multiLang.text_upload_photos}{$multiLang.text_upload_photos}{else}No Translate (Key Lang:text_upload_photos){/if}.{/if}</span>
+                  {if $error.type eq 1}<div class="text-danger">{if $multiLang.text_error_type}{$multiLang.text_error_type}{else}No Translate (Key Lang:text_error_type){/if}</div>{/if}
+                  {if $error.size eq 1}<div class="text-danger">{if $multiLang.text_error_file}{$multiLang.text_error_file}{else}No Translate (Key Lang:text_error_file){/if}</div>{/if}
                   <input type="file" name="image" id="file" onchange="readURL(this);" />
                   <input type="hidden" name="old_file" value="{$edit.photo}">
                 </div>

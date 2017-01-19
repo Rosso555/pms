@@ -31,7 +31,7 @@
                     <div class="form-group">
                       <div class="col-md-5">
                         <select class="form-control" id="the_select">
-                          <option value="">Show by staff role</option>
+                          <option value="">{if $multiLang.text_search_staff_role}{$multiLang.text_search_staff_role}{else}No Translate (Key Lang:text_search_staff_role){/if}</option>
                           <option value="">All staff role</option>
                           {foreach from = $search_by_role item = staff_role}
                           <option value="{$staff_role.staff_role_name}">{$staff_role.staff_role_name}</option>
@@ -64,24 +64,24 @@
                         <div class="form-group">
                           <label for="staff_function">{if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}:</label>
                           <select class="form-control" id="staff_function" name="staff_function_id">
-                            <option value=""> ---Please Select Staff Functon--- </option>
+                            <option value=""> ---{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}--- </option>
                             {foreach from = $list_staff_function item = staff_function}
                             <option value="{$staff_function.id}"{if $edit_staff_permission.staff_function_id eq $staff_function.id}selected{else}{if $smarty.session.staff_permission.staff_function_id eq $staff_function.id}selected{/if}{/if}>{$staff_function.title}</option>
                             {/foreach}
                           </select>
-                          <p class="help-block">{if $error.staff_function_id eq 1}<font style="color:red;">*&nbsp;Please Select  Staff funtion</font>{/if}</p>
+                          <p class="help-block">{if $error.staff_function_id eq 1}<font style="color:red;">*&nbsp;{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate (Key Lang:text_please_select){/if} {if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}</font>{/if}</p>
                         </div>
                       </div>
                       <div class="col-md-6">
                         <div class="form-group">
                           <label for="staff">{if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}:</label>
                           <select class="form-control" id="staff" name="staff_role_id">
-                            <option value="0"> ---Please Select Staff Role--- </option>
+                            <option value="0"> ---{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}--- </option>
                             {foreach from = $list_staff_role item = staff_role}
                             <option value="{$staff_role.id}" {if $edit_staff_permission.staff_role_id eq $staff_role.id}selected{else}{if $smarty.session.staff_permission.staff_role_id eq $staff_role.id}selected{/if}{/if}>{$staff_role.name}</option>
                             {/foreach}
                           </select>
-                          <p class="help-block">{if $error.staff_role_id eq 1}<font style="color:red;">*&nbsp;Please Input staff Role</font>{/if}</p>
+                          <p class="help-block">{if $error.staff_role_id eq 1}<font style="color:red;">*&nbsp;{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate (Key Lang:text_please_select){/if} {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}</font>{/if}</p>
                         </div>
                       </div>
                     </div>

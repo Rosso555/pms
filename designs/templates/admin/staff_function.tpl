@@ -43,13 +43,13 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>{if $multiLang.text_staff_function_title}{$multiLang.text_staff_function_title}{else}No Translate (Key Lang:text_staff_function_title){/if}:</label><span class="text-danger"> *{if $error.title eq 1}Please write title.{/if}</span>
+                  <label>{if $multiLang.text_staff_function_title}{$multiLang.text_staff_function_title}{else}No Translate (Key Lang:text_staff_function_title){/if}:</label><span class="text-danger"> *{if $error.title eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_staff_function_title}{$multiLang.text_staff_function_title}{else}No Translate (Key Lang:text_staff_function_title){/if}.{/if}</span>
                   <input type="text" class="form-control" name="title" value="{if $edit.title}{$edit.title}{else}{if $smarty.session.staff_function.title|escape}{$smarty.session.staff_function.title|escape}{/if}{/if}" placeholder="example:ABC.."/>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>{if $multiLang.text_task_title}{$multiLang.text_task_title}{else}No Translate (Key Lang:text_task_title){/if}:</label><span class="text-danger"> *{if $error.task eq 1}Please write task.{/if}</span>
+                  <label>{if $multiLang.text_task_title}{$multiLang.text_task_title}{else}No Translate (Key Lang:text_task_title){/if}:</label><span class="text-danger"> *{if $error.task eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_task_title}{$multiLang.text_task_title}{else}No Translate (Key Lang:text_task_title){/if}.{/if}</span>
                   <input type="text" class="form-control" name="task" value="{if $edit.task_name}{$edit.task_name}{else}{if $smarty.session.staff_function.task|escape}{$smarty.session.staff_function.task|escape}{/if}{/if}" placeholder="task staff,.." />
                 </div>
               </div>

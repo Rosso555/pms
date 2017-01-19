@@ -7,7 +7,7 @@
       <li class="active">{if $multiLang.text_staff_role_header}{$multiLang.text_staff_role_header}{else}No Translate (Key Lang:text_staff_role_header){/if}</li>
     </ul>
     {if $error.title}
-    <div class="alert alert-danger">
+    <div class="alert alert-danger" id="{if $error.title eq 1}flash{/if}">
       <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
       <strong>Warning!</strong> Please write staff role.
     </div>
