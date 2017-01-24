@@ -70,28 +70,26 @@
               {foreach  from=$list_staff_role item=v}
               <tr>
                 <td valign="top">{$v.name}</td>
-                <td class="text-center" valign="top">
+                <td valign="top">
                   <a href="{$admin_file_name}?task=staff_role&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
                   <button href="#myModal_{$v.id}" class= "btn btn-danger btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}" data-toggle= "modal"><i class="fa fa-trash-o"></i></button>
-									<div id="myModal_{$v.id}" class="modal fade" role="dialog">
-										<div class="modal-dialog modal-md">
-  										<div class="modal-content">
-  								    	<div class="modal-header">
-  											  <button type="button" class="close" data-dismiss="modal">&times;</button>
-  											  <h3>{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h3>
-  										  </div>
-  									    <div class="modal-body">
-  									    	<p>Are you sure want to delete project's named <label class="label label-info">{$v.name} </label> ?</p>
-  								      </div>
-    								    <div class="modal-footer">
-                          <CENTER>
-                            <a href="{$admin_file_name}?task=staff_role&amp;action=delete&amp;id={$v.id}" class="btn btn-primary pull-left"><i class="fa fa-trash-o"></i> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</a>
-    								    		<button type="button" data-dismiss="modal" class="btn btn-danger pull-left"><i class="fa fa-close"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
-                          </CENTER>
-    								    </div>
-  								    </div>
-								    </div>
-								  </div>
+                  <div class="modal fade" id="myModal_{$v.id}" role="dialog">
+                    <div class="modal-dialog">
+                      <div class="panel panel-primary modal-content">
+                        <div class="panel-heading modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h4>
+                        </div>
+                        <div class="modal-body">
+                          <p>{if $multiLang.text_confirm_delete}{$multiLang.text_confirm_delete}{else}No Translate (Key Lang:text_confirm_delete){/if} {$v.name}?</p>
+                        </div>
+                        <div class="modal-footer">
+                          <a href="{$admin_file_name}?task=staff_role&amp;action=delete&amp;id={$v.id}" class="btn btn-danger btn-md"><i class="fa fa-check-circle-o"></i> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</a>
+                          <button type="button" class="btn btn-primary collapsed" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </td>
               </tr>
             {/foreach}

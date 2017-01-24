@@ -334,7 +334,7 @@ if('staff_permission' === $task)
    }
    if(0 === count($error) && !empty($_POST['id']))
    {
-     $common->update('ameter number: parameter was ', $field = ['staff_function_id' => $staff_function_id, 'staff_role_id' => $staff_role_id], $conditon = ['id' => $_POST['id']]);
+     $common->update('staff_permission', $field = ['staff_function_id' => $staff_function_id, 'staff_role_id' => $staff_role_id], $conditon = ['id' => $_POST['id']]);
      //reset session
      unset($_SESSION['staff_permission']);
      header('location: '.$admin_file.'?task=staff_permission');
@@ -564,11 +564,11 @@ if('staff_function' === $task)
     $title    = $common->clean_string($_POST['title']);
     $task     = $common->clean_string($_POST['task']);
     $action   = $common->clean_string($_POST['action']);
-
     $_SESSION['staff_function'] = $_POST;
     //check validate form
     if(empty($title))   $error['title'] = 1;
     if(empty($task))    $error['task'] = 1;
+    if(!empty($task) && !empty($action) && is_staff_function_exits($task, $action) > 0) $error['is_staff_function_exist'] = 2;
     if(count($error) === 0 && empty($id))
     {
       $common->save('staff_function',$field = ['title' => $title, 'task_name'=>$task,'action_name'=>$action]);
