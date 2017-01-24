@@ -59,6 +59,106 @@ if(!empty($_GET['deflang']))
   header('location: '.$index_file);
   exit;
 }
+
+if('user_register' === $task)
+{
+  $error = array();
+  if($_POST){
+    //get value from form
+    $username = $common->clean_string($_POST['username']);
+    $password = $common->clean_string($_POST['password']);
+    $email    = $common->clean_string($_POST['email']);
+    $job      = $common->clean_string($_POST['job']);
+    $address  = $common->clean_string($_POST['address']);
+    //add value to session to use in template
+    $_SESSION['user_register'] = $_POST;
+    //form validation
+    if(empty($username))  $error['username']  = 1;
+    if(empty($password))  $error['password']  = 1;
+    if(empty($email))     $error['email']  = 1;
+    if(empty($job))       $error['job']  = 1;
+    if(empty($address))   $error['address']  = 1;
+    if(!empty($password) && !$common->checkPassword($password))
+    {
+      $error['less_password'] = 1;
+    }
+
+    if(0 === count($error)){
+      $common->save('psychologist', $field = ['name' => $username,
+                                              'password' => $password,
+                                              'email'   => $email,
+                                              'job'     => $job,
+                                              'address' => $address]);
+      //unset session
+      unset($_SESSION['user_register']);
+      //Redirect
+      header('location: '.$index_file);
+      exit;
+    }
+  }
+
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->display('index/register.tpl');
+  exit;
+}
+if('completed' === $task){
+
+  $smarty_appform->display('index/completed.tpl');
+  exit;
+}
+
+
+//task: login
+if('login' === $task){
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $username = $common->clean_string($_POST['username']);
+    $password = $common->clean_string($_POST['password']);
+    //add value to session to use in template
+    $_SESSION['user_login'] = $_POST;
+    //form validation
+    if(empty($username))  $error['username']  = 1;
+    if(empty($password))  $error['password']  = 1;
+
+    if(0 === count($error)){
+      //compare username and password in form
+      if($admin_username  === $username && $admin_password === md5($password)){
+        //assign value to session
+        $_SESSION['is_user_login'] = 'user';
+        //remove session to clear data
+        unset($_SESSION['user_login']);
+        //redirect to admin.php
+        header('Location:'.$index_file);
+        exit;
+      }
+      //wrong username and password
+      $error['login'] = 1;
+    }
+  }
+  //default of login task
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->display('index/login.tpl');
+  exit;
+}
+//task: logout by clear session
+if('logout' === $task){
+  unset($_SESSION['is_user_login']);
+  header('Location:'.$index_file.'?task=login');
+  exit;
+}
+//redirect if no session
+if(empty($_SESSION['is_user_login'])){
+  header('Location:'.$index_file.'?task=login');
+  exit;
+}
+
+
+
+
+
 //task home
 $smarty_appform->display('index/index.tpl');
 exit;

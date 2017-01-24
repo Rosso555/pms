@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=""/>
-<meta name="keywords" content=""/>
+<meta name="description" content="Psychology Management System"/>
+<meta name="keywords" content="Psychology Management System"/>
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
@@ -17,7 +17,7 @@
 <body>
 {if $mode eq "index" }{include file="index/menu.tpl" }{/if}
 {block name="slide"}
- 
+
 {/block}
 </nav>
 <div class="container">
