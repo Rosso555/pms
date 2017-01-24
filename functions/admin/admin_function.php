@@ -2,8 +2,8 @@
 /**
  * [getMultilang]
  * @param  [string] $lang
- * @return [array]
  * @author In khemarak
+ * @return [array]
  */
 function getMultilang($lang)
 {
@@ -33,6 +33,7 @@ function getMultilang($lang)
  * is_key_lang_exist
  * @param  string  $key_lang
  * @return boolean
+ * @author In khemarak
  */
 function is_key_lang_exist($key_lang)
 {
@@ -52,9 +53,10 @@ function is_key_lang_exist($key_lang)
   return $result;
 }
 /**
- * [getMultilangByID description]
+ * [getMultilangBy unique_id]
  * @param  [int] $unique_id
  * @return [array]
+ * @author In khemarak
  */
 function getMultilangByID($unique_id)
 {
@@ -67,7 +69,6 @@ function getMultilangByID($unique_id)
     $query->bindValue(':unique_id', $unique_id, PDO::PARAM_INT);
     $query->execute();
     $rows = $query->fetchAll();
-    // print_r($newResult);
     return $rows;
   }
   catch (Exception $e)
@@ -79,6 +80,8 @@ function getMultilangByID($unique_id)
 /**
  * updateDefaultLang for update default_lang to zero
  * @return true or false
+ * @author In khemarak
+ * @return boolean
  */
 function updateDefaultLang()
 {
@@ -96,10 +99,11 @@ function updateDefaultLang()
 }
 
 /**
- * [listMultiLang ]
+ * [listMultiLang]
  * @param  string $kwd
  * @return [array]
  * @author In khemarak
+ * @return array
  */
  function listMultiLang($kwd = "", $slimit)
 {
@@ -145,7 +149,6 @@ function listLanguage($kwd)
     {
       $condition .= ' WHERE title LIKE :kwd ';
     }
-
     $sql = ' SELECT *, (SELECT COUNT(*) FROM `language` '.$condition.') AS total FROM `language` '.$condition.' ORDER BY id DESC LIMIT :offset, :limit ';
     $query = $connected->prepare($sql);
     if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
@@ -167,7 +170,7 @@ function listLanguage($kwd)
  * [ListStaffRoleByPermission ]
  * @param string $kwd
  * @author In khemarak
- * return array
+ * @return array
  */
 function ListStaffRoleByPermission($kwd = "")
 {
@@ -193,7 +196,7 @@ function ListStaffRoleByPermission($kwd = "")
  * [ListStaffPermission]
  * @param string $kwd
  * @author In khemarak
- * return array
+ * @return array
  */
 function ListStaffPermission($kwd = "")
 {
@@ -268,6 +271,7 @@ function listFunction($kwd = "")
  * [ListStaffRole]
  * @param string $kwd
  * @author In khemarak
+ * @return array
  */
 function ListStaffRole($kwd = "")
 {
@@ -300,6 +304,7 @@ function ListStaffRole($kwd = "")
  * [ListStaffInfo]
  * @param string $kwd
  * @author In khemarak
+ * @return array
  */
 function ListStaffInfo($kwd = "")
 {

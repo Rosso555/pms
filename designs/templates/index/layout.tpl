@@ -10,12 +10,16 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="/css/admin_style.css" type="text/css"/>
+<link rel="stylesheet" href="/css/index_style.css" type="text/css"/>
 <link rel="stylesheet" href="/css/style_select2.css" type="text/css"/>
-<title>PMS-ADMIN</title>
+<title>PMS</title>
 </head>
 <body>
-{if $mode eq "admin" }{include file="admin/menu.tpl" }{/if}
+{if $mode eq "index" }{include file="index/menu.tpl" }{/if}
+{block name="slide"}
+ 
+{/block}
+</nav>
 <div class="container">
 	<div class="row">
 		<div class="col-md-12">
@@ -43,6 +47,12 @@
 {/block}
 <script>
 $(document).ready(function(){
+	  // check animation icon
+		$("#animated").hover(function () {
+			$("#animated_icon").addClass("fa fa-cog fa-lg fa-spin");  //Add the active class to the area is hovered
+	}, function () {
+			$("#animated_icon").removeClass("fa-spin");
+	});
 		// tooltip
     $('[data-toggle1="tooltip"]').tooltip();
 		// select2 form

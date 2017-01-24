@@ -469,7 +469,6 @@ if('staff_info' === $task)
 	        $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
 	        $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
 				}
-          // echo $images;exit;
           $common->save('staff', $field = ['name'     => $name,
                                           'password'  => $pass,
                                           'gender'    => $gender,

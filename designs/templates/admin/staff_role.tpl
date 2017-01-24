@@ -9,14 +9,14 @@
     {if $error.title}
     <div class="alert alert-danger" id="{if $error.title eq 1}flash{/if}">
       <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-      <strong>Warning!</strong> Please write staff role.
+      <strong>{if $multiLang.text_warning}{$multiLang.text_warning}{else}No Translate (Key Lang:text_warning){/if}!</strong>{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_staff_role_header}{$multiLang.text_staff_role_header}{else}No Translate (Key Lang:text_staff_role_header){/if}.
     </div>
     {/if}
     {if $error.exist_delete eq 1}
       <div class="alert alert-danger alert-dismissible"  id="{if $error.exist_delete eq 1}flash{/if}">
         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-        <strong>warning!</strong> sorry you can not delete this record!
+        <strong>{if $multiLang.text_warning}{$multiLang.text_warning}{else}No Translate (Key Lang:text_warning){/if}!</strong> {if $multiLang.text_canot_delete_record}{$multiLang.text_canot_delete_record}{else}No Translate (Key Lang:text_canot_delete_record){/if}!
       </div>
     {/if}
     <div class="panel panel-primary">

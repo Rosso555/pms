@@ -31,8 +31,8 @@
         <button type="submit" class="btn btn-default">Submit</button>
       </form> -->
       <ul class="nav navbar-nav navbar-right">
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-cog fa-lg" aria-hidden="true"></i> {if $multiLang.menu_setting}{$multiLang.menu_setting}{else}No Translate (Key Lang:menu_setting){/if} <span class="caret"></span></a>
+        <li class="dropdown" id="animated">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i id="animated_icon" class="fa fa-cog fa-lg" aria-hidden="true"></i> {if $multiLang.menu_setting}{$multiLang.menu_setting}{else}No Translate (Key Lang:menu_setting){/if} <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="{$admin_file}?task=category"><i class="fa fa-bars" aria-hidden="true"></i>&nbsp;{if $multiLang.menu_category}{$multiLang.menu_category}{else}No Translate (Key Lang: menu_category){/if}</a></li>
             <li><a href="{$admin_file}?task=add_language"><i class="fa fa-language" aria-hidden="true"></i>&nbsp; {if $multiLang.menu_add_language}{$multiLang.menu_add_language}{else}No Translate (Key Lang: menu_add_language){/if}</a></li>
@@ -52,7 +52,7 @@
             {/foreach}
           </ul>
         </li>
-        <li><a href="{$admin_file}?task=logout"><i class="fa fa-sign-out fa-lg" aria-hidden="true"></i> {if $multiLang.menu_logout}{$multiLang.menu_logout}{else}No Translate (Key Lang:menu_logout){/if}</a></li>
+        <li><a href="{$admin_file}?task=logout" id="animated_logout"><i class="fa fa-sign-out fa-lg" aria-hidden="true"></i> {if $multiLang.menu_logout}{$multiLang.menu_logout}{else}No Translate (Key Lang:menu_logout){/if}</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

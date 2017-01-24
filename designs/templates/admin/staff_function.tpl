@@ -58,7 +58,7 @@
               <div class="col-md-6">
                 <div class="form-group">
                   <label>{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if}:</label>
-                  <input type="text" class="form-control" name="action" value="{if $edit.action_name}{$edit.action_name}{else}{if $smarty.session.staff_function.action|escape}{$smarty.session.staff_function.action|escape}{/if}{/if}" placeholder="action save.." />
+                  <input type="text" class="form-control" name="action" value="{if $edit.action_name}{$edit.action_name}{else}{if $smarty.session.staff_function.action|escape}{$smarty.session.staff_function.action|escape}{/if}{/if}" placeholder="action save, edit,delete..." />
                 </div>
               </div>
             </div>
