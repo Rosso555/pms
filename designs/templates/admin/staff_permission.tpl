@@ -139,11 +139,11 @@
                               <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h4>
                             </div>
                             <div class="modal-body">
-                              <p>Are you sure you want to delete this staff permission?</p>
+                              <p>{if $multiLang.text_confirm_delete}{$multiLang.text_confirm_delete}{else}No Translate (Key Lang:text_confirm_delete){/if}?</p>
                             </div>
                             <div class="modal-footer">
                               <a href="{$admin_file}?task=staff_permission&amp;action=delete&amp;id={$staff_permission.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}</i></a>
-                              <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-remove"> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</i></button>
+                              <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</i></button>
                             </div>
                           </div>
                         </div>

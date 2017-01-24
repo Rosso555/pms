@@ -89,10 +89,10 @@
               <div class="form-group">
                 {if $edit.id}
                   <input type="hidden" name="id" value="{$edit.id}">
-                  <button type="submit" name="submit" class="btn btn-success"><i class="fa fa-check-circle-o"></i> Update</button>
-                  <a href="{$admin_file}?task=staff_info" class="btn btn-danger"><i class="fa fa-close"></i> Cancel</a>
+                  <button type="submit" name="submit" class="btn btn-success"><i class="fa fa-check-circle-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate (Key Lang:button_update){/if}</button>
+                  <a href="{$admin_file}?task=staff_info" class="btn btn-danger"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</a>
                 {else}
-                  <button type="submit" class="btn btn-info"><i class="fa fa-check-circle-o"></i> Save</button>
+                  <button type="submit" class="btn btn-info"><i class="fa fa-check-circle-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate (Key Lang:button_save){/if}</button>
                 {/if}
               </div>
             </div>
@@ -150,8 +150,8 @@
                         <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h4>
                       </div>
                       <div class="modal-body">
-                        <p>{if $v.status eq 1}{if $multiLang.text_change_status}{$multiLang.text_change_status}{else}No Translate (Key Lang:text_change_status){/if}
-                          {elseif $v.status eq 0}{if $multiLang.text_change_status}{$multiLang.text_change_status}{else}No Translate (Key Lang:text_change_status){/if}{/if}</p>
+                        <p>{if $v.status eq 1}{if $multiLang.text_change_status}{$multiLang.text_change_status}{else}No Translate (Key Lang:text_change_status){/if} {if $multiLang.text_show_Active}{$multiLang.text_show_Active}?{else}No Translate (Key Lang:text_show_Active){/if}
+                          {elseif $v.status eq 2}{if $multiLang.text_change_status}{$multiLang.text_change_status}{else}No Translate (Key Lang:text_change_status){/if} {if $multiLang.text_show_stope}{$multiLang.text_show_stope}?{else}No Translate (Key Lang:text_show_stope){/if}{/if}</p>
                       </div>
                       <div class="modal-footer">
                         <a href="{$admin_file}?task=staff_info&amp;action=change_status&amp;id={$v.id|escape}&amp;status={$v.status|escape}" class="btn btn-danger btn-md"><i class="fa fa-check-circle-o"></i> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</a>
@@ -170,7 +170,7 @@
                       <div class="modal-content">
                         <div class="modal-header">
                           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                          <h4 class="modal-title" id="myModalLabel">Profile Information</h4>
+                          <h4 class="modal-title" id="myModalLabel">{if $multiLang.text_pro_info}{$multiLang.text_pro_info}{else}No Translate (Key Lang:text_pro_info){/if}</h4>
                         </div>
                         <div class="modal-body">
                         <img class="img-circle" src="/images/staff/thumbnail__{$v.photo}" width="20%">
@@ -184,13 +184,13 @@
                             <dt>{if $multiLang.text_title_role}{$multiLang.text_title_role}{else}No Translate (Key Lang:text_title_role){/if}</dt>
                             <dd class="text-left">{$v.role_name}</dd>
                           </dl>
-                        <legend>Account Information</legend>
+                        <legend>{if $multiLang.text_acc_info}{$multiLang.text_acc_info}{else}No Translate (Key Lang:text_acc_info){/if}</legend>
                         <label>{if $multiLang.text_title_name}{$multiLang.text_title_name}{else}No Translate (Key Lang:text_title_name){/if}:</label> {$v.name}<br />
                         <label>{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}:</label> {$v.password}
                         </div>
                         <div class="modal-footer">
-                          <button type="button" class="btn btn-default" data-dismiss="modal">{if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
-                          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+                          <a href="{$admin_file}?task=staff_info&amp;action=edit&amp;id={$v.id}" class="btn btn-success"><i class="fa fa-edit"></i> {if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}</a>
+                          <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times-circle" aria-hidden="true"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
                         </div>
                       </div>
                     </div>

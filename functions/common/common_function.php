@@ -1,4 +1,37 @@
 <?php
+/**
+ * [is_staff_function_exist ]
+ * @param  [string]  $task
+ * @param  [string]  $action
+ * @return boolean
+ * @author In khemarak
+ */
+function is_staff_function_exits($task, $action)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count FROM `staff_function` WHERE task_name = :task AND action_name= :action';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':task', (string)$task, PDO::PARAM_STR);
+    $query->bindValue(':action', (string)$action, PDO::PARAM_STR);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: is_staff_function_exist'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * [is_staff_permission_exist description]
+ * @param  [string]  $table_name
+ * @param  [string]  $role_id
+ * @param  [int]  $function_id
+ * @return boolean
+ * @author In khemarak
+ */
 function is_staff_permission_exist($table_name, $role_id, $function_id)
 {
   //these values are set in setup.php

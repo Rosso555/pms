@@ -1,4 +1,5 @@
 <?php
+
 /**
  * [getMultilang]
  * @param  [string] $lang
