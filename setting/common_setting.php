@@ -4,8 +4,17 @@ require_once('internal_libs/database.class.php');
 require_once('internal_libs/common.class.php');
 require_once('external_libs/thumbnail.php');
 require_once('external_libs/Smarty-3.1.14/libs/SmartyPaginate.class.php');
+require_once('external_libs/swiftmailer-5.x/lib/swift_required.php');
+
 //create common class object
 $common = new common();
+//Mailer
+$transport = Swift_SmtpTransport::newInstance('smtp.gmail.com', 465, 'ssl')
+            ->setUsername(EMAIL_USERNAME)
+            ->setPassword(EMAIL_PASSWORD)
+            ->setAuthMode('login');
+$mailer = Swift_Mailer::newInstance($transport);
+
 //set initalize parameter
 $task = $action = $kwd = null;
 $next = '';
@@ -19,6 +28,8 @@ $smarty_appform = new PMS_SMARTY();
 $smarty_appform->assign('smpaginate','common/paginate.tpl');
 $smarty_appform->assign('mode', 'admin');
 $smarty_appform->assign('admin_file', $admin_file);
+$smarty_appform->assign('index_file', $index_file);
+$smarty_appform->assign('psychologist_file', $psychologist_file);
 $smarty_appform->assign('site_url', $site_url);
 /* Paginate */
 if(empty($_SESSION['task'])) 		$_SESSION['task'] = $task;
@@ -40,4 +51,6 @@ $error = '';
 // Database connection
 $database_connect 		 		= new database(DB_HOSTNAME, DB_USER, DB_PASSWORD, DB_DATABASE_NAME);
 $database_connect->debug 	= $debug;
-$connected 				 	 			= & $database_connect->_Connect; ?>
+$connected 				 	 			= & $database_connect->_Connect;
+
+?>

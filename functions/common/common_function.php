@@ -1,5 +1,35 @@
 <?php
 /**
+ * [getMultilang]
+ * @param  [string] $lang
+ * @author In khemarak
+ * @return [array]
+ */
+function getMultilang($lang)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT key_lang, title FROM `multi_lang` WHERE lang = :lang ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $query->execute();
+    $rows = $query->fetchAll();
+    $newResult = array();
+    //Loop: insert to newarray
+    foreach ($rows as $key => $row) {
+      $newResult[$row['key_lang']] = $row['title'];
+    }
+    return $newResult;
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getMultilang'.$e->getMessage();
+  }
+  return $result;
+
+}
+/**
  * [is_staff_function_exist ]
  * @param  [string]  $task
  * @param  [string]  $action
@@ -173,4 +203,54 @@ function listCategory($kwd, $lang)
 
   return $result;
 }
- ?>
+/**
+ * check_user_email
+ * @param  string $email is email address
+ * @return boolean
+ */
+function check_user_email($email){
+  global $debug, $connected, $total_data;
+  $result = true;
+  try{
+    $sql = ' SELECT COUNT(*) AS total_count FROM `psychologist` WHERE email = :email ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':email', (string)$email, PDO::PARAM_STR);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+
+  }catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: check_user_email'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * checkSecretkey
+ * @param  string $secretkey
+ * @return boolean
+ */
+function checkSecretkey($psy_id ,$secretkey){
+  global $debug, $connected, $total_data;
+  $result = true;
+  try{
+    $sql = ' SELECT COUNT(*) AS total_count FROM `psychologist` WHERE id = :psy_id AND secretkey = :secretkey ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':secretkey', (string)$secretkey, PDO::PARAM_STR);
+    $query->bindValue(':psy_id', $psy_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+
+  }catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkSecretkey'.$e->getMessage();
+  }
+
+  return $result;
+}
+
+
+
+?>

@@ -13,11 +13,11 @@
   <link rel="stylesheet" href="/css/index_style.css" type="text/css"/>
   <title>PMS Register</title>
 </head>
-<body style="background-color: #fafafa;">
+<body>
 <div class="container" style="margin-top: 22px;">
   <div class="row">
     <div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
-      <ul class="breadcrumb" style="background-color: #e9e9e9;">
+      <ul class="breadcrumb">
         <li><a href="{$index_file}?task=login"><span class="label label-success">Login</span></a></li>
         <li class="active">Register</li>
       </ul>
@@ -30,38 +30,38 @@
           <form action="{$index_file}?task=user_register" method="post">
             <div class="form-group" id="error_user">
               <label for="user"><span style="color:red">*</span> Username:</label>
-              <span style="color:red" id="txt_error_user"></span>
+              <span style="color:red" id="txt_error_user">{if $error.username}Please enter username !!!{/if}</span>
 
               <input type="text" class="form-control" id="user" name="username" value="{$smarty.session.user_register.username}">
             </div>
             <div class="form-group" id="error_pwd">
               <label for="pwd"><span style="color:red">*</span> Password:</label>
-              <span style="color:red" id="txt_error_pwd">{if $error.less_password}Your password less than 8 or not with number and letter.{/if}</span>
+              <span style="color:red" id="txt_error_pwd">{if $error.password}Please enter password !!!{/if} {if $error.not_match_password}Your password do not match. Please try again.{/if} {if $error.less_password}Your password less than 8 or not with number and letter.{/if}</span>
 
               <input type="password" class="form-control" id="pwd" name="password" onkeyup="checkPassword('pwd');" value="{$smarty.session.user_register.password}">
               <span style="color:red">More than 8 characters with number and letter</span>
             </div>
             <div class="form-group" id="error_re_pwd">
               <label for="re_pwd"><span style="color:red">*</span> Re-Password:</label>
-              <span style="color:red" id="txt_error_re_pwd"></span>
+              <span style="color:red" id="txt_error_re_pwd">{if $error.re_password}Please enter re_password !!!{/if}</span>
 
-              <input type="password" class="form-control" id="re_pwd" onchange="checkPassword('re_pwd');">
+              <input type="password" class="form-control" id="re_pwd" name="re_password" onchange="checkPassword('re_pwd');">
             </div>
             <div class="form-group" id="error_email">
               <label for="email"><span style="color:red">*</span> Email:</label>
-              <span style="color:red" id="txt_error_email"></span>
+              <span style="color:red" id="txt_error_email">{if $error.email}Please enter email !!!{/if} {if $error.invalid_email}Your email is not valid !!!{/if} {if $error.exist_email}Your email is existed !!!{/if}</span>
 
               <input type="email" class="form-control" id="email" name="email" placeholder="example@domain.com" value="{$smarty.session.user_register.email}">
             </div>
             <div class="form-group" id="error_job">
               <label for="job"><span style="color:red">*</span> Job:</label>
-              <span style="color:red" id="txt_error_job"></span>
+              <span style="color:red" id="txt_error_job">{if $error.job}Your email is job !!!{/if}</span>
 
               <input type="text" class="form-control" id="job" name="job" value="{$smarty.session.user_register.job}">
             </div>
             <div class="form-group" id="error_address">
               <label for="address"><span style="color:red">*</span> Address:</label>
-              <span style="color:red" id="txt_error_address"></span>
+              <span style="color:red" id="txt_error_address">{if $error.address}Your email is address !!!{/if}</span>
 
               <textarea class="form-control" rows="4" id="address" name="address">{$smarty.session.user_register.address}</textarea>
             </div>
@@ -85,7 +85,7 @@
 
       if(pwd == ''){
         $("#error_pwd").attr("class", "form-group has-error");
-        $("#txt_error_pwd").text("Please enter password!!!");
+        $("#txt_error_pwd").text("Please enter password !!!");
       }else {
         $("#error_pwd").attr("class", "form-group has-success");
         $("#txt_error_pwd").text("");
@@ -100,7 +100,7 @@
 
         if(re_pwd == ''){
           $("#error_re_pwd").attr("class", "form-group has-error");
-          $("#txt_error_re_pwd").text("Please enter re-password!!!");
+          $("#txt_error_re_pwd").text("Please enter re-password !!!");
         }else {
           $("#error_re_pwd").attr("class", "form-group has-success");
           $("#txt_error_re_pwd").text("");
@@ -122,7 +122,7 @@ $("form").submit(function( event ) {
 
   if(user == ''){
     $("#error_user").attr("class", "form-group has-error");
-    $("#txt_error_user").text("Please enter username!!!");
+    $("#txt_error_user").text("Please enter username !!!");
   }else {
     $("#error_user").attr("class", "form-group has-success");
     $("#txt_error_user").text("");
@@ -130,7 +130,7 @@ $("form").submit(function( event ) {
 
   if(pwd == ''){
     $("#error_pwd").attr("class", "form-group has-error");
-    $("#txt_error_pwd").text("Please enter password!!!");
+    $("#txt_error_pwd").text("Please enter password !!!");
   }else {
     $("#error_pwd").attr("class", "form-group has-success");
     $("#txt_error_pwd").text("");
@@ -138,7 +138,7 @@ $("form").submit(function( event ) {
 
   if(re_pwd == ''){
     $("#error_re_pwd").attr("class", "form-group has-error");
-    $("#txt_error_re_pwd").text("Please enter re-password!!!");
+    $("#txt_error_re_pwd").text("Please enter re-password !!!");
   }else {
     $("#error_re_pwd").attr("class", "form-group has-success");
     $("#txt_error_re_pwd").text("");
@@ -146,7 +146,7 @@ $("form").submit(function( event ) {
 
   if(email == ''){
     $("#error_email").attr("class", "form-group has-error");
-    $("#txt_error_email").text("Please enter email!!!");
+    $("#txt_error_email").text("Please enter email !!!");
   }else {
     $("#error_email").attr("class", "form-group has-success");
     $("#txt_error_email").text("");
@@ -154,7 +154,7 @@ $("form").submit(function( event ) {
 
   if(job == ''){
     $("#error_job").attr("class", "form-group has-error");
-    $("#txt_error_job").text("Please enter job!!!");
+    $("#txt_error_job").text("Please enter job !!!");
   }else {
     $("#error_job").attr("class", "form-group has-success");
     $("#txt_error_job").text("");
@@ -162,7 +162,7 @@ $("form").submit(function( event ) {
 
   if(address == ''){
     $("#error_address").attr("class", "form-group has-error");
-    $("#txt_error_address").text("Please enter address!!!");
+    $("#txt_error_address").text("Please enter address !!!");
   }else {
     $("#error_address").attr("class", "form-group has-success");
     $("#txt_error_address").text("");

@@ -15,8 +15,9 @@
 <title>PMS</title>
 </head>
 <body>
-{if $mode eq "index" }{include file="index/menu.tpl" }{/if}
-<div class="container">
+{include file="psychologist/menu.tpl" }
+
+<div class="container" style="margin-top: 80px;">
 	<div class="row">
 		<div class="col-md-12">
 			{block name="main"}
@@ -29,36 +30,20 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<script type="text/javascript">
-	function readURL(input) {
-		if (input.files && input.files[0]) {
-				var reader = new FileReader();
-				reader.onload = function (e) {
-					$('#blah').attr('src', e.target.result);
-				}
-			reader.readAsDataURL(input.files[0]);
-		}
-	}
-</script>
+
 {block name="javascript"}
 {/block}
 <script>
 $(document).ready(function(){
-	  // check animation icon
-		$("#animated").hover(function () {
-			$("#animated_icon").addClass("fa fa-cog fa-lg fa-spin");  //Add the active class to the area is hovered
-	}, function () {
-			$("#animated_icon").removeClass("fa-spin");
+	// tooltip
+  $('[data-toggle1="tooltip"]').tooltip();
+	// select2 form
+	$(".select2").select2();
+
+	$(".select2_second_topic").select2({
+		  placeholder: "Analysis Topic",
 	});
-		// tooltip
-    $('[data-toggle1="tooltip"]').tooltip();
-		// select2 form
-		$(".select2").select2();
 
-		$(".select2_second_topic").select2({
-			  placeholder: "Analysis Topic",
-
-			});
 });
 function NumAndTwoDecimals(e , field)
 {

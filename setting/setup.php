@@ -16,6 +16,7 @@ define('ACC_CO_WORKER', 2);
 /* global varriable */
 $admin_file = 'admin.php';
 $index_file = 'index.php';
+$psychologist_file = 'psychologist.php';
 
 //varriable initialize
 $debug = true;
@@ -41,6 +42,17 @@ $allows   =   array(
 
 $admin_username = 'admin';
 $admin_password = '783aa605875aa00477ecffeeddbbe65d';
+
+//Email account
+define('EMAIL_USERNAME', 'noreply@e-khmer.com');
+define('EMAIL_PASSWORD', '7K<dSQ%D#$');
+$mail_signature = '
+*********************************************************
+Psychology Management System (PMS)
+E-mail: support@e-khmer.com
+Phone: (855)715533175
+Website: http://www.pms.e-khmer.com/
+*********************************************************';
 
 $site_url = 'http://www.pms.e-khmer.com/';
 // define("IMAGE_FILES_PATH", "/home/scusersbnn/chapmeas.e-khmer.com/images/");

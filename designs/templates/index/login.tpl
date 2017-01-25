@@ -13,21 +13,22 @@
   <link rel="stylesheet" href="/css/index_style.css" type="text/css"/>
   <title>PMS</title>
 </head>
-<body style="background-color: #fafafa;">
+<body>
 <div class="container" style="margin-top: 80px;">
   <div class="row">
     <div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
-      <ul class="breadcrumb" style="background-color: #e9e9e9;">
+      <ul class="breadcrumb">
         <li><a href="{$index_file}"><span class="label label-success">PMS</span></a></li>
         <li class="active">User</li>
       </ul>
 
-      {if $error }
+      {if $error}
         <div class="alert alert-danger" data-dismiss="alert">
         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-          {if $error.name eq 1} <i class="fa fa-exclamation"></i>&nbsp;Please enter your name. <br />{/if}
+          {if $error.username eq 1} <i class="fa fa-exclamation"></i>&nbsp;Please enter your name. <br />{/if}
           {if $error.password eq 1} <i class="fa fa-exclamation"></i>&nbsp;Please enter your password. <br />{/if}
-          {if $error.login_error eq 1}    <i class="fa fa-exclamation"></i>&nbsp;Wrong name or password or no permission. <br />{/if}
+          {if $error.user_role eq 1}<i class="fa fa-exclamation"></i>&nbsp;Please check patient or psychologist. <br>{/if}
+          {if $error.login_error eq 1} <i class="fa fa-exclamation"></i>&nbsp;Wrong name or password or no permission. <br />{/if}
         </div>
       {/if}
       <div class="panel panel-primary">
@@ -37,19 +38,19 @@
         <div class="panel-body">
           <form action="{$staff_file}?task=login" method="post"​ class="form">
             <p class="text-left">
-              <label class="radio-inline"><input type="radio" name="user_role" value="1">Patient</label>
-              <label class="radio-inline"><input type="radio" name="user_role" value="2">Psychologist</label>
+              <label class="radio-inline"><input type="radio" name="user_role" value="1" {if $smarty.session.user_login.user_role eq 1}checked{/if}>Patient</label>
+              <label class="radio-inline"><input type="radio" name="user_role" value="2" {if $smarty.session.user_login.user_role eq 2}checked{/if}>Psychologist</label>
             </p>
-            <div class="form-group">
+            <div class="form-group {if $error.username eq 1}has-error{/if}">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-user" aria-hidden="true"></i></span>
-                <input type="text" class="form-control" placeholder="Username" name="name" value="" autofocus required>
+                <input type="text" class="form-control" name="username" placeholder="Username" value="{$smarty.session.user_login.username}" autofocus>
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group {if $error.password eq 1}has-error{/if}">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-lock" aria-hidden="true"></i></span>
-                <input type="password" class="form-control" name="password" placeholder="Password" required>
+                <input type="password" class="form-control" name="password" placeholder="Password" value="{$smarty.session.user_login.password}">
               </div>
             </div>
             <p><small><i class="fa fa-info-circle" aria-hidden="true"></i> <a href="{$index_file}?task=forget">Forgot Password.</a></small></p>

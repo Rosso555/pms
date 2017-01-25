@@ -1,35 +1,4 @@
 <?php
-
-/**
- * [getMultilang]
- * @param  [string] $lang
- * @author In khemarak
- * @return [array]
- */
-function getMultilang($lang)
-{
-  global $debug, $connected;
-  $result = true;
-  try{
-    $sql= ' SELECT key_lang, title FROM `multi_lang` WHERE lang = :lang ';
-    $query = $connected->prepare($sql);
-    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
-    $query->execute();
-    $rows = $query->fetchAll();
-    $newResult = array();
-    //Loop: insert to newarray
-    foreach ($rows as $key => $row) {
-      $newResult[$row['key_lang']] = $row['title'];
-    }
-    return $newResult;
-
-  } catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: getMultilang'.$e->getMessage();
-  }
-  return $result;
-
-}
 /**
  * is_key_lang_exist
  * @param  string  $key_lang

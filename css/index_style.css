@@ -1,4 +1,6 @@
-
+body{
+  background-color: #DEDEDE;
+}
 .panel-primary{
   border-color: #009686;
 }
@@ -18,9 +20,8 @@
 }
 .navbar-default {
     background-image: none;
-    background-color: 	#2E2E2E;
-    border-color: #2E2E2E;
-    opacity: 0.8;
+    background-color: 	#278ed2;
+    border-color: #e7e7e7;
 }
 .panel{
   box-shadow: 2px 6px 5px rgba(0, 0, 0, 0.13);
@@ -39,7 +40,6 @@
   color: #D1D1D1;
 }
 /*End Nav Menu*/
-
 /*Menu dropdown*/
 .dropdown-menu > li.header_menu > a{
   font-weight: bold;
