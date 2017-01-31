@@ -17,7 +17,7 @@
 <body>
 {include file="psychologist/menu.tpl" }
 
-<div class="container" style="margin-top: 80px;">
+<div class="container" style="margin-top: 70px;">
 	<div class="row">
 		<div class="col-md-12">
 			{block name="main"}

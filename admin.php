@@ -401,7 +401,7 @@ if('staff_info' === $task)
       $phone    = $common->clean_string($_POST['phone']);
       $staff_role   = $common->clean_string($_POST['staff_role']);
       $old_fle = $common->clean_string($_POST['old_file']);
-      $create_at  = date('Y-m-d h:i:s', time());
+      //add value to session to use in template
       $_SESSION['staff_info'] = $_POST;
       //check validate form
 			if(empty($name))   $error['name'] = 1;
@@ -446,8 +446,7 @@ if('staff_info' === $task)
                                           'phone'     => $phone,
                                           'status'    => 1,
                                           'photo'     => $image,
-                                          'staff_role_id' =>$staff_role,
-                                          'created_at'   => $create_at]);
+                                          'staff_role_id' =>$staff_role]);
         $_SESSION['staff_info'] = '';
         unset($_SESSION['staff_info']);
 				//Redirect

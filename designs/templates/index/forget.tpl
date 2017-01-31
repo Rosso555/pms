@@ -19,27 +19,28 @@
     <div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
       <ul class="breadcrumb">
         <li><a href="{$index_file}"><span class="label label-success">PMS</span></a></li>
-        <li class="active">User</li>
+        <li class="active">Forgot Password</li>
       </ul>
 
       {if $error}
         <div class="alert alert-danger" data-dismiss="alert">
         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-          {if $error.email eq 1} <i class="fa fa-exclamation"></i>&nbsp;Please enter your email. <br />{/if}
-          {if $error.password eq 1} <i class="fa fa-exclamation"></i>&nbsp;Please enter your password. <br />{/if}
+          {if $error.email eq 1} <i class="fa fa-exclamation"></i>&nbsp;Please enter your email. <br/>{/if}
           {if $error.user_role eq 1}<i class="fa fa-exclamation"></i>&nbsp;Please check patient or psychologist. <br>{/if}
-          {if $error.login_error eq 1} <i class="fa fa-exclamation"></i>&nbsp;Wrong email or password or no permission. <br />{/if}
+          {if $error.invalid_email eq 1} <i class="fa fa-exclamation"></i>&nbsp;Your email is not valid. <br/>{/if}
+          {if $error.wrong_email eq 1} <i class="fa fa-exclamation"></i>&nbsp;Your email is not registed. <br/>{/if}
         </div>
       {/if}
       <div class="panel panel-primary">
         <div class="panel-heading pms_panel_heading">
-          <h4 class="panel-title text-center">USER LOGIN</h4>
+          <h4 class="panel-title text-center">Forgot Password</h4>
         </div>
         <div class="panel-body">
-          <form action="{$index_file}?task=login" method="post"​ class="form">
+          <form action="{$index_file}?task=forget" method="post"​ class="form">
+            <p style="font-size: 22px; color: #4e4e4e;">Please input your registered email.</p>
             <p class="text-left">
-              <label class="radio-inline"><input type="radio" name="user_role" value="1" {if $smarty.session.user_login.user_role eq 1}checked{/if}>Patient</label>
-              <label class="radio-inline"><input type="radio" name="user_role" value="2" {if $smarty.session.user_login.user_role eq 2}checked{/if}>Psychologist</label>
+              <label class="radio-inline"><input type="radio" name="user_role" value="1" {if $smarty.session.forget.user_role eq 1}checked{/if}>Patient</label>
+              <label class="radio-inline"><input type="radio" name="user_role" value="2" {if $smarty.session.forget.user_role eq 2}checked{/if}>Psychologist</label>
             </p>
             <div class="form-group {if $error.email eq 1}has-error{/if}">
               <div class="input-group">
@@ -47,20 +48,11 @@
                 <input type="text" class="form-control" name="email" placeholder="example@domain.com" value="{$smarty.session.user_login.email}" autofocus>
               </div>
             </div>
-            <div class="form-group {if $error.password eq 1}has-error{/if}">
-              <div class="input-group">
-                <span class="input-group-addon"><i class="fa fa-lock" aria-hidden="true"></i></span>
-                <input type="password" class="form-control" name="password" placeholder="Password" value="{$smarty.session.user_login.password}">
-              </div>
-            </div>
-            <p><small><i class="fa fa-info-circle" aria-hidden="true"></i> <a href="{$index_file}?task=forget">Forgot Password.</a></small></p>
             <div class="form-group">
-              <button type="submit" class="btn btn-primary btn-block" style="border-radius: 0px;"><i class="fa fa-sign-in"></i> LOGIN</button>
+              <button type="submit" class="btn btn-primary"><i class="fa fa-sign-in"></i> SUBMIT</button>
             </div>
           </form>
-          <br>
-          <small>Don't have a PMS psychologist account yet? <a href="{$index_file}?task=user_register">Create your account now.</a></small>
-          <br><br>
+
         </div>
       </div>
       <span style="font-size: 13px" class="text-muted"> © {$smarty.now|date_format:"%Y"} PSYCHOLOGY MANAGEMENT SYSTEM.</span>

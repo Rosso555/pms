@@ -204,11 +204,11 @@ function listCategory($kwd, $lang)
   return $result;
 }
 /**
- * check_user_email
+ * check_psychologist_email
  * @param  string $email is email address
  * @return boolean
  */
-function check_user_email($email){
+function check_psychologist_email($email){
   global $debug, $connected, $total_data;
   $result = true;
   try{
@@ -221,7 +221,30 @@ function check_user_email($email){
 
   }catch (Exception $e) {
     $result = false;
-    if($debug)  echo 'Errors: check_user_email'.$e->getMessage();
+    if($debug)  echo 'Errors: check_psychologist_email'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * check_patient_email
+ * @param  string $email is email address
+ * @return boolean
+ */
+function check_patient_email($email){
+  global $debug, $connected, $total_data;
+  $result = true;
+  try{
+    $sql = ' SELECT COUNT(*) AS total_count FROM `patient` WHERE email = :email ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':email', (string)$email, PDO::PARAM_STR);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+
+  }catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: check_patient_email'.$e->getMessage();
   }
 
   return $result;
@@ -250,7 +273,69 @@ function checkSecretkey($psy_id ,$secretkey){
 
   return $result;
 }
+/**
+ * listPatient
+ * @param  string $kwd is keyword
+ * @return array or boolean
+ */
+function listPatient($kwd, $psychologist_id){
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = $where = '';
+    if(!empty($kwd)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' name LIKE :kwd ';
+    }
+    if(!empty($psychologist_id)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' psychologist_id = :psychologist_id AND deleted_at IS NULL ';
+    }
 
+    if(!empty($condition)) $where .= ' WHERE '.$condition;
+
+    $sql = ' SELECT *, (SELECT COUNT(*) FROM `patient` '.$where.') AS total FROM `patient` '.$where.' ORDER BY id DESC LIMIT :offset, :limit ';
+    $query = $connected->prepare($sql);
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    if (!empty($psychologist_id)) $query->bindValue(':psychologist_id', $psychologist_id, PDO::PARAM_INT);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listPatient'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * getPatientByID
+ * @param  int $id is patient_id
+ * @param  int $psychologist_id is psychologist_id
+ * @return array or boolean
+ */
+function getPatientByID($id, $psychologist_id){
+  global $debug, $connected, $total_data;
+  $result = true;
+  try{
+    $sql = ' SELECT * FROM `patient` WHERE id = :id AND psychologist_id = :psychologist_id AND deleted_at IS NULL ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':id', $id, PDO::PARAM_INT);
+    $query->bindValue(':psychologist_id', $psychologist_id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetch();
+
+  }catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getPatientByID'.$e->getMessage();
+  }
+
+  return $result;
+}
 
 
 ?>

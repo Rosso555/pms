@@ -23,6 +23,13 @@
             <li><a href="{$admin_file}?task=staff_function"><i class="fa fa-retweet" aria-hidden="true"></i> {if $multiLang.menu_function}{$multiLang.menu_function}{else}No Translate (Key Lang:menu_function){/if}</a></li>
           </ul>
         </li>
+        <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-users" aria-hidden="true"></i> User <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{$admin_file}?task=psychologist"><i class="fa fa-user-plus" aria-hidden="true"></i> Psychologist</a></li>
+            <li><a href="{$admin_file}?task=patient"><i class="fa fa-user-md" aria-hidden="true"></i> Patient</a></li>
+          </ul>
+        </li>
       </ul>
       <!-- <form class="navbar-form navbar-left">
         <div class="form-group">

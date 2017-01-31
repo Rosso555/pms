@@ -21,7 +21,7 @@
 		<div class="col-md-12">
 			{block name="main"}
 			{/block}
-		</div>
+		</div> 
 		{include file="common/footer.tpl"}
 	</div>
 </div>

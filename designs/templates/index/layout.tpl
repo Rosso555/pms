@@ -15,8 +15,8 @@
 <title>PMS</title>
 </head>
 <body>
-{if $mode eq "index" }{include file="index/menu.tpl" }{/if}
-<div class="container">
+{include file="index/menu.tpl"}
+<div class="container" style="margin-top:70px;">
 	<div class="row">
 		<div class="col-md-12">
 			{block name="main"}

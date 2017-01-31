@@ -38,14 +38,112 @@ if(empty($_SESSION['is_psycho_login_id'])){
 
 if('patient' === $task)
 {
+  $error = array();
+  if($_POST){
+    //get value from form
+    $id     = $common->clean_string($_POST['id']);
+    $name   = $common->clean_string($_POST['name']);
+    $email  = $common->clean_string($_POST['email']);
+    $phone  = $common->clean_string($_POST['phone']);
+    $gender = $common->clean_string($_POST['gender']);
+    $age    = $common->clean_string($_POST['age']);
+    $password = $common->clean_string($_POST['password']);
+    //add value to session to use in template
+    $_SESSION['patient'] = $_POST;
+    //form validation
+    if(empty($name))    $error['name']    = 1;
+    if(empty($email))   $error['email']   = 1;
+    if(empty($phone))   $error['phone']   = 1;
+    if(empty($gender))  $error['gender']  = 1;
+    if(empty($age))     $error['age']     = 1;
+    if(empty($password))  $error['password']  = 1;
+    if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
+		   $error['invalid_email'] = 1;
+		}
+    if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
+      $existed = check_patient_email($email);
+      if($existed > 0){
+        $error['exist_email'] = 1;
+      }
+    }
+    //Save
+    if(empty($id) && COUNT($error) === 0){
+      $common->save('patient', $field =['psychologist_id' => $_SESSION['is_psycho_login_id'],
+                                        'name'    => $name,
+                                        'email'   => $email,
+                                        'phone'   => $phone,
+                                        'gender'  => $gender,
+                                        'age'     => $age,
+                                        'password'=> $password]);
+    //unset session
+    unset($_SESSION['patient']);
+    //Redirect
+    header('location: '.$psychologist_file.'?task=patient');
+    exit;
+    }
+    //Update
+    if(!empty($id) && COUNT($error) === 0){
+      $common->update('patient', $field= ['name'     => $name,
+                                          'email'    => $email,
+                                          'phone'    => $phone,
+                                          'gender'   => $gender,
+                                          'age'      => $age,
+                                          'password' => $password],
+                                 $condition = ['id' => $_GET['id'], 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+    //unset session
+    unset($_SESSION['patient']);
+    //Redirect
+    header('location: '.$psychologist_file.'?task=patient');
+    exit;
+    }
+  }
+  //Change staus patient
+  if('change_status' === $action && !empty($_GET['id']))
+  {
+    if(!empty($_GET['status'] == 1))
+    {
+      $common->update('patient', $field = ['status' => 2], $condition = ['id' => $_GET['id'], 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+    }elseif (!empty($_GET['status'] == 2)) {
+      $common->update('patient', $field = ['status' => 1], $condition = ['id' => $_GET['id'], 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+    }
+    header('location:'.$psychologist_file.'?task=patient');
+    exit;
+  }
+  //action delete staff role
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $deleted_at = date("Y-m-d");
+    $common->update('patient', $field = ['deleted_at' => $deleted_at], $condition = ['id' => $_GET['id'], 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+    header('location:'.$psychologist_file.'?task=patient');
+    exit;
+  }
+  //Action: edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $resutlGetPatientById = getPatientByID($_GET['id'], $_SESSION['is_psycho_login_id']);
 
+    if(!empty($resutlGetPatientById) && COUNT($resutlGetPatientById) > 0){
+      $smarty_appform->assign('editPatient', $resutlGetPatientById);
+    }else {
+      header('location:'.$psychologist_file.'?task=page_not_found');
+      exit;
+    }
+  }
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $result = listPatient($kwd, $_SESSION['is_psycho_login_id']);
 
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listPatient', $result);
   $smarty_appform->display('psychologist/patient.tpl');
   exit;
 }
 
 
-
+//Task: page not found
+if('page_not_found' === $task){
+  $smarty_appform->display('psychologist/page_error_404.tpl');
+  exit;
+}
 
 
 $smarty_appform->display('psychologist/index.tpl');
