@@ -1,47 +1,50 @@
-{extends file="psychologist/layout.tpl"}
+{extends file="admin/layout.tpl"}
 {block name="main"}
 <ul class="breadcrumb">
-  <li><a href="{$psychologist_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li class="active">Patient</li>
+  <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
+  <li class="active">Psychologist</li>
 </ul>
 <div class="panel panel-primary">
-  <div class="panel-heading"><h3 class="panel-title">Patient</h3></div>
+  <div class="panel-heading"><h3 class="panel-title">Psychologist.</h3></div>
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
         <div class="row">
-          <form class="form-inline">
-            <input type="hidden" name="task" value="patient">
-            <div class="form-group col-md-2" style="margin-bottom:5px;">
-              <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
-                <i class="fa fa-plus-circle"></i> Add Patient
-              </button>
-            </div>
-            <div class="form-group col-md-3" style="margin-bottom:5px;">
-              <select class="form-control select2" name="gender" style="width:100%">
-                <option value="">--- Select Gender ---</option>
-                <option value="1" {if $smarty.get.gender eq 1}selected{/if}>Male</option>
-                <option value="2" {if $smarty.get.gender eq 3}selected{/if}>Female</option>
-              </select>
-            </div>
-            <div class="form-group col-md-3" style="margin-bottom:5px;">
-              <select class="form-control select2" name="status" style="width:100%">
-                <option value="">--- Select Status ---</option>
-                <option value="1" {if $smarty.get.status eq 1}selected{/if}>Active</option>
-                <option value="2" {if $smarty.get.status eq 2}selected{/if}>Stop</option>
-              </select>
-            </div>
-            <div class="form-group col-md-4" style="margin-bottom:5px;">
-              <input type="text" class="form-control" placeholder="Enter name" name="kwd">
-              <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
-            </div>
-          </form>
+          <div class="col-md-12">
+            <form class="form-inline">
+              <input type="hidden" name="task" value="patient">
+              <div class="form-group" style="margin-bottom:5px;">
+                <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
+                  <i class="fa fa-plus-circle"></i> Add Psychologist
+                </button>
+              </div>
+              <div class="form-group" style="margin-bottom:5px;">
+                <select class="form-control select2" name="psy_id">
+                  <option value="">---Select Psychologist---</option>
+                  {foreach from=$listPsychologist item=v}
+                  <option value="{$v.id}" {if $smarty.get.psy_id eq $v.id}selected{/if}>{$v.username}</option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:5px;">
+                <select class="form-control select2" name="status">
+                  <option value="">---Select Status---</option>
+                  <option value="1" {if $smarty.get.status eq 1}selected{/if}>Active</option>
+                  <option value="2" {if $smarty.get.status eq 2}selected{/if}>Stop</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:5px;">
+                <input type="text" class="form-control" placeholder="Enter name" name="kwd">
+                <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
+              </div>
+            </form>
+          </div>
         </div>
         <div id="demo" class="collapse {if $error OR $editPatient.id}in{/if}">
           {if $editPatient.id}
-          <form action="{$psychologist_file}?task=patient&amp;action=edit&amp;id={$editPatient.id}" method="post">
+          <form action="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$editPatient.id}" method="post">
           {else}
-          <form action="{$psychologist_file}?task=patient" method="post">
+          <form action="{$admin_file}?task=psychologist" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">
@@ -102,7 +105,7 @@
                   {if $editPatient.id}
                     <input type="hidden" name="id" value="{$editPatient.id}" />
                     <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> Update</button>
-                    <a href="{$psychologist_file}?task=patient" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> Cancel</a>
+                    <a href="{$admin_file}?task=psychologist" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> Cancel</a>
                   {else}
                     <button type="submit" name="submit" class="btn btn-info"><i class="fa fa-floppy-o"></i> Save</button>
                   {/if}
@@ -118,63 +121,63 @@
       <table class="table table-striped">
         <thead>
           <tr bgcolor="#eeeeee">
-            <th>Name</th>
+            <th>Psychologist</th>
             <th>Email</th>
             <th>Password</th>
-            <th>Phone</th>
-            <th>Gender</th>
-            <th>Age</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-        {if $listPatient|@count gt 0}
-          {foreach from=$listPatient item=v}
+        {if $listPsychologistData|@count gt 0}
+          {foreach from=$listPsychologistData item=v}
           <tr>
             <td>{$v.username}</td>
             <td>{$v.email}</td>
             <td>{$v.password}</td>
-            <td>{$v.phone}</td>
-            <td>{if $v.gender eq 1}Male{else}Female{/if}</td>
-            <td>{$v.age}</td>
             <td>
+            {if $v.deleted_at eq null}
               {if $v.status eq 1}
-              <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
-                <i class="fa fa-check-circle"></i> Active
+              <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
+                <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Unconfirm Or Stop
               </button>
               {else}
-              <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
-                <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Stop
+              <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
+                <i class="fa fa-check-circle"></i> Confirm Or Active
               </button>
               {/if}
-                <!-- Modal -->
-                <div class="modal fade" id="status_{$v.id}" role="dialog">
-                  <div class="modal-dialog">
-                    <!-- Modal content-->
-                    <div class="panel panel-primary modal-content">
-                      <div class="panel-heading modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="panel-title modal-title">Confirmation</h4>
-                      </div>
-                      <div class="modal-body">
-                        <p>
-                          Are you sure you want to change status to <b>{if $v.status eq 1}Stop{else}Active{/if}</b>?
-                        </p>
-                      </div>
-                      <div class="modal-footer">
-                        <a href="{$psychologist_file}?task=patient&amp;action=change_status&amp;id={$v.id|escape}&amp;status={$v.status|escape}" class="btn btn-danger btn-md" style="color: white;">
-                          <i class="fa fa-check-circle-o"></i> Yes
-                        </a>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> Discard</button>
-                      </div>
+            {else}
+              <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
+                <i class="fa fa-ban" aria-hidden="true"></i> Deleted
+              </button>
+            {/if}
+              <!-- Modal -->
+              <div class="modal fade" id="status_{$v.id}" role="dialog">
+                <div class="modal-dialog">
+                  <!-- Modal content-->
+                  <div class="panel panel-primary modal-content">
+                    <div class="panel-heading modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="panel-title modal-title">Confirmation</h4>
+                    </div>
+                    <div class="modal-body">
+                      <p>
+                        Are you sure you want to change status to <b>{if $v.status eq 2}Stop{else}Active{/if}</b>?
+                      </p>
+                    </div>
+                    <div class="modal-footer">
+                      <a href="{$admin_file}?task=psychologist&amp;action=change_status&amp;id={$v.id|escape}&amp;status={$v.status|escape}" class="btn btn-danger btn-md" style="color: white;">
+                        <i class="fa fa-check-circle-o"></i> Yes
+                      </a>
+                      <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> Discard</button>
                     </div>
                   </div>
                 </div>
-                <!-- Modal -->
+              </div>
+              <!-- Modal -->
             </td>
             <td>
-              <a href="{$psychologist_file}?task=patient&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
+              <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
               <button href="#myModal_{$v.id}" class= "btn btn-danger btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}" data-toggle= "modal"><i class="fa fa-trash-o"></i></button>
               <div class="modal fade" id="myModal_{$v.id}" role="dialog">
                 <div class="modal-dialog">
@@ -187,7 +190,7 @@
                       <p>{if $multiLang.text_confirm_delete}{$multiLang.text_confirm_delete}{else}No Translate (Key Lang:text_confirm_delete){/if} {$v.name}?</p>
                     </div>
                     <div class="modal-footer">
-                      <a href="{$psychologist_file}?task=patient&amp;action=delete&amp;id={$v.id}" class="btn btn-danger btn-md"><i class="fa fa-check-circle-o"></i> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</a>
+                      <a href="{$admin_file}?task=psychologist&amp;action=delete&amp;id={$v.id}" class="btn btn-danger btn-md"><i class="fa fa-check-circle-o"></i> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</a>
                       <button type="button" class="btn btn-primary collapsed" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
                     </div>
                   </div>

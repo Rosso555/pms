@@ -45,9 +45,25 @@
   <div class="container" style="margin-top: 80px;">
     <div class="jumbotron text-center" style=" background-color: #fcfcfc; color: #606060;">
       <i class="fa fa-check-circle" style="color: green; font-size:40px;"></i>
+      {if $smarty.cookies.completed eq 'forgot_password'}
+        <h2>Thank you!</h2>
+        <p>Please check that email for reset password.</p>
+        <a href="http://gmail.com/" class="btn btn-primary btn-sm" target="_blank">Click Here <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
+      {/if}
+      {if $smarty.cookies.completed eq 'new_password'}
+        <h2>Thank you!</h2>
+        <p>Your password has been change.</p>
+        <a href="{$index_file}" class="btn btn-primary btn-sm">Login <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
+      {/if}
+      {if $smarty.cookies.completed eq 'user_register'}
         <h2>Thank you for registration!</h2>
         <p>We will send your register information to user via email. Please check that email for confirm email.</p>
         <a href="http://gmail.com/" class="btn btn-primary btn-sm" target="_blank">Click Here <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
+      {/if}
+      {if !$smarty.cookies.completed}
+        <h2>Thank you!</h2>
+        <a href="{$index_file}" class="btn btn-primary btn-sm">Login <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
+      {/if}
     </div>
 
     <span style="font-size: 13px" class="text-muted"> © {$smarty.now|date_format:"%Y"} PSYCHOLOGY MANAGEMENT SYSTEM.</span>

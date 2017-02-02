@@ -8,14 +8,16 @@ define('DB_PASSWORD', '23#ded2f4d32dS');
 define('DB_DATABASE_NAME', 'pmsekdb');
 
 //User role
-define('ACC_PSYLOGIST', 1);
-define('ACC_CO_WORKER', 2);
+define('ACC_PATIENT', 1);
+define('ACC_PSYLOGIST', 2);
+define('ACC_CO_WORKER', 3);
 
 
 /* we can use it anywhere */
 /* global varriable */
 $admin_file = 'admin.php';
 $index_file = 'index.php';
+$patient_file = 'patient.php';
 $psychologist_file = 'psychologist.php';
 
 //varriable initialize

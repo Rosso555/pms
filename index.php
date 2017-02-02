@@ -87,7 +87,7 @@ To verify your identity, please click the link below for confirm your email:
 
 Thank you for registering with us.
 
-Thanks,
+Best Regard,
     '.$mail_signature;
         $message = Swift_Message::newInstance()
                 ->setSubject('Your account need verify at Psychology Management System (PMS)')
@@ -97,6 +97,7 @@ Thanks,
 
       $result 	= $mailer->send($message);
 
+      setcookie('completed', 'user_register', time() + 50);
       //unset session
       unset($_SESSION['user_register']);
       //Redirect
@@ -107,14 +108,14 @@ Thanks,
 
   if('verify' === $action)
   {
-    $existSecretkey = checkSecretkey($_GET['psy_id'] ,$_GET['secretkey']);
+    $existSecretkey = checkSecretkeyPsychologist($_GET['psy_id'] ,$_GET['secretkey']);
 
     if($_GET['secretkey'] && $_GET['psy_id'] && $existSecretkey > 0){
-      $common->update('psychologist', $field = ['secretkey' => NULL,'status' => 2], $condition = ['id' => $_GET['psy_id']]);
+      $common->update('psychologist', $field = ['secretkey' => NULL, 'status' => 2], $condition = ['id' => $_GET['psy_id']]);
       header('location: '.$index_file);
       exit;
     }else {
-      setcookie('page_error', 1, time() + 10);
+      setcookie('page_error', 1, time() + 50);
       header('location: '.$index_file.'?task=page_not_found');
       exit;
     }
@@ -124,13 +125,15 @@ Thanks,
   $smarty_appform->display('index/register.tpl');
   exit;
 }
+//Task: froget
 if('forget' === $task){
   $error = array();
   if($_POST)
   {
     //get value from form
-    $email  = $common->clean_string($_POST['email']);
-    $user_role  = $common->clean_string($_POST['user_role']);
+    $email     = $common->clean_string($_POST['email']);
+    $user_role = $common->clean_string($_POST['user_role']);
+    $secretkey = time();
     //add value to session to use in template
     $_SESSION['forget'] = $_POST;
     //form validation
@@ -146,47 +149,108 @@ if('forget' === $task){
 
     if(0 === count($error)){
 
-  //     //Send email
-  //     $body = 'Dear '.$username.'
-  //
-  // Welcome to Psychology Management System (PMS). Your username and password is:
-  //
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  //
-  // Username：'.$username.'
-  // Password：'.$password.'
-  //
-  // To verify your identity, please click the link below for confirm your email:
-  //
-  // '.$site_url.$index_file.'?task=user_register&action=verify&secretkey='.$secretkey.'&psy_id='.$psy_id.'
-  //
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  //
-  // Thank you for registering with us.
-  //
-  // Thanks,
-  //     '.$mail_signature;
-  //         $message = Swift_Message::newInstance()
-  //                 ->setSubject('Your account need verify at Psychology Management System (PMS)')
-  //                 ->setFrom(array('noreply@e-khmer.com' => 'Psychology Management System (PMS)'))
-  //                 ->setTo(array($email => $username))
-  //                 ->setBody($body);
-  //
-  //       $result 	= $mailer->send($message);
-  //   }
+      $result = getDataByUserRole($user_role, $email);
 
-  }
+      if($user_role == 1){
+        $common->update('patient', $field = ['secretkey' => $secretkey], $condition = ['id' => $result['id']]);
+      }else {
+        $common->update('psychologist', $field = ['secretkey' => $secretkey], $condition = ['id' => $result['id']]);
+      }
 
-  if('new_password' === $action){
+      //Send email
+      $body = 'Dear '.$result['username'].'
 
-    $smarty_appform->display('index/forget.tpl');
-    exit;
+Welcome to Psychology Management System (PMS).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You recently requested to reset your PMS password. Please click on the link below:
+
+'.$site_url.$index_file.'?task=new_password&secretkey='.$secretkey.'&user_role='.$user_role.'&id='.$result['id'].'
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Best Regard,
+      '.$mail_signature;
+          $message = Swift_Message::newInstance()
+                  ->setSubject('Reset your PMS Password')
+                  ->setFrom(array('noreply@e-khmer.com' => 'Psychology Management System (PMS)'))
+                  ->setTo(array($email => $username))
+                  ->setBody($body);
+
+        $result 	= $mailer->send($message);
+
+      setcookie('completed', 'forgot_password', time() + 50);
+      //unset session
+      unset($_SESSION['forget']);
+      //Redirect
+      header('location: '.$index_file.'?task=completed');
+      exit;
+    }
   }
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->display('index/forget.tpl');
   exit;
 }
+
+if('new_password' === $task){
+  $error = array();
+  if($_POST){
+    //get value from form
+    $id        = $common->clean_string($_POST['id']);
+    $user_role = $common->clean_string($_POST['user_role']);
+    $secretkey = $common->clean_string($_POST['user_role']);
+    $password    = $common->clean_string($_POST['password']);
+    $re_password = $common->clean_string($_POST['re_password']);
+    //add value to session to use in template
+    $_SESSION['new_password'] = $_POST;
+    //form validation
+    if(empty($id))       $error['id']  = 1;
+    if(empty($user_role))   $error['user_role'] = 1;
+    if(empty($password))    $error['password']  = 1;
+    if(empty($re_password)) $error['re_password']  = 1;
+    if(!empty($password) && !empty($re_password) && $password !== $re_password){
+      $error['not_match_password'] = 1;
+    }
+    if(!empty($password) && !$common->checkPassword($password)){
+      $error['less_password_not_letter'] = 1;
+    }
+
+    if(COUNT($error) == 0){
+      if($user_role == 1){
+        $common->update('patient', $field = ['password' => $password, 'secretkey' => NULL], $condition = ['id' => $id]);
+      }else {
+        $common->update('psychologist', $field = ['password' => $password, 'secretkey' => NULL], $condition = ['id' => $id]);
+      }
+
+      setcookie('completed', 'new_password', time() + 50);
+      //unset session
+      unset($_SESSION['new_password']);
+      //Redirect
+      header('location: '.$index_file.'?task=completed');
+      exit;
+    }
+
+  }
+
+  if($_GET['user_role'] == 1){
+    $existSecretkey = checkSecretkeyPatient($_GET['id'] ,$_GET['secretkey']);
+  }else {
+    $existSecretkey = checkSecretkeyPsychologist($_GET['id'] ,$_GET['secretkey']);
+  }
+
+  if($_GET['secretkey'] && $_GET['id'] && $existSecretkey == 0){
+    setcookie('page_error', 'new_password', time() + 50);
+    header('location: '.$index_file.'?task=page_not_found');
+    exit;
+
+  }
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->display('index/new_password.tpl');
+  exit;
+}
+
 //Task: completed
 if('completed' === $task){
   $smarty_appform->display('index/completed.tpl');
@@ -197,8 +261,6 @@ if('page_not_found' === $task){
   $smarty_appform->display('index/page_error_404.tpl');
   exit;
 }
-
-
 //task: login
 if('login' === $task){
   $error = array();
@@ -224,12 +286,12 @@ if('login' === $task){
         if(!empty($patient_login)){
           //assign value to session
           $_SESSION['is_patient_login_id'] = $patient_login['id'];
-          $_SESSION['is_patient_name'] = $patient_login['name'];
+          $_SESSION['is_patient_username'] = $patient_login['username'];
           $_SESSION['is_patient_email']    = $patient_login['email'];
           //remove session to clear data
           unset($_SESSION['user_login']);
           //redirect to admin.php
-          header('Location:'.$index_file);
+          header('Location:'.$patient_file);
           exit;
         }else {
           //wrong username and password
@@ -237,8 +299,8 @@ if('login' === $task){
         }
 
       }else {
-
         $psy_login = psychologist_login($email, $password);
+
         if(!empty($psy_login)){
           //assign value to session
           $_SESSION['is_psycho_login_id'] = $psy_login['id'];
@@ -265,15 +327,15 @@ if('login' === $task){
   $smarty_appform->display('index/login.tpl');
   exit;
 }
-//task: logout by clear session
+// //task: logout by clear session
 if('logout' === $task){
   unset($_SESSION['is_patient_login_id']);
   header('Location:'.$index_file.'?task=login');
   exit;
 }
-//redirect if no session
-if(empty($_SESSION['is_patient_login_id'])){
-  header('Location:'.$index_file.'?task=login');
+//redirect to psychologist.php if has $_SESSION['is_psycho_login_id']
+if(empty($_SESSION['is_psycho_login_id']) && !empty($_SESSION['is_patient_login_id'])){
+  header('Location:'.$patient_file);
   exit;
 }
 //redirect to psychologist.php if has $_SESSION['is_psycho_login_id']
@@ -285,8 +347,10 @@ if(!empty($_SESSION['is_psycho_login_id']) && empty($_SESSION['is_patient_login_
 if(empty($_SESSION['is_psycho_login_id']) && empty($_SESSION['is_patient_login_id'])){
   header('Location:'.$index_file.'?task=login');
   exit;
+}else {
+  header('Location:'.$index_file.'?task=login');
+  exit;
 }
-
 
 //task home
 $smarty_appform->display('index/index.tpl');

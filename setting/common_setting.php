@@ -29,6 +29,7 @@ $smarty_appform->assign('smpaginate','common/paginate.tpl');
 $smarty_appform->assign('mode', 'admin');
 $smarty_appform->assign('admin_file', $admin_file);
 $smarty_appform->assign('index_file', $index_file);
+$smarty_appform->assign('patient_file', $patient_file);
 $smarty_appform->assign('psychologist_file', $psychologist_file);
 $smarty_appform->assign('site_url', $site_url);
 /* Paginate */

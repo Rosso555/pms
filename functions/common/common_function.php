@@ -250,11 +250,39 @@ function check_patient_email($email){
   return $result;
 }
 /**
- * checkSecretkey
- * @param  string $secretkey
- * @return boolean
+ * getDataByUserRole
+ * @param  int $user_role is check for select from table
+ * @param  string $email
+ * @return array or boolean
  */
-function checkSecretkey($psy_id ,$secretkey){
+function getDataByUserRole($user_role, $email){
+  global $debug, $connected, $total_data;
+  $result = true;
+  try{
+    if($user_role == 1){
+      $sql = ' SELECT * FROM `patient` WHERE email = :email ';
+    }else {
+      $sql = ' SELECT * FROM `psychologist` WHERE email = :email ';
+    }
+    $query = $connected->prepare($sql);
+    $query->bindValue(':email', (string)$email, PDO::PARAM_STR);
+    $query->execute();
+    return $query->fetch();
+
+  }catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getDataByUserRole'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * checkSecretkeyPsychologist
+ * @param  int $psy_id is psychologist_id
+ * @param  string $secretkey
+ * @return array or boolean
+ */
+function checkSecretkeyPsychologist($psy_id, $secretkey){
   global $debug, $connected, $total_data;
   $result = true;
   try{
@@ -268,7 +296,32 @@ function checkSecretkey($psy_id ,$secretkey){
 
   }catch (Exception $e) {
     $result = false;
-    if($debug)  echo 'Errors: checkSecretkey'.$e->getMessage();
+    if($debug)  echo 'Errors: checkSecretkeyPsychologist'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * checkSecretkeyPatient
+ * @param  int $p_id
+ * @param  string $secretkey
+ * @return array or boolean
+ */
+function checkSecretkeyPatient($p_id, $secretkey){
+  global $debug, $connected, $total_data;
+  $result = true;
+  try{
+    $sql = ' SELECT COUNT(*) AS total_count FROM `patient` WHERE id = :p_id AND secretkey = :secretkey ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':secretkey', (string)$secretkey, PDO::PARAM_STR);
+    $query->bindValue(':p_id', $p_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+
+  }catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkSecretkeyPatient'.$e->getMessage();
   }
 
   return $result;
@@ -278,18 +331,26 @@ function checkSecretkey($psy_id ,$secretkey){
  * @param  string $kwd is keyword
  * @return array or boolean
  */
-function listPatient($kwd, $psychologist_id){
+function listPatient($kwd, $psychologist_id, $gender, $status){
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
     $condition = $where = '';
     if(!empty($kwd)) {
       if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' name LIKE :kwd ';
+      $condition .= ' username LIKE :kwd ';
     }
     if(!empty($psychologist_id)) {
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' psychologist_id = :psychologist_id AND deleted_at IS NULL ';
+    }
+    if(!empty($gender)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' gender = :gender ';
+    }
+    if(!empty($status)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' status = :status ';
     }
 
     if(!empty($condition)) $where .= ' WHERE '.$condition;
@@ -297,7 +358,9 @@ function listPatient($kwd, $psychologist_id){
     $sql = ' SELECT *, (SELECT COUNT(*) FROM `patient` '.$where.') AS total FROM `patient` '.$where.' ORDER BY id DESC LIMIT :offset, :limit ';
     $query = $connected->prepare($sql);
     if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
-    if (!empty($psychologist_id)) $query->bindValue(':psychologist_id', $psychologist_id, PDO::PARAM_INT);
+    if (!empty($gender)) $query->bindValue(':gender', (string)$gender, PDO::PARAM_STR);
+    if (!empty($status)) $query->bindValue(':status', (int)$status, PDO::PARAM_INT);
+    if (!empty($psychologist_id)) $query->bindValue(':psychologist_id', (int)$psychologist_id, PDO::PARAM_INT);
     $query->bindValue(':offset', $offset, PDO::PARAM_INT);
     $query->bindValue(':limit', $limit, PDO::PARAM_INT);
     $query->execute();

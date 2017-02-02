@@ -19,7 +19,7 @@
     <div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
       <ul class="breadcrumb">
         <li><a href="{$index_file}"><span class="label label-success">PMS</span></a></li>
-        <li class="active">Forgot Password</li>
+        <li class="active">Forgot</li>
       </ul>
 
       {if $error}
@@ -49,6 +49,7 @@
               </div>
             </div>
             <div class="form-group">
+              <a href="{$index_file}?task=login" class="btn btn-warning"><i class="fa fa-step-backward" aria-hidden="true"></i> Back</a>
               <button type="submit" class="btn btn-primary"><i class="fa fa-sign-in"></i> SUBMIT</button>
             </div>
           </form>

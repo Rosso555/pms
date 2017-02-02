@@ -23,7 +23,6 @@ $smarty_appform->assign('getLanguage', $common->find('language', $condition = nu
 //Change language on template
 $smarty_appform->assign('multiLang', getMultilang($lang));
 
-
 //task: logout by clear session
 if('logout' === $task){
   unset($_SESSION['is_psycho_login_id']);
@@ -35,14 +34,19 @@ if(empty($_SESSION['is_psycho_login_id'])){
   header('Location:'.$index_file.'?task=login');
   exit;
 }
-
+//Task: page not found
+if('page_not_found' === $task){
+  $smarty_appform->display('psychologist/page_error_404.tpl');
+  exit;
+}
+//Task: patient
 if('patient' === $task)
 {
   $error = array();
   if($_POST){
     //get value from form
     $id     = $common->clean_string($_POST['id']);
-    $name   = $common->clean_string($_POST['name']);
+    $username = $common->clean_string($_POST['username']);
     $email  = $common->clean_string($_POST['email']);
     $phone  = $common->clean_string($_POST['phone']);
     $gender = $common->clean_string($_POST['gender']);
@@ -51,7 +55,7 @@ if('patient' === $task)
     //add value to session to use in template
     $_SESSION['patient'] = $_POST;
     //form validation
-    if(empty($name))    $error['name']    = 1;
+    if(empty($username))  $error['username']  = 1;
     if(empty($email))   $error['email']   = 1;
     if(empty($phone))   $error['phone']   = 1;
     if(empty($gender))  $error['gender']  = 1;
@@ -69,7 +73,7 @@ if('patient' === $task)
     //Save
     if(empty($id) && COUNT($error) === 0){
       $common->save('patient', $field =['psychologist_id' => $_SESSION['is_psycho_login_id'],
-                                        'name'    => $name,
+                                        'username'=> $username,
                                         'email'   => $email,
                                         'phone'   => $phone,
                                         'gender'  => $gender,
@@ -83,7 +87,7 @@ if('patient' === $task)
     }
     //Update
     if(!empty($id) && COUNT($error) === 0){
-      $common->update('patient', $field= ['name'     => $name,
+      $common->update('patient', $field= ['username' => $username,
                                           'email'    => $email,
                                           'phone'    => $phone,
                                           'gender'   => $gender,
@@ -129,21 +133,20 @@ if('patient' === $task)
       exit;
     }
   }
-  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
-  $result = listPatient($kwd, $_SESSION['is_psycho_login_id']);
 
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $gender = !empty($_GET['gender']) ? $_GET['gender'] : '';
+  $status = !empty($_GET['status']) ? $_GET['status'] : '';
+  $result = listPatient($kwd, $_SESSION['is_psycho_login_id'], $gender, $status);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listPatient', $result);
   $smarty_appform->display('psychologist/patient.tpl');
   exit;
 }
 
-
-//Task: page not found
-if('page_not_found' === $task){
-  $smarty_appform->display('psychologist/page_error_404.tpl');
-  exit;
-}
 
 
 $smarty_appform->display('psychologist/index.tpl');

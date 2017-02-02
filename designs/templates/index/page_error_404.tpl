@@ -46,7 +46,10 @@
     <div class="jumbotron text-center" style=" background-color: #fcfcfc; color: #606060;">
       <i class="fa fa-info-circle" aria-hidden="true" style="color: red; font-size:40px;"></i>
         <h2>Page Not Found!</h2>
-        <p>Sorry! {if $smarty.cookies.page_error eq 1}You has been link expired.{/if}</p>
+        <p>Sorry!
+          {if $smarty.cookies.page_error eq 1}You has been link expired.{/if}
+          {if $smarty.cookies.page_error eq 'new_password'}You reset password been link expired.{/if}
+        </p>
         <a href="{$index_file}" class="btn btn-primary btn-sm">Home <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
     </div>
 

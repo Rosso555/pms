@@ -271,7 +271,7 @@ function ListStaffRole($kwd = "")
   return $result;
 }
 /**
- * [ListStaffInfo]
+ * ListStaffInfo
  * @param string $kwd
  * @author In khemarak
  * @return array
@@ -285,7 +285,6 @@ function ListStaffInfo($kwd = "")
     if(!empty($kwd))
     {
       $condition .= ' WHERE staff.name LIKE :kwd OR staff.status LIKE :kwd ';
-      // $condition .= ' WHERE staff.name LIKE :kwd OR staff.status LIKE :kwd ';
     }
     $sql = 'SELECT staff.*, staff_role.name AS role_name, (SELECT COUNT(*) FROM `staff`  INNER JOIN staff_role ON staff.staff_role_id = staff_role.id '.$condition.') AS total
              FROM `staff`
@@ -304,5 +303,107 @@ function ListStaffInfo($kwd = "")
     $result = false;
     if($debug)  echo 'Errors: listStaff'.$e->getMessage();
   }
+  return $result;
+}
+/**
+ * listPatientAdmin
+ * @param  string $kwd is keyword
+ * @param  int $psychologist_id
+ * @param  int $gender
+ * @param  int $status
+ * @return array or boolean
+ */
+function listPatientAdmin($kwd, $psychologist_id, $gender, $status){
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = $where = '';
+    if(!empty($kwd)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' p.username LIKE :kwd ';
+    }
+    if(!empty($psychologist_id)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' p.psychologist_id = :psychologist_id ';
+    }
+    if(!empty($gender)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' p.gender = :gender ';
+    }
+    if(!empty($status)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' p.status = :status ';
+    }
+
+    if(!empty($condition)) $where .= ' WHERE '.$condition;
+
+    $sql = ' SELECT p.*, psy.username AS psy_name, (SELECT COUNT(*) FROM `patient` p INNER JOIN psychologist psy ON psy.id = p.psychologist_id '.$where.') AS total
+             FROM `patient` p
+              INNER JOIN psychologist psy ON psy.id = p.psychologist_id '.$where.' ORDER BY id DESC LIMIT :offset, :limit ';
+
+    $query = $connected->prepare($sql);
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    if (!empty($gender)) $query->bindValue(':gender', (string)$gender, PDO::PARAM_STR);
+    if (!empty($status)) $query->bindValue(':status', (int)$status, PDO::PARAM_INT);
+    if (!empty($psychologist_id)) $query->bindValue(':psychologist_id', (int)$psychologist_id, PDO::PARAM_INT);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listPatientAdmin'.$e->getMessage();
+  }
+
+  return $result;
+}
+
+function listPsychologistAdmin($kwd, $psychologist_id, $gender, $status){
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = $where = '';
+    if(!empty($kwd)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' p.username LIKE :kwd ';
+    }
+    if(!empty($psychologist_id)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' p.psychologist_id = :psychologist_id ';
+    }
+    if(!empty($gender)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' p.gender = :gender ';
+    }
+    if(!empty($status)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' p.status = :status ';
+    }
+
+    if(!empty($condition)) $where .= ' WHERE '.$condition;
+
+    $sql = ' SELECT *, (SELECT COUNT(*) FROM `psychologist` '.$where.') AS total
+             FROM `psychologist` '.$where.' ORDER BY id DESC LIMIT :offset, :limit ';
+
+    $query = $connected->prepare($sql);
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    if (!empty($gender)) $query->bindValue(':gender', (string)$gender, PDO::PARAM_STR);
+    if (!empty($status)) $query->bindValue(':status', (int)$status, PDO::PARAM_INT);
+    if (!empty($psychologist_id)) $query->bindValue(':psychologist_id', (int)$psychologist_id, PDO::PARAM_INT);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listPatientAdmin'.$e->getMessage();
+  }
+
   return $result;
 }
