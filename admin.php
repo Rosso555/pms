@@ -693,9 +693,26 @@ if('patient' === $task)
   $smarty_appform->display('admin/admin_patient.tpl');
   exit;
 }
+//Task: psychologist
 if('psychologist' === $task){
 
-  $result = listPsychologistAdmin($kwd, $psy_id, $gender, $status);
+  //Change staus psychologist
+  if('change_status' === $action && !empty($_GET['id']))
+  {
+    if(!empty($_GET['status'] == 1))
+    {
+      $common->update('psychologist', $field = ['status' => 2], $condition = ['id' => $_GET['id']]);
+    }elseif (!empty($_GET['status'] == 2)) {
+      $common->update('psychologist', $field = ['status' => 1], $condition = ['id' => $_GET['id']]);
+    }
+    header('location:'.$admin_file.'?task=psychologist');
+    exit;
+  }
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $status = !empty($_GET['status']) ? $_GET['status'] : '';
+  $psy_id = !empty($_GET['psy_id']) ? $_GET['psy_id'] : '';
+
+  $result = listPsychologistAdmin($kwd, $psy_id, $status);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -704,7 +721,83 @@ if('psychologist' === $task){
   $smarty_appform->display('admin/admin_psychologist.tpl');
   exit;
 }
+//task question
+if('question' === $task)
+{
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $title = $common->clean_string($_POST['title']);
+    $type  = $common->clean_string($_POST['type']);
+    $is_email  = $common->clean_string($_POST['is_email']);
+    $desc  = $common->clean_string($_POST['description']);
+    $id    = $common->clean_string($_POST['id']);
+
+    //add value to session to use in template
+    $_SESSION['question'] = $_POST;
+    //form validation
+    if(empty($title))   $error['title'] = 1;
+    if(empty($type))    $error['type']  = 1;
+    if(empty($desc))    $error['desc']  = 1;
+
+    //Add question
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('question', $field = ['title' => $title, 'description' => $desc, 'type' => $type, 'is_email' => $is_email, 'lang' => $lang]);
+      //unset session
+      unset($_SESSION['question']);
+      //Redirect
+      header('location: '.$admin_file.'?task=question');
+      exit;
+    }
+
+    //update question
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('question', $field = ['title' => $title, 'description' => $desc, 'type' => $type, 'is_email' => $is_email], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['question']);
+      //Redirect
+      header('location: '.$admin_file.'?task=question');
+      exit;
+    }
+
+  }
+
+  //action delete question
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $result = checkDeleteQuestion($_GET['id']);
+    if('0' === $result['total_count'])
+    {
+      $common->delete('question', $field = ['id' => $_GET['id'], 'lang' => $lang]);
+    }else {
+      setcookie('checkQuestion', $result['question_title'], time() + 10);
+    }
+
+    header('location: '.$admin_file.'?task=question');
+    exit;
+
+  }
+
+  //get edit question
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getQuestionByID', getQuestionByID($_GET['id']));
+  }
+
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $listQuestion = listQuestion($kwd, $lang);
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listQuestion', $listQuestion);
+  $smarty_appform->display('admin/admin_question.tpl');
+  exit;
+}
 //task home
 $smarty_appform->display('admin/index.tpl');
 exit;
- ?>
+?>

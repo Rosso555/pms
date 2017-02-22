@@ -30,11 +30,14 @@
             <li><a href="{$admin_file}?task=patient"><i class="fa fa-user-md" aria-hidden="true"></i> Patient</a></li>
           </ul>
         </li>
-
+        <li><a href="{$admin_file}?task=question"><i class="fa fa-question-circle" aria-hidden="true"></i> {if $multiLang.menu_question}{$multiLang.menu_question}{else}No Translate (Key Lang: menu_question){/if}</a></li>
+        <li><a href="{$admin_file}?task=test"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test}{$multiLang.menu_test}{else}No Translate (Key Lang: menu_test){/if}</a></li>
+        <li><a href="{$admin_file}?task=test_question"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_question}{$multiLang.menu_test_question}{else}No Translate (Key Lang: menu_test_question){/if}</a></li>
+        <li><a href="{$admin_file}?task=test_group"><i class="fa fa-clone fa-fw"></i> Test Group</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown" id="animated">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i id="animated_icon" class="fa fa-cog fa-lg" aria-hidden="true"></i> {if $multiLang.menu_setting}{$multiLang.menu_setting}{else}No Translate (Key Lang:menu_setting){/if} <span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-cog fa-lg" aria-hidden="true"></i> {if $multiLang.menu_setting}{$multiLang.menu_setting}{else}No Translate (Key Lang:menu_setting){/if} <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="{$admin_file}?task=category"><i class="fa fa-bars" aria-hidden="true"></i>&nbsp;{if $multiLang.menu_category}{$multiLang.menu_category}{else}No Translate (Key Lang: menu_category){/if}</a></li>
             <li><a href="{$admin_file}?task=add_language"><i class="fa fa-language" aria-hidden="true"></i>&nbsp; {if $multiLang.menu_add_language}{$multiLang.menu_add_language}{else}No Translate (Key Lang: menu_add_language){/if}</a></li>

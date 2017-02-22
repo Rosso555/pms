@@ -11,8 +11,8 @@
       <div class="panel-body">
         <div class="row">
           <div class="col-md-12">
-            <form class="form-inline">
-              <input type="hidden" name="task" value="patient">
+            <form class="form-inline" action="{$admin_file}?task=psychologist" method="get">
+              <input type="hidden" name="task" value="psychologist">
               <div class="form-group" style="margin-bottom:5px;">
                 <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
                   <i class="fa fa-plus-circle"></i> Add Psychologist
@@ -29,12 +29,12 @@
               <div class="form-group" style="margin-bottom:5px;">
                 <select class="form-control select2" name="status">
                   <option value="">---Select Status---</option>
-                  <option value="1" {if $smarty.get.status eq 1}selected{/if}>Active</option>
-                  <option value="2" {if $smarty.get.status eq 2}selected{/if}>Stop</option>
+                  <option value="1" {if $smarty.get.status eq 1}selected{/if}>Unconfirm Or Stop</option>
+                  <option value="2" {if $smarty.get.status eq 2}selected{/if}>Confirm Or Active</option>
                 </select>
               </div>
               <div class="form-group" style="margin-bottom:5px;">
-                <input type="text" class="form-control" placeholder="Enter name" name="kwd">
+                <input type="text" class="form-control" placeholder="example@domain.com" name="kwd" value="{$smarty.get.kwd}">
                 <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
               </div>
             </form>
@@ -136,7 +136,6 @@
             <td>{$v.email}</td>
             <td>{$v.password}</td>
             <td>
-            {if $v.deleted_at eq null}
               {if $v.status eq 1}
               <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
                 <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Unconfirm Or Stop
@@ -146,11 +145,7 @@
                 <i class="fa fa-check-circle"></i> Confirm Or Active
               </button>
               {/if}
-            {else}
-              <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
-                <i class="fa fa-ban" aria-hidden="true"></i> Deleted
-              </button>
-            {/if}
+
               <!-- Modal -->
               <div class="modal fade" id="status_{$v.id}" role="dialog">
                 <div class="modal-dialog">
@@ -178,7 +173,7 @@
             </td>
             <td>
               <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
-              <button href="#myModal_{$v.id}" class= "btn btn-danger btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}" data-toggle= "modal"><i class="fa fa-trash-o"></i></button>
+              <!-- <button href="#myModal_{$v.id}" class= "btn btn-danger btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}" data-toggle= "modal"><i class="fa fa-trash-o"></i></button>
               <div class="modal fade" id="myModal_{$v.id}" role="dialog">
                 <div class="modal-dialog">
                   <div class="panel panel-primary modal-content">
@@ -195,7 +190,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> -->
             </td>
           </tr>
           {/foreach}

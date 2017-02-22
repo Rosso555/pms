@@ -23,9 +23,9 @@ function is_key_lang_exist($key_lang)
   return $result;
 }
 /**
- * [getMultilangBy unique_id]
- * @param  [int] $unique_id
- * @return [array]
+ * getMultilangBy unique_id
+ * @param  int $unique_id
+ * @return array or boolean
  * @author In khemarak
  */
 function getMultilangByID($unique_id)
@@ -67,13 +67,12 @@ function updateDefaultLang()
   }
   return $result;
 }
-
 /**
- * [listMultiLang]
+ * listMultiLang
  * @param  string $kwd
- * @return [array]
- * @author In khemarak
  * @return array
+ * @author In khemarak
+ * @return array or boolean
  */
  function listMultiLang($kwd = "", $slimit)
 {
@@ -90,7 +89,6 @@ function updateDefaultLang()
                 INNER JOIN language l ON l.id = ml.language_id '.$condition.' ORDER BY key_lang DESC LIMIT :offset, :limit ';
     $stmt = $connected->prepare($sql);
     if(!empty($kwd)) $stmt->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
-    // $stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
     $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
     $stmt->execute();
@@ -104,9 +102,9 @@ function updateDefaultLang()
   return $result;
 }
 /**
- * [listLanguage]
- * @param  [string] $kwd
- * @return [arrat]
+ * listLanguage
+ * @param  string $kwd
+ * @return array or boolean
  * @author In khemarak
  */
 function listLanguage($kwd)
@@ -137,7 +135,7 @@ function listLanguage($kwd)
   return $result;
 }
 /**
- * [ListStaffRoleByPermission ]
+ * ListStaffRoleByPermission
  * @param string $kwd
  * @author In khemarak
  * @return array
@@ -163,7 +161,7 @@ function ListStaffRoleByPermission($kwd = "")
   return $result;
 }
 /**
- * [ListStaffPermission]
+ * ListStaffPermission
  * @param string $kwd
  * @author In khemarak
  * @return array
@@ -205,9 +203,9 @@ function ListStaffPermission($kwd = "")
   return $result;
 }
 /**
- * [listFunction ]
+ * listFunction
  * @param  string $kwd
- * @return [array]
+ * @return array or boolean
  * @author in Khemarak
  */
 function listFunction($kwd = "")
@@ -360,27 +358,29 @@ function listPatientAdmin($kwd, $psychologist_id, $gender, $status){
 
   return $result;
 }
-
-function listPsychologistAdmin($kwd, $psychologist_id, $gender, $status){
+/**
+ * listPsychologistAdmin
+ * @param  string $kwd is keyword
+ * @param  int $psychologist_id
+ * @param  int $status is status
+ * @return array or boolean
+ */
+function listPsychologistAdmin($kwd, $psychologist_id, $status){
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
     $condition = $where = '';
     if(!empty($kwd)) {
       if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' p.username LIKE :kwd ';
+      $condition .= ' email LIKE :kwd ';
     }
     if(!empty($psychologist_id)) {
       if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' p.psychologist_id = :psychologist_id ';
-    }
-    if(!empty($gender)) {
-      if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' p.gender = :gender ';
+      $condition .= ' id = :psychologist_id ';
     }
     if(!empty($status)) {
       if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' p.status = :status ';
+      $condition .= ' status = :status ';
     }
 
     if(!empty($condition)) $where .= ' WHERE '.$condition;
@@ -390,7 +390,6 @@ function listPsychologistAdmin($kwd, $psychologist_id, $gender, $status){
 
     $query = $connected->prepare($sql);
     if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
-    if (!empty($gender)) $query->bindValue(':gender', (string)$gender, PDO::PARAM_STR);
     if (!empty($status)) $query->bindValue(':status', (int)$status, PDO::PARAM_INT);
     if (!empty($psychologist_id)) $query->bindValue(':psychologist_id', (int)$psychologist_id, PDO::PARAM_INT);
     $query->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -402,8 +401,91 @@ function listPsychologistAdmin($kwd, $psychologist_id, $gender, $status){
   }
   catch (Exception $e) {
     $result = false;
-    if($debug)  echo 'Errors: listPatientAdmin'.$e->getMessage();
+    if($debug)  echo 'Errors: listPsychologistAdmin'.$e->getMessage();
   }
 
+  return $result;
+}
+/**
+ * listQuestion
+ * @param  string $kwd is keyword
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function listQuestion($kwd, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+    if(!empty($kwd))
+    {
+      $condition .= ' AND title LIKE :kwd ';
+    }
+
+    $sql = ' SELECT *, (SELECT COUNT(*) FROM `question` WHERE lang = :lang '.$condition.') AS total FROM `question` WHERE lang = :lang '.$condition.' ORDER BY id DESC LIMIT :offset, :limit ';
+    $query = $connected->prepare($sql);
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    $query->bindValue(':lang', $lang, PDO::PARAM_INT);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetchAll();
+    if (count($row) > 0) $total_data = $row[0]['total'];
+    return $row;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: ListQuestion'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * getQuestionByID
+ * @param  int $id is question_id
+ * @return array or boolean
+ */
+function getQuestionByID($id)
+{
+  global $debug, $connected;
+  $result = true;
+  try
+  {
+    $sql = 'SELECT * FROM `question` WHERE id = :id';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':id', $id, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetch();
+    return $row;
+  }
+  catch (Exception $e)
+  {
+    if($debug) echo 'Error: getQuestionByID'. $e->getMessage();
+  }
+  return $result;
+}
+/**
+ * checkDeleteQuestion for delete question
+ * @param  int $id is question_id
+ * @return boolean
+ */
+function checkDeleteQuestion($id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count, q.title AS question_title
+            FROM `test_question` tq
+             INNER JOIN question q ON q.id = tq.question_id
+            WHERE tq.question_id = :id';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetch();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkDeleteQuestion'.$e->getMessage();
+  }
   return $result;
 }

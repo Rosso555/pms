@@ -11,7 +11,7 @@
       <div class="panel-body">
         <div class="row">
           <div class="col-md-12">
-            <form class="form-inline">
+            <form class="form-inline" action="{$admin_file}?task=patient" method="get">
               <input type="hidden" name="task" value="patient">
               <div class="form-group" style="margin-bottom:5px;">
                 <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
