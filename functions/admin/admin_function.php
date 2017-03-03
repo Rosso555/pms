@@ -166,7 +166,7 @@ function ListStaffRoleByPermission($kwd = "")
  * @author In khemarak
  * @return array
  */
-function ListStaffPermission($kwd = "")
+function ListStaffPermission($kwd = "", $srid)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
@@ -174,22 +174,31 @@ function ListStaffPermission($kwd = "")
     $condition = '';
     if(!empty($kwd))
     {
-      $condition .= ' WHERE staff_role.name LIKE :kwd OR staff_function.title LIKE :kwd';
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' staff_role.name LIKE :kwd OR staff_function.title LIKE :kwd ';
     }
+    if(!empty($srid))
+    {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' staff_permission.staff_role_id = :srid ';
+    }
+    if(!empty($condition)) $where = ' WHERE '.$condition;
+
     $sql = 'SELECT staff_permission.* ,staff_role.name AS staff_role_name, staff_function.title AS staff_function_title,(SELECT COUNT(*) FROM `staff_permission`
               INNER JOIN staff_role
               ON staff_permission.staff_role_id = staff_role.id
               INNER JOIN staff_function
               ON staff_permission.staff_function_id = staff_function.id
-              '.$condition.') AS total
+              '.$where.') AS total
              FROM `staff_permission`
              INNER JOIN staff_role
              ON staff_permission.staff_role_id = staff_role.id
              INNER JOIN staff_function
              ON staff_permission.staff_function_id = staff_function.id
-             '.$condition.' ORDER BY id DESC LIMIT :offset, :limit';
+             '.$where.' ORDER BY id DESC LIMIT :offset, :limit';
     $stmt = $connected->prepare($sql);
     if(!empty($kwd)) $stmt->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    if(!empty($srid)) $stmt->bindValue(':srid', (int)$srid, PDO::PARAM_INT);
     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
     $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
     $stmt->execute();
@@ -486,6 +495,56 @@ function checkDeleteQuestion($id)
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: checkDeleteQuestion'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * Get listTest
+ * @author Hong Syden
+ * @param  string $kwd  is keyword
+ * @param  string $lang is language
+ * @return array or bolean
+ */
+function listTest($kwd, $catid, $testid, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+    if(!empty($kwd))
+    {
+      $condition .= ' AND t.title LIKE :kwd ';
+    }
+    if(!empty($catid))
+    {
+      $condition .= ' AND t.category_id = :catid';
+    }
+    if(!empty($testid))
+    {
+      $condition .= ' AND t.id = :test_id';
+    }
+    $sql =' SELECT t.*, c.name AS category_name,
+              (SELECT COUNT(*) FROM `test` t INNER JOIN category c ON c.id = t.category_id WHERE t.lang = :lang '.$condition.') AS total
+            FROM `test` t
+            INNER JOIN category c ON c.id = t.category_id
+              WHERE t.lang = :lang '.$condition.'
+            ORDER BY t.id DESC LIMIT :offset, :limit ';
+    $query = $connected->prepare($sql);
+
+    if(!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    if(!empty($catid)) $query->bindValue(':catid', (int)$catid, PDO::PARAM_INT);
+    if(!empty($testid)) $query->bindValue(':test_id', (int)$testid, PDO::PARAM_INT);
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $query->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetchAll();
+    if (count($row) > 0) $total_data = $row[0]['total'];
+    return $row;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: ListTest'.$e->getMessage();
   }
   return $result;
 }

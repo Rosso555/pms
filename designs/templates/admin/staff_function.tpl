@@ -2,7 +2,10 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li class="active">{if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}</li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}</li>
+  {if $smarty.get.action eq 'edit'}
+  <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate (Key Lang:text_edit){/if}</li>
+  {/if}
 </ul>
 {if $error.is_staff_function_exist eq 2}
   <div class="alert alert-danger alert-dismissible"  id="{if $error.is_staff_function_exist eq 2}flash{/if}">

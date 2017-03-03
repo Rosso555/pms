@@ -2,7 +2,10 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li class="active">Patient</li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>Patient</li>
+  {if $smarty.get.action eq 'edit'}
+  <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate (Key Lang:text_edit){/if}</li>
+  {/if}
 </ul>
 <div class="panel panel-primary">
   <div class="panel-heading"><h3 class="panel-title">Patient.</h3></div>
@@ -56,20 +59,31 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
+                  <label for="email"><span style="color:red">*</span> Psychologist:</label>
+                  <select class="form-control select2" name="psy_id" style="width:100%;">
+                    <option value="">---Select Psychologist---</option>
+                    {foreach from=$listPsychologist item=v}
+                    <option value="{$v.id}" {if $editPatient.psychologist_id}{if $editPatient.psychologist_id eq $v.id}selected{/if}{else}{if $smarty.get.psy_id eq $v.id}selected{/if}{/if}>{$v.username}</option>
+                    {/foreach}
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
                   <label for="username"><span style="color:red">*</span> Name:</label>
                   {if $error.username}<span style="color:red">Please enter username!</span>{/if}
                   <input type="text" class="form-control" id="username" placeholder="Enter name" name="username" value="{if $editPatient.username}{$editPatient.username}{else}{$smarty.session.patient.username}{/if}">
                 </div>
               </div>
+            </div>
+            <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="pwd"><span style="color:red">*</span> Password:</label>
                   {if $error.password}<span style="color:red">Please enter password!</span>{/if}
-                  <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
+                  <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
                 </div>
               </div>
-            </div>
-            <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="email"><span style="color:red">*</span> Email:</label>
@@ -79,6 +93,8 @@
                   <input type="email" class="form-control" id="email" placeholder="example@domain.com" name="email" value="{if $editPatient.email}{$editPatient.email}{else}{$smarty.session.patient.email}{/if}">
                 </div>
               </div>
+            </div>
+            <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="phone"><span style="color:red">*</span> Phone:</label>
@@ -86,8 +102,6 @@
                   <input type="text" class="form-control" id="phone" placeholder="Enter phone" name="phone" value="{if $editPatient.phone}{$editPatient.phone}{else}{$smarty.session.patient.phone}{/if}">
                 </div>
               </div>
-            </div>
-            <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="email"><span style="color:red">*</span> Gender:</label>
@@ -98,6 +112,8 @@
                   </div>
                 </div>
               </div>
+            </div>
+            <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="age"><span style="color:red">*</span> Age:</label>
@@ -162,7 +178,7 @@
               </button>
               {/if}
             {else}
-              <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
+              <button type="button" class="btn btn-warning btn-xs">
                 <i class="fa fa-ban" aria-hidden="true"></i> Deleted
               </button>
             {/if}

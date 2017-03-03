@@ -2,7 +2,10 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file_name}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li class="active">{if $multiLang.text_staff_role_header}{$multiLang.text_staff_role_header}{else}No Translate (Key Lang:text_staff_role_header){/if}</li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_staff_role_header}{$multiLang.text_staff_role_header}{else}No Translate (Key Lang:text_staff_role_header){/if}</li>
+  {if $smarty.get.action eq 'edit'}
+  <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate (Key Lang:text_edit){/if}</li>
+  {/if}
 </ul>
 {if $error.title}
 <div class="alert alert-danger" id="{if $error.title eq 1}flash{/if}">

@@ -2,7 +2,10 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file_name}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li class="active">{if $multiLang.text_staff_permision_header}{$multiLang.text_staff_permision_header}{else}No Translate (Key Lang:text_staff_permision_header){/if}</li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_staff_permision_header}{$multiLang.text_staff_permision_header}{else}No Translate (Key Lang:text_staff_permision_header){/if}</li>
+  {if $smarty.get.action eq 'edit'}
+  <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate (Key Lang:text_edit){/if}</li>
+  {/if}
 </ul>
 {if $error.exist_save eq 1}
   <div class="alert alert-danger alert-dismissible"  id="{if $error.exist_save eq 1}flash{/if}">
@@ -29,10 +32,9 @@
                 <div class="form-group">
                   <div class="col-md-5">
                     <select class="form-control" id="the_select">
-                      <option value="">{if $multiLang.text_search_staff_role}{$multiLang.text_search_staff_role}{else}No Translate (Key Lang:text_search_staff_role){/if}</option>
-                      <option value="">All staff role</option>
+                      <option value="">--- All staff role ---</option>
                       {foreach from = $search_by_role item = staff_role}
-                      <option value="{$staff_role.staff_role_name}">{$staff_role.staff_role_name}</option>
+                      <option value="{$staff_role.staff_role_id}" {if $smarty.get.srid eq $staff_role.staff_role_id}selected{/if}>{$staff_role.staff_role_name}</option>
                       {/foreach}
                     </select>
                   </div>
@@ -166,7 +168,7 @@
 <script type="text/javascript">
 $(function(){
   $("#the_select").change(function(){
-    window.location='{$admin_file}?task=staff_permission&kwd=' + this.value
+    window.location='{$admin_file}?task=staff_permission&kwd={$smarty.get.kwd}&srid=' + this.value
   });
   document.getElementById("search").value = "";
 });

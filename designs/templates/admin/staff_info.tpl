@@ -2,7 +2,10 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li class="active">{if $multiLang.staff_infomation_header}{$multiLang.staff_infomation_header}{else}No Translate (Key Lang:staff_infomation_header){/if}</li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.staff_infomation_header}{$multiLang.staff_infomation_header}{else}No Translate (Key Lang:staff_infomation_header){/if}</li>
+  {if $smarty.get.action eq 'edit'}
+  <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate (Key Lang:text_edit){/if}</li>
+  {/if}
 </ul>
 <div class="panel panel-primary">
   <div class="panel-heading"><h3 class="panel-title">{if $multiLang.staff_infomation_header}{$multiLang.staff_infomation_header}{else}No Translate (Key Lang:staff_infomation_header){/if}</h3></div>
@@ -163,16 +166,19 @@
                      <dl class="dl-horizontal">
                         <dt>{if $multiLang.text_title_name}{$multiLang.text_title_name}{else}No Translate (Key Lang:text_title_name){/if}:</dt>
                         <dd class="text-left">{$v.name}</dd>
+
+                        <dt>{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}:</dt>
+                        <dd class="text-left">{$v.password}</dd>
+
                         <dt>{if $multiLang.text_title_phone}{$multiLang.text_title_phone}{else}No Translate (Key Lang:text_title_phone){/if}:<dt>
                         <dd class="text-left">{$v.phone}</dd>
-                        <dt>{if $multiLang.text_title_gender}{$multiLang.text_title_gender}{else}No Translate (Key Lang:text_title_gender){/if}</dt>
+
+                        <dt>{if $multiLang.text_title_gender}{$multiLang.text_title_gender}{else}No Translate (Key Lang:text_title_gender){/if}:</dt>
                         <dd class="text-left">{if $v.gender eq 1}Male{else}Female{/if}</dd>
-                        <dt>{if $multiLang.text_title_role}{$multiLang.text_title_role}{else}No Translate (Key Lang:text_title_role){/if}</dt>
+
+                        <dt>{if $multiLang.text_title_role}{$multiLang.text_title_role}{else}No Translate (Key Lang:text_title_role){/if}:</dt>
                         <dd class="text-left">{$v.role_name}</dd>
                       </dl>
-                    <legend>{if $multiLang.text_acc_info}{$multiLang.text_acc_info}{else}No Translate (Key Lang:text_acc_info){/if}</legend>
-                    <label>{if $multiLang.text_title_name}{$multiLang.text_title_name}{else}No Translate (Key Lang:text_title_name){/if}:</label> {$v.name}<br />
-                    <label>{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}:</label> {$v.password}
                     </div>
                     <div class="modal-footer">
                       <a href="{$admin_file}?task=staff_info&amp;action=edit&amp;id={$v.id}" class="btn btn-success"><i class="fa fa-edit"></i> {if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}</a>

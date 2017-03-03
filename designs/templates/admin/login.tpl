@@ -22,7 +22,7 @@
         {/if}
         <div class="panel panel-primary">
           <div class="panel-heading pms_panel_heading">
-            <h4 class="panel-title text-center">ADMIN LOGIN</h4>
+            <h4 class="panel-title text-center" style="padding: 5px;">PMS - ADMIN LOGIN</h4>
           </div>
           <div class="panel-body">
             <form action="{$admin_file}?task=login" method="post"​ class="form">
@@ -41,7 +41,7 @@
                 </div>
               </div>
               <div class="form-group">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-sign-in"></i> LOGIN</button>
+                <button type="submit" class="btn btn-info"><i class="fa fa-sign-in"></i> LOGIN</button>
               </div>
             </form>
           </div>
