@@ -499,6 +499,48 @@ function checkDeleteQuestion($id)
   return $result;
 }
 /**
+ * checkDeleteTopic
+ * @param  int $id is topic_id
+ * @return array or boolean
+ */
+function checkDeleteTopic($id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count, t.name FROM `test_question_topic` tqt INNER JOIN topic t ON t.id = tqt.topic_id WHERE tqt.topic_id = :id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetch();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkDeleteTopic'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * checkDeleteTopicAnalysis
+ * @param  int  $id is topic_analysis_id
+ * @return boolean
+ */
+function checkDeleteTopicAnalysis($id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count, ts.name FROM `test_topic_analysis` tts INNER JOIN topic_analysis ts ON ts.id = tts.topic_analysis_id WHERE tts.topic_analysis_id = :id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetch();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkDeleteTopicAnalysis'.$e->getMessage();
+  }
+  return $result;
+}
+/**
  * Get listTest
  * @author Hong Syden
  * @param  string $kwd  is keyword
@@ -545,6 +587,130 @@ function listTest($kwd, $catid, $testid, $lang)
   catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: ListTest'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * listMailerlite
+ * @param  string $kwd is keyword
+ * @return array or boolean
+ */
+function listMailerlite($kwd)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    if(!empty($kwd))
+    {
+      $condition .= ' WHERE title LIKE :kwd ';
+    }
+
+    $sql =' SELECT *, (SELECT COUNT(*) FROM `mailerlite` '.$condition.') AS total FROM `mailerlite` '.$condition.' LIMIT :offset, :limit ';
+    $query = $connected->prepare($sql);
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listMailerlite'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * listResult
+ * @param  int $tid is test_id
+ * @param  int $topic_id is topic_id
+ * @param  int $slimit for set limit
+ * @return array or boolean
+ */
+function listResult($tid, $topic_id, $slimit)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+    if(!empty($slimit)) {
+      $limit = $slimit;
+      $setLimit = ' LIMIT :offset, :limit ';
+    }
+    if(!empty($topic_id)) $condition = ' AND r.topic_id = :topic_id ';
+
+    $sql =' SELECT r.*, t.name, (SELECT COUNT(*) FROM `result` r INNER JOIN topic t ON t.id = r.topic_id WHERE r.test_id = :test_id '.$condition.') AS total
+            FROM `result` r
+              INNER JOIN topic t ON t.id = r.topic_id
+            WHERE r.test_id = :test_id '.$condition.' ORDER BY r.topic_id DESC '.$setLimit;
+    $query = $connected->prepare($sql);
+    if(!empty($topic_id)) $query->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
+    if(!empty($slimit)) {
+      $query->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+      $query->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+    }
+    $query->bindValue(':test_id', (int)$tid, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetchAll();
+    if (count($row) > 0) $total_data = $row[0]['total'];
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listResult'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * checkDeleteResult
+ * @param  int $id is result_id
+ * @return array or boolean
+ */
+function checkDeleteResult($id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql1= ' SELECT COUNT(*) AS total_count, r.score_from, r.score_to, t.name, r.test_id, r.topic_id
+            FROM `result_condition` rc
+              INNER JOIN result r ON r.id = rc.result_id
+              INNER JOIN topic t ON t.id = r.topic_id
+            WHERE rc.result_id = :id ';
+    $query1 = $connected->prepare($sql1);
+    $query1->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query1->execute();
+    $row1 = $query1->fetch();
+
+    $sql2= ' SELECT COUNT(*) AS total_tque_hide FROM `test_question_topic_hide` WHERE test_id = :test_id AND topic_id = :topic_id OR test_id = :test_id ANd if_topic_id = :topic_id ';
+    $query2 = $connected->prepare($sql2);
+    $query2->bindValue(':test_id', (int)$row1['test_id'], PDO::PARAM_INT);
+    $query2->bindValue(':topic_id', (int)$row1['topic_id'], PDO::PARAM_INT);
+    $query2->execute();
+    $row2 = $query2->fetch();
+
+    $sql3= ' SELECT COUNT(*) total_topicAnlysis FROM `test_topic_analysis` WHERE test_id = :test_id AND topic_id = :topic_id ';
+    $query3 = $connected->prepare($sql3);
+    $query3->bindValue(':test_id', (int)$row1['test_id'], PDO::PARAM_INT);
+    $query3->bindValue(':topic_id', (int)$row1['topic_id'], PDO::PARAM_INT);
+    $query3->execute();
+    $row3 = $query3->fetch();
+
+    $sql4= ' SELECT COUNT(*) AS totalTopicAns FROM `test_topic_answer` WHERE test_id = :test_id AND topic_id = :topic_id ';
+    $query4 = $connected->prepare($sql4);
+    $query4->bindValue(':test_id', (int)$row1['test_id'], PDO::PARAM_INT);
+    $query4->bindValue(':topic_id', (int)$row1['topic_id'], PDO::PARAM_INT);
+    $query4->execute();
+    $row4 = $query4->fetch();
+
+    //Sum Total Count
+    $totalDelete = $row1['total_count'] + $row2['total_tque_hide'] + $row3['total_topicAnlysis'] + $row4['totalTopicAns'];
+    $newResult = array('score_from' => $row1['score_from'], 'score_to' => $row1['score_to'], 'name' => $row1['name'], 'total_count' => $totalDelete);
+    return $newResult;
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkDeleteResult'.$e->getMessage();
   }
   return $result;
 }

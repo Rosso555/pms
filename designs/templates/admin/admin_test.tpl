@@ -126,9 +126,10 @@
           <tr bgcolor="#eeeeee">
             <th width="230">{if $multiLang.text_category}{$multiLang.text_category}{else}No Translate(Key Lang: text_category){/if}</th>
             <th width="230">{if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}</th>
+            <th width="230">{if $multiLang.text_graphic}{$multiLang.text_graphic}{else}No Translate(Key Lang: text_graphic){/if}</th>
             <th width="550">{if $multiLang.text_description}{$multiLang.text_description}{else}No Translate(Key Lang: text_description){/if}</th>
             <th width="100">{if $multiLang.text_status}{$multiLang.text_status}{else}No Translate(Key Lang: text_status){/if}</th>
-            <th width="260">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate(Key Lang: text_action){/if}</th>
+            <th width="400">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate(Key Lang: text_action){/if}</th>
           </tr>
         </thead>
         {if $listTest|@count gt 0}
@@ -137,6 +138,7 @@
           <tr>
             <td><a href="{$admin_file}?task=test&amp;catid={$data.category_id}">{$data.category_name}</a></td>
             <td>{$data.title}</td>
+            <td>{$data.graph_title}</td>
             <td>{$data.description}</td>
             <td>
             {if $data.status eq 1}
@@ -162,9 +164,9 @@
                         {if $multiLang.text_change_status}{$multiLang.text_change_status}{else}No Translate(Key Lang: text_change_status){/if}
                         <b>
                         {if $data.status eq 1}
-                          {if $multiLang.text_unpublish}{$multiLang.text_unpublish}{else}No Translate(Key Lang: text_unpublish){/if}
-                        {else}
                           {if $multiLang.text_publish}{$multiLang.text_publish}{else}No Translate(Key Lang: text_publish){/if}
+                        {else}
+                          {if $multiLang.text_unpublish}{$multiLang.text_unpublish}{else}No Translate(Key Lang: text_unpublish){/if}
                         {/if} </b>?
                       </p>
                     </div>
@@ -209,6 +211,7 @@
               <a href="{$admin_file}?task=test_topic&amp;tid={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_topic}{$multiLang.button_add_test_topic}{else}No Translate (Key Lang: button_add_test_topic){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
               <a href="{$admin_file}?task=test_topic_analysis&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_analysis_topic_less_big}{$multiLang.button_add_test_analysis_topic_less_big}{else}No Translate(Key Lang: button_add_test_analysis_topic_less_big){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
               <a href="{$admin_file}?task=test_topic_answer&amp;tid={$data.id}" class="btn btn-primary btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_topic_answer_calculate}{$multiLang.button_add_test_topic_answer_calculate}{else}No Translate(Key Lang: button_add_test_topic_answer_calculate){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+              <a href="{$admin_file}?task=group_answer_question&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_group_answer_question}{$multiLang.button_add_group_answer_question}{else}No Translate(Key Lang: button_add_group_answer_question){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
               <a href="{$admin_file}?task=response&amp;tid={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_respone_result}{$multiLang.button_respone_result}{else}No Translate (Key Lang: button_respone_result){/if}" style="margin-bottom: 3px;"><i class="fa fa-folder-open" aria-hidden="true"></i></a>
             </td>
           </tr>

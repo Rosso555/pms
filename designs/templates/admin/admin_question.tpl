@@ -40,17 +40,17 @@
                   <div class="form-group">
                     <label for="title"><span style="color: red">*</span> {if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}:</label>
                     {if $error.title}
-                      <span style="color: red">{if $multiLang.text_title_empty}{$multiLang.text_title_empty}{else}No Translate(Key Lang: text_title_empty){/if}</span>
+                      <span style="color: red">{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate(Key Lang: text_please_input){/if} {if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}.</span>
                     {/if}
                     <input type="text" name="title" class="form-control" placeholder="Title"
                     value="{if $smarty.session.question.title}{$smarty.session.question.title}{elseif $getQuestionByID.title}{$getQuestionByID.title}{/if}">
                   </div>
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-3">
                   <div class="form-group">
                     <label for="title"><span style="color: red">*</span> {if $multiLang.text_type}{$multiLang.text_type}{else}No Translate(Key Lang: text_type){/if}:</label>
                     {if $error.type}
-                      <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_type}{$multiLang.text_type}{else}No Translate(Key Lang: text_type){/if}</span>
+                      <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_type}{$multiLang.text_type}{else}No Translate(Key Lang: text_type){/if}.</span>
                     {/if}
                     <select class="form-control" name="type">
                       <option value="">---{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} {if $multiLang.text_type}{$multiLang.text_type}{else}No Translate(Key Lang: text_type){/if}---</option>
@@ -67,13 +67,19 @@
                     <label><input type="checkbox" value="1" name="is_email" {if $smarty.session.question.is_email}{if $smarty.session.question.is_email eq 1} checked {/if}{else}{if $getQuestionByID.is_email eq 1}checked{/if}{/if}>{if $multiLang.text_yes}{$multiLang.text_yes}{else}No Translate(Key Lang: text_yes){/if}</label>
                   </div>
                 </div>
+                <div class="col-md-2">
+                  <label for="title" style="margin-bottom: 0px;"> {if $multiLang.text_hide_title}{$multiLang.text_hide_title}{else}No Translate(Key Lang: text_hide_title){/if}:{$getQuestionByID.hide_title}</label>
+                  <div class="checkbox box" style="margin-top: 5px;">
+                    <label><input type="checkbox" value="1" name="hide_title" {if $smarty.session.question.hide_title}{if $smarty.session.question.hide_title eq 1} checked {/if}{else}{if $getQuestionByID.hide_title eq 1}checked{/if}{/if}>{if $multiLang.text_yes}{$multiLang.text_yes}{else}No Translate(Key Lang: text_yes){/if}</label>
+                  </div>
+                </div>
               </div>
               <div class="row">
                 <div class="col-md-12">
                   <div class="form-group">
                     <label><span style="color: red">*</span> {if $multiLang.text_description}{$multiLang.text_description}{else}No Translate(Key Lang: text_description){/if}:</label>
                     {if $error.desc}
-                      <span style="color: red">{if $multiLang.text_description_empty}{$multiLang.text_description_empty}{else}No Translate(Key Lang: text_description_empty){/if}</span>
+                      <span style="color: red">{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate(Key Lang: text_please_input){/if} {if $multiLang.text_description}{$multiLang.text_description}{else}No Translate(Key Lang: text_description){/if}.</span>
                     {/if}
                     <textarea class="form-control" name="description" rows="5" placeholder="Write something" style="overflow:auto; resize:none;">{if $smarty.session.question.description}{$smarty.session.question.description}{elseif $getQuestionByID.description}{$getQuestionByID.description}{/if}</textarea>
                   </div>
@@ -103,6 +109,7 @@
             <th>{if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}</th>
             <th>{if $multiLang.text_type}{$multiLang.text_type}{else}No Translate(Key Lang: text_type){/if}</th>
             <th>{if $multiLang.text_email}{$multiLang.text_email}{else}No Translate(Key Lang: text_email){/if}</th>
+            <th>{if $multiLang.text_hide_title}{$multiLang.text_hide_title}{else}No Translate(Key Lang: text_hide_title){/if}</th>
             <th>{if $multiLang.text_description}{$multiLang.text_description}{else}No Translate(Key Lang: text_description){/if}</th>
             <th width="130">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate(Key Lang: text_action){/if}</th>
             </tr>
@@ -113,7 +120,8 @@
             <tr>
               <td>{$question.title}</td>
               <td>{if $question.type eq 1}Text Input{elseif $question.type eq 2}Textarea{elseif $question.type eq 3}Radio{else}Check{/if}</td>
-              <td>{if $question.is_email eq 1}Yes{else}No{/if}</td>
+              <td>{if $question.is_email eq 1}<span class="label label-primary"><i class="fa fa-check-circle" aria-hidden="true"></i> Yes</span>{else}<span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> No</span>{/if}</td>
+              <td>{if $question.hide_title eq 0}<span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> No</span>{else}<span class="label label-primary"><i class="fa fa-check-circle" aria-hidden="true"></i> yes</span>{/if}</td>
               <td>{$question.description}</td>
               <td>
                 <a href="{$admin_file}?task=question&amp;action=edit&amp;id={$question.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang: button_edit){/if}"><i class="fa fa-edit"></i></a>

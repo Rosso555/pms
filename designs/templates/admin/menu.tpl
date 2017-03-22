@@ -40,9 +40,14 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-cog fa-lg" aria-hidden="true"></i> {if $multiLang.menu_setting}{$multiLang.menu_setting}{else}No Translate (Key Lang:menu_setting){/if} <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="{$admin_file}?task=category"><i class="fa fa-bars" aria-hidden="true"></i>&nbsp;{if $multiLang.menu_category}{$multiLang.menu_category}{else}No Translate (Key Lang: menu_category){/if}</a></li>
+            <li><a href="{$admin_file}?task=mailerlite"><i class="fa fa-envelope" aria-hidden="true"></i> {if $multiLang.menu_mailerlite}{$multiLang.menu_mailerlite}{else}No Translate (Key Lang: menu_mailerlite){/if}</a></li>
             <li><a href="{$admin_file}?task=add_language"><i class="fa fa-language" aria-hidden="true"></i>&nbsp; {if $multiLang.menu_add_language}{$multiLang.menu_add_language}{else}No Translate (Key Lang: menu_add_language){/if}</a></li>
             <li><a href="{$admin_file}?task=multi_language"><i class="fa fa-language" aria-hidden="true"></i>&nbsp; {if $multiLang.menu_translate_language}{$multiLang.menu_translate_language}{else}No Translate (Key Lang:menu_translate_language){/if}</a></li>
             <li role="separator" class="divider"></li>
+						<li class="header_menu"><a>{if $multiLang.sub_menu_topic}{$multiLang.sub_menu_topic}{else}No Translate (Key Lang: sub_menu_topic){/if}</a></li>
+						<li><a href="{$admin_file}?task=topic"> &nbsp;&nbsp;&nbsp;{if $multiLang.sub_menu_topic}{$multiLang.sub_menu_topic}{else}No Translate (Key Lang: sub_menu_topic){/if}</a></li>
+						<li><a href="{$admin_file}?task=topic_analysis"> &nbsp;&nbsp;&nbsp;{if $multiLang.menu_analysis_topic}{$multiLang.menu_analysis_topic}{else}No Translate (Key Lang: menu_analysis_topic){/if}</a></li>
+						<li role="separator" class="divider"></li>
             <li class="header_menu"><a><i class="fa fa-sort-alpha-desc" aria-hidden="true"></i>&nbsp; {if $multiLang.menu_default_language}{$multiLang.menu_default_language}{else}No Translate (Key Lang:menu_default_language){/if}</a></li>
 						{foreach from=$getLanguage item=v}
 						<li><a href="{$admin_file}?deflang={$v.lang_name}&amp;lid={$v.id}"> &nbsp;&nbsp;&nbsp;{$v.title} {if $lang_name eq $v.lang_name}<i class="fa fa-check" aria-hidden="true"></i>{/if} </a></li>

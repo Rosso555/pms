@@ -399,6 +399,76 @@ function getPatientByID($id, $psychologist_id){
 
   return $result;
 }
+/**
+ * listTopic
+ * @param  string $kwd is keyword
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function listTopic($kwd, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+    if(!empty($kwd)) $condition .= ' AND name LIKE :kwd ';
+
+    $sql = ' SELECT *, (SELECT COUNT(*) FROM `topic` WHERE lang = :lang '.$condition.') AS total FROM `topic` WHERE lang = :lang '.$condition.' ORDER BY id DESC LIMIT :offset, :limit ';
+
+    $query = $connected->prepare($sql);
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listTopic'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * listTopicAnalysis
+ * @param  string $kwd is keyword
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function listTopicAnalysis($kwd, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+    if(!empty($kwd))
+    {
+      $condition .= ' AND name LIKE :kwd ';
+    }
+
+    $sql = ' SELECT *, (SELECT COUNT(*) FROM `topic_analysis` WHERE lang = :lang '.$condition.') AS total FROM `topic_analysis` WHERE lang = :lang '.$condition.' ORDER BY id DESC LIMIT :offset, :limit ';
+    $query = $connected->prepare($sql);
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listTopicAnalysis'.$e->getMessage();
+  }
+
+  return $result;
+}
+
+
 
 
 ?>
