@@ -714,3 +714,146 @@ function checkDeleteResult($id)
   }
   return $result;
 }
+/**
+ * checkViewOrderTopic
+ * @param  int $test_id is test_id
+ * @return array or boolean
+ */
+function checkViewOrderTopic($test_id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS count_view_order FROM `result` WHERE test_id = :test_id AND view_order IS NULL ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['count_view_order'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkViewOrderTopic'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListTestTopic
+ * @param  int $test_id is test_id
+ * @return array or boolean
+ */
+function getListTestTopic($test_id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql = ' SELECT r.*, t.name FROM `result` r INNER JOIN topic t ON t.id = r.topic_id WHERE test_id = :test_id GROUP BY r.topic_id ORDER BY r.view_order ASC ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetchAll();
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestTopic'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListTestQuestionTopicHide
+ * @param  int $test_id is test id
+ * @return array or boolean
+ */
+function getListTestQuestionTopicHide($test_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql =' SELECT tqth.*, t.title, tp.name AS topic_name1, tp2.name AS topic_name2
+            FROM `test_question_topic_hide` tqth
+              INNER JOIN test t ON t.id = tqth.test_id
+              INNER JOIN topic tp ON tp.id = tqth.topic_id
+              INNER JOIN topic tp2 ON tp2.id = tqth.if_topic_id
+            WHERE tqth.test_id = :id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':id', (int)$test_id, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetchAll();
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestQuestionTopicHide'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListTopicHide
+ * @param  int $test_id is test id
+ * @param  int $topic_id is topic_id
+ * @return array or boolean
+ */
+function getListTestTopicHide($test_id, $topic_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    if(!empty($topic_id)) $where = ' AND r.topic_id != :topic_id ';
+
+    $sql= ' SELECT r.*, t.name, tqth.topic_id AS topic_hide_id
+            FROM `result` r
+              INNER JOIN topic t ON t.id = r.topic_id
+              LEFT JOIN test_question_topic_hide tqth ON tqth.topic_id = r.topic_id AND r.test_id = tqth.test_id
+            WHERE r.test_id = :test_id '.$where.' GROUP BY r.topic_id ORDER BY r.view_order ASC ';
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    if(!empty($topic_id)) $query->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    return $rows;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTopicHide'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListTestTopicAnalysis
+ * @param  int  $test_id
+ * @param  string  $lang is language
+ * @return boolean or array
+ */
+function getListTestTopicAnalysis($kwd, $test_id, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+
+    if(!empty($kwd)) $condition = ' AND t.name LIKE :kwd ';
+
+    $sql =' SELECT tta.*, t.name AS topic_name, ta.name AS topic_analysis_name,
+              (SELECT COUNT(*) FROM `test_topic_analysis` tta
+                INNER JOIN topic t ON t.id = tta.topic_id
+                INNER JOIN topic_analysis ta ON ta.id = tta.topic_analysis_id
+              WHERE tta.test_id = :test_id AND t.lang = :lang AND ta.lang = :lang '.$condition.') AS total
+            FROM `test_topic_analysis` tta
+              INNER JOIN topic t ON t.id = tta.topic_id
+              INNER JOIN topic_analysis ta ON ta.id = tta.topic_analysis_id
+            WHERE tta.test_id = :test_id AND t.lang = :lang AND ta.lang = :lang '.$condition.' ORDER BY tta.topic_id DESC LIMIT :offset, :limit ';
+
+    $query = $connected->prepare($sql);
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $query->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetchAll();
+    if (count($row) > 0) $total_data = $row[0]['total'];
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestTopicAnalysis'.$e->getMessage();
+  }
+  return $result;
+}

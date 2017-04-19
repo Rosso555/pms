@@ -15,6 +15,8 @@ if(empty($lang) and empty($_SESSION['lang'])) $lang = $result['lang_name'];
 if(!empty($lang) and empty($_SESSION['lang'])) $_SESSION['lang'] = $lang;
 if(!empty($lang) and $lang != $_SESSION['lang']) $_SESSION['lang'] = $lang;
 if(empty($lang) and $_SESSION['lang']) $lang = $_SESSION['lang'];
+$smarty_appform->assign('index_file', $index_file);
+
 //Smarty assign value
 $smarty_appform->assign('lang_name', $result['lang_name']);
 

@@ -21,7 +21,8 @@
 		<div class="col-md-12">
 			{block name="main"}
 			{/block}
-		</div> 
+		</div>
+		<div class="loader"></div>
 		{include file="common/footer.tpl"}
 	</div>
 </div>
@@ -52,6 +53,7 @@ $(document).ready(function(){
 	});
 		// tooltip
     $('[data-toggle1="tooltip"]').tooltip();
+		$('#test_topic').popover();
 		// select2 form
 		$(".select2").select2();
 
@@ -73,6 +75,10 @@ function NumAndTwoDecimals(e , field)
     field.value = "";
   }
 }
+
+$(window).load(function() { $(".loader").fadeOut("slow"); });
+
 </script>
+
 </body>
 </html>

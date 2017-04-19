@@ -15,6 +15,9 @@ if(empty($lang) and empty($_SESSION['lang'])) $lang = $result['lang_name'];
 if(!empty($lang) and empty($_SESSION['lang'])) $_SESSION['lang'] = $lang;
 if(!empty($lang) and $lang != $_SESSION['lang']) $_SESSION['lang'] = $lang;
 if(empty($lang) and $_SESSION['lang']) $lang = $_SESSION['lang'];
+$smarty_appform->assign('mode', 'admin');
+$smarty_appform->assign('admin_file', $admin_file);
+
 //Smarty assign value
 $smarty_appform->assign('lang_name', $result['lang_name']);
 
@@ -1152,6 +1155,83 @@ if('topic' === $task)
   $smarty_appform->display('admin/admin_topic.tpl');
   exit;
 }
+//Task: topic hide
+if('topic_hide' === $task)
+{
+  //Clear session
+  if(!$_POST) unset($_SESSION['topic_hide']);
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $less_than    = $common->clean_string($_POST['less_than']);
+    $bigger_than  = $common->clean_string($_POST['bigger_than']);
+    $tid_first    = $common->clean_string($_POST['topic_first']);
+    $tid_second   = $common->clean_string($_POST['topic_second']);
+    $id       = $common->clean_string($_POST['id']);
+    $test_id  = $_GET['tid'];
+
+    //add value to session to use in template
+    $_SESSION['topic_hide'] = $_POST;
+    //form validation
+    if(empty($less_than))   $error['less_than']  = 1;
+    if(empty($bigger_than)) $error['bigger_than']  = 1;
+    if(empty($tid_first))   $error['topic_first']  = 1;
+    if(empty($tid_second))   $error['topic_second']  = 1;
+
+    //Add topic
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('test_question_topic_hide', $field = ['test_id' => $test_id, 'topic_id' => $tid_first, 'if_topic_id' => $tid_second, 'less_than' => $less_than, 'bigger_than' => $bigger_than]);
+      //unset session
+      unset($_SESSION['topic_hide']);
+      //Redirect
+      header('location: '.$admin_file.'?task=topic_hide&tid='.$test_id);
+      exit;
+    }
+    //update topic
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('test_question_topic_hide', $field = ['topic_id' => $tid_first, 'if_topic_id' => $tid_second, 'less_than' => $less_than, 'bigger_than' => $bigger_than], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['topic_hide']);
+      //Redirect
+      header('location: '.$admin_file.'?task=topic_hide&tid='.$test_id);
+      exit;
+    }
+  }
+  //action delete topic
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('test_question_topic_hide', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=topic_hide&tid='.$_GET['tid']);
+    exit;
+  }
+
+  if('get_topic_hide' === $action)
+  {
+    $result = getListTestTopicHide($_GET['tid'], $_GET['tpid']);
+
+    header('Content-type: application/json');
+   	echo json_encode($result);
+   	exit;
+  }
+  //get edit test question
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getTopicQHideByID', $common->find('test_question_topic_hide', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $result = getListTestQuestionTopicHide($_GET['tid']);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listTestQueTopicHide', $result);
+  $smarty_appform->assign('listTestTopic', getListTestTopicHide($_GET['tid'], ''));
+  $smarty_appform->assign('getTest', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_topic_hide.tpl');
+  exit;
+}
 //Task: topic analysis
 if('topic_analysis' === $task)
 {
@@ -1222,6 +1302,199 @@ if('topic_analysis' === $task)
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listTopicAnalysis', $result);
   $smarty_appform->display('admin/admin_topic_analysis.tpl');
+  exit;
+}
+//Task: test topic
+if('test_topic' === $task)
+{
+  if('update_test_topic' === $action)
+  {
+    $test_id    = $_POST['testid'];
+    $topic_id   = $_POST['topicid'];
+    $view_order = $_POST['view_order'];
+
+    if(!empty($test_id) && !empty($topic_id) && !empty($view_order)){
+      $result = $common->update('result', $field = ['view_order' => $view_order], $condition = ['test_id' => $test_id, 'topic_id' => $topic_id]);
+    }
+    $resultCount = checkViewOrderTopic($test_id);
+
+    header('Content-type: application/json');
+   	echo json_encode(array('status' => $result, 'checkCountView' => $resultCount));
+   	exit;
+  }
+
+  $result = getListTestTopic($_GET['tid']);
+
+  $smarty_appform->assign('listTestTopic', $result);
+  $smarty_appform->assign('checkViewOrderTopic', checkViewOrderTopic($_GET['tid']));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_test_topic.tpl');
+  exit;
+}
+//Task: test_topic_analysis
+if('test_topic_analysis' === $task)
+{
+  //Clear session
+  if(!$_POST) unset($_SESSION['test_topic_analysis']);
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $test_id      = $common->clean_string($_POST['test_id']);
+    $topic_id     = $common->clean_string($_POST['topic_id']);
+    $ana_topic_id = $common->clean_string($_POST['ana_topic_id']);
+    $less_than    = $common->clean_string($_POST['less_than_value']);
+    $bigger_than  = $common->clean_string($_POST['bigger_than_value']);
+    $id   = $common->clean_string($_POST['test_topic_asis_id']);
+
+    //add value to session to use in template
+    $_SESSION['test_topic_analysis'] = $_POST;
+    //form validation
+    if(empty($topic_id))    $error['topic_id']  = 1;
+    if(empty($ana_topic_id))$error['ana_topic_id']  = 1;
+    if(empty($less_than))   $error['less_than']   = 1;
+    if(empty($bigger_than)) $error['bigger_than'] = 1;
+
+    //Add topic
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('test_topic_analysis', $field = ['test_id' => $test_id,
+                                                     'topic_id'=> $topic_id,
+                                                     'topic_analysis_id' => $ana_topic_id,
+                                                     'less_than'    => $less_than,
+                                                     'bigger_than'  => $bigger_than]);
+      //unset session
+      unset($_SESSION['test_topic_analysis']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_topic_analysis&tid='.$test_id);
+      exit;
+    }
+    //update topic
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('test_topic_analysis', $field = ['topic_id'=> $topic_id,
+                                                       'topic_analysis_id' => $ana_topic_id,
+                                                       'less_than' => $less_than,
+                                                       'bigger_than' => $bigger_than],
+                                             $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['test_topic_analysis']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_topic_analysis&tid='.$test_id);
+      exit;
+    }
+  }
+  //action delete topic
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('test_topic_analysis', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=test_topic_analysis&tid='.$_GET['tid']);
+    exit;
+  }
+  //get edit category
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getTestTopicAsisByID', $common->find('test_topic_analysis', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $result = getListTestTopicAnalysis($kwd, $_GET['tid'], $lang);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('error', $error);
+  // $smarty_appform->assign('listTestQueTopic', getListTestQuestionTopic($_GET['tid'], $lang, ''));
+  $smarty_appform->assign('listTestTopic', getListTestTopicHide($_GET['tid'], ''));
+  $smarty_appform->assign('listTestTopicAnalysis', $result);
+  $smarty_appform->assign('listTopicAnalysis', $common->find('topic_analysis', $condition = ['lang' => $lang], $type = 'all'));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_test_topic_analysis.tpl');
+  exit;
+}
+//Task: test_topic_answer
+if('test_topic_answer' === $task)
+{
+  //Clear session
+  if(!$_POST) unset($_SESSION['test_topic_answer']);
+
+  $error = array();
+  if($_POST)
+  {
+    $id       = $common->clean_string($_POST['id']);
+    $topic_id = $common->clean_string($_POST['topic_id']);
+    $average  = $common->clean_string($_POST['average']);
+    $stdd     = $common->clean_string($_POST['stdd']);
+    $multiplier = $common->clean_string($_POST['multiplier']);
+    $constant   = $common->clean_string($_POST['constant']);
+
+    //add value to session to use in template
+    $_SESSION['test_topic_answer'] = $_POST;
+    //form validation
+    if(empty($topic_id))    $error['topic_id'] = 1;
+    if(empty($average))     $error['average'] = 1;
+    if(empty($stdd))        $error['stdd'] = 1;
+    if(empty($multiplier))  $error['multiplier'] = 1;
+    if(empty($constant))    $error['constant'] = 1;
+
+    $result = $common->find('test_topic_answer', $condition = ['id' => $id], $type = 'one');
+
+    if(!empty($topic_id) && $result['topic_id'] !== $topic_id && is_test_topic_answer_exist($_GET['tid'], $topic_id) > 0) $error['is_key_test_topic_ans_exist'] = 2;
+
+    //Add test
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('test_topic_answer', $field =['test_id'     => $_GET['tid'],
+                                                  'topic_id'    => $topic_id,
+                                                  'average'     => $average,
+                                                  'stdd'        => $stdd,
+                                                  'multiplier'  => $multiplier,
+                                                  'constant'    => $constant]);
+      //unset session
+      unset($_SESSION['test_topic_answer']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_topic_answer&tid='.$_GET['tid']);
+      exit;
+    }
+    //update test
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('test_topic_answer', $field =['test_id'     => $_GET['tid'],
+                                                    'topic_id'    => $topic_id,
+                                                    'average'     => $average,
+                                                    'stdd'        => $stdd,
+                                                    'multiplier'  => $multiplier,
+                                                    'constant'    => $constant], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['test_topic_answer']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_topic_answer&tid='.$_GET['tid']);
+      exit;
+    }
+  }
+  //action delete topic
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('test_topic_answer', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=test_topic_answer&tid='.$_GET['tid']);
+    exit;
+  }
+  //get edit test_topic_answer
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getTestTopicAnsByID', $common->find('test_topic_answer', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $results = listTestTopicAnswer($_GET['tid'], $kwd);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listTestTopicAnswer', $results);
+  // $smarty_appform->assign('listTestQueTopic', getListTestQuestionTopic($_GET['tid'], $lang, ''));
+  $smarty_appform->assign('listTestTopic', getListTestTopicHide($_GET['tid'], ''));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_test_topic_answer.tpl');
   exit;
 }
 //Task: mailerlite
