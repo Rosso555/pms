@@ -40,9 +40,9 @@
                   {if $error.is_lang_name_exist eq 2}
                     <span style="color: red">Short language is exist.</span>
                   {/if}
-                  <input type="text" class="form-control" name="language" value="{$getLanguageByID.lang_name}" placeholder="Example: en, ge" required>
+                  <input type="text" class="form-control" name="language" value="{$getLanguageByID.lang_name}" placeholder="Example: en, de" required>
                 </div>
-                <span style="color: red">Note: Please input short Language. Example: (English:en), (German:ge), (French:fr), (Khmer:kh)</span>
+                <span style="color: red">Note: Please input short Language. Example: (English:en), (German:de), (French:fr), (Khmer:km)</span>
             </div>
             </div>
             <div class="row" style="margin-top: 10px;">
