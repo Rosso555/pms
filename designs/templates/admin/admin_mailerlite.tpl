@@ -2,7 +2,7 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_mailer_lte}{$multiLang.text_mailer_lte}{else}No Translate(Key Lang:text_mailer_lte){/if}</li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_mailer_lite}{$multiLang.text_mailer_lite}{else}No Translate(Key Lang:text_mailer_lite){/if}</li>
   {if $smarty.get.action eq 'edit'}
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
   {/if}
@@ -14,7 +14,7 @@
   </div>
 {/if}
   <div class="panel panel-primary">
-    <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_mailer_lte}{$multiLang.text_mailer_lte}{else}No Translate(Key Lang:text_mailer_lte){/if}</h4></div>
+    <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_mailer_lite}{$multiLang.text_mailer_lite}{else}No Translate(Key Lang:text_mailer_lite){/if}</h4></div>
     <div class="panel-body">
       <div class="panel panel-default">
         <div class="panel-body">
@@ -68,7 +68,7 @@
                         <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate(Key Lang: button_update){/if}</button>
                         <a href="{$admin_file}?task=mailerlite" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate(Key Lang: button_cancel){/if}</a>
                       {else}
-                        <button type="submit" name="butsubmit" class="btn btn-danger"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
+                        <button type="submit" name="butsubmit" class="btn btn-info"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
                       {/if}
                     </div>
                   </div>
@@ -107,7 +107,7 @@
                       </div>
                       <div class="modal-body">
                         <p>
-                          {if $multiLang.text_confirmation_delete}{$multiLang.text_confirmation_delete}{else}No Translate(Key Lang:text_confirmation_delete){/if} {if $multiLang.text_mailer_lte}{$multiLang.text_mailer_lte}{else}No Translate(Key Lang:text_mailer_lte){/if}
+                          {if $multiLang.text_confirmation_delete}{$multiLang.text_confirmation_delete}{else}No Translate(Key Lang:text_confirmation_delete){/if} {if $multiLang.text_mailer_lite}{$multiLang.text_mailer_lite}{else}No Translate(Key Lang:text_mailer_lite){/if}
                           <b>({$mailerlite.title|escape})</b>?
                         </p>
                       </div>

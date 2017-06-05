@@ -6,6 +6,7 @@ require_once(dirname(__FILE__).'/setting/setup.php');
 require_once(dirname(__FILE__).'/setting/common_setting.php');
 require_once(dirname(__FILE__).'/functions/admin/admin_function.php');
 require_once(dirname(__FILE__).'/functions/common/common_function.php');
+require_once(dirname(__FILE__).'/external_libs/mailerlite-api-v2-php-sdk-0.1.7/vendor/autoload.php');
 
 //Get language By default_lang = 1
 $result = $common->find('language', $condition = ['default_lang' => 1], $type = 'one');
@@ -420,6 +421,7 @@ if('staff_info' === $task)
       $phone    = $common->clean_string($_POST['phone']);
       $staff_role   = $common->clean_string($_POST['staff_role']);
       $old_fle = $common->clean_string($_POST['old_file']);
+
       //add value to session to use in template
       $_SESSION['staff_info'] = $_POST;
       //check validate form
@@ -427,17 +429,14 @@ if('staff_info' === $task)
       if(empty($pass))   $error['pass'] = 1;
       if(empty($phone))  $error['phone'] = 1;
       if(empty($staff_role))  $error['staff_role'] = 1;
-      if(!empty($password) && !$common->checkPassword($password))
+      if(!empty($pass) && !$common->checkPassword($pass))
       {
         $error['password'] = 2;
       }
       if(!empty($_POST['old_file'])){
         $image = $old_fle;
-      }else{
-        if(empty($_FILES['image']['name'])){
-          $error['no_image'] = 1;
-        }
       }
+
       if(!empty($_FILES['image']['name']))
       {
         if($_FILES['image']['size'] > $allows['SIZE'][0])  $error['size'] = 1;
@@ -534,7 +533,9 @@ if('staff_info' === $task)
     $smarty_appform->assign('edit',$common->find('staff', $condition = ['id' => $_GET['id']], $type='one'));
   }
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
-	$results = ListStaffInfo($kwd);
+  $status = !empty($_GET['status']) ? $_GET['status'] : '';
+	$results = ListStaffInfo($kwd, $status);
+
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
   $smarty_appform->assign('list_staff', $results);
@@ -1083,6 +1084,69 @@ if('result' === $task)
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->assign('topic', $common->find('topic', $condition = ['lang' => $lang], $type = 'all'));
   $smarty_appform->display('admin/admin_result.tpl');
+  exit;
+}
+//Task result condition
+if('result_condition' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['result_con']);
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $show_result_id   = $common->clean_string($_POST['show_result_id']);
+    $result_id  = $common->clean_string($_POST['rid']);
+    $result_con_id    = $common->clean_string($_POST['result_con_id']);
+
+
+    //add value to session to use in template
+    $_SESSION['result_con'] = $_POST;
+    //form validation
+    if(empty($show_result_id)) $error['show_result_id'] = 1;
+    if(empty($result_id))     $error['result_id'] = 1;
+
+    //Add result Condition
+    if(0 === count($error) && empty($result_con_id))
+    {
+      $common->save('result_condition', $field = ['result_id' => $result_id, 'show_result_id' => $show_result_id]);
+      //unset session
+      unset($_SESSION['result_con']);
+      //Redirect
+      header('location: '.$admin_file.'?task=result_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&rid='.$result_id);
+      exit;
+    }
+    //update result Condition
+    if(0 === count($error) && !empty($result_con_id))
+    {
+      $common->update('result_condition', $field = ['result_id' => $result_id, 'show_result_id' => $show_result_id], $condition = ['id' => $result_con_id]);
+      //unset session
+      unset($_SESSION['result_con']);
+      //Redirect
+      header('location: '.$admin_file.'?task=result_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&rid='.$result_id);
+      exit;
+    }
+  }
+  //action delete result condition condition
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('result_condition', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=result_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&rid='.$_GET['rid']);
+    exit;
+  }
+  //get edit result condition
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getResultConByID', $common->find('result_condition', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+  $reslut = listResultCondition($_GET['tid'], $_GET['rid']);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('resultCondition', $reslut);
+  $smarty_appform->assign('result', listResult($_GET['tid'], $_GET['tpid'], ''));
+  $smarty_appform->assign('resultById', $common->find('result', $condition = ['id' => $_GET['rid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_result_condition.tpl');
   exit;
 }
 //Task: topic

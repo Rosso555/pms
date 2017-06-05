@@ -25,11 +25,11 @@
                 <input type="text" class="form-control" name="kwd" value="{if $smarty.get.kwd eq 1 || $smarty.get.kwd eq 2}{else}{$smarty.get.kwd}{/if}" />
               </div>
               <div class="form-group">
-                <select class="form-control " name="kwd" id="the_select">
+                <select class="form-control " name="status" id="the_select">
                   <option value="">Show active or stoped</option>
                   <option value="">Show all</option>
-                  <option value="1">Active</option>
-                  <option value="2">stoped</option>
+                  <option value="1" {if $smarty.get.status eq 1}selected{/if}>Active</option>
+                  <option value="2" {if $smarty.get.status eq 2}selected{/if}>stoped</option>
                 </select>
               </div>
               <div class="form-group">
@@ -45,14 +45,14 @@
               <input type="text" class="form-control" name="name" value="{if $edit.name}{$edit.name}{else}{if $smarty.session.staff_info.name|escape}{$smarty.session.staff_info.name|escape}{/if}{/if}" />
             </div>
             <div class="form-group">
-              <label>{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}: </label>
+              <label>{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}: <span class="text-danger">*</span></label>
               <span class="text-danger">
                 {if $error.pass eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}.{/if}
-                {if $error.password eq 2}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if}.{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}{/if}
+                {if $error.password eq 2}{if $multiLang.text_invalid_pass}{$multiLang.text_invalid_pass}{else}No Translate (Key Lang:text_invalid_pass){/if}.{/if}
               </span>
               <input type="password" id='password' class="form-control" name="password" value="{if $edit.password}{$edit.password}{else}{if $smarty.session.staff_info.password|escape}{$smarty.session.staff_info.password|escape}{/if}{/if}" />
               <input type="checkbox" onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'"> {if $multiLang.text_show_password}{$multiLang.text_show_password}{else}No Translate (Key Lang:text_show_password){/if}
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-danger">* {if $multiLang.text_invalid_pass}{$multiLang.text_invalid_pass}{else}No Translate (Key Lang:text_invalid_pass){/if}</span>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </div>
             <label>Gender</label><span class="text-danger"> *{if $error.gender}Please choice gender.{/if}</span>
             <div class="radio">
@@ -65,7 +65,7 @@
             </div>
             <div class="form-group">
               <label>{if $multiLang.text_phone}{$multiLang.text_phone}{else}No Translate (Key Lang:text_phone){/if}:</label><span class="text-danger"> *{if $error.phone eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_phone}{$multiLang.text_phone}{else}No Translate (Key Lang:text_phone){/if}.{/if}</span>
-              <input type="text" class="form-control" name="phone" value="{if $edit.phone}{$edit.phone}{else}{if $smarty.session.staff_info.phone|escape}{$smarty.session.staff_info.phone|escape}{/if}{/if}" placeholder="+855 123 456" />
+              <input type="text" class="form-control" name="phone" value="{if $edit.phone}{$edit.phone}{else}{if $smarty.session.staff_info.phone|escape}{$smarty.session.staff_info.phone|escape}{/if}{/if}" placeholder="+855 123 456" onkeyup="NumAndTwoDecimals(event , this);" />
             </div>
             <div class="form-group">
               <label>{if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}</label><span class="text-danger"> *{if $error.staff_role eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}.{/if}</span>
@@ -202,7 +202,7 @@
 <script type="text/javascript">
 $(function(){
   $("#the_select").change(function(){
-    window.location='{$admin_file}?task=staff_info&kwd=' + this.value
+    window.location='{$admin_file}?task=staff_info&kwd={$smarty.get.kwd}&status=' + this.value
   });
 });
 </script>

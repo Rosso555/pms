@@ -1,5 +1,22 @@
 <?php
 /**
+ * array_unique_by_key for multidimensional array
+ * @param  mix $array is array value
+ * @param  string $key is name of array key
+ * @return array or boolean
+ */
+function array_unique_by_key(&$array, $key) {
+  $tmp = array();
+  $result = array();
+  foreach ($array as $value) {
+      if (!in_array($value[$key], $tmp)) {
+          array_push($tmp, $value[$key]);
+          array_push($result, $value);
+      }
+  }
+  return $array = $result;
+}
+/**
  * [getMultilang]
  * @param  [string] $lang
  * @author In khemarak

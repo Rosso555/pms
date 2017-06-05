@@ -69,12 +69,11 @@ function updateDefaultLang()
 }
 /**
  * listMultiLang
- * @param  string $kwd
- * @return array
- * @author In khemarak
+ * @param  string $kwd is keywrd
+ * @param  int $slimit is setLimit
  * @return array or boolean
  */
- function listMultiLang($kwd = "", $slimit)
+function listMultiLang($kwd, $slimit)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
@@ -82,13 +81,36 @@ function updateDefaultLang()
     $condition = '';
 
     if(!empty($slimit)) $limit = $slimit;
-    if(!empty($kwd)) $condition .= ' WHERE key_lang LIKE :kwd ';
+
+    if(!empty($kwd)){
+      $sql1 = ' SELECT * FROM `multi_lang` WHERE title LIKE :kwd ';
+      $stmt1 = $connected->prepare($sql1);
+      $stmt1->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+      $stmt1->execute();
+      $row1 = $stmt1->fetchAll();
+      $rWhereTitle = array_unique_by_key($row1, 'key_lang');
+
+      if(!empty($rWhereTitle)){
+        $where_in = '';
+        foreach ($rWhereTitle as $key => $value) {
+          if($key == 0){
+            $where_in .= ' "'.$value['key_lang'].'" ';
+          }else {
+            $where_in .= ', "'.$value['key_lang'].'" ';
+          }
+        }//End fetch
+        $condition .= ' WHERE ml.key_lang IN ('.$where_in.') ';
+      }else {
+        $condition .= ' WHERE ml.key_lang LIKE :kwd ';
+      }
+    }
 
     $sql = ' SELECT ml.*, l.title AS language_title, (SELECT COUNT(*) FROM `multi_lang` ml INNER JOIN language l ON l.id = ml.language_id '.$condition.') AS total
                 FROM `multi_lang` ml
-                INNER JOIN language l ON l.id = ml.language_id '.$condition.' ORDER BY key_lang DESC LIMIT :offset, :limit ';
+                INNER JOIN language l ON l.id = ml.language_id '.$condition.' ORDER BY ml.key_lang DESC LIMIT :offset, :limit ';
+
     $stmt = $connected->prepare($sql);
-    if(!empty($kwd)) $stmt->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    if(empty($rWhereTitle) && !empty($kwd)) $stmt->bindValue(':kwd', $kwd .'%', PDO::PARAM_STR);
     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
     $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
     $stmt->execute();
@@ -283,7 +305,7 @@ function ListStaffRole($kwd = "")
  * @author In khemarak
  * @return array
  */
-function ListStaffInfo($kwd = "")
+function ListStaffInfo($kwd, $status)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
@@ -291,15 +313,25 @@ function ListStaffInfo($kwd = "")
     $condition = '';
     if(!empty($kwd))
     {
-      $condition .= ' WHERE staff.name LIKE :kwd OR staff.status LIKE :kwd ';
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' staff.name LIKE :kwd ';
     }
-    $sql = 'SELECT staff.*, staff_role.name AS role_name, (SELECT COUNT(*) FROM `staff`  INNER JOIN staff_role ON staff.staff_role_id = staff_role.id '.$condition.') AS total
+    if(!empty($status))
+    {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' staff.status = :status ';
+    }
+    if(!empty($condition)) $where .= ' WHERE '.$condition;
+
+    $sql = 'SELECT staff.*, staff_role.name AS role_name, (SELECT COUNT(*) FROM `staff`  INNER JOIN staff_role ON staff.staff_role_id = staff_role.id '.$where.') AS total
              FROM `staff`
              INNER JOIN staff_role
                ON staff.staff_role_id = staff_role.id
-             '.$condition.' ORDER BY staff.id DESC LIMIT :offset, :limit';
+             '.$where.' ORDER BY staff.id DESC LIMIT :offset, :limit';
+
     $stmt = $connected->prepare($sql);
     if(!empty($kwd)) $stmt->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    if(!empty($status)) $stmt->bindValue(':status', (int)$status, PDO::PARAM_INT);
     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
     $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
     $stmt->execute();
@@ -308,7 +340,7 @@ function ListStaffInfo($kwd = "")
     return $row;
   } catch (Exception $e) {
     $result = false;
-    if($debug)  echo 'Errors: listStaff'.$e->getMessage();
+    if($debug)  echo 'Errors: ListStaffInfo'.$e->getMessage();
   }
   return $result;
 }
@@ -663,6 +695,32 @@ function listResult($tid, $topic_id, $slimit)
   return $result;
 }
 /**
+ * listResultCondition
+ * @param  int $tid is test id
+ * @param  int $rid is result id
+ * @return array or boolean
+ */
+function listResultCondition($tid, $rid)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try {
+    $sql =' SELECT rc.*, r.score_from, r.score_to, r.message, t.name FROM `result_condition` rc
+              INNER JOIN result r ON r.id = rc.show_result_id
+              INNER JOIN topic t ON t.id = r.topic_id
+            WHERE rc.result_id = :rid AND r.test_id = :tid ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':rid', (int)$rid, PDO::PARAM_INT);
+    $stmt->bindValue(':tid', (int)$tid, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listResultCondition'.$e->getMessage();
+  }
+  return $result;
+}
+/**
  * checkDeleteResult
  * @param  int $id is result_id
  * @return array or boolean
@@ -786,6 +844,95 @@ function getListTestQuestionTopicHide($test_id)
   return $result;
 }
 /**
+ * getListTransaction
+ * @param  int $mlid is mailerlite_id
+ * @return array or boolean
+ */
+function getListTransaction($mlid, $testid, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+
+    if(!empty($testid)) $condition = ' AND apit.test_id = :test_id';
+
+    $sql =' SELECT apit.*, t.title AS test_title, COUNT(gm.transaction_id) AS count_group,
+              (SELECT COUNT(*) FROM (SELECT COUNT(*) FROM `apitransaction` apit
+                INNER JOIN mailerlite_group gm ON gm.transaction_id = apit.id
+                INNER JOIN test t ON t.id = apit.test_id
+              WHERE apit.ml_id = :mlid '.$condition.' GROUP BY apit.id) AS group_by) AS total
+            FROM `apitransaction` apit
+              INNER JOIN mailerlite_group gm ON gm.transaction_id = apit.id
+              INNER JOIN test t ON t.id = apit.test_id
+            WHERE apit.ml_id = :mlid AND t.lang = :lang '.$condition.' GROUP BY apit.id LIMIT :offset, :limit';
+    $query = $connected->prepare($sql);
+
+    if(!empty($testid)) $query->bindValue(':test_id', $testid, PDO::PARAM_INT);
+
+    $query->bindValue(':mlid', $mlid, PDO::PARAM_INT);
+    $query->bindValue(':lang', $lang, PDO::PARAM_STR);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTransaction'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * is_exist_transaction_test
+ * @param  int  $testid test id
+ * @param  int  $mlid   mailerlite_id
+ * @return boolean
+ */
+function is_exist_transaction_test($testid, $mlid)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count FROM `apitransaction` WHERE test_id = :testid AND ml_id = :mlid ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':testid', (int)$testid, PDO::PARAM_INT);
+    $query->bindValue(':mlid', (int)$mlid, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: is_exist_transaction_test'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * countMailerLiteGroup
+ * @param  int $tid is translate_id
+ * @return boolean
+ */
+function countMailerLiteGroup($tid)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count FROM `mailerlite_group` WHERE transaction_id = :tid ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':tid', (int)$tid, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: countMailerLiteGroup'.$e->getMessage();
+  }
+  return $result;
+}
+/**
  * getListTopicHide
  * @param  int $test_id is test id
  * @param  int $topic_id is topic_id
@@ -813,47 +960,6 @@ function getListTestTopicHide($test_id, $topic_id)
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: getListTopicHide'.$e->getMessage();
-  }
-  return $result;
-}
-/**
- * getListTestTopicAnalysis
- * @param  int  $test_id
- * @param  string  $lang is language
- * @return boolean or array
- */
-function getListTestTopicAnalysis($kwd, $test_id, $lang)
-{
-  global $debug, $connected, $limit, $offset, $total_data;
-  $result = true;
-  try{
-    $condition = '';
-
-    if(!empty($kwd)) $condition = ' AND t.name LIKE :kwd ';
-
-    $sql =' SELECT tta.*, t.name AS topic_name, ta.name AS topic_analysis_name,
-              (SELECT COUNT(*) FROM `test_topic_analysis` tta
-                INNER JOIN topic t ON t.id = tta.topic_id
-                INNER JOIN topic_analysis ta ON ta.id = tta.topic_analysis_id
-              WHERE tta.test_id = :test_id AND t.lang = :lang AND ta.lang = :lang '.$condition.') AS total
-            FROM `test_topic_analysis` tta
-              INNER JOIN topic t ON t.id = tta.topic_id
-              INNER JOIN topic_analysis ta ON ta.id = tta.topic_analysis_id
-            WHERE tta.test_id = :test_id AND t.lang = :lang AND ta.lang = :lang '.$condition.' ORDER BY tta.topic_id DESC LIMIT :offset, :limit ';
-
-    $query = $connected->prepare($sql);
-    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
-    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
-    $query->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-    $query->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-    $query->execute();
-    $row = $query->fetchAll();
-    if (count($row) > 0) $total_data = $row[0]['total'];
-    return $row;
-  } catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: getListTestTopicAnalysis'.$e->getMessage();
   }
   return $result;
 }
