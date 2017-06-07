@@ -57,10 +57,17 @@ $(document).ready(function(){
 		// select2 form
 		$(".select2").select2();
 
-		$(".select2_second_topic").select2({
-			  placeholder: "Analysis Topic",
+		$(".select2_test_group").select2({
+				placeholder: "---{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if}---",
+		});
 
-			});
+		$(".select2_second_topic").select2({
+			  placeholder: "{if $multiLang.text_analysis_topic}{$multiLang.text_analysis_topic}{else}No Translate(Key Lang: text_analysis_topic){/if}",
+		});
+		$(".select2_group_answer").select2({
+			  placeholder: "--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} ---",
+		});
+
 });
 function NumAndTwoDecimals(e , field)
 {

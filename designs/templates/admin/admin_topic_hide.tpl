@@ -170,6 +170,7 @@
 <script>
 function getTopicHide(sel)
 {
+  $(".loader").show();
   $.ajax({
     type: "GET",
     url: "{$admin_file}?task=topic_hide&action=get_topic_hide&tid={$smarty.get.tid}&tpid="+sel.value,
@@ -188,9 +189,12 @@ function getTopicHide(sel)
 
         }
         $("#topic_second").html(dataHTML);
+        $(".loader").hide();
       }else {
+        dataHTML += "<option value=''>--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} Show {if $multiLang.text_topic}{$multiLang.text_topic}{else}No Translate(Key Lang: text_topic){/if} ---</option>";
 
         $("#topic_second").html(dataHTML);
+        $(".loader").hide();
       }
 
     },
