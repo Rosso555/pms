@@ -1272,6 +1272,30 @@ function is_exist_test_question($test_id, $que_id)
   return $result;
 }
 /**
+ * is_exist_answer_topic
+ * @param  int  $ansid is answer_id
+ * @param  int  $topic_id is topic_id
+ * @return boolean
+ */
+function is_exist_answer_topic($ansid, $topic_id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count FROM `answer_topic` WHERE answer_id = :answer_id AND topic_id = :topic_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':answer_id', (int)$ansid, PDO::PARAM_INT);
+    $query->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: is_exist_answer_topic'.$e->getMessage();
+  }
+  return $result;
+}
+/**
  * checkTopicResult
  * @param  int $test_id
  * @param  int $topic_id
@@ -1431,6 +1455,488 @@ function listAnswer($tqid, $kwd)
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: listAnswer'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListAnswerTopic
+ * @param  int $answer_id
+ * @return array or boolean
+ */
+function getListAnswerTopic($answer_id){
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql =' SELECT atp.*, t.name FROM `answer_topic` atp INNER JOIN topic t ON t.id = atp.topic_id WHERE atp.answer_id = :answer_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':answer_id', $answer_id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetchAll();
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getAnswerTopic'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * getTestQuestionTopView
+ * @param  int $test_id is test_id
+ * @return array or boolean
+ */
+function getTestQuestionTopView($test_id){
+  global $debug, $connected;
+  $result = true;
+
+  try{
+    $sql =' SELECT * FROM `test_question` WHERE test_id = :test_id ORDER BY view_order DESC LIMIT 0, 1 ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetch();
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getTestQuestionTopView'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * getCheckViewOrder
+ * @param  int $test_id is test id
+ * @param  int $view_order is view_order
+ * @return array or boolean
+ */
+function getCheckViewOrder($test_id, $view_order)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try{
+    $sql =' SELECT ans.*, tq2.view_order AS t_que_view_order, tq.view_order AS jump_to_view_order, tq.test_id
+            FROM `answer` ans
+              INNER JOIN test_question tq ON tq.id = ans.jump_to
+              INNER JOIN test_question tq2 ON tq2.id = ans.test_question_id
+            WHERE tq.test_id = :test_id AND ans.jump_to != 0 AND tq2.view_order < :view_order ORDER BY tq.view_order DESC LIMIT 0, 1 ';
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':view_order', (int)$view_order, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetch();
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getCheckViewOrder'.$e->getMessage();
+  }
+  return $result;
+
+}
+/**
+ * getListQuestionJumpTo
+ * @param  int $answer_id is answer_id
+ * @return array or boolean
+ */
+function getListQuestionJumpTo($answer_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql =' SELECT ans.*, tq.id, tq.question_id, q.title AS title_que
+            FROM `answer` ans
+             INNER JOIN test_question tq ON tq.id = ans.jump_to
+             INNER JOIN question q ON q.id = tq.question_id
+            WHERE ans.id = :answer_id ';
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':answer_id', (int)$answer_id, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetch();
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListQuestionJumpTo'.$e->getMessage();
+  }
+  return $result;
+
+}
+/**
+ * getListViewOrderTestQuestion
+ * @param  int $test_id
+ * @return array or boolean
+ */
+function getListViewOrderTestQuestion($test_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try{
+    $sql =' SELECT tqvo.*, q.title AS que_title, q.description, ga.g_answer_title, (SELECT COUNT(*) FROM `test_question_view_order` tqvo INNER JOIN test_question tq ON tq.id = tqvo.test_question_id INNER JOIN question q ON q.id = tq.question_id LEFT JOIN group_answer ga ON ga.test_question_id = tqvo.test_question_id WHERE tqvo.test_id = :test_id) AS total
+            FROM `test_question_view_order` tqvo
+              INNER JOIN test_question tq ON tq.id = tqvo.test_question_id
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN group_answer ga ON ga.test_question_id = tqvo.test_question_id
+            WHERE tqvo.test_id = :test_id ORDER BY tqvo.view_order ASC LIMIT :offset, :limit';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListViewOrderTestQuestion'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getTestQuestionGroupAnswer
+ * @param  int $test_id
+ * @return array or boolean
+ */
+function getTestQuestionGroupAnswer($test_id)
+{
+  global $debug, $connected;
+  $result = true;
+
+  try{
+    $sql =' SELECT tq.id AS tqid, q.title AS que_title, q.description, ga.g_answer_title, tqvo.id AS tq_view_order, tgq.id AS test_ques_group FROM `test_question` tq
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN group_answer ga ON ga.test_id = :test_id AND ga.test_question_id = tq.id
+              LEFT JOIN test_question_view_order tqvo ON tqvo.test_id = :test_id AND tqvo.test_question_id = tq.id
+              LEFT JOIN test_group_question tgq ON tgq.test_question_id = tq.id
+            WHERE tq.test_id = :test_id AND ga.test_question_id IS NULL OR ga.flag = 1 ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetchAll();
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getTestQuestionGroupAnswer'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * is_view_order_exist
+ * @param  int  $test_id
+ * @param  int $test_que_id
+ * @return boolean
+ */
+function is_view_order_exist($test_id, $test_que_id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count FROM `test_question_view_order` WHERE test_id = :test_id AND test_question_id = :test_que_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':test_que_id', (int)$test_que_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: is_view_order_exist'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListResponseByTopic
+ * @param  int $test_id
+ * @param  int $slimit for setLimit
+ * @return array or boolean
+ */
+function getListResponseByTopic($test_id, $slimit)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    $result = getListResponse($test_id, $slimit);
+
+    foreach ($result as $key => $value) {
+      $sql =' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, t.name AS topic_title,
+                ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+              FROM `response` rs
+                INNER JOIN response_answer rsa ON rsa.response_id = rs.id
+                INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
+                INNER JOIN answer_topic atp ON atp.answer_id = ans.id
+                INNER JOIN topic t ON t.id = atp.topic_id
+               WHERE rs.id = :rid GROUP BY atp.topic_id, rs.id ORDER BY rs.id DESC ';
+
+      $query = $connected->prepare($sql);
+      $query->bindValue(':rid', (int)$value['id'], PDO::PARAM_INT);
+      $query->execute();
+      $rows = $query->fetchAll();
+      $newResult[] = array('id' => $value['id'], 'unique_id' => $value['unique_id'], 'created_at' => $value['created_at'], 'topic_result' => $rows);
+    }
+
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListResponseByTopic'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListResponse
+ * @param  int $test_id is test id
+ * @param  int $slimit for set limit
+ * @return array or boolean
+ */
+function getListResponse($test_id, $slimit)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    if(!empty($slimit)) $limit = $slimit;
+    if(!empty($slimit)) $setLimit = ' LIMIT :offset, :limit ';
+
+    $sql =' SELECT *, (SELECT COUNT(*) FROM `response` WHERE test_id = :test_id) AS total FROM `response` WHERE test_id = :test_id ORDER BY created_at DESC '.$setLimit;
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+
+    if(!empty($slimit)){
+      $query->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+      $query->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+    }
+
+    $query->execute();
+    $row = $query->fetchAll();
+    if (count($row) > 0) $total_data = $row[0]['total'];
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListResponse'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListResponseAnswerByTopic
+ * @param  int $rid is response_id
+ * @return array or boolean
+ */
+function getListResponseAnswerByTopic($rid)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $result = getListResponseAnswer($rid);
+
+    foreach ($result as $key => $value) {
+      $sql =' SELECT t.name, ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+              FROM `response_answer` ra
+                INNER JOIN test_question tq ON tq.id = ra.test_question_id
+                INNER JOIN question q ON q.id = tq.question_id
+                LEFT JOIN answer_topic atp ON atp.answer_id = ra.answer_id
+                LEFT JOIN answer ans ON ans.id = ra.answer_id
+                LEFT JOIN topic t ON t.id = atp.topic_id
+              WHERE ra.response_id = :rid AND ra.id = :rans_id  GROUP BY atp.topic_id ORDER BY atp.topic_id ASC ';
+
+      $query = $connected->prepare($sql);
+      $query->bindValue(':rid', (int)$rid, PDO::PARAM_INT);
+      $query->bindValue(':rans_id', (int)$value['id'], PDO::PARAM_INT);
+      $query->execute();
+      $rows = $query->fetchAll();
+      $newResult[] = array('id'         => $value['id'],
+                           'content'    => $value['content'],
+                           'is_email'   => $value['is_email'],
+                           'que_title'  => $value['que_title'],
+                           'title'      => $value['title'],
+                           'calculate'  => $value['calculate'],
+                           'topic_value' => $rows);
+    }
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListResponseAnswer'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListResponseAnswer
+ * @param  int $rid is response_id
+ * @return array or boolean
+ */
+function getListResponseAnswer($rid)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql =' SELECT ra.*, tq.question_id, q.title AS que_title, ans.*, ra.id,
+              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+            FROM `response_answer` ra
+              INNER JOIN test_question tq ON tq.id = ra.test_question_id
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN answer_topic atp ON atp.answer_id = ra.answer_id
+              LEFT JOIN answer ans ON ans.id = ra.answer_id
+            WHERE ra.response_id = :rid GROUP BY ra.id ';
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':rid', (int)$rid, PDO::PARAM_INT);
+
+    $query->execute();
+    return $query->fetchAll();
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListResponseAnswer'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getResponseAnswerCSVdownload
+ * @param  int $test_id is test_id
+ * @return array or boolean
+ */
+function getResponseAnswerCSVdownload($test_id){
+
+  global $total_data;
+  $resultListResponse = getListResponse($test_id, '');
+  if(!empty($resultListResponse)){
+    foreach ($resultListResponse as $key => $value) {
+      $newResult[] = array('id' => $value['id'], 'score' => $value['score']);
+      $result = getListResponseAnswer($value['id']);
+
+      foreach ($result as $key => $va) {
+
+        $newResult['answer'.$value['id']][] =  $va['que_title'];
+
+        if(!empty($va['content'])){
+          $newResult['answer'.$value['id']][] =  $va['content'];
+        }else {
+          if($va['calculate'] == 1){
+            $newResult['answer'.$value['id']][] =  $va['amount'].' /No Calculate';
+          }else {
+            $newResult['answer'.$value['id']][] =  $va['amount'].' /Calculate';
+          }
+        }
+
+      }
+
+    }
+
+    //Get max value of count result answer for gerate header csv
+    $max_value = 0;
+    foreach ($newResult as $key => $value) {
+      if (count($newResult['answer'.$value['id']]) >= $max_value && count($newResult['answer'.$value['id']]) !== 0){
+        $max_value = count($newResult['answer'.$value['id']]);
+      }
+    }
+    $total_data = $max_value / 2;
+  }
+
+  return $newResult;
+}
+/**
+ * listTestGroup
+ * @param  int $testid is test_id
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function listTestGroup($testid, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+
+    if(!empty($testid)) $condition .= ' AND tg.test_id = :test_id ';
+
+    $sql =' SELECT tg.*, t.title AS title_test, COUNT(tgq.id) AS total_group_question,
+              (SELECT COUNT(*) FROM `test_group` tg INNER JOIN test t ON t.id = tg.test_id WHERE t.lang = :lang '.$condition.') AS total
+            FROM `test_group` tg
+              INNER JOIN test t ON t.id = tg.test_id
+              LEFT JOIN test_group_question tgq ON tgq.test_group_id = tg.id
+            WHERE t.lang = :lang '.$condition.'
+            GROUP BY tg.id ORDER BY tg.test_id DESC LIMIT :offset, :limit ';
+    $query = $connected->prepare($sql);
+
+    if(!empty($testid)) $query->bindValue(':test_id', $testid, PDO::PARAM_INT);
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listTestGroup'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * listTestGroupQuestion
+ * @param  int $tgroupid is test_group_id
+ * @return array or boolean
+ */
+function listTestGroupQuestion($tgroupid)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    $sql =' SELECT tgq.*, q.title AS que_title, q.type, q.description, ga.g_answer_title,
+              (SELECT COUNT(*) FROM `test_group_question` tgq
+                INNER JOIN test_question tq ON tq.id = tgq.test_question_id
+                INNER JOIN question q ON q.id = tq.question_id
+                LEFT JOIN group_answer ga ON ga.test_question_id = tgq.test_question_id
+              WHERE tgq.test_group_id = :test_group_id) AS total
+            FROM `test_group_question` tgq
+              INNER JOIN test_question tq ON tq.id = tgq.test_question_id
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN group_answer ga ON ga.test_question_id = tgq.test_question_id
+            WHERE tgq.test_group_id = :test_group_id LIMIT :offset, :limit';
+    $query = $connected->prepare($sql);
+
+    $query->bindValue(':test_group_id', $tgroupid, PDO::PARAM_INT);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listTestGroupQuestion'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * is_exist_test_group_question
+ * @param  int  $test_id
+ * @param  int  $t_que_id is test question_id
+ * @return boolean
+ */
+function is_exist_test_group_question($test_id, $t_que_id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count FROM `test_group` tg INNER JOIN test_group_question tgq ON tgq.test_group_id = tg.id WHERE tg.test_id = :test_id AND tgq.test_question_id = :t_que_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':t_que_id', (int)$t_que_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: is_exist_test_group_question'.$e->getMessage();
   }
   return $result;
 }

@@ -26,18 +26,31 @@
         <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-users" aria-hidden="true"></i> User <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="{$admin_file}?task=psychologist"><i class="fa fa-user-plus" aria-hidden="true"></i> Psychologist</a></li>
-            <li><a href="{$admin_file}?task=patient"><i class="fa fa-user-md" aria-hidden="true"></i> Patient</a></li>
+            <li><a href="{$admin_file}?task=psychologist"><i class="fa fa-user-plus" aria-hidden="true"></i> {if $multiLang.menu_psychologist}{$multiLang.menu_psychologist}{else}No Translate (Key Lang: menu_psychologist){/if}</a></li>
+            <li><a href="{$admin_file}?task=patient"><i class="fa fa-user-md" aria-hidden="true"></i> {if $multiLang.menu_patient}{$multiLang.menu_patient}{else}No Translate (Key Lang: menu_patient){/if}</a></li>
           </ul>
         </li>
         <li><a href="{$admin_file}?task=question"><i class="fa fa-question-circle" aria-hidden="true"></i> {if $multiLang.menu_question}{$multiLang.menu_question}{else}No Translate (Key Lang: menu_question){/if}</a></li>
-        <li><a href="{$admin_file}?task=test"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test}{$multiLang.menu_test}{else}No Translate (Key Lang: menu_test){/if}</a></li>
-        <li><a href="{$admin_file}?task=test_question"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_question}{$multiLang.menu_test_question}{else}No Translate (Key Lang: menu_test_question){/if}</a></li>
-        <li><a href="{$admin_file}?task=test_group"><i class="fa fa-clone fa-fw"></i> Test Group</a></li>
+
+        <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-cog" aria-hidden="true"></i> Test Setting <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{$admin_file}?task=test"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test}{$multiLang.menu_test}{else}No Translate (Key Lang: menu_test){/if}</a></li>
+            <li><a href="{$admin_file}?task=test_question"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_question}{$multiLang.menu_test_question}{else}No Translate (Key Lang: menu_test_question){/if}</a></li>
+            <li><a href="{$admin_file}?task=test_group"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_group}{$multiLang.menu_test_group}{else}No Translate (Key Lang: menu_test_group){/if}</a></li>
+          </ul>
+        </li>
+        <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-share-square-o" aria-hidden="true"></i> Test Assign <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{$admin_file}?task=test_psychologist"><i class="fa fa-user-plus" aria-hidden="true"></i> {if $multiLang.menu_psychologist}{$multiLang.menu_psychologist}{else}No Translate (Key Lang: menu_psychologist){/if}</a></li>
+            <li><a href="{$admin_file}?task=test_patient"><i class="fa fa-user-md" aria-hidden="true"></i> {if $multiLang.menu_patient}{$multiLang.menu_patient}{else}No Translate (Key Lang: menu_patient){/if}</a></li>
+          </ul>
+        </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown" id="animated">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-cog fa-lg" aria-hidden="true"></i> {if $multiLang.menu_setting}{$multiLang.menu_setting}{else}No Translate (Key Lang:menu_setting){/if} <span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-cog" aria-hidden="true"></i> {if $multiLang.menu_setting}{$multiLang.menu_setting}{else}No Translate (Key Lang:menu_setting){/if} <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="{$admin_file}?task=category"><i class="fa fa-bars" aria-hidden="true"></i>&nbsp;{if $multiLang.menu_category}{$multiLang.menu_category}{else}No Translate (Key Lang: menu_category){/if}</a></li>
             <li><a href="{$admin_file}?task=mailerlite"><i class="fa fa-envelope" aria-hidden="true"></i> {if $multiLang.menu_mailerlite}{$multiLang.menu_mailerlite}{else}No Translate (Key Lang: menu_mailerlite){/if}</a></li>

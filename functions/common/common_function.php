@@ -484,7 +484,153 @@ function listTopicAnalysis($kwd, $lang)
 
   return $result;
 }
+/**
+ * getResultAnswerTopic
+ * @param  int $unique_id is unique_id
+ * @param  int $test_id is test_id
+ * @param  int $if_topic_id is if_topic_id
+ * @return array or boolean
+ */
+function getResultAnswerTopic($unique_id, $test_id, $if_topic_id, $topic_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
 
+    if(!empty($if_topic_id)) $where .= ' AND atp.topic_id = :if_topic_id ';
+    if(!empty($topic_id)) $where .= ' AND atp.topic_id = :topic_id ';
+
+    $sql =' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
+              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+            FROM `response` rs
+              INNER JOIN response_answer rsa ON rsa.response_id = rs.id
+              INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
+              INNER JOIN answer_topic atp ON atp.answer_id = ans.id
+              INNER JOIN topic t ON t.id = atp.topic_id
+              LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
+              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
+            WHERE rs.unique_id = :unique_id '.$where.' GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
+
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':unique_id', (int)$unique_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    if(!empty($topic_id)) $stmt->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
+    if(!empty($if_topic_id)) $stmt->bindValue(':if_topic_id', (int)$if_topic_id, PDO::PARAM_INT);
+    $stmt->execute();
+    if(!empty($if_topic_id) || !empty($topic_id)){
+      $rows = $stmt->fetch();
+    }else {
+      $rows = $stmt->fetchAll();
+    }
+    return $rows;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getResultAnswerTopic'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListTestPsychologist
+ * @param  int $psy_id
+ * @param  int $tid
+ * @param  string $status
+ * @return array or boolean
+ */
+function getListTestPsychologist($psy_id, $tid, $status)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = $where = '';
+
+    if(!empty($psy_id)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' tps.psychologist_id = :psy_id ';
+    }
+    if(!empty($tid)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' tps.test_id = :testid ';
+    }
+    if(!empty($status)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' tps.status = :status ';
+    }
+
+    if(!empty($condition)) $where .= ' WHERE '.$condition;
+
+    $sql =' SELECT tps.*, psy.username, t.category_id, t.title,
+              (SELECT COUNT(*) FROM `test_psychologist` tps INNER JOIN psychologist psy ON psy.id = tps.psychologist_id INNER JOIN test t ON t.id = tps.test_id '.$where.') AS total_count
+            FROM `test_psychologist` tps
+              INNER JOIN psychologist psy ON psy.id = tps.psychologist_id
+              INNER JOIN test t ON t.id = tps.test_id '.$where.' ORDER BY tps.psychologist_id LIMIT :offset, :limit ';
+
+    $stmt = $connected->prepare($sql);
+
+    if(!empty($tid))    $stmt->bindValue(':testid', $tid, PDO::PARAM_INT);
+    if(!empty($psy_id)) $stmt->bindValue(':psy_id', $psy_id, PDO::PARAM_INT);
+    if(!empty($status)) $stmt->bindValue(':status', $status, PDO::PARAM_INT);
+
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total_count'];
+    return $rows;
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestPsychologist'.$e->getMessage();
+  }
+  return $result;
+}
+
+function getListTestPatient($pat_id, $tid, $status)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = $where = '';
+
+    if(!empty($pat_id)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' tpt.patient_id = :pat_id ';
+    }
+    if(!empty($tid)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' tpt.test_id = :testid ';
+    }
+    if(!empty($status)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' tpt.status = :status ';
+    }
+
+    if(!empty($condition)) $where .= ' WHERE '.$condition;
+
+    $sql =' SELECT tpt.*, pt.username, t.category_id, t.title,
+              (SELECT COUNT(*) FROM `test_patient` tpt INNER JOIN patient pt ON pt.id = tpt.patient_id INNER JOIN test t ON t.id = tpt.test_id '.$where.') AS total_count
+            FROM `test_patient` tpt
+              INNER JOIN patient pt ON pt.id = tpt.patient_id
+              INNER JOIN test t ON t.id = tpt.test_id '.$where.' ORDER BY tpt.patient_id LIMIT :offset, :limit ';
+
+    $stmt = $connected->prepare($sql);
+
+    if(!empty($tid))    $stmt->bindValue(':testid', $tid, PDO::PARAM_INT);
+    if(!empty($pat_id)) $stmt->bindValue(':pat_id', $pat_id, PDO::PARAM_INT);
+    if(!empty($status)) $stmt->bindValue(':status', $status, PDO::PARAM_INT);
+
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total_count'];
+    return $rows;
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestPatient'.$e->getMessage();
+  }
+  return $result;
+}
 
 
 

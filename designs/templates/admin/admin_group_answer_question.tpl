@@ -2,6 +2,7 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
+  <li><a id="bCrumbTest" href="{$admin_file}?task=test">{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</a></li>
   <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_group_answer_question}{$multiLang.text_group_answer_question}{else}No Translate(Key Lang: text_group_answer_question){/if}</li>
   {if $smarty.get.action eq 'edit'}
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
@@ -245,7 +246,7 @@
         </div>
         <!-- End Modal Change Status -->
 
-      <a href="javascript:history.back()" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
+      <a id="btnBack" href="javascript:history.back()" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
     </div><!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
@@ -253,6 +254,19 @@
 {/block}
 {block name="javascript"}
 <script>
+  //Get previous url
+  var urlBack =  document.referrer;
+  var url = '';
+  if(urlBack !== '') url = getUrlPrevious(urlBack);
+  if(url.task === 'test') localStorage.setItem('urlTest',urlBack);
+  //Get session url
+  var getUrlBack = localStorage.getItem('urlTest');
+  if(getUrlBack !== null){
+    $("#btnBack").attr("href", getUrlBack);
+    $("#bCrumbTest").attr("href", getUrlBack);
+  }
+  //End previous url
+
 function getGroupAnswerDetail(id)
 {
   //Clear value on select2

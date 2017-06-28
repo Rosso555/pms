@@ -17,16 +17,23 @@ class common
   	$str = stripslashes($str);
   	return $str;
   }
-  //not yet finish
-  // function clean_string_array($str_array)
-  // {
-  //   $str = array();
-  //   foreach ($str_array as $key => $str) {
-  //     $str = strip_tags($str);
-  //   	$str = stripslashes($str);
-  //   }
-  // 	return $str;
-  // }
+  /**
+   * clean string array
+   * @param  mix $str_array
+   * @return array
+   */
+  function clean_string_array($str_array)
+  {
+    $re_str = array();
+    if(!empty($str_array)){
+      foreach ($str_array as $key => $str) {
+        $str = strip_tags($str);
+      	$str = stripslashes($str);
+        $re_str[] = $str;
+      }
+    }
+  	return $re_str;
+  }
 
 	function sendMail($to, $subject, $body, $from_email,$from_name)
 	{

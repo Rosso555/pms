@@ -2,8 +2,8 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li><a href="{$admin_file}?task=test">{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</a></li>
-  <li><a href="{$admin_file}?task=result&amp;tid={$smarty.get.tid}">{if $multiLang.text_result}{$multiLang.text_result}{else}No Translate(Key Lang: text_result){/if}</a></li>
+  <li><a id="bCrumbTest" href="{$admin_file}?task=test">{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</a></li>
+  <li><a id="bCrumbResult" href="{$admin_file}?task=result&amp;tid={$smarty.get.tid}">{if $multiLang.text_result}{$multiLang.text_result}{else}No Translate(Key Lang: text_result){/if}</a></li>
   <li {if $smarty.get.action neq edit}class="active"{/if}>{if $multiLang.text_result_condition}{$multiLang.text_result_condition}{else}No Translate(Key Lang: text_result_condition){/if}</li>
   {if $smarty.get.action eq edit}
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
@@ -50,7 +50,7 @@
               <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate(Key Lang: button_update){/if}</button>
               <a href="{$admin_file}?task=result_condition&amp;tid={$smarty.get.tid}&amp;tpid={$smarty.get.tpid}&amp;rid={$smarty.get.rid}" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate(Key Lang: button_cancel){/if}</a>
             {else}
-              <button type="submit" name="butsubmit" class="btn btn-danger"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
+              <button type="submit" name="butsubmit" class="btn btn-info"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
             {/if}
           </div>
         </form>
@@ -115,9 +115,27 @@
         {/if}
       </table>
 
-      <a href="javascript:history.back()" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
+      <a id="btnBack" href="javascript:history.back()" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
     </div><!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->
+{/block}
+{block name="javascript"}
+<script>
+  //Get previous url
+  var urlBack =  document.referrer;
+  var url = '';
+  if(urlBack !== '') url = getUrlPrevious(urlBack);
+  if(url.task === 'result') localStorage.setItem('urlResult',urlBack);
+  //Get session url
+  var getUrlBack = localStorage.getItem('urlResult');
+  var getUrlBackTest = localStorage.getItem('urlTest');
+  if(getUrlBack !== null){
+    $("#btnBack").attr("href", getUrlBack);
+    $("#bCrumbResult").attr("href", getUrlBack);
+  }
+  if(getUrlBackTest !== null) $("#bCrumbTest").attr("href", getUrlBackTest);
+  //End previous url
+</script>
 {/block}

@@ -12,7 +12,13 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="/css/admin_style.css" type="text/css"/>
 <link rel="stylesheet" href="/css/style_select2.css" type="text/css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
 <title>PMS-ADMIN</title>
+<script>
+	$(window).load(function() { $(".loader").fadeOut("slow"); });
+</script>
+
 </head>
 <body>
 {if $mode eq "admin" }{include file="admin/menu.tpl" }{/if}
@@ -41,8 +47,6 @@
 		}
 	}
 </script>
-{block name="javascript"}
-{/block}
 <script>
 $(document).ready(function(){
 	  // check animation icon
@@ -68,6 +72,10 @@ $(document).ready(function(){
 			  placeholder: "--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} ---",
 		});
 
+		$(".select2_test_psy").select2({
+			  placeholder: "{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if}",
+		});
+
 });
 function NumAndTwoDecimals(e , field)
 {
@@ -83,9 +91,23 @@ function NumAndTwoDecimals(e , field)
   }
 }
 
-$(window).load(function() { $(".loader").fadeOut("slow"); });
+function getUrlPrevious(urlBack) {
+	var url = urlBack;
+	var vars = {};
+	var hashes = url.split("?")[1];
+	var hash = hashes.split('&');
+
+	for (var i = 0; i < hash.length; i++) {
+		params=hash[i].split("=");
+		vars[params[0]] = params[1];
+	}
+	return vars;
+}
 
 </script>
+
+{block name="javascript"}
+{/block}
 
 </body>
 </html>

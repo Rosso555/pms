@@ -96,9 +96,11 @@ if('multi_language' === $task)
 
     //form validation
     if(empty($key_lang))    $error['key_lang']  = 1;
-    $result = getMultilangByID($_GET['unique_id']);
+
+    $result = $common->find('multi_lang', $condition = ['unique_id' => $_GET['unique_id']], $type = 'one');
 
     if(!empty($key_lang) && $result['key_lang'] !== $key_lang && is_key_lang_exist($key_lang) > 0) $error['is_key_lang_exist'] = 2;
+
 
     //Add question
     if(0 === count($error) && empty($_GET['unique_id']))
@@ -1208,6 +1210,177 @@ if('answer' === $task)
   $smarty_appform->display('admin/admin_answer.tpl');
   exit;
 }
+//task answer
+if('answer_topic' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['answer_topic']);
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $default_value  = $common->clean_string($_POST['default_value']);
+    $assign_value   = $common->clean_string($_POST['assign_value']);
+    $weight_value   = $common->clean_string($_POST['weight_value']);
+    $topic_id       = $common->clean_string($_POST['topic']);
+    $answer_id      = $common->clean_string($_POST['ans_id']);
+    $id     = $common->clean_string($_POST['id']);
+
+    if(empty($weight_value)) $weight_value = 1;
+    //add value to session to use in template
+    $_SESSION['answer_topic'] = $_POST;
+    //form validation
+    if(empty($answer_id)) $error['asid']  = 1;
+    if(empty($topic_id)) $error['topic_id']  = 1;
+    if(empty($default_value)) $error['default_value'] = 1;
+    //Check is existed topic
+    $rAnsTopic = $common->find('answer_topic', $condition = ['id' => $id], $type = 'one');
+    if($rAnsTopic['topic_id'] !== $topic_id && is_exist_answer_topic($answer_id, $topic_id) > 0) {
+      $error['is_exist_topic']   = 1;
+    }
+
+    //Add Answer
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('answer_topic', $field = ['answer_id' => $answer_id,
+                                              'topic_id'  => $topic_id,
+                                              'default_value' => $default_value,
+                                              'assign_value'  => $assign_value,
+                                              'weight_value'  => $weight_value]);
+      //unset session
+      unset($_SESSION['answer_topic']);
+      //Redirect
+      header('location: '.$admin_file.'?task=answer_topic&tid='.$_GET['tid'].'&qid='.$_GET['qid'].'&tqid='.$_GET['tqid'].'&ans_id='.$_GET['ans_id']);
+      exit;
+    }
+    //update Answer
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('answer_topic', $field = ['answer_id' => $answer_id,
+                                                'topic_id'  => $topic_id,
+                                                'default_value' => $default_value,
+                                                'assign_value'  => $assign_value,
+                                                'weight_value'  => $weight_value], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['answer_topic']);
+      //Redirect
+      header('location: '.$admin_file.'?task=answer_topic&tid='.$_GET['tid'].'&qid='.$_GET['qid'].'&tqid='.$_GET['tqid'].'&ans_id='.$_GET['ans_id']);
+      exit;
+    }
+  }
+  //action delete answer topic
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $rAnswerTopic = $common->find('answer_topic', $condition = ['id' => $_GET['id']], $type = 'one');
+    $rTopic = $common->find('topic', $condition = ['id' => $rAnswerTopic['topic_id']], $type = 'one');
+    $result = checkDeleteAnswer($rAnswerTopic['answer_id']);
+
+    if('0' === $result['total_count'])
+    {
+      $common->delete('answer_topic', $field = ['id' => $_GET['id']]);
+    }else {
+      setcookie('checkAnswer', $result['title'], time() + 10);
+      setcookie('topicTitle', $rTopic['name'], time() + 10);
+      setcookie('ans_topic_id', $_GET['id'], time() + 10);
+    }
+
+    header('location: '.$admin_file.'?task=answer_topic&tid='.$_GET['tid'].'&qid='.$_GET['qid'].'&tqid='.$_GET['tqid'].'&ans_id='.$_GET['ans_id']);
+    exit;
+  }
+  //action delete permanently answer topic
+  if('delete_permanently' === $action && !empty($_GET['id']))
+  {
+    $common->delete('answer_topic', $field = ['id' => $_GET['id']]);
+    $rAnswerTopic = $common->find('answer_topic', $condition = ['answer_id' => $_GET['ans_id']], $type = 'all');
+    //Get response answer
+    $rResponseAns = $common->find('response_answer', $condition = ['answer_id' => $_GET['ans_id']], $type = 'all');
+    foreach ($rResponseAns as $key => $value) {
+      $rSumResAns = sumResponseAnswer($value['response_id'], $_GET['tid']);
+      $common->update('response', $field = ['score' => $rSumResAns], $condition = ['id' => $value['response_id']]);
+    }
+
+    if(COUNT($rAnswerTopic) === 0){
+      deleteResponseAnswer($_GET['tid'], $_GET['ans_id']);
+    }
+
+    setcookie('checkAnswer', $result['title'], time() - 10);
+    setcookie('topicTitle', $rTopic['title'], time() - 10);
+    setcookie('ans_topic_id', $_GET['id'], time() - 10);
+
+    header('location: '.$admin_file.'?task=answer_topic&tid='.$_GET['tid'].'&qid='.$_GET['qid'].'&tqid='.$_GET['tqid'].'&ans_id='.$_GET['ans_id']);
+    exit;
+  }
+  //get edit answer topic
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getAnswerTopicByID', $common->find('answer_topic', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $listAnsTopic = getListAnswerTopic($_GET['ans_id']);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listAnswerTopic', $listAnsTopic);
+  $smarty_appform->assign('topicResult', getTopicResult($_GET['tid']));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->assign('answer', $common->find('answer', $condition = ['id' => $_GET['ans_id']], $type = 'one'));
+  $smarty_appform->assign('question', $common->find('question', $condition = ['id' => $_GET['qid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_answer_topic.tpl');
+  exit;
+}
+//Task jump_to
+if('jump_to' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['session_jump']);
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $question_id       = $common->clean_string($_POST['question']);
+
+    //add value to session to use in template
+    $_SESSION['session_jump'] = $_POST;
+    //form validation
+    if(empty($question_id))     $error['question'] = 1;
+    //update test question
+    if(0 === count($error) && !empty($_GET['ans_id']))
+    {
+      $common->update('answer', $field = ['jump_to' => $question_id], $condition = ['id' => $_GET['ans_id']]);
+      //unset session
+      unset($_SESSION['session_jump']);
+      //Redirect
+      header('location: '.$admin_file.'?task=jump_to&tid='.$_GET['tid'].'&qid='.$_GET['qid'].'&tqid='.$_GET['tqid'].'&ans_id='.$_GET['ans_id']);
+      exit;
+    }
+    $smarty_appform->assign('error', $error);
+  }
+  //action delete category
+  if('delete' === $action && !empty($_GET['ans_id']))
+  {
+    $common->update('answer', $field = ['jump_to' => NULL], $condition = ['id' => $_GET['ans_id']]);
+    header('location: '.$admin_file.'?task=jump_to&tid='.$_GET['tid'].'&qid='.$_GET['qid'].'&tqid='.$_GET['tqid'].'&ans_id='.$_GET['ans_id']);
+    exit;
+  }
+  // check condition when it has parent_id
+  if('edit' === $action && !empty($_GET['ans_id'])){
+    $smarty_appform->assign('jump_toByID', $common->find('answer', $condition = ['id' => $_GET['ans_id']], $type = 'one'));
+  }
+
+  // $result_answer = $common->find('answer', $condition = ['id' => $_GET['ans_id']], $type = 'one');
+  $result_test_question = $common->find('test_question', $condition = ['id' => $_GET['tqid']], $type = 'one');
+  // var_dump(getCheckViewOrder($_GET['tid'], $result_test_question['view_order']));
+
+  $smarty_appform->assign('listTestQuestion', getListTestQuestion('', $_GET['tid'], '', '', $lang, $slimit = ''));
+  $smarty_appform->assign('answer', $common->find('answer', $condition = ['id' => $_GET['ans_id']], $type = 'one'));
+  $smarty_appform->assign('question', $common->find('question', $condition = ['id' => $_GET['qid'], 'lang' => $lang], $type = 'one'));
+  $smarty_appform->assign('test_question', $result_test_question);
+  $smarty_appform->assign('getCheckViewOrder', getCheckViewOrder($_GET['tid'], $result_test_question['view_order']));
+  $smarty_appform->assign('question_jump_to', getListQuestionJumpTo($_GET['ans_id']));
+  $smarty_appform->display('admin/admin_jump_to.tpl');
+  exit;
+}
 //task test
 if('test' === $task)
 {
@@ -1882,6 +2055,164 @@ if('test_topic_answer' === $task)
   $smarty_appform->display('admin/admin_test_topic_answer.tpl');
   exit;
 }
+//Task test group
+if('test_group' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['test_group']);
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $testid   = $common->clean_string($_POST['test']);
+    $title    = $common->clean_string($_POST['title']);
+    $id       = $common->clean_string($_POST['id']);
+
+    //add value to session to use in template
+    $_SESSION['test_group'] = $_POST;
+    //form validation
+    if(empty($title))   $error['title']   = 1;
+    if(empty($testid))  $error['testid']  = 1;
+
+    //Add test group
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('test_group', $field = ['test_id' => $testid, 'title' => $title]);
+      //unset session
+      unset($_SESSION['test_group']);
+      //Redirect
+      if($_GET['tid']){
+        header('location: '.$admin_file.'?task=test_group&tid='.$_GET['tid']);
+      }else {
+        header('location: '.$admin_file.'?task=test_group');
+      }
+      exit;
+    }
+    //update test group
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('test_group', $field = ['test_id' => $testid, 'title' => $title], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['test_group']);
+      //Redirect
+      if($_GET['tid']){
+        header('location: '.$admin_file.'?task=test_group&tid='.$_GET['tid']);
+      }else {
+        header('location: '.$admin_file.'?task=test_group');
+      }
+      exit;
+    }
+  }
+  //action delete test group
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('test_group_question', $field = ['test_group_id' => $_GET['id']]);
+    $common->delete('test_group', $field = ['id' => $_GET['id']]);
+
+    if($_GET['tid']){
+      header('location: '.$admin_file.'?task=test_group&tid='.$_GET['tid']);
+    }else {
+      header('location: '.$admin_file.'?task=test_group');
+    }
+    exit;
+  }
+  //get edit test group
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getTestGroupByID', $common->find('test_group', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $testid = !empty($_GET['tid']) ? $_GET['tid'] : '';
+  $result = listTestGroup($testid, $lang);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('listTestGroup', $result);
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang], $type = 'all'));
+  $smarty_appform->display('admin/admin_test_group.tpl');
+  exit;
+}
+//Task test group question
+if('test_group_question' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['test_g_question']);
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    // $tquestion_id = $common->clean_string($_POST['test_question']);
+    $tgroup_id    = $common->clean_string($_GET['tgid']);
+    $id   = $common->clean_string($_POST['id']);
+
+    //add value to session to use in template
+    $_SESSION['test_g_question'] = $_POST;
+    //form validation
+    if(empty($_POST['test_question']))  $error['test_question'] = 1;
+    if(empty($tgroup_id))     $error['test_g_id']     = 1;
+
+    if(!empty($_POST['test_question'])){
+      foreach ($_POST['test_question'] as $key => $value) {
+        if(empty($id) && is_exist_test_group_question($_GET['tid'], $value) > 0) {
+          $error['is_exist_test_group_que'] += 1;
+        }
+      }
+    }
+
+    //Add test group
+    if(0 === count($error) && empty($id))
+    {
+      foreach ($_POST['test_question'] as $key => $value) {
+        $common->save('test_group_question', $field = ['test_group_id' => $tgroup_id, 'test_question_id' => $value]);
+      }
+      //unset session
+      unset($_SESSION['test_g_question']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_group_question&tid='.$_GET['tid'].'&tgid='.$_GET['tgid']);
+      exit;
+    }
+    //update test group
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('test_group_question', $field = ['test_question_id' => $tquestion_id], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['test_g_question']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_group_question&tid='.$_GET['tid'].'&tgid='.$_GET['tgid']);
+      exit;
+    }
+  }
+  //action delete test group
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('test_group_question', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=test_group_question&tid='.$_GET['tid'].'&tgid='.$_GET['tgid']);
+    exit;
+  }
+  //get edit test group question
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getTestGQByID', $common->find('test_group_question', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $result = listTestGroupQuestion($_GET['tgid']);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listTestGroupQuestion', $result);
+  // $smarty_appform->assign('listTestQuestion', getListTestQuestion('',$_GET['tid'], '', $test_g_ques = 1, $lang, $slimit = ''));
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionGroupAnswer($_GET['tid']));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->assign('test_group', $common->find('test_group', $condition = ['id' => $_GET['tgid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_test_group_question.tpl');
+  exit;
+}
 //Task group answer question
 if('group_answer_question' === $task){
   //Clear session
@@ -2052,6 +2383,76 @@ if('group_answer_question' === $task){
   $smarty_appform->assign('groupAnswerCheckDisable', $common->find('group_answer', $condition = ['test_id' => $_GET['tid']], $type = 'all'));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->display('admin/admin_group_answer_question.tpl');
+  exit;
+}
+//Task View Order
+if('test_question_view_order' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['view_order']);
+
+  $error = array();
+  if($_POST)
+  {
+    $id       = $common->clean_string($_POST['id']);
+    $tid      = $common->clean_string($_GET['tid']);
+    $view_order   = $common->clean_string($_POST['view_order']);
+    $test_que_id  = $common->clean_string($_POST['test_question']);
+
+    //add value to session to use in template
+    $_SESSION['view_order'] = $_POST;
+    //form validation
+    if(empty($view_order))    $error['view_order'] = 1;
+    if(empty($test_que_id))   $error['test_question'] = 1;
+
+    $result = $common->find('test_question_view_order', $condition = ['test_id' => $tid, 'test_question_id' => $test_que_id], $type = 'one');
+
+    if(!empty($test_que_id) && $result['test_question_id'] !== $test_que_id && is_view_order_exist($_GET['tid'], $test_que_id) > 0) $error['is_view_order_exist'] = 1;
+
+    //Add test
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('test_question_view_order', $field =['test_id' => $tid, 'test_question_id' => $test_que_id, 'view_order' => $view_order]);
+      //unset session
+      unset($_SESSION['view_order']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_question_view_order&tid='.$_GET['tid']);
+      exit;
+    }
+    //update test
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('test_question_view_order', $field =['test_id' => $tid, 'test_question_id' => $test_que_id,'view_order' => $view_order], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['view_order']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_question_view_order&tid='.$_GET['tid']);
+      exit;
+    }
+  }
+  //action delete topic
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('test_question_view_order', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=test_question_view_order&tid='.$_GET['tid']);
+    exit;
+  }
+  //get edit test_topic_answer
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getViewOrderByID', $common->find('test_question_view_order', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $results = getListViewOrderTestQuestion($_GET['tid']);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listTestQestionViewOrder', $results);
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionGroupAnswer($_GET['tid']));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_test_que_view_order.tpl');
   exit;
 }
 //Task: mailerlite
@@ -2256,7 +2657,491 @@ if('apitransaction' === $task)
   $smarty_appform->display('admin/admin_api_transcation.tpl');
   exit;
 }
+//Task: Respone
+if('response' === $task)
+{
 
+  if('view_topic_sum' === $action){
+
+    $results = getResultAnswerTopic($_GET['unique_id'], $_GET['tid'], '', '');
+    header('Content-type: application/json');
+   	echo json_encode($results);
+   	exit;
+  }
+
+  // $result = getListResponse($_GET['tid'], $slimit = 10);
+  $result = getListResponseByTopic($_GET['tid'], $slimit = 10);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('listResponse', $result);
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_response.tpl');
+  exit;
+}
+//Task: Response Answer
+if('response_answer' === $task)
+{
+  // $result = getListResponseAnswer($_GET['rid']);
+  $result = getListResponseAnswerByTopic($_GET['rid']);
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('listResponseAnswer', $result);
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_response_answer.tpl');
+  exit;
+}
+//Task: Test Psychologist
+if('test_psychologist' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['test_psy']);
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    if(!empty($_POST['id'])){
+      $testid   = $common->clean_string($_POST['test']);
+    }else {
+      $testid   = $common->clean_string_array($_POST['test']);
+    }
+    $psy_id   = $common->clean_string($_POST['psy_id']);
+    $id       = $common->clean_string($_POST['id']);
+
+    //add value to session to use in template
+    $_SESSION['test_psy'] = $_POST;
+    //form validation
+    if(empty($testid))  $error['testid']  = 1;
+    if(empty($psy_id))  $error['psy_id']  = 1;
+
+    //Add test group
+    if(0 === count($error) && empty($id))
+    {
+      foreach ($testid as $key => $va) {
+        $common->save('test_psychologist', $field = ['psychologist_id' => $psy_id, 'test_id' => $va]);
+      }
+      //unset session
+      unset($_SESSION['test_psy']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_psychologist');
+      exit;
+    }
+    //update test group
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('test_psychologist', $field = ['psychologist_id' => $psy_id, 'test_id' => $testid], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['test_psy']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_psychologist');
+      exit;
+    }
+  }
+  //Delete: test psychologist
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('test_psychologist', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=test_psychologist');
+    exit;
+  }
+  //get edit apitransaction
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getTestPsy', $common->find('test_psychologist', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
+  $psy_id = !empty($_GET['psy_id']) ? $_GET['psy_id'] : '';
+  $status = !empty($_GET['status']) ? $_GET['status'] : '';
+
+  $results = getListTestPsychologist($psy_id, $tid, $status);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('testPsychologist', $results);
+  $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang], $type = 'all'));
+  $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = null, $type = 'all'));
+  $smarty_appform->display('admin/admin_test_psychologist.tpl');
+  exit;
+}
+//Task: Test Patient
+if('test_patient' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['test_patient']);
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    if(!empty($_POST['id'])){
+      $testid   = $common->clean_string($_POST['test']);
+    }else {
+      $testid   = $common->clean_string_array($_POST['test']);
+    }
+    $pat_tid  = $common->clean_string($_POST['pat_id']);
+    $id       = $common->clean_string($_POST['id']);
+
+    //add value to session to use in template
+    $_SESSION['test_psy'] = $_POST;
+    //form validation
+    if(empty($testid))  $error['testid']  = 1;
+    if(empty($pat_tid))  $error['psy_id']  = 1;
+
+    //Add test group
+    if(0 === count($error) && empty($id))
+    {
+      foreach ($testid as $key => $va) {
+        $common->save('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $va]);
+      }
+      //unset session
+      unset($_SESSION['test_patient']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_patient');
+      exit;
+    }
+    //update test group
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $testid], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['test_patient']);
+      //Redirect
+      header('location: '.$admin_file.'?task=test_patient');
+      exit;
+    }
+  }
+  //Delete: test psychologist
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('test_patient', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=test_patient');
+    exit;
+  }
+  //get edit apitransaction
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getTestPat', $common->find('test_patient', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
+  $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
+  $status = !empty($_GET['status']) ? $_GET['status'] : '';
+
+  $results = getListTestPatient($pat_id, $tid, $status);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('testPatient', $results);
+  $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang], $type = 'all'));
+  $smarty_appform->assign('patient', $common->find('patient', $condition = null, $type = 'all'));
+  $smarty_appform->display('admin/admin_test_patient.tpl');
+  exit;
+}
+
+
+//Create And download CSV file
+if('download_csv' === $task)
+{
+  $resultTest = $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one');
+  $result = getResponseAnswerCSVdownload($_GET['tid']);
+
+  $title = preg_replace('/[^A-Za-z0-9 ().]/u','', $resultTest['title']);
+
+  if(!empty($result)){
+    //open the file
+    $file = fopen('file_csv/'.$title.'.csv', 'w');
+    //loop header
+    for ($i=0; $i < $total_data; $i++) {
+      $headerTitle[] =  'Question';
+      $headerTitle[] =  'Answer';
+    }
+
+    //save column header
+    fputcsv($file, $headerTitle);
+
+    foreach ($result as $row)
+    {
+      if(!empty($result['answer'.$row['id']])){
+        //save row of data
+        fputcsv($file, $result['answer'.$row['id']]);
+      }
+    }
+
+    fclose($file);
+    header('location: /file_csv/'.$title.'.csv');
+  }else {
+    header('location: '.$admin_file.'?task=response&tid='.$_GET['tid']);
+  }
+
+  exit;
+}
+// Task copy_test_question "Copy Test Question, Answer, Answer Topic to other Test"
+if('copy_test_question' === $task)
+{
+  //Get test question
+  $rTestQues = $common->find('test_question', $condition = ['id' => $_GET['tqid']], $type = 'one');
+  //Check is existed topic
+  if(is_exist_test_question($_GET['test_id'], $rTestQues['question_id']) > 0) {
+
+    $copy_result   = false;
+
+  }else {
+    //Save test question
+    $tque_id = $common->save('test_question', $field =['test_id' => $_GET['test_id'],
+                                                       'question_id'  => $rTestQues['question_id'],
+                                                       'view_order'   => $rTestQues['view_order'],
+                                                       'is_required'  => $_GET['required']]);
+    //Get answer
+    $rAnswer = $common->find('answer', $condition = ['test_question_id' => $_GET['tqid']], $type = 'all');
+    //Get Topic in Result
+    $rGetTopicResult = getTopicResult($_GET['test_id']);
+
+    if(!empty($rAnswer)){
+      //Fetch anser
+      foreach ($rAnswer as $key => $value) {
+        //Save answer
+        $answer_id = $common->save('answer', $field = ['title' => $value['title'], 'test_question_id' => $tque_id, 'view_order' => $value['view_order'], 'calculate' => $value['calculate']]);
+        $default_value = $value['view_order'];
+        $weight_value = 1;
+
+        if(!empty($rGetTopicResult) && !empty($answer_id)){
+          foreach ($rGetTopicResult as $k => $v) {
+            $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $v['topic_id'], 'default_value' => $default_value, 'weight_value'  => $weight_value]);
+          }
+
+        }
+      }//end Fetch anser
+    }
+
+    $copy_result = true;
+  }
+
+
+  header('Content-type: application/json');
+  echo json_encode($copy_result);
+  exit;
+}
+// Task copy_test_answer "Copy Test, Answer, Answer Topic to other question"
+if('copy_test_answer' === $task)
+{
+  if($_POST){
+    $test_id      = $_POST['tid'];
+    $test_que_id  = $_POST['tqid'];
+    $question_id  = $_POST['question_id'];
+    $required     = $_POST['required'];
+    $copy_all     = $_POST['copy_all_value'];
+
+    $rTestQuestionTopView = getTestQuestionTopView($test_id);
+    $view_order = $rTestQuestionTopView['view_order'] + 1;
+
+    //Check is has copy all
+    if(!empty($copy_all)){
+      $rTestQues = $common->find('test_question', $condition = ['test_id' => $test_id], $type = 'all');
+
+      if(!empty($rTestQues)){
+        foreach ($rTestQues as $key => $value) {
+          if($test_que_id === $value['id']){
+            //Get answer
+            $allResultAnswer = $common->find('answer', $condition = ['test_question_id' => $value['id']], $type = 'all');
+          }
+
+          if($test_que_id != $value['id']){
+            //Get answer by test question_id
+            $rAnswer = $common->find('answer', $condition = ['test_question_id' => $value['id']], $type = 'all');
+            if(!empty($rAnswer)){
+              foreach ($rAnswer as $k => $va) {
+                $common->delete('answer_topic', $field = ['answer_id' => $va['id']]);
+              }
+            }
+            $common->delete('answer', $field = ['test_question_id' => $value['id']]);
+          }//End check not eqaul test_question_id
+        }//End fetch $rTestQues
+
+        //fetch save data
+        foreach ($rTestQues as $key => $value) {
+          if($test_que_id != $value['id']){
+            //Get Question By ID
+            $rQuestion = $common->find('question', $condition = ['id' => $value['question_id']], $type = 'one');
+            //Check question type
+            if($rQuestion['type'] == 3 || $rQuestion['type'] == 4){
+
+             //Get Topic in Result
+             $rGetTopicResult = getTopicResult($test_id);
+
+             if(!empty($allResultAnswer)){
+               //Fetch anser
+               foreach ($allResultAnswer as $k => $va) {
+                 //Save answer
+                 $answer_id = $common->save('answer', $field = ['title' => $va['title'], 'test_question_id' => $value['id'], 'view_order' => $va['view_order'], 'calculate' => $va['calculate']]);
+                 $default_value = $va['view_order'];
+                 $weight_value = 1;
+
+                 if(!empty($rGetTopicResult) && !empty($answer_id)){
+                   foreach ($rGetTopicResult as $k => $v) {
+                     $result = $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $v['topic_id'], 'default_value' => $default_value, 'weight_value' => $weight_value]);
+                   }
+                 }
+               }//end Fetch answer
+             }
+            }//End check question type
+          }
+
+        }//fetch end save data
+        if($result == true){
+          $copy_result   = true;
+        }else {
+          $copy_result   = false;
+        }
+      }
+
+    }else {
+      //Get Question By ID
+      $rQuestion = $common->find('question', $condition = ['id' => $question_id], $type = 'one');
+      //Check is existed topic, save overide.
+      if(is_exist_test_question($_POST['tid'], $_POST['question_id']) > 0) {
+        //Get test question by test id
+        $rTestQues = $common->find('test_question', $condition = ['test_id' => $test_id, 'question_id' => $question_id], $type = 'one');
+        //Update test question
+        $common->update('test_question', $field = ['is_required' => $required], $condition = ['id' => $rTestQues['id']]);
+
+        if($rTestQues['id'] !== $test_que_id){
+          //Get answer by test question_id
+          $rAnswer = $common->find('answer', $condition = ['test_question_id' => $rTestQues['id']], $type = 'all');
+          if(!empty($rAnswer)){
+            foreach ($rAnswer as $key => $value) {
+              $common->delete('answer_topic', $field = ['answer_id' => $value['id']]);
+            }
+            $common->delete('answer', $field = ['test_question_id' => $rTestQues['id']]);
+          }
+
+          //Check question type
+          if($rQuestion['type'] == 3 || $rQuestion['type'] == 4){
+           //Get answer
+           $rAnswer = $common->find('answer', $condition = ['test_question_id' => $test_que_id], $type = 'all');
+           //Get Topic in Result
+           $rGetTopicResult = getTopicResult($test_id);
+
+           if(!empty($rAnswer)){
+             //Fetch anser
+             foreach ($rAnswer as $key => $value) {
+               //Save answer
+               $answer_id = $common->save('answer', $field = ['title' => $value['title'], 'test_question_id' => $rTestQues['id'], 'view_order' => $value['view_order'], 'calculate' => $value['calculate']]);
+               $default_value = $value['view_order'];
+               $weight_value = 1;
+
+               if(!empty($rGetTopicResult) && !empty($answer_id)){
+                 foreach ($rGetTopicResult as $k => $v) {
+                   $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $v['topic_id'], 'default_value' => $default_value, 'weight_value' => $weight_value]);
+                 }
+               }
+             }//end Fetch answer
+           }
+          }//End check question type
+
+        }
+
+        $copy_result   = true;
+      }else {
+        //Save test question
+        $tque_id = $common->save('test_question', $field =['test_id' => $test_id,
+                                                           'question_id'  => $question_id,
+                                                           'view_order'   => $view_order,
+                                                           'is_required'  => $required]);
+        //Check question type
+        if($rQuestion['type'] == 3 || $rQuestion['type'] == 4){
+          //Get answer
+          $rAnswer = $common->find('answer', $condition = ['test_question_id' => $test_que_id], $type = 'all');
+          //Get Topic in Result
+          $rGetTopicResult = getTopicResult($test_id);
+
+          if(!empty($rAnswer)){
+            //Fetch anser
+            foreach ($rAnswer as $key => $value) {
+              //Save answer
+              $answer_id = $common->save('answer', $field = ['title' => $value['title'], 'test_question_id' => $tque_id, 'view_order' => $value['view_order'], 'calculate' => $value['calculate']]);
+              $default_value = $value['view_order'];
+              $weight_value = 1;
+
+              if(!empty($rGetTopicResult) && !empty($answer_id)){
+                foreach ($rGetTopicResult as $k => $v) {
+                  $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $v['topic_id'], 'default_value' => $default_value, 'weight_value' => $weight_value]);
+                }
+              }
+            }//end Fetch answer
+          }
+        }//End check question type
+
+        $copy_result = true;
+      }//End Check is existed topic
+    }//End Check is has copy all
+
+  }//End Post
+
+  header('Content-type: application/json');
+  echo json_encode($copy_result);
+  exit;
+}
+//Task Ajax
+if('ajax' === $task)
+{
+  //action save_group_answer
+  if('save_group_answer' === $action){
+    $error = array();
+    if($_POST){
+      $data   = json_decode($_POST['data']);
+      $tid    = $_POST['test_id'];
+      $gans_flag_id    = $_POST['gans_flag_id'];
+
+      if(!empty($data)){
+        foreach ($data as $v) {
+          if(is_exist_group_answer_question($tid, $v->test_que_id) > 0) {
+            $error['is_exist_group_answer_que']   = 1;
+          }
+        }
+      }
+      //Add test group answer
+      if(0 === count($error))
+      {
+        foreach ($data as $v) {
+          $common->save('group_answer', $field = ['test_id' => $tid, 'test_question_id' => $v->test_que_id, 'sub_id' => $gans_flag_id]);
+          $common->delete('test_question_view_order', $field = ['test_id' => $tid, 'test_question_id' => $v->test_que_id]);
+          $common->delete('test_group_question', $field = ['test_question_id' => $v->test_que_id]);
+        }
+      }
+    }
+    if(!empty($error)){
+      $results = $error;
+    }else {
+      $results = getListGroupAnswer($tid, $gans_flag_id, '', $slimit = 10);
+    }
+
+    header('Content-type: application/json');
+    echo json_encode($results);
+    exit;
+  }
+  //action list_answer
+  if('list_answer' === $action){
+    $results = $common->find('answer', $condition = ['test_question_id' => $_GET['tqid']], $type = 'all');
+    header('Content-type: application/json');
+    echo json_encode($results);
+    exit;
+  }
+  //action check_que_type
+  if('check_que_type' === $action){
+    $results = $common->find('question', $condition = ['id' => $_GET['qid']], $type = 'one');
+    header('Content-type: application/json');
+    echo json_encode($results);
+    exit;
+  }
+}
 //task home
 $smarty_appform->display('admin/index.tpl');
 exit;

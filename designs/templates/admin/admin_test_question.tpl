@@ -151,7 +151,7 @@
                     <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update} {else}No Translate(Key Lang: button_update){/if}</button>
                     <a href="{$admin_file}?task=test_question&amp;tid={$smarty.get.tid}&amp;kwd={$smarty.get.kwd}" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel} {else}No Translate(Key Lang: button_cancel){/if}</a>
                   {else}
-                    <button type="submit" name="butsubmit" class="btn btn-danger"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
+                    <button type="submit" name="butsubmit" class="btn btn-info"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
                   {/if}
                 </div>
               </div>
@@ -323,6 +323,7 @@
          $("#error").text("* Sorry! You can't add test question. Because duplication test question in test.");
          $(".loader").hide();
        }else {
+         alert("helllo");
          location.reload();
        }
       },

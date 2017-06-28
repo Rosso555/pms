@@ -2,7 +2,7 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li><a href="{$admin_file}?task=test_question&amp;tid={$smarty.get.tid}">{if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}</a></li>
+  <li><a id="bCrumbTQue" href="{$admin_file}?task=test_question&amp;tid={$smarty.get.tid}">{if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}</a></li>
   <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_answer}{$multiLang.text_answer}{else}No Translate(Key Lang: text_answer){/if}</li>
   {if $smarty.get.action eq 'edit'}
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
@@ -107,7 +107,7 @@
                     <button type="submit" class="btn btn-success" {if $question.type eq 1 OR $question.type eq 2}disabled{/if}><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate(Key Lang: button_update){/if}</button>
                     <a href="{$admin_file}?task=answer&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate(Key Lang: button_concel){/if}</a>
                   {else}
-                    <button type="submit" name="butsubmit" class="btn btn-danger" {if $question.type eq 1 OR $question.type eq 2}disabled{/if}><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
+                    <button type="submit" name="butsubmit" class="btn btn-info" {if $question.type eq 1 OR $question.type eq 2}disabled{/if}><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
                   {/if}
                 </div>
               </div>
@@ -169,7 +169,7 @@
         </tbody>
         {else}
         <tr>
-          <td colspan="3"><h4 style="text-align:center">{if $multiLang.text_there_are_no_record}{$multiLang.text_there_are_no_record}{else}No Translate (Key Lang: text_there_are_no_record){/if}</h4></td>
+          <td colspan="5"><h4 style="text-align:center">{if $multiLang.text_there_are_no_record}{$multiLang.text_there_are_no_record}{else}No Translate (Key Lang: text_there_are_no_record){/if}</h4></td>
         </tr>
         {/if}
       </table>
@@ -241,7 +241,7 @@
       </div>
       <!-- Modal -->
 
-      <a href="javascript:history.back()" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
+      <a id="btnBack" href="javascript:history.back()" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
     </div><!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
@@ -249,6 +249,19 @@
 {/block}
 {block name="javascript"}
 <script>
+//Get previous url
+var urlBack =  document.referrer;
+var url = '';
+if(urlBack !== '') url = getUrlPrevious(urlBack);
+if(url.task === 'test_question') localStorage.setItem('urlTque',urlBack);
+//Get session url
+var getUrlBack = localStorage.getItem('urlTque');
+if(getUrlBack !== null){
+  $("#btnBack").attr("href", getUrlBack);
+  $("#bCrumbTQue").attr("href", getUrlBack);
+}
+//End previous url
+
 function checkCopyAll(){
   var copy_all = document.getElementById("copy_all").checked;
   if (copy_all) {
@@ -292,13 +305,13 @@ function save_test_answer_answer_topic(tid, tqid){
          $("#error_existed").text("* Sorry! You can't add test question. Because duplication test question in test.");
          $(".loader").hide();
        }else {
-        //  location.reload();
+         location.reload();
        }
       },
       error: function(){
        //Show error here
-       alert("Cannot show detail. Please try again later.");
-      //  location.reload();
+       alert("Cannot save data. Please try again later.");
+       location.reload();
       }
     });//End Ajax
   }else {

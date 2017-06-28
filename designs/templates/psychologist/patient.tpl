@@ -55,7 +55,7 @@
                 <div class="form-group">
                   <label for="pwd"><span style="color:red">*</span> Password:</label>
                   {if $error.password}<span style="color:red">Please enter password!</span>{/if}
-                  <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
+                  <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
                 </div>
               </div>
             </div>

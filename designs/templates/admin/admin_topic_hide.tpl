@@ -2,7 +2,7 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li><a href="{$admin_file}?task=test">{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</a></li>
+  <li><a id="bCrumbTest" href="{$admin_file}?task=test">{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</a></li>
   <li><a href="{$admin_file}?task=test_topic&amp;tid={$smarty.get.tid}">{if $multiLang.text_test_topic_view_order}{$multiLang.text_test_topic_view_order}{else}No Translate(Key Lang: text_test_topic_view_order){/if}</a></li>
   <li {if $smarty.get.action neq edit}class="active"{/if}>{if $multiLang.text_topic_hide}{$multiLang.text_topic_hide}{else}No Translate(Key Lang: text_topic_hide){/if}</li>
   {if $smarty.get.action eq edit}
@@ -168,6 +168,9 @@
 
 {block name="javascript"}
 <script>
+var getUrlBackTest = localStorage.getItem('urlTest');
+if(getUrlBackTest !== null) $("#bCrumbTest").attr("href", getUrlBackTest);
+
 function getTopicHide(sel)
 {
   $(".loader").show();
