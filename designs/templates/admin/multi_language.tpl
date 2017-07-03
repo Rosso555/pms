@@ -1,4 +1,4 @@
-{extends file="admin/layout.tpl"}
+{extends file="common/layout.tpl"}
 {block name="main"}
 <div class="panel panel-primary">
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.multil_language_title}{$multiLang.multil_language_title}{else}No Translate(Key Lang: multil_language_title){/if}</h4></div>

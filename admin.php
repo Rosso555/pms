@@ -2199,7 +2199,7 @@ if('test_group_question' === $task)
     $smarty_appform->assign('getTestGQByID', $common->find('test_group_question', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
-  $result = listTestGroupQuestion($_GET['tgid']);
+  $result = listTestGroupQuestionAdmin($_GET['tgid']);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -2754,10 +2754,11 @@ if('test_psychologist' === $task)
   }
 
   $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
+  $cid    = !empty($_GET['cid']) ? $_GET['cid'] : '';
   $psy_id = !empty($_GET['psy_id']) ? $_GET['psy_id'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
 
-  $results = getListTestPsychologist($psy_id, $tid, $status);
+  $results = getListTestPsychologist($psy_id, $tid, $cid, $status);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -2833,7 +2834,7 @@ if('test_patient' === $task)
   $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
 
-  $results = getListTestPatient($pat_id, $tid, $status);
+  $results = getListTestPatient($pat_id, '', $tid, $status);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -2845,8 +2846,6 @@ if('test_patient' === $task)
   $smarty_appform->display('admin/admin_test_patient.tpl');
   exit;
 }
-
-
 //Create And download CSV file
 if('download_csv' === $task)
 {

@@ -14,7 +14,12 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
 				<li><a href="{$psychologist_file}?task=patient"><i class="fa fa-user-md" aria-hidden="true"></i> Patient</a></li>
-
+        <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-share-square-o" aria-hidden="true"></i> Test Assign <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{$psychologist_file}?task=test_patient"><i class="fa fa-user-md" aria-hidden="true"></i> {if $multiLang.menu_patient}{$multiLang.menu_patient}{else}No Translate (Key Lang: menu_patient){/if}</a></li>
+          </ul>
+        </li>
 			</ul>
 
       <ul class="nav navbar-nav navbar-right">

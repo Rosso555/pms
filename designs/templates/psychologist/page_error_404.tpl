@@ -1,4 +1,4 @@
-{extends file="psychologist/layout.tpl"}
+{extends file="common/layout.tpl"}
 {block name="main"}
 <div class="jumbotron text-center" style=" background-color: #fcfcfc; color: #606060;">
   <i class="fa fa-info-circle" aria-hidden="true" style="color: red; font-size:40px;"></i>

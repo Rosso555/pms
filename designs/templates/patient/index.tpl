@@ -1,4 +1,4 @@
-{extends file="patient/layout.tpl"}
+{extends file="common/layout.tpl"}
 {block name="main"}
 <div class="panel panel-primary">
   <div class="panel-heading"><h3 class="panel-title">Welcome!</h3></div>

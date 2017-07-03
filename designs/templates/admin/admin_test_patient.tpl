@@ -1,4 +1,4 @@
-{extends file="admin/layout.tpl"}
+{extends file="common/layout.tpl"}
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
@@ -7,12 +7,6 @@
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
   {/if}
 </ul>
-{if $smarty.cookies.checkTestGroup}
-  <div class="alert alert-danger">
-    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-    Sorry! you cannot delete "<strong>{$smarty.cookies.checkTestGroup}</strong>" because it has been used.
-  </div>
-{/if}
 <div class="panel panel-primary">
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_test_patient}{$multiLang.text_test_patient}{else}No Translate(Key Lang: text_test_patient){/if}</h4></div>
   <div class="panel-body">

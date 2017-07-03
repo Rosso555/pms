@@ -1,4 +1,4 @@
-{extends file="admin/layout.tpl"}
+{extends file="common/layout.tpl"}
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file_name}"><i class="fa fa-fw fa-home"></i></a></li>

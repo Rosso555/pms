@@ -1882,7 +1882,7 @@ function listTestGroup($testid, $lang)
  * @param  int $tgroupid is test_group_id
  * @return array or boolean
  */
-function listTestGroupQuestion($tgroupid)
+function listTestGroupQuestionAdmin($tgroupid)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;

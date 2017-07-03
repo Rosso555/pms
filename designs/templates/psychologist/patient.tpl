@@ -1,4 +1,4 @@
-{extends file="psychologist/layout.tpl"}
+{extends file="common/layout.tpl"}
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$psychologist_file}"><i class="fa fa-fw fa-home"></i></a></li>

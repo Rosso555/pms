@@ -1,4 +1,4 @@
-{extends file="admin/layout.tpl"}
+{extends file="common/layout.tpl"}
 {block name="main"}
 {if $smarty.cookies.checkCategory}
   <div class="alert alert-danger">

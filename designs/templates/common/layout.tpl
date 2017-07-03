@@ -3,26 +3,31 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=""/>
-<meta name="keywords" content=""/>
+<meta name="description" content="Psychology Management System"/>
+<meta name="keywords" content="Psychology Management System"/>
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="/css/admin_style.css" type="text/css"/>
+{if $mode eq "admin"}<link rel="stylesheet" href="/css/admin_style.css" type="text/css"/>{/if}
+{if $mode eq "psychologist" OR $mode eq "index" OR $mode eq "patient"}<link rel="stylesheet" href="/css/index_style.css" type="text/css"/>{/if}
+{if $mode eq "psychologist"}<link rel="stylesheet" href="/css/psychologist_style.css" type="text/css"/>{/if}
 <link rel="stylesheet" href="/css/style_select2.css" type="text/css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
-<title>PMS-ADMIN</title>
+<title>{block name="title"}{/block}PMS-ADMIN</title>
 <script>
 	$(window).load(function() { $(".loader").fadeOut("slow"); });
 </script>
-
+{block name="style"}{/block}
 </head>
 <body>
-{if $mode eq "admin" }{include file="admin/menu.tpl" }{/if}
-<div class="container">
+	{if $mode eq "admin"}{include file="admin/menu.tpl"}{/if}
+	{if $mode eq "psychologist"}{include file="psychologist/menu.tpl"}{/if}
+	{if $mode eq "patient"}{include file="patient/menu.tpl"}{/if}
+
+<div class="container" style="margin-top: 70px;">
 	<div class="row">
 		<div class="col-md-12">
 			{block name="main"}
