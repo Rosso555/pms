@@ -57,37 +57,33 @@ function getStaffPermissionData($srid)
   $result = true;
   try
   {
-    $sql = ' SELECT * FROM `staff_permission` sp INNER JOIN staff_function sf ON sf.id = sp.staff_function_id WHERE sp.staff_role_id = :staff_role_id AND sf.action_name != "" GROUP BY sf.task_name, sf.action_name ';
+    //Get Task Name
+    $sql = ' SELECT * FROM `staff_permission` sp INNER JOIN staff_function sf ON sf.id = sp.staff_function_id WHERE sp.staff_role_id = :staff_role_id GROUP BY sf.task_name ';
     $stmt = $connected->prepare($sql);
     $stmt->bindValue(':staff_role_id', $srid, PDO::PARAM_INT);
     $stmt->execute();
     $rows = $stmt->fetchAll();
-    var_dump($rows);
-
-    $newResultActon = array();
-
-    // foreach ($rows as $key => $value) {
-    //   $newResultActon
-    // }
-
+  
     $newResult = array();
-
     foreach ($rows as $key => $value) {
-
-      $newResultActon[] = array($value['action_name'] => $value['action_name']);
-
-      $sql1 = ' SELECT * FROM `staff_permission` sp INNER JOIN staff_function sf ON sf.id = sp.staff_function_id WHERE sp.staff_role_id = :staff_role_id AND sf.action_name != "" GROUP BY sf.task_name, sf.action_name ';
+      //Get Action Name
+      $sql1 = ' SELECT action_name FROM `staff_permission` sp INNER JOIN staff_function sf ON sf.id = sp.staff_function_id WHERE sp.staff_role_id = :staff_role_id AND sf.action_name != "" AND task_name = :task_name ';
       $stmt1 = $connected->prepare($sql1);
       $stmt1->bindValue(':staff_role_id', $srid, PDO::PARAM_INT);
+      $stmt1->bindValue(':task_name', $value['task_name'], PDO::PARAM_STR);
       $stmt1->execute();
       $rows1 = $stmt1->fetchAll();
-
-      $newResult[$value['task_name']] = array('action' => array($value['action_name'] => $value['action_name']));
+      if(!empty($rows1)){
+        foreach ($rows1 as $k => $va) {
+          $newResult[$value['task_name']][] = array($va['action_name'] => $va['action_name']);
+        }
+      }else {
+        $newResult[$value['task_name']][] = array();
+      }
 
     }
-    // var_dump($newResultActon);
-    // var_dump($newResult);
 
+    return $newResult;
   } catch(PDOException $e) {
 
     $result = false;

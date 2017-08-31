@@ -54,17 +54,22 @@
 </script>
 <script>
 $(document).ready(function(){
-	  // check animation icon
+		var placeholder_val = $('#select2_placeholder').val();
+		// check animation icon
 		$("#animated").hover(function () {
 			$("#animated_icon").addClass("fa fa-cog fa-lg fa-spin");  //Add the active class to the area is hovered
-	}, function () {
+		}, function () {
 			$("#animated_icon").removeClass("fa-spin");
-	});
+		});
 		// tooltip
     $('[data-toggle1="tooltip"]').tooltip();
 		$('#test_topic').popover();
 		// select2 form
 		$(".select2").select2();
+
+		$(".select2_mul").select2({
+				placeholder: placeholder_val,
+		});
 
 		$(".select2_test_group").select2({
 				placeholder: "---{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if}---",

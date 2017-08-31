@@ -57,10 +57,10 @@
             <form  action="{$admin_file}?task=staff_permission" method="post">
               <div class="row">
                 <div class="col-md-6">
-                  <div class="form-group">
+                  <div class="form-group multi_select2">
+                    <input type="hidden" id="select2_placeholder" value="--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if} ---">
                     <label for="staff_function">{if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}:</label>
-                    <select class="form-control" id="staff_function" name="staff_function_id">
-                      <option value=""> ---{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}--- </option>
+                    <select class="form-control select2_mul" id="staff_function" name="staff_function_id" style="width:100%;" multiple="multiple">
                       {foreach from = $list_staff_function item = staff_function}
                       <option value="{$staff_function.id}"{if $edit_staff_permission.staff_function_id eq $staff_function.id}selected{else}{if $smarty.session.staff_permission.staff_function_id eq $staff_function.id}selected{/if}{/if}>{$staff_function.title}</option>
                       {/foreach}
