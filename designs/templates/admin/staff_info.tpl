@@ -38,7 +38,7 @@
             </form>
           </div>
         </div>
-        <div class="collapse {if $error Or $edit.id}in{/if}" id="collapseExample">
+        <div class="collapse {if $error Or $edit.id}in{/if}" id="collapseExample" style="margin-top: 10px;">
           <form class="form" role="form" action="{$admin_file}?task=staff_info" method="post" enctype="multipart/form-data">
             <div class="form-group">
               <label>{if $multiLang.text_staff_full_name}{$multiLang.text_staff_full_name}{else}No Translate (Key Lang:text_staff_full_name){/if}:</label><span class="text-danger"> *{if $error.name eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_staff_full_name}{$multiLang.text_staff_full_name}{else}No Translate (Key Lang:text_staff_full_name){/if}.{/if}</span>
@@ -88,7 +88,7 @@
                 </div>
               </div>
               <div class="col-md-9">
-              <img class="img-thumbnail img-middle" id="blah" src="{if $edit.id}/images/staff/thumbnail__{$edit.photo} {else} /images/user-default.png {/if}" width="100" style="height:103px">
+              <img class="img-thumbnail img-middle" id="blah" src="{if $edit.photo}/images/staff/thumbnail__{$edit.photo} {else} /images/user-default.png {/if}" width="100" style="height:103px">
               </br>
               <div class="text-danger">Max file size:8MB</div>
             </div>
@@ -126,7 +126,7 @@
             <td valign="top">{$v.role_name}</td>
             <td valign="top">{$v.phone}</td>
             <td>{if $v.status eq 1}
-            <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#myModal_{$v.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate (Key Lang:text_click_change_status){/if}"><i class="fa fa-circle" aria-hidden="true"></i> {if $multiLang.text_show_Active}{$multiLang.text_show_Active}{else}No Translate (Key Lang:text_show_Active){/if}</button>
+            <button type="button" class="btn btn-success btn-xs" {if $v.staff_role_id|@count eq 1 and $v.staff_role_id eq 1}disabled{/if} data-toggle="modal" data-target="#myModal_{$v.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate (Key Lang:text_click_change_status){/if}"><i class="fa fa-circle" aria-hidden="true"></i> {if $multiLang.text_show_Active}{$multiLang.text_show_Active}{else}No Translate (Key Lang:text_show_Active){/if}</button>
             {elseif $v.status eq 2}
             <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$v.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate (Key Lang:text_click_change_status){/if}"><i class="fa fa-square" aria-hidden="true"></i> {if $multiLang.text_show_stope}{$multiLang.text_show_stope}{else}No Translate (Key Lang:text_show_stope){/if}</button>
             {/if}
@@ -162,7 +162,7 @@
                       <h4 class="modal-title" id="myModalLabel">{if $multiLang.text_pro_info}{$multiLang.text_pro_info}{else}No Translate (Key Lang:text_pro_info){/if}</h4>
                     </div>
                     <div class="modal-body">
-                    <img class="img-circle" src="/images/staff/thumbnail__{$v.photo}" width="20%">
+                    <img class="img-circle" src="{if $v.photo}/images/staff/thumbnail__{$v.photo} {else} /images/user-default.png {/if}" width="20%">
                      <dl class="dl-horizontal">
                         <dt>{if $multiLang.text_title_name}{$multiLang.text_title_name}{else}No Translate (Key Lang:text_title_name){/if}:</dt>
                         <dd class="text-left">{$v.name}</dd>

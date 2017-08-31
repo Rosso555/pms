@@ -7,18 +7,11 @@
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate (Key Lang:text_edit){/if}</li>
   {/if}
 </ul>
-{if $error.is_staff_function_exist eq 2}
-  <div class="alert alert-danger alert-dismissible"  id="{if $error.is_staff_function_exist eq 2}flash{/if}">
-    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-    <strong>warning!</strong>Staff Function Already exit.Please Enter another Staff Function!
-  </div>
-{/if}
 {if $error.exist_delete eq 1}
   <div class="alert alert-danger alert-dismissible"  id="{if $error.exist_delete eq 1}flash{/if}">
     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
     <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-    <strong>warning!</strong> sorry you can not delete this record!
+    <strong>warning!</strong> sorry you can not delete this record!, Because it has been used.
   </div>
 {/if}
 <div class="panel panel-primary">
@@ -44,8 +37,12 @@
             </form>
           </div>
         </div>
-        <div class="collapse {if $error Or $edit.id}in{/if}" id="demo">
+        <div class="collapse {if $error Or $edit.id}in{/if}" id="demo" style="margin-top: 10px;">
+          {if $edit.id}
+          <form class="form" role="form" action="{$admin_file}?task=staff_function&amp;action=edit&amp;id={$edit.id}" method="post" enctype="multipart/form-data">
+          {else}
           <form class="form" role="form" action="{$admin_file}?task=staff_function" method="post" enctype="multipart/form-data">
+          {/if}
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
@@ -55,7 +52,8 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>{if $multiLang.text_task_title}{$multiLang.text_task_title}{else}No Translate (Key Lang:text_task_title){/if}:</label><span style="color:red;"> *{if $error.task eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_task_title}{$multiLang.text_task_title}{else}No Translate (Key Lang:text_task_title){/if}.{/if}</span>
+                  <label>{if $multiLang.text_task}{$multiLang.text_task}{else}No Translate (Key Lang:text_task){/if} {if $multiLang.text_name}{$multiLang.text_name}{else}No Translate (Key Lang:text_name){/if}:</label><span style="color:red;"> *{if $error.task eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_task}{$multiLang.text_task}{else}No Translate (Key Lang:text_task){/if}.{/if}</span>
+                  {if $error.is_staff_fun_exist_task eq 2}<span style="color:red;">{if $multiLang.text_task}{$multiLang.text_task}{else}No Translate (Key Lang:text_task){/if} {if $multiLang.text_is_existed}{$multiLang.text_is_existed}{else}No Translate (Key Lang:text_is_existed){/if}</span>{/if}
                   <input type="text" class="form-control" name="task" value="{if $edit.task_name}{$edit.task_name}{else}{if $smarty.session.staff_function.task|escape}{$smarty.session.staff_function.task|escape}{/if}{/if}" placeholder="task staff,.." />
                 </div>
               </div>
@@ -63,8 +61,9 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if}:</label>
-                  <input type="text" class="form-control" name="action" value="{if $edit.action_name}{$edit.action_name}{else}{if $smarty.session.staff_function.action|escape}{$smarty.session.staff_function.action|escape}{/if}{/if}" placeholder="action save, edit,delete..." />
+                  <label>{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if} {if $multiLang.text_name}{$multiLang.text_name}{else}No Translate (Key Lang:text_name){/if}:</label>
+                  {if $error.is_staff_fun_exist_action eq 2}<span style="color:red;">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if} {if $multiLang.text_is_existed}{$multiLang.text_is_existed}{else}No Translate (Key Lang:text_is_existed){/if}</span>{/if}
+                  <input type="text" class="form-control" name="action" value="{if $edit.action_name}{$edit.action_name}{else}{if $smarty.session.staff_function.action|escape}{$smarty.session.staff_function.action|escape}{/if}{/if}" placeholder="action save, edit, delete..." />
                 </div>
               </div>
             </div>
@@ -90,8 +89,8 @@
         <thead>
           <tr bgcolor="#eeeeee">
             <th>{if $multiLang.text_staff_function_title}{$multiLang.text_staff_function_title}{else}No Translate (Key Lang:text_staff_function_title){/if}</th>
-            <th>{if $multiLang.text_task_title}{$multiLang.text_task_title}{else}No Translate (Key Lang:text_task_title){/if}</th>
-            <th>{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if}</th>
+            <th>{if $multiLang.text_task}{$multiLang.text_task}{else}No Translate (Key Lang:text_task){/if} {if $multiLang.text_name}{$multiLang.text_name}{else}No Translate (Key Lang:text_name){/if}</th>
+            <th>{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if} {if $multiLang.text_name}{$multiLang.text_name}{else}No Translate (Key Lang:text_name){/if}</th>
             <th class="text-center" width="100px">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if}</th>
           </tr>
         </thead>

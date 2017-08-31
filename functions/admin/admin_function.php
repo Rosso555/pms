@@ -1,4 +1,24 @@
 <?php
+function admin_login($username, $password)
+{
+  global $debug, $connected, $total_data;
+  $result = true;
+
+  try{
+    $sql = ' SELECT * FROM `staff` WHERE name = :username AND password = :password AND status = 1 ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':username', (string)$username, PDO::PARAM_STR);
+    $query->bindValue(':password', (string)$password, PDO::PARAM_STR);
+    $query->execute();
+
+    return $query->fetch();
+  }catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: admin_login'.$e->getMessage();
+  }
+
+  return $result;
+}
 /**
  * is_key_lang_exist
  * @param  string  $key_lang
@@ -73,56 +93,59 @@ function updateDefaultLang()
  * @param  int $slimit is setLimit
  * @return array or boolean
  */
-function listMultiLang($kwd, $slimit)
-{
-  global $debug, $connected, $limit, $offset, $total_data;
-  $result = true;
-  try {
-    $condition = '';
+ function listMultiLang($kwd, $slimit)
+ {
+   global $debug, $connected, $limit, $offset, $total_data;
+   $result = true;
 
-    if(!empty($slimit)) $limit = $slimit;
+   try {
+     $condition = '';
 
-    if(!empty($kwd)){
-      $sql1 = ' SELECT * FROM `multi_lang` WHERE title LIKE :kwd ';
-      $stmt1 = $connected->prepare($sql1);
-      $stmt1->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
-      $stmt1->execute();
-      $row1 = $stmt1->fetchAll();
-      $rWhereTitle = array_unique_by_key($row1, 'key_lang');
+     if(!empty($slimit)) $limit = $slimit;
 
-      if(!empty($rWhereTitle)){
-        $where_in = '';
-        foreach ($rWhereTitle as $key => $value) {
-          if($key == 0){
-            $where_in .= ' "'.$value['key_lang'].'" ';
-          }else {
-            $where_in .= ', "'.$value['key_lang'].'" ';
-          }
-        }//End fetch
-        $condition .= ' WHERE ml.key_lang IN ('.$where_in.') ';
-      }else {
-        $condition .= ' WHERE ml.key_lang LIKE :kwd ';
-      }
-    }
+     if(!empty($kwd)){
+       $sql1 = ' SELECT * FROM `multi_lang` WHERE title LIKE :kwd ';
+       $stmt1 = $connected->prepare($sql1);
+       $stmt1->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+       $stmt1->execute();
+       $row1 = $stmt1->fetchAll();
+       $rWhereTitle = array_unique_by_key($row1, 'key_lang');
 
-    $sql = ' SELECT ml.*, l.title AS language_title, (SELECT COUNT(*) FROM `multi_lang` ml INNER JOIN language l ON l.id = ml.language_id '.$condition.') AS total
-                FROM `multi_lang` ml
-                INNER JOIN language l ON l.id = ml.language_id '.$condition.' ORDER BY ml.key_lang DESC LIMIT :offset, :limit ';
+       if(!empty($rWhereTitle)){
+         $where_in = '';
+         foreach ($rWhereTitle as $key => $value) {
+           if($key == 0){
+             $where_in .= ' "'.$value['key_lang'].'" ';
+           }else {
+             $where_in .= ', "'.$value['key_lang'].'" ';
+           }
+         }//End fetch
+         $condition .= ' WHERE ml.key_lang IN ('.$where_in.') ';
+       }else {
+         $condition .= ' WHERE ml.key_lang LIKE :kwd ';
+       }
+     }
 
-    $stmt = $connected->prepare($sql);
-    if(empty($rWhereTitle) && !empty($kwd)) $stmt->bindValue(':kwd', $kwd .'%', PDO::PARAM_STR);
-    $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-    $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-    $stmt->execute();
-    $row = $stmt->fetchAll();
-    if (count($row) > 0) $total_data = $row[0]['total'];
-    return $row;
-  } catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: listMultiLang'.$e->getMessage();
-  }
-  return $result;
-}
+     $sql = ' SELECT ml.*, l.title AS language_title, (SELECT COUNT(*) FROM `multi_lang` ml INNER JOIN language l ON l.id = ml.language_id '.$condition.') AS total
+                 FROM `multi_lang` ml
+                 INNER JOIN language l ON l.id = ml.language_id '.$condition.' ORDER BY ml.key_lang DESC LIMIT :offset, :limit ';
+
+     $stmt = $connected->prepare($sql);
+     if(empty($rWhereTitle) && !empty($kwd)) $stmt->bindValue(':kwd', $kwd .'%', PDO::PARAM_STR);
+     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+     $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+     $stmt->execute();
+     $row = $stmt->fetchAll();
+     if (count($row) > 0) $total_data = $row[0]['total'];
+
+     return $row;
+   } catch (Exception $e) {
+     $result = false;
+     if($debug)  echo 'Errors: listMultiLang'.$e->getMessage();
+   }
+
+   return $result;
+ }
 /**
  * listLanguage
  * @param  string $kwd

@@ -1,5 +1,108 @@
 <?php
 /**
+* Check staff permission
+*
+* @param int $role_id Staff role id taken from staff_role_id of table staff
+* @param string $task Task name. Ex: staff
+* @param string $action Action name. Ex: edit
+* @return boolean If it is true, it means that staff has permission to perform this function
+*/
+function auth($role_id, $task, $action = '')
+{
+ global $debug, $connected;
+
+ //super admin
+ if(isset($_SESSION['is_super_admin']) && !empty($_SESSION['is_super_admin'])) return true;
+
+ $result = true;
+ try
+ {
+   //Get function id
+   $sql = "SELECT id FROM `staff_function` WHERE task_name = :task_name ";
+   if(!empty($action)) $sql .= "AND action_name = :action_name";
+   $stmt = $connected->prepare($sql);
+   $stmt->bindValue(':task_name', $task, PDO::PARAM_STR);
+   if(!empty($action)) $stmt->bindValue(':action_name', $action, PDO::PARAM_STR);
+   $stmt->execute();
+   $row = $stmt->fetch();
+   //print_r($row);
+   if(empty($row['id'])) return false;
+
+   $stmt = $connected->prepare('SELECT count(*) AS total FROM `staff_permission` WHERE staff_role_id = :role_id AND staff_function_id = :function_id');
+   $stmt->bindValue(':role_id', (int)$role_id, PDO::PARAM_INT);
+   $stmt->bindValue(':function_id', (int)$row['id'], PDO::PARAM_INT);
+   $stmt->execute();
+   $row = $stmt->fetch();
+   if(empty($row['total'])) return false;
+   if(!empty($row['total']) && $row['total']>0) return true;
+
+ } catch(PDOException $e) {
+
+   $result = false;
+   if ($debug)
+   {
+     echo 'ERROR: ' . $e->getMessage();
+     exit;
+   }
+
+ }
+
+ return $result;
+}
+
+function getStaffPermissionData($srid)
+{
+  global $debug, $connected;
+
+  $result = true;
+  try
+  {
+    $sql = ' SELECT * FROM `staff_permission` sp INNER JOIN staff_function sf ON sf.id = sp.staff_function_id WHERE sp.staff_role_id = :staff_role_id AND sf.action_name != "" GROUP BY sf.task_name, sf.action_name ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':staff_role_id', $srid, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+    var_dump($rows);
+
+    $newResultActon = array();
+
+    // foreach ($rows as $key => $value) {
+    //   $newResultActon
+    // }
+
+    $newResult = array();
+
+    foreach ($rows as $key => $value) {
+
+      $newResultActon[] = array($value['action_name'] => $value['action_name']);
+
+      $sql1 = ' SELECT * FROM `staff_permission` sp INNER JOIN staff_function sf ON sf.id = sp.staff_function_id WHERE sp.staff_role_id = :staff_role_id AND sf.action_name != "" GROUP BY sf.task_name, sf.action_name ';
+      $stmt1 = $connected->prepare($sql1);
+      $stmt1->bindValue(':staff_role_id', $srid, PDO::PARAM_INT);
+      $stmt1->execute();
+      $rows1 = $stmt1->fetchAll();
+
+      $newResult[$value['task_name']] = array('action' => array($value['action_name'] => $value['action_name']));
+
+    }
+    // var_dump($newResultActon);
+    // var_dump($newResult);
+
+  } catch(PDOException $e) {
+
+    $result = false;
+    if ($debug)
+    {
+      echo 'ERROR: getStaffPermissionData ' . $e->getMessage();
+      exit;
+    }
+
+  }
+
+  return $result;
+}
+
+/**
  * array_unique_by_key for multidimensional array
  * @param  mix $array is array value
  * @param  string $key is name of array key
@@ -58,17 +161,31 @@ function is_staff_function_exits($task, $action)
   global $debug, $connected;
   $result = true;
   try{
-    $sql= ' SELECT COUNT(*) AS total_count FROM `staff_function` WHERE task_name = :task AND action_name= :action';
+    $condition = $where = '';
+
+    if(!empty($task)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' task_name = :task ';
+    }
+    if(!empty($action)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' action_name = :action ';
+    }
+    if(!empty($condition)) $where .=' WHERE '.$condition;
+
+    $sql= ' SELECT COUNT(*) AS total_count FROM `staff_function` '.$where;
     $query = $connected->prepare($sql);
-    $query->bindValue(':task', (string)$task, PDO::PARAM_STR);
-    $query->bindValue(':action', (string)$action, PDO::PARAM_STR);
+    if(!empty($task)) $query->bindValue(':task', (string)$task, PDO::PARAM_STR);
+    if(!empty($action)) $query->bindValue(':action', (string)$action, PDO::PARAM_STR);
     $query->execute();
     $rows = $query->fetch();
+
     return $rows['total_count'];
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: is_staff_function_exist'.$e->getMessage();
   }
+
   return $result;
 }
 /**
@@ -106,23 +223,31 @@ function is_staff_permission_exist($table_name, $role_id, $function_id)
 /**
  * is_staff_role_exist
  * @param  string  $table_name
- * @param  int $id
+ * @param  int $id is staff_role_id
  * @return boolean
  * @author In khemarak
  */
-function is_staff_role_exist($table_name, $id)
+function is_staff_role_exist($id)
 {
   //these values are set in setup.php
   global $debug, $connected;
   $result = true;
   try
   {
-    $sql = 'SELECT COUNT(*) as total FROM '.$table_name.' WHERE staff_role_id = :id';
+    $sql = 'SELECT COUNT(*) as total FROM staff WHERE staff_role_id = :id';
     $stmt = $connected->prepare($sql);
     $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
     $stmt->execute();
     $row = $stmt->fetch();
-    return $row['total'];
+
+    $sql1 = 'SELECT COUNT(*) as total FROM staff_permission WHERE staff_role_id = :id';
+    $stmt1 = $connected->prepare($sql1);
+    $stmt1->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $stmt1->execute();
+    $row1 = $stmt1->fetch();
+    $totalCount = $row['total'] + $row1['total'];
+
+    return $totalCount;
   } catch(PDOException $e) {
     $result = false;
     if ($debug)
@@ -131,6 +256,7 @@ function is_staff_role_exist($table_name, $id)
       exit;
     }
   }
+
   return $result;
 }
 /**

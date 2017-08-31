@@ -86,10 +86,10 @@
                   <div class="form-group">
                     {if $edit_staff_permission.id}
                       <input type="hidden" name="id" value="{$edit_staff_permission.id}" />
-                      <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> Update</button>
-                      <a href="{$admin_file}?task=staff_permission" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> Cancel</a>
+                      <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate (Key Lang:button_update){/if}</button>
+                      <a href="{$admin_file}?task=staff_permission" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</a>
                     {else}
-                      <button type="submit" name="submit" class="btn btn-info"><i class="fa fa-floppy-o"></i> Save</button>
+                      <button type="submit" name="submit" class="btn btn-info"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate (Key Lang:button_save){/if}</button>
                     {/if}
                   </div>
                 </div>

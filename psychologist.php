@@ -32,16 +32,19 @@ if('logout' === $task){
   header('Location:'.$index_file.'?task=login');
   exit;
 }
+
 //redirect if no session
 if(empty($_SESSION['is_psycho_login_id'])){
   header('Location:'.$index_file.'?task=login');
   exit;
 }
+
 //Task: page not found
 if('page_not_found' === $task){
   $smarty_appform->display('psychologist/page_error_404.tpl');
   exit;
 }
+
 //Task: patient
 if('patient' === $task)
 {
@@ -68,8 +71,8 @@ if('patient' === $task)
 		   $error['invalid_email'] = 1;
 		}
     if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
-      $existed = check_patient_email($email);
-      if($existed > 0){
+      $result = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
+      if($result['email'] !== $email && check_patient_email($email) > 0){
         $error['exist_email'] = 1;
       }
     }
@@ -227,12 +230,20 @@ if('test_patient' === $task)
   exit;
 }
 
+//Task: Test Question
 if('test_question' === $task)
 {
-  // if(!empty($_SESSION['testid'])){
-  //   header('Location:'.$index_file);
-  //   exit;
-  // }
+  $resultTestPsychologist = $common->find('test_psychologist', $condition = ['id' => $_GET['id'], 'test_id' => $_GET['tid'], 'psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'one');
+
+  if(empty($resultTestPsychologist)){
+    header('Location:'.$psychologist_file.'?task=page_not_found');
+    exit;
+  }
+
+  if(!empty($_SESSION['testid'])){
+    header('Location:'.$psychologist_file);
+    exit;
+  }
   //Get Test Group By test_id
   $resultTestGroup = listTestGroupByTestId($_GET['tid']);
 
@@ -330,7 +341,7 @@ if('test_question' === $task)
         }
         //Clear sesson
         unset($_SESSION['tgroupid']);
-        header('Location:'.$index_file.'?task=result&id='.$_GET['id']);
+        header('Location:'.$psychologist_file.'?task=result&tid='.$_GET['tid'].'&id='.$_GET['id']);
         exit;
       }
       //Condition test no group
@@ -343,7 +354,7 @@ if('test_question' === $task)
         }
         //Clear sesson
         unset($_SESSION['tgroupid']);
-        header('Location:'.$index_file.'?task=result&id='.$_GET['id']);
+        header('Location:'.$psychologist_file.'?task=result&tid='.$_GET['tid'].'&id='.$_GET['id']);
         exit;
       }
 
@@ -389,11 +400,19 @@ if('test_question' === $task)
   }
 
   if(empty($result) && COUNT($result) === 0 && empty($getTestByID)){
-    header('Location:'.$psychologist_file.'?task=page_error');
+    header('Location:'.$psychologist_file.'?task=page_not_found');
     exit;
   }
 
+  $sumAnswerCol = 0;
+  foreach ($result as $key => $value) {
+    if($value['flag'] == 1){
+      if($value['answer'] > $sumAnswerCol) $sumAnswerCol = COUNT($value['answer']);
+    }
+  }
+
   $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('sumAnswerCol', $sumAnswerCol);
   $smarty_appform->assign('totalAnswer', $total_data);
   $smarty_appform->assign('resultQueIdJumpTo', $resultQueIdJumpTo);
   $smarty_appform->assign('contentError', $_SESSION['contentError']);
@@ -407,10 +426,9 @@ if('test_question' === $task)
   $smarty_appform->assign('sessionContentBack', $_SESSION['contentBack'.$test_group_id]);
   $smarty_appform->assign('testQueGroup', $resultTestGroup);
   $smarty_appform->assign('countTestGroupSession', COUNT($_SESSION['tgroupid']) + 1);
-  $smarty_appform->display('psychologist/test_question.tpl');
+  $smarty_appform->display('common/test_question_responsive.tpl');
   exit;
 }
-
 
 $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
 $cid    = !empty($_GET['cid']) ? $_GET['cid'] : '';
@@ -426,5 +444,4 @@ $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $l
 $smarty_appform->assign('category', $common->find('category', $condition = ['lang' => $lang], $type = 'all'));
 $smarty_appform->display('psychologist/index.tpl');
 exit;
-
 ?>

@@ -26,6 +26,7 @@ $smarty_appform->assign('lang_name', $result['lang_name']);
 $smarty_appform->assign('getLanguage', $common->find('language', $condition = null, $type = 'all'));
 //Change language on template
 $smarty_appform->assign('multiLang', getMultilang($lang));
+
 if(!empty($_GET['deflang']))
 {
   //Update default_lang to zero
@@ -49,19 +50,25 @@ if('login' === $task){
     if(empty($password))  $error['password']  = 1;
 
     if(0 === count($error)){
+      $resultAdminLogin = admin_login($username, $password);
       //compare username and password in form
-      if($admin_username  === $username && $admin_password === md5($password)){
+      if(!empty($resultAdminLogin)){
         //assign value to session
-        $_SESSION['is_admin_login'] = 'admin';
-        //remove session to clear data
+        $_SESSION['is_admin_login'] = $resultAdminLogin['id'];
+        $_SESSION['staff_login_role'] = $resultAdminLogin['staff_role_id'];
+        //Check is super admin
+        if($resultAdminLogin['staff_role_id'] == 1){
+          $_SESSION['is_super_admin'] = $resultAdminLogin['staff_role_id'];
+        }
+        //remove session from post
         unset($_SESSION['admin']);
         //redirect to admin.php
         header('Location:'.$admin_file);
         exit;
       }
-      //wrong username and password
-      $error['login'] = 1;
     }
+    //wrong username and password
+    $error['login'] = 1;
   }
   //default of login task
   $smarty_appform->assign('error', $error);
@@ -79,6 +86,23 @@ if(empty($_SESSION['is_admin_login'])){
   header('Location:'.$admin_file.'?task=login');
   exit;
 }
+//Check Staff Permission On template
+$smarty_appform->assign('staffPermission', getStaffPermissionData($_SESSION['staff_login_role']));
+//redirect if no permission
+if($task == 'perror')
+{
+  $smarty_appform->assign('mode_file', $admin_file);
+  $smarty_appform->display('common/permission_error.tpl');
+	exit;
+}
+//Check permission
+$permission = auth($_SESSION['staff_login_role'], $task, $action);
+if(!empty($task) && false === $permission)
+{
+	header('location:'.$admin_file.'?task=perror');
+	exit;
+}
+
 //task multi_language
 if('multi_language' === $task)
 {
@@ -385,7 +409,7 @@ if('staff_role' === $task)
   //action delete staff role
   if('delete' === $action && !empty($_GET['id']))
   {
-    if(!empty($lang) && is_staff_role_exist('staff_permission', $_GET['id']) > 0)
+    if(!empty($lang) && is_staff_role_exist($_GET['id']) > 0)
     {
       $error['exist_delete'] = 1;
     }else{
@@ -460,6 +484,7 @@ if('staff_info' === $task)
 	        $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
 	        $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
 				}
+
           $common->save('staff', $field = ['name'     => $name,
                                           'password'  => $pass,
                                           'gender'    => $gender,
@@ -562,10 +587,28 @@ if('staff_function' === $task)
     //check validate form
     if(empty($title))   $error['title'] = 1;
     if(empty($task))    $error['task'] = 1;
-    if(!empty($task) && !empty($action) && is_staff_function_exits($task, $action) > 0) $error['is_staff_function_exist'] = 2;
+    //Get Staff Function
+    $resultSFun = $common->find('staff_function', $condition = ['id' => $id], $type='one');
+    if($resultSFun['task_name'] !== $task && $s_function['action_name'] !== $action || $resultSFun['task_name'] === $task && $resultSFun['action_name'] !== $action || $resultSFun['task_name'] !== $task && $resultSFun['action_name'] === $action)
+    {
+      if($resultSFun['task_name'] !== $task || $s_function['action_name'] !== $action){
+        if(!empty($task) && empty($action) && is_staff_function_exits($task, '') > 0) $error['is_staff_fun_exist_task'] = 2;
+      }
+      if(!empty($task) && !empty($action) && is_staff_function_exits($task, $action) > 0) $error['is_staff_fun_exist_action'] = 2;
+
+    }
+    if(!empty($action)){
+      $rAction = $action;
+    } else {
+      $rAction = NULL;
+    }
     if(count($error) === 0 && empty($id))
     {
-      $common->save('staff_function',$field = ['title' => $title, 'task_name'=>$task,'action_name'=>$action]);
+      // if(empty($action)){
+        $common->save('staff_function',$field = ['title' => $title, 'task_name' => $task, 'action_name' => $action]);
+      // } else {
+      //   $common->save('staff_function',$field = ['title' => $title, 'task_name' => $task]);
+      // }
       $_SESSION['staff_function'] = '';
       unset($_SESSION['staff_function']);
       //Redirect
@@ -574,7 +617,7 @@ if('staff_function' === $task)
     }
     if(count($error) === 0 && !empty($id))
     {
-      $common->update('staff_function', $field = ['title' => $title,'task_name'=>$task, 'action_name'=>$action], $condition = ['id' => $id]);
+      $common->update('staff_function', $field = ['title' => $title, 'task_name' => $task, 'action_name' => $action], $condition = ['id' => $id]);
       $_SESSION['staff_function'] = '';
       unset($_SESSION['staff_function']);
       //Redirect
@@ -597,7 +640,7 @@ if('staff_function' === $task)
   }
   if('edit' === $action && !empty($_GET['id']))
   {
-    $smarty_appform->assign('edit',$common->find('staff_function', $condition = ['id' => $_GET['id']], $type='one'));
+    $smarty_appform->assign('edit', $common->find('staff_function', $condition = ['id' => $_GET['id']], $type='one'));
   }
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
 	$list_function = listFunction($kwd);
@@ -639,7 +682,7 @@ if('patient' === $task)
 		}
     if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
       $result = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
-      if($result['email'] !== $email &&  check_patient_email($email) > 0){
+      if($result['email'] !== $email && check_patient_email($email) > 0){
         $error['exist_email'] = 1;
       }
     }
