@@ -135,7 +135,7 @@
         {/if}
       </table>
     </div><!--table-responsive  -->
-    <div class="pull-right"> {include file="common/paginate.tpl"}</div>
+    {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->
 {/block}

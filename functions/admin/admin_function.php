@@ -1,4 +1,10 @@
 <?php
+/**
+ * admin_login
+ * @param  string $username
+ * @param  string $password
+ * @return array or boolean
+ */
 function admin_login($username, $password)
 {
   global $debug, $connected, $total_data;
@@ -170,6 +176,7 @@ function listLanguage($kwd)
     $query->execute();
     $rows = $query->fetchAll();
     if (count($rows) > 0) $total_data = $rows[0]['total'];
+
     return $rows;
   }
   catch (Exception $e) {
@@ -1956,10 +1963,31 @@ function is_exist_test_group_question($test_id, $t_que_id)
     $query->bindValue(':t_que_id', (int)$t_que_id, PDO::PARAM_INT);
     $query->execute();
     $rows = $query->fetch();
+
     return $rows['total_count'];
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: is_exist_test_group_question'.$e->getMessage();
   }
+
+  return $result;
+}
+
+function getStaffFunctionIsNullStaffPer($srid)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT sf.id, sf.title FROM `staff_function` sf LEFT JOIN staff_permission sp ON sp.staff_function_id = sf.id AND sp.staff_role_id = :staff_role_id WHERE sp.id IS NULL ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':staff_role_id', (int)$srid, PDO::PARAM_INT);
+    $query->execute();
+
+    return $query->fetchAll();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getStaffFunctionIsNullStaffPer'.$e->getMessage();
+  }
+
   return $result;
 }

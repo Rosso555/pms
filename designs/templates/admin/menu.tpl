@@ -161,24 +161,3 @@
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
-{block name="javascript"}
-<!-- <script>
-  $(document).ready(function(){
-    checkAdminMenuPermission();
-
-  });
-
-  function checkAdminMenuPermission(){
-    var menu_user   = $('#menu_user');
-    var menu_staff  = $('#menu_staff');
-    var test_setting  = $('#test_setting');
-    var test_assign   = $('#test_assign');
-
-    if(menu_user.find('ul li').length == 0)   $('#menu_user').hide();
-    if(menu_staff.find('ul li').length == 0)  $('#menu_staff').hide();
-    if(test_setting.find('ul li').length == 0)  $('#test_setting').hide();
-    if(test_assign.find('ul li').length == 0)   $('#test_assign').hide();
-
-  }
-</script> -->
-{/block}

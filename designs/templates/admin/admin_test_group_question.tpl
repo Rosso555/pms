@@ -33,7 +33,8 @@
           {/if}
             <div class="row">
               <div class="col-md-12">
-                <div class="form-group">
+                <div class="form-group multi_select2">
+                  <input type="hidden" id="select2_placeholder" value="{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}">
                   <label for="title"><span style="color: red">*</span> {if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}:</label>
                   {if $error.test_question}
                     <span style="color: red">{if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}</span>
@@ -41,8 +42,8 @@
                   {if $error.is_exist_test_group_que}
                     <span style="color: red">{if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if} {if $multiLang.text_is_existed}{$multiLang.text_is_existed}{else}No Translate(Key Lang: text_is_existed){/if}</span>
                   {/if}
-                  <select class="form-control select2_test_group" multiple="multiple" name="test_question[]" style="width:100%">
-                    <option value="{$data.tqid}">--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} ---</option>
+                  <select class="form-control select2_mul" multiple="multiple" name="test_question[]" style="width:100%">
+                    <!-- <option value="{$data.tqid}">- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} -</option> -->
                     {foreach from=$listTestQueGroupAnswer item=data}
                     <option value="{$data.tqid}" {if $data.test_ques_group}disabled{/if}>
                     {if $data.g_answer_title}

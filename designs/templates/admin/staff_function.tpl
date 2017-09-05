@@ -128,7 +128,7 @@
         </tbody>
       </table>
     </div>
-    <div class="pull-right">{include file = "common/paginate.tpl"}</div>
+    {include file = "common/paginate.tpl"}
   </div><!--panel panel-body-->
 </div><!--panel panel-primary-->
 

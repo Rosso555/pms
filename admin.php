@@ -93,14 +93,14 @@ if($task == 'perror')
 {
   $smarty_appform->assign('mode_file', $admin_file);
   $smarty_appform->display('common/permission_error.tpl');
-	exit;
+  exit;
 }
 //Check permission
 $permission = auth($_SESSION['staff_login_role'], $task, $action);
 if(!empty($task) && false === $permission)
 {
-	header('location:'.$admin_file.'?task=perror');
-	exit;
+  header('location:'.$admin_file.'?task=perror');
+  exit;
 }
 
 //task multi_language
@@ -130,7 +130,7 @@ if('multi_language' === $task)
     if(0 === count($error) && empty($_GET['unique_id']))
     {
       foreach ($_POST['title'] as $k => $v) {
-         $common->save('multi_lang', $field = ['unique_id' => $unique_id, 'language_id' => $_POST['language_id'][$k], 'title' => $_POST['title'][$k], 'key_lang' => $key_lang, 'lang' => $_POST['lang'][$k]]);
+        $common->save('multi_lang', $field = ['unique_id' => $unique_id, 'language_id' => $_POST['language_id'][$k], 'title' => $_POST['title'][$k], 'key_lang' => $key_lang, 'lang' => $_POST['lang'][$k]]);
       }
       //unset session
       unset($_SESSION['translate']);
@@ -313,48 +313,74 @@ if('category' === $task)
 //task permission
 if('staff_permission' === $task)
 {
-  $getsrid = (isset($_GET['sr_id']))?$_GET['sr_id']:'';
+  $getsrid = (isset($_GET['sr_id']))? $_GET['sr_id']:'';
   //Clear session
   if(empty($_POST)) unset($_SESSION['staff_permission']);
 
   $error = array();
   if($_POST)
   {
-   $staff_function_id = $common->clean_string($_POST['staff_function_id']);
-   $staff_role_id     = $common->clean_string($_POST['staff_role_id']);
-
-   if(empty($staff_function_id))   $error['staff_function_id']=1;
-   if(empty($staff_role_id))       $error['staff_role_id'] =1;
-   $_SESSION['staff_permission'] = $_POST;
-
-   if(0 === count($error) && empty($_POST['id']))
-   {
-     if(!empty($lang) && is_staff_permission_exist('staff_permission', $staff_role_id, $staff_function_id) > 0)
-     {
-       $error['exist_save'] = 1;
-     }else{
-       $common->save('staff_permission', $field = ['staff_function_id'=> $staff_function_id, 'staff_role_id'=> $staff_role_id] );
-       //reset session
-       unset($_SESSION['staff_permission']);
-       //Redirect
-       header('location: '.$admin_file.'?task=staff_permission');
-       exit;
+    if(empty($_POST['id'])){
+      $staff_function_id = $common->clean_string_array($_POST['staff_function_id']);
+    }else {
+      $staff_function_id = $common->clean_string($_POST['staff_function_id']);
     }
-   }
-   if(0 === count($error) && !empty($_POST['id']))
-   {
-     $common->update('staff_permission', $field = ['staff_function_id' => $staff_function_id, 'staff_role_id' => $staff_role_id], $conditon = ['id' => $_POST['id']]);
-     //reset session
-     unset($_SESSION['staff_permission']);
-     header('location: '.$admin_file.'?task=staff_permission');
-     exit;
-   }
-   $smarty_appform->assign('error', $error);
+    $staff_role_id     = $common->clean_string($_POST['staff_role_id']);
+
+    if(empty($staff_function_id))   $error['staff_function_id']=1;
+    if(empty($staff_role_id))       $error['staff_role_id'] =1;
+
+    if(!empty($staff_function_id) && empty($_POST['id'])){
+      $existed_per = 0;
+      foreach ($staff_function_id as $key => $value) {
+        $existed_per += is_staff_permission_exist('staff_permission', $staff_role_id, $value);
+      }
+      if($existed_per > 0) $error['existed_per'] = 1;
+    }
+
+    if(!empty($staff_function_id) && !empty($_POST['id'])){
+      $result = $common->find('staff_permission', $condition = ['id' => $_GET['id']], $type = 'one');
+      if(($result['staff_function_id'] != $staff_function_id || $result['staff_role_id'] != $staff_role_id) && is_staff_permission_exist('staff_permission', $staff_role_id, $staff_function_id) > 0)
+      {
+        $error['existed_per'] = 1;
+      }
+    }
+
+    $_SESSION['staff_permission'] = $_POST;
+    if(0 === count($error) && empty($_POST['id']))
+    {
+      foreach ($staff_function_id as $key => $value) {
+        $common->save('staff_permission', $field = ['staff_function_id'=> $value, 'staff_role_id'=> $staff_role_id] );
+      }
+      //reset session
+      unset($_SESSION['staff_permission']);
+      //Redirect
+      header('location: '.$admin_file.'?task=staff_permission');
+      exit;
+    }
+    if(0 === count($error) && !empty($_POST['id']))
+    {
+      $common->update('staff_permission', $field = ['staff_function_id' => $staff_function_id, 'staff_role_id' => $staff_role_id], $conditon = ['id' => $_POST['id']]);
+      //reset session
+      unset($_SESSION['staff_permission']);
+      header('location: '.$admin_file.'?task=staff_permission');
+      exit;
+    }
+    $smarty_appform->assign('error', $error);
   }
+
   if('delete' === $action && !empty($_GET['id']))
   {
     $common->delete('staff_permission', $field = ['id'=>$_GET['id']]);
     header('location: '.$admin_file.'?task=staff_permission');
+    exit;
+  }
+  //action get staff function is null in staff_permission
+  if('staff_fun_permistion' === $action)
+  {
+    $results = getStaffFunctionIsNullStaffPer($_GET['srid']);
+    header('Content-type: application/json');
+    echo json_encode($results);
     exit;
   }
   //action edit staff permission
@@ -380,21 +406,21 @@ if('staff_role' === $task)
   if(empty($_POST)) unset($_SESSION['staff_role']);
 
   $error = array();
-	if($_POST)
+  if($_POST)
   {
     $id    = $common->clean_string($_POST['id']);
-		$title = $common->clean_string($_POST['name']);
+    $title = $common->clean_string($_POST['name']);
     $_SESSION['staff_role'] = $_POST;
-		if(empty($title)) $error['title'] = 1;
-		if(empty($id) && 0 === count($error))
-		{
-			$common->save('staff_role',$field = ['name' => $title]);
+    if(empty($title)) $error['title'] = 1;
+    if(empty($id) && 0 === count($error))
+    {
+      $common->save('staff_role',$field = ['name' => $title]);
       $_SESSION['staff_role'] = '';
       unset($_SESSION['staff_role']);
-			//Redirect
-			header('location:'.$admin_file.'?task=staff_role');
-			exit;
-		}
+      //Redirect
+      header('location:'.$admin_file.'?task=staff_role');
+      exit;
+    }
     if(!empty($id) && 0 === count($error))
     {
       $common->update('staff_role', $field = ['name' => $title], $condition = ['id' => $id]);
@@ -405,7 +431,7 @@ if('staff_role' === $task)
       exit;
     }
     $smarty_appform->assign('error', $error);
-	}
+  }
   //action delete staff role
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -424,7 +450,7 @@ if('staff_role' === $task)
   }
   $smarty_appform->assign('error', $error);
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
-	$results = ListStaffRole($kwd);
+  $results = ListStaffRole($kwd);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
   $smarty_appform->assign('list_staff_role', $results);
@@ -438,105 +464,103 @@ if('staff_info' === $task)
   if(empty($_POST)) unset($_SESSION['staff_info']);
 
   $error = array();
-		if($_POST)
-		{
-      $id       = $common->clean_string($_POST['id']);
-			$name     = $common->clean_string($_POST['name']);
-      $pass     = $common->clean_string($_POST['password']);
-      $gender   = $common->clean_string($_POST['gender']);
-      $phone    = $common->clean_string($_POST['phone']);
-      $staff_role   = $common->clean_string($_POST['staff_role']);
-      $old_fle = $common->clean_string($_POST['old_file']);
+  if($_POST)
+  {
+    $id       = $common->clean_string($_POST['id']);
+    $name     = $common->clean_string($_POST['name']);
+    $pass     = $common->clean_string($_POST['password']);
+    $gender   = $common->clean_string($_POST['gender']);
+    $phone    = $common->clean_string($_POST['phone']);
+    $staff_role   = $common->clean_string($_POST['staff_role']);
+    $old_fle = $common->clean_string($_POST['old_file']);
 
-      //add value to session to use in template
-      $_SESSION['staff_info'] = $_POST;
-      //check validate form
-			if(empty($name))   $error['name'] = 1;
-      if(empty($pass))   $error['pass'] = 1;
-      if(empty($phone))  $error['phone'] = 1;
-      if(empty($staff_role))  $error['staff_role'] = 1;
-      if(!empty($pass) && !$common->checkPassword($pass))
+    //add value to session to use in template
+    $_SESSION['staff_info'] = $_POST;
+    //check validate form
+    if(empty($name))   $error['name'] = 1;
+    if(empty($pass))   $error['pass'] = 1;
+    if(empty($phone))  $error['phone'] = 1;
+    if(empty($staff_role))  $error['staff_role'] = 1;
+    if(!empty($pass) && !$common->checkPassword($pass))
+    {
+      $error['password'] = 2;
+    }
+    if(!empty($_POST['old_file'])){
+      $image = $old_fle;
+    }
+
+    if(!empty($_FILES['image']['name']))
+    {
+      if($_FILES['image']['size'] > $allows['SIZE'][0])  $error['size'] = 1;
+      if(!in_array($_FILES['image']['type'], $allows['TYPE']['image'])) $error['type'] = 1;
+    }
+    if(empty($id) && 0 === count($error))
+    {
+      if(!empty($_FILES['image']) && !empty($_FILES['image']['name']))
       {
-        $error['password'] = 2;
-      }
-      if(!empty($_POST['old_file'])){
-        $image = $old_fle;
+        $image = $common->uploadFile($_FILES, time(), IMAGE_PATH, 'image');
+        // echo $image;exit;
+        if($_FILES['image']['error'] > 0)  $error['error'] = 1;
+        //Generate thumbnail
+        $images = new Zubrag_image;
+        $images->max_x        = $thumbnail_width;
+        $images->max_y        = $thumbnail_height;
+        $images->save_to_file = 1;
+        $images->image_type   = '-1';
+        $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
+        $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
       }
 
-      if(!empty($_FILES['image']['name']))
-      {
-        if($_FILES['image']['size'] > $allows['SIZE'][0])  $error['size'] = 1;
-        if(!in_array($_FILES['image']['type'], $allows['TYPE']['image'])) $error['type'] = 1;
-      }
-			if(empty($id) && 0 === count($error))
-			{
+      $common->save('staff', $field = ['name'     => $name,
+      'password'  => $pass,
+      'gender'    => $gender,
+      'phone'     => $phone,
+      'status'    => 1,
+      'photo'     => $image,
+      'staff_role_id' =>$staff_role]);
+      $_SESSION['staff_info'] = '';
+      unset($_SESSION['staff_info']);
+      //Redirect
+      header('location:'.$admin.'?task=staff_info');
+      exit;
+    }
+    if(!empty($id) && 0 === count($error))
+    {
+      if(empty($_POST['old_fle'])){
         if(!empty($_FILES['image']) && !empty($_FILES['image']['name']))
-				{
-					$image = $common->uploadFile($_FILES, time(), IMAGE_PATH, 'image');
-          // echo $image;exit;
-					if($_FILES['image']['error'] > 0)  $error['error'] = 1;
-					//Generate thumbnail
-	        $images = new Zubrag_image;
-	        $images->max_x        = $thumbnail_width;
-	        $images->max_y        = $thumbnail_height;
-	        $images->save_to_file = 1;
-	        $images->image_type   = '-1';
-	        $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
-	        $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
-				}
-
-          $common->save('staff', $field = ['name'     => $name,
-                                          'password'  => $pass,
-                                          'gender'    => $gender,
-                                          'phone'     => $phone,
-                                          'status'    => 1,
-                                          'photo'     => $image,
-                                          'staff_role_id' =>$staff_role]);
-        $_SESSION['staff_info'] = '';
-        unset($_SESSION['staff_info']);
-				//Redirect
-				header('location:'.$admin.'?task=staff_info');
-				exit;
-			}
-      if(!empty($id) && 0 === count($error))
-      {
-        if(empty($_POST['old_fle'])){
-          if(!empty($_FILES['image']) && !empty($_FILES['image']['name']))
+        {
+          $photo = $common->find('staff', $condition = ['id' => $id], $type = 'one');
+          if(!empty($photo['photo']))
           {
-            $photo = $common->find('staff', $condition = ['id' => $id], $type = 'one');
-            if(!empty($photo['photo']))
-            {
-              @unlink(IMAGE_PATH.$photo['photo']);
-              @unlink(IMAGE_PATH.'thumbnail__'.$photo['photo']);
-            }
-            $image = $common->uploadFile($_FILES, time(), IMAGE_PATH, 'image');
-            if($_FILES['image']['error'] > 0)  $error['error'] = 1;
-            //Generate thumbnail
-            $images = new Zubrag_image;
-            $images->max_x        = $thumbnail_width;
-            $images->max_y        = $thumbnail_height;
-            $images->save_to_file = 1;
-            $images->image_type   = '-1';
-            $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
-            $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
+            @unlink(IMAGE_PATH.$photo['photo']);
+            @unlink(IMAGE_PATH.'thumbnail__'.$photo['photo']);
           }
+          $image = $common->uploadFile($_FILES, time(), IMAGE_PATH, 'image');
+          if($_FILES['image']['error'] > 0)  $error['error'] = 1;
+          //Generate thumbnail
+          $images = new Zubrag_image;
+          $images->max_x        = $thumbnail_width;
+          $images->max_y        = $thumbnail_height;
+          $images->save_to_file = 1;
+          $images->image_type   = '-1';
+          $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
+          $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
         }
-        $common->update('staff', $field = ['name' => $name,
-                                                'password'  => $pass,
-                                                'gender'    => $gender,
-                                                'phone'     => $phone,
-                                                'photo'     => $image,
-                                                'staff_role_id' =>$staff_role
-                                               ],
-        $condition = ['id' => $id]);
-        $_SESSION['staff_info'] = '';
-        unset($_SESSION['staff_info']);
-        //Redirect
-        header('location:'.$admin_file.'?task=staff_info');
-        exit;
       }
+      $common->update('staff', $field = ['name' => $name,
+      'password'  => $pass,
+      'gender'    => $gender,
+      'phone'     => $phone,
+      'photo'     => $image,
+      'staff_role_id' =>$staff_role], $condition = ['id' => $id]);
+      $_SESSION['staff_info'] = '';
+      unset($_SESSION['staff_info']);
+      //Redirect
+      header('location:'.$admin_file.'?task=staff_info');
+      exit;
+    }
     $smarty_appform->assign('error', $error);
-	}
+  }
   //action delete staff role
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -561,7 +585,7 @@ if('staff_info' === $task)
   }
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
-	$results = ListStaffInfo($kwd, $status);
+  $results = ListStaffInfo($kwd, $status);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -605,7 +629,7 @@ if('staff_function' === $task)
     if(count($error) === 0 && empty($id))
     {
       // if(empty($action)){
-        $common->save('staff_function',$field = ['title' => $title, 'task_name' => $task, 'action_name' => $action]);
+      $common->save('staff_function',$field = ['title' => $title, 'task_name' => $task, 'action_name' => $action]);
       // } else {
       //   $common->save('staff_function',$field = ['title' => $title, 'task_name' => $task]);
       // }
@@ -643,7 +667,7 @@ if('staff_function' === $task)
     $smarty_appform->assign('edit', $common->find('staff_function', $condition = ['id' => $_GET['id']], $type='one'));
   }
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
-	$list_function = listFunction($kwd);
+  $list_function = listFunction($kwd);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
   $smarty_appform->assign('error', $error);
@@ -678,8 +702,8 @@ if('patient' === $task)
     if(empty($age))     $error['age']     = 1;
     if(empty($password))  $error['password']  = 1;
     if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
-		   $error['invalid_email'] = 1;
-		}
+      $error['invalid_email'] = 1;
+    }
     if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
       $result = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
       if($result['email'] !== $email && check_patient_email($email) > 0){
@@ -689,33 +713,33 @@ if('patient' === $task)
     //Save
     if(empty($id) && COUNT($error) === 0){
       $common->save('patient', $field =['psychologist_id' => $psy_id,
-                                        'username'=> $username,
-                                        'email'   => $email,
-                                        'phone'   => $phone,
-                                        'gender'  => $gender,
-                                        'age'     => $age,
-                                        'password'=> $password]);
-    //unset session
-    unset($_SESSION['patient']);
-    //Redirect
-    header('location: '.$admin_file.'?task=patient');
-    exit;
+      'username'=> $username,
+      'email'   => $email,
+      'phone'   => $phone,
+      'gender'  => $gender,
+      'age'     => $age,
+      'password'=> $password]);
+      //unset session
+      unset($_SESSION['patient']);
+      //Redirect
+      header('location: '.$admin_file.'?task=patient');
+      exit;
     }
     //Update
     if(!empty($id) && COUNT($error) === 0){
       $common->update('patient', $field= ['psychologist_id' => $psy_id,
-                                          'username' => $username,
-                                          'email'    => $email,
-                                          'phone'    => $phone,
-                                          'gender'   => $gender,
-                                          'age'      => $age,
-                                          'password' => $password],
-                                 $condition = ['id' => $_GET['id']]);
-    //unset session
-    unset($_SESSION['patient']);
-    //Redirect
-    header('location: '.$admin_file.'?task=patient');
-    exit;
+      'username' => $username,
+      'email'    => $email,
+      'phone'    => $phone,
+      'gender'   => $gender,
+      'age'      => $age,
+      'password' => $password],
+      $condition = ['id' => $_GET['id']]);
+      //unset session
+      unset($_SESSION['patient']);
+      //Redirect
+      header('location: '.$admin_file.'?task=patient');
+      exit;
     }
   }
   //Change staus patient
@@ -784,8 +808,8 @@ if('psychologist' === $task)
     if(empty($address))   $error['address']   = 1;
 
     if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
-		   $error['invalid_email'] = 1;
-		}
+      $error['invalid_email'] = 1;
+    }
     if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
       $result = $common->find('psychologist', $condition = ['id' => $_GET['id']], $type='one');
       if($result['email'] !== $email &&  check_psychologist_email($email) > 0){
@@ -795,29 +819,29 @@ if('psychologist' === $task)
     //Save
     if(empty($id) && COUNT($error) === 0){
       $common->save('psychologist', $field = ['username'=> $username,
-                                              'email'   => $email,
-                                              'job'     => $job,
-                                              'password'=> $password,
-                                              'address' => $address]);
-    //unset session
-    unset($_SESSION['psychologist']);
-    //Redirect
-    header('location: '.$admin_file.'?task=psychologist');
-    exit;
+      'email'   => $email,
+      'job'     => $job,
+      'password'=> $password,
+      'address' => $address]);
+      //unset session
+      unset($_SESSION['psychologist']);
+      //Redirect
+      header('location: '.$admin_file.'?task=psychologist');
+      exit;
     }
     //Update
     if(!empty($id) && COUNT($error) === 0){
       $common->update('psychologist', $field=['username' => $username,
-                                              'email'    => $email,
-                                              'job'      => $job,
-                                              'password' => $password,
-                                              'address'  => $address],
-                                     $condition = ['id' => $id]);
-    //unset session
-    unset($_SESSION['psychologist']);
-    //Redirect
-    header('location: '.$admin_file.'?task=psychologist');
-    exit;
+      'email'    => $email,
+      'job'      => $job,
+      'password' => $password,
+      'address'  => $address],
+      $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['psychologist']);
+      //Redirect
+      header('location: '.$admin_file.'?task=psychologist');
+      exit;
     }
   }
   //Change staus psychologist
@@ -968,9 +992,9 @@ if('test_question' === $task)
     if(0 === count($error) && empty($test_question_id))
     {
       $tque_id = $common->save('test_question', $field = ['test_id' => $test_id,
-                                               'question_id'  => $question_id,
-                                               'view_order'   => $view_order,
-                                               'is_required'  => $required]);
+      'question_id'  => $question_id,
+      'view_order'   => $view_order,
+      'is_required'  => $required]);
       // //Get answer
       $rAnswer = $common->find('answer', $condition = ['test_question_id' => $copy_test_que], $type = 'all');
       //Get question
@@ -979,7 +1003,7 @@ if('test_question' === $task)
       $rTestues = $common->find('test_question', $condition = ['id' => $copy_test_que], $type = 'one');
 
       if(!empty($rAnswer) && $rQuestion['type'] == 3 || $rQuestion['type'] == 4){
-      //Fetch anser
+        //Fetch anser
         foreach ($rAnswer as $key => $value) {
           //Get answer_topic
           $rAnswerTopic = $common->find('answer_topic', $condition = ['answer_id' => $value['id']], $type = 'all');
@@ -1020,10 +1044,10 @@ if('test_question' === $task)
     if(0 === count($error) && !empty($test_question_id))
     {
       $common->update('test_question', $field = ['test_id'      => $test_id,
-                                                 'question_id'  => $question_id,
-                                                 'view_order'   => $view_order,
-                                                 'is_required'  => $required],
-                                       $condition = ['id' => $test_question_id]);
+      'question_id'  => $question_id,
+      'view_order'   => $view_order,
+      'is_required'  => $required],
+      $condition = ['id' => $test_question_id]);
       //unset session
       unset($_SESSION['test_question']);
       //Redirect
@@ -1169,9 +1193,9 @@ if('answer' === $task)
       if(!empty($result)){
         foreach ($result as $key => $value) {
           $common->save('answer_topic', $field = ['answer_id' => $answer_id,
-                                                  'topic_id'  => $value['topic_id'],
-                                                  'default_value' => $default_value,
-                                                  'weight_value'  => $weight_value]);
+          'topic_id'  => $value['topic_id'],
+          'default_value' => $default_value,
+          'weight_value'  => $weight_value]);
         }
 
       }
@@ -1287,10 +1311,10 @@ if('answer_topic' === $task)
     if(0 === count($error) && empty($id))
     {
       $common->save('answer_topic', $field = ['answer_id' => $answer_id,
-                                              'topic_id'  => $topic_id,
-                                              'default_value' => $default_value,
-                                              'assign_value'  => $assign_value,
-                                              'weight_value'  => $weight_value]);
+      'topic_id'  => $topic_id,
+      'default_value' => $default_value,
+      'assign_value'  => $assign_value,
+      'weight_value'  => $weight_value]);
       //unset session
       unset($_SESSION['answer_topic']);
       //Redirect
@@ -1301,10 +1325,10 @@ if('answer_topic' === $task)
     if(0 === count($error) && !empty($id))
     {
       $common->update('answer_topic', $field = ['answer_id' => $answer_id,
-                                                'topic_id'  => $topic_id,
-                                                'default_value' => $default_value,
-                                                'assign_value'  => $assign_value,
-                                                'weight_value'  => $weight_value], $condition = ['id' => $id]);
+      'topic_id'  => $topic_id,
+      'default_value' => $default_value,
+      'assign_value'  => $assign_value,
+      'weight_value'  => $weight_value], $condition = ['id' => $id]);
       //unset session
       unset($_SESSION['answer_topic']);
       //Redirect
@@ -1451,10 +1475,10 @@ if('test' === $task)
     if(0 === count($error) && empty($id))
     {
       $testid = $common->save('test', $field = ['category_id' => $category,
-                                                'title'       => $title,
-                                                'graph_title' => $grapTitle,
-                                                'description' => $desc,
-                                                'lang'        => $lang]);
+      'title'       => $title,
+      'graph_title' => $grapTitle,
+      'description' => $desc,
+      'lang'        => $lang]);
       //unset session
       unset($_SESSION['test']);
       //Redirect
@@ -1469,9 +1493,9 @@ if('test' === $task)
     if(0 === count($error) && !empty($id))
     {
       $common->update('test', $field = ['category_id' => $category,
-                                        'title'       => $title,
-                                        'graph_title' => $grapTitle,
-                                        'description' => $desc], $condition = ['id' => $id]);
+      'title'       => $title,
+      'graph_title' => $grapTitle,
+      'description' => $desc], $condition = ['id' => $id]);
       //unset session
       unset($_SESSION['test']);
       //Redirect
@@ -1815,8 +1839,8 @@ if('topic_hide' === $task)
     $result = getListTestTopicHide($_GET['tid'], $_GET['tpid']);
 
     header('Content-type: application/json');
-   	echo json_encode($result);
-   	exit;
+    echo json_encode($result);
+    exit;
   }
   //get edit test question
   if('edit' === $action && !empty($_GET['id']))
@@ -1920,8 +1944,8 @@ if('test_topic' === $task)
     $resultCount = checkViewOrderTopic($test_id);
 
     header('Content-type: application/json');
-   	echo json_encode(array('status' => $result, 'checkCountView' => $resultCount));
-   	exit;
+    echo json_encode(array('status' => $result, 'checkCountView' => $resultCount));
+    exit;
   }
 
   $result = getListTestTopic($_GET['tid']);
@@ -1961,10 +1985,10 @@ if('test_topic_analysis' === $task)
     if(0 === count($error) && empty($id))
     {
       $common->save('test_topic_analysis', $field = ['test_id' => $test_id,
-                                                     'topic_id'=> $topic_id,
-                                                     'topic_analysis_id' => $ana_topic_id,
-                                                     'less_than'    => $less_than,
-                                                     'bigger_than'  => $bigger_than]);
+      'topic_id'=> $topic_id,
+      'topic_analysis_id' => $ana_topic_id,
+      'less_than'    => $less_than,
+      'bigger_than'  => $bigger_than]);
       //unset session
       unset($_SESSION['test_topic_analysis']);
       //Redirect
@@ -1975,10 +1999,10 @@ if('test_topic_analysis' === $task)
     if(0 === count($error) && !empty($id))
     {
       $common->update('test_topic_analysis', $field = ['topic_id'=> $topic_id,
-                                                       'topic_analysis_id' => $ana_topic_id,
-                                                       'less_than' => $less_than,
-                                                       'bigger_than' => $bigger_than],
-                                             $condition = ['id' => $id]);
+      'topic_analysis_id' => $ana_topic_id,
+      'less_than' => $less_than,
+      'bigger_than' => $bigger_than],
+      $condition = ['id' => $id]);
       //unset session
       unset($_SESSION['test_topic_analysis']);
       //Redirect
@@ -2045,11 +2069,11 @@ if('test_topic_answer' === $task)
     if(0 === count($error) && empty($id))
     {
       $common->save('test_topic_answer', $field =['test_id'     => $_GET['tid'],
-                                                  'topic_id'    => $topic_id,
-                                                  'average'     => $average,
-                                                  'stdd'        => $stdd,
-                                                  'multiplier'  => $multiplier,
-                                                  'constant'    => $constant]);
+      'topic_id'    => $topic_id,
+      'average'     => $average,
+      'stdd'        => $stdd,
+      'multiplier'  => $multiplier,
+      'constant'    => $constant]);
       //unset session
       unset($_SESSION['test_topic_answer']);
       //Redirect
@@ -2060,11 +2084,11 @@ if('test_topic_answer' === $task)
     if(0 === count($error) && !empty($id))
     {
       $common->update('test_topic_answer', $field =['test_id'     => $_GET['tid'],
-                                                    'topic_id'    => $topic_id,
-                                                    'average'     => $average,
-                                                    'stdd'        => $stdd,
-                                                    'multiplier'  => $multiplier,
-                                                    'constant'    => $constant], $condition = ['id' => $id]);
+      'topic_id'    => $topic_id,
+      'average'     => $average,
+      'stdd'        => $stdd,
+      'multiplier'  => $multiplier,
+      'constant'    => $constant], $condition = ['id' => $id]);
       //unset session
       unset($_SESSION['test_topic_answer']);
       //Redirect
@@ -2257,7 +2281,8 @@ if('test_group_question' === $task)
   exit;
 }
 //Task group answer question
-if('group_answer_question' === $task){
+if('group_answer_question' === $task)
+{
   //Clear session
   if(empty($_POST)) unset($_SESSION['g_answer_ques']);
 
@@ -2654,8 +2679,8 @@ if('apitransaction' === $task)
   {
     $result_detail = $common->find('mailerlite_group', $condition = ['transaction_id' => $_GET['tid']], $type = 'all');
     header('Content-type: application/json');
-   	echo json_encode($result_detail);
-   	exit;
+    echo json_encode($result_detail);
+    exit;
   }
   //Delete: mailerlite
   if('delete' === $action && !empty($_GET['id']))
@@ -2676,8 +2701,8 @@ if('apitransaction' === $task)
     }
 
     header('Content-type: application/json');
-   	echo json_encode(array('status' => $result, 'countMG' => $countMG));
-   	exit;
+    echo json_encode(array('status' => $result, 'countMG' => $countMG));
+    exit;
   }
   //get edit apitransaction
   if('edit' === $action && !empty($_GET['id']))
@@ -2703,13 +2728,12 @@ if('apitransaction' === $task)
 //Task: Respone
 if('response' === $task)
 {
-
   if('view_topic_sum' === $action){
 
     $results = getResultAnswerTopic($_GET['unique_id'], $_GET['tid'], '', '');
     header('Content-type: application/json');
-   	echo json_encode($results);
-   	exit;
+    echo json_encode($results);
+    exit;
   }
 
   // $result = getListResponse($_GET['tid'], $slimit = 10);
@@ -2938,9 +2962,9 @@ if('copy_test_question' === $task)
   }else {
     //Save test question
     $tque_id = $common->save('test_question', $field =['test_id' => $_GET['test_id'],
-                                                       'question_id'  => $rTestQues['question_id'],
-                                                       'view_order'   => $rTestQues['view_order'],
-                                                       'is_required'  => $_GET['required']]);
+    'question_id'  => $rTestQues['question_id'],
+    'view_order'   => $rTestQues['view_order'],
+    'is_required'  => $_GET['required']]);
     //Get answer
     $rAnswer = $common->find('answer', $condition = ['test_question_id' => $_GET['tqid']], $type = 'all');
     //Get Topic in Result
@@ -3015,24 +3039,24 @@ if('copy_test_answer' === $task)
             //Check question type
             if($rQuestion['type'] == 3 || $rQuestion['type'] == 4){
 
-             //Get Topic in Result
-             $rGetTopicResult = getTopicResult($test_id);
+              //Get Topic in Result
+              $rGetTopicResult = getTopicResult($test_id);
 
-             if(!empty($allResultAnswer)){
-               //Fetch anser
-               foreach ($allResultAnswer as $k => $va) {
-                 //Save answer
-                 $answer_id = $common->save('answer', $field = ['title' => $va['title'], 'test_question_id' => $value['id'], 'view_order' => $va['view_order'], 'calculate' => $va['calculate']]);
-                 $default_value = $va['view_order'];
-                 $weight_value = 1;
+              if(!empty($allResultAnswer)){
+                //Fetch anser
+                foreach ($allResultAnswer as $k => $va) {
+                  //Save answer
+                  $answer_id = $common->save('answer', $field = ['title' => $va['title'], 'test_question_id' => $value['id'], 'view_order' => $va['view_order'], 'calculate' => $va['calculate']]);
+                  $default_value = $va['view_order'];
+                  $weight_value = 1;
 
-                 if(!empty($rGetTopicResult) && !empty($answer_id)){
-                   foreach ($rGetTopicResult as $k => $v) {
-                     $result = $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $v['topic_id'], 'default_value' => $default_value, 'weight_value' => $weight_value]);
-                   }
-                 }
-               }//end Fetch answer
-             }
+                  if(!empty($rGetTopicResult) && !empty($answer_id)){
+                    foreach ($rGetTopicResult as $k => $v) {
+                      $result = $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $v['topic_id'], 'default_value' => $default_value, 'weight_value' => $weight_value]);
+                    }
+                  }
+                }//end Fetch answer
+              }
             }//End check question type
           }
 
@@ -3066,26 +3090,26 @@ if('copy_test_answer' === $task)
 
           //Check question type
           if($rQuestion['type'] == 3 || $rQuestion['type'] == 4){
-           //Get answer
-           $rAnswer = $common->find('answer', $condition = ['test_question_id' => $test_que_id], $type = 'all');
-           //Get Topic in Result
-           $rGetTopicResult = getTopicResult($test_id);
+            //Get answer
+            $rAnswer = $common->find('answer', $condition = ['test_question_id' => $test_que_id], $type = 'all');
+            //Get Topic in Result
+            $rGetTopicResult = getTopicResult($test_id);
 
-           if(!empty($rAnswer)){
-             //Fetch anser
-             foreach ($rAnswer as $key => $value) {
-               //Save answer
-               $answer_id = $common->save('answer', $field = ['title' => $value['title'], 'test_question_id' => $rTestQues['id'], 'view_order' => $value['view_order'], 'calculate' => $value['calculate']]);
-               $default_value = $value['view_order'];
-               $weight_value = 1;
+            if(!empty($rAnswer)){
+              //Fetch anser
+              foreach ($rAnswer as $key => $value) {
+                //Save answer
+                $answer_id = $common->save('answer', $field = ['title' => $value['title'], 'test_question_id' => $rTestQues['id'], 'view_order' => $value['view_order'], 'calculate' => $value['calculate']]);
+                $default_value = $value['view_order'];
+                $weight_value = 1;
 
-               if(!empty($rGetTopicResult) && !empty($answer_id)){
-                 foreach ($rGetTopicResult as $k => $v) {
-                   $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $v['topic_id'], 'default_value' => $default_value, 'weight_value' => $weight_value]);
-                 }
-               }
-             }//end Fetch answer
-           }
+                if(!empty($rGetTopicResult) && !empty($answer_id)){
+                  foreach ($rGetTopicResult as $k => $v) {
+                    $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $v['topic_id'], 'default_value' => $default_value, 'weight_value' => $weight_value]);
+                  }
+                }
+              }//end Fetch answer
+            }
           }//End check question type
 
         }
@@ -3094,9 +3118,9 @@ if('copy_test_answer' === $task)
       }else {
         //Save test question
         $tque_id = $common->save('test_question', $field =['test_id' => $test_id,
-                                                           'question_id'  => $question_id,
-                                                           'view_order'   => $view_order,
-                                                           'is_required'  => $required]);
+        'question_id'  => $question_id,
+        'view_order'   => $view_order,
+        'is_required'  => $required]);
         //Check question type
         if($rQuestion['type'] == 3 || $rQuestion['type'] == 4){
           //Get answer

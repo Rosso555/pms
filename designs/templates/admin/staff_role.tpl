@@ -96,7 +96,7 @@
         </tbody>
       </table>
     </div>
-    <div class="pull-right">{include file = "common/paginate.tpl"}</div>
+    {include file = "common/paginate.tpl"}
   </div>
 </div>
 

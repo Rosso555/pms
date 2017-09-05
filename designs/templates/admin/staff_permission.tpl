@@ -54,30 +54,36 @@
             </div>
           </div>
           <div id="demo" class="collapse {if $error or $edit_staff_permission.id}in{/if}">
-            <form  action="{$admin_file}?task=staff_permission" method="post">
+            {if $edit_staff_permission.id}
+            <form action="{$admin_file}?task=staff_permission&amp;action=edit&amp;id={$edit_staff_permission.id}" method="post">
+            {else}
+            <form action="{$admin_file}?task=staff_permission" method="post">
+            {/if}
               <div class="row">
                 <div class="col-md-6">
-                  <div class="form-group multi_select2">
-                    <input type="hidden" id="select2_placeholder" value="--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if} ---">
-                    <label for="staff_function">{if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}:</label>
-                    <select class="form-control select2_mul" id="staff_function" name="staff_function_id" style="width:100%;" multiple="multiple">
-                      {foreach from = $list_staff_function item = staff_function}
-                      <option value="{$staff_function.id}"{if $edit_staff_permission.staff_function_id eq $staff_function.id}selected{else}{if $smarty.session.staff_permission.staff_function_id eq $staff_function.id}selected{/if}{/if}>{$staff_function.title}</option>
-                      {/foreach}
-                    </select>
-                    <p class="help-block">{if $error.staff_function_id eq 1}<font style="color:red;">*&nbsp;{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate (Key Lang:text_please_select){/if} {if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}</font>{/if}</p>
-                  </div>
-                </div>
-                <div class="col-md-6">
                   <div class="form-group">
-                    <label for="staff">{if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}:</label>
-                    <select class="form-control" id="staff" name="staff_role_id">
-                      <option value="0"> ---{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}--- </option>
+                    <label for="staff"><span style="color:red;">*</span> {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}:</label>
+                    {if $error.staff_role_id eq 1}<span style="color:red;">*&nbsp;{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate (Key Lang:text_please_select){/if} {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}</span>{/if}
+                    <select class="form-control" id="staff" name="staff_role_id" onchange="getStaffFunctionByStaff(this)">
+                      <option value="0">--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if} ---</option>
                       {foreach from = $list_staff_role item = staff_role}
                       <option value="{$staff_role.id}" {if $edit_staff_permission.staff_role_id eq $staff_role.id}selected{else}{if $smarty.session.staff_permission.staff_role_id eq $staff_role.id}selected{/if}{/if}>{$staff_role.name}</option>
                       {/foreach}
                     </select>
-                    <p class="help-block">{if $error.staff_role_id eq 1}<font style="color:red;">*&nbsp;{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate (Key Lang:text_please_select){/if} {if $multiLang.text_staff_role}{$multiLang.text_staff_role}{else}No Translate (Key Lang:text_staff_role){/if}</font>{/if}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group multi_select2">
+                    <input type="hidden" id="select2_placeholder" value="{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}">
+                    <label for="staff_function"><span style="color:red;">*</span> {if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}:</label>
+                    {if $error.staff_function_id eq 1}<span style="color:red;">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate (Key Lang:text_please_select){/if} {if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if}</span>{/if}
+                    {if $error.existed_per eq 1}<span style="color:red;">{if $multiLang.text_staff_function}{$multiLang.text_staff_function}{else}No Translate (Key Lang:text_staff_function){/if} {if $multiLang.text_is_existed}{$multiLang.text_is_existed}{else}No Translate (Key Lang:text_is_existed){/if}</span>{/if}
+
+                    <select class="form-control select2_mul" id="staff_function" {if $smarty.get.action eq 'edit'}name="staff_function_id"{else}name="staff_function_id[]" multiple="multiple"{/if} style="width:100%;">
+                      {foreach from = $list_staff_function item = staff_function}
+                      <option value="{$staff_function.id}" {if $edit_staff_permission.staff_function_id eq $staff_function.id}selected{else}{if $smarty.session.staff_permission.staff_function_id}{foreach from=$smarty.session.staff_permission.staff_function_id item=sp}{if $sp eq $staff_function.id}selected{/if}{/foreach}{/if}{/if}>{$staff_function.title}</option>
+                      {/foreach}
+                    </select>
                   </div>
                 </div>
               </div>
@@ -89,7 +95,7 @@
                       <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate (Key Lang:button_update){/if}</button>
                       <a href="{$admin_file}?task=staff_permission" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</a>
                     {else}
-                      <button type="submit" name="submit" class="btn btn-info"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate (Key Lang:button_save){/if}</button>
+                      <button type="submit" class="btn btn-info"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate (Key Lang:button_save){/if}</button>
                     {/if}
                   </div>
                 </div>
@@ -108,8 +114,8 @@
             </tr>
           </thead>
           {if $list_Staff_Permission|@count gt 0}
-          {foreach from = $list_Staff_Permission item = staff_permission key=k}
           <tbody>
+          {foreach from = $list_Staff_Permission item = staff_permission key=k}
             <tr>
               <td>{$staff_permission.staff_function_title}</td>
               <td>
@@ -146,8 +152,8 @@
                 </div>
               </td>
             </tr>
-          </tbody>
           {/foreach}
+          </tbody>
           {else}
           <tr>
             <td colspan="5"><h4 style="text-align:center">There is no record</h4></td>
@@ -155,29 +161,57 @@
           {/if}
         </table>
       </div><!--table-responsive  -->
-      <div class="pull-right">{include file="common/paginate.tpl"}</div>
+      {include file="common/paginate.tpl"}
     </div><!--end panel-body-->
 </div><!--panel panel-primary-->
 {/block}
 {block name="javascript"}
 <script type="text/javascript">
   $(document).ready(function(){
-      $( "#flash" ).fadeIn( 50 ).delay( 3000 ).fadeOut( 500 );
+    $( "#flash" ).fadeIn( 50 ).delay( 3000 ).fadeOut( 500 );
+
+    {if $error}
+    $('.select2_mul').on('select2:select', function (event) {
+      console.log(event.params.data);
+    });
+    {/if}
+
+    $("#the_select").change(function(){
+      window.location='{$admin_file}?task=staff_permission&kwd={$smarty.get.kwd}&srid=' + this.value
+    });
+    document.getElementById("search").value = "";
+
   });
-</script>
-<script type="text/javascript">
-$(function(){
-  $("#the_select").change(function(){
-    window.location='{$admin_file}?task=staff_permission&kwd={$smarty.get.kwd}&srid=' + this.value
-  });
-  document.getElementById("search").value = "";
-});
-</script>
-<script>
-$('#birth_date').datetimepicker({ locale: 'en', format: 'YYYY-MM-DD' });
- $('[data-toggle="popover"]').popover();
-	$(function () {
-    $('[data-toggle1="tooltip"]').tooltip()
-  });
+
+  function getStaffFunctionByStaff(sel)
+  {
+    $(".loader").show();
+
+    $.ajax({
+      type: "GET",
+      url: "{$admin_file}?task=staff_permission&action=staff_fun_permistion&srid="+sel.value,
+      success: function(data){
+        var dataHTML = "";
+        if(data.length > 0)
+        {
+          for (var i = 0; i < data.length; i++) {
+            dataHTML += "<option value='"+data[i].id+"'>"+data[i].title+"</option>";
+          }
+          $("#staff_function").html(dataHTML);
+        }else {
+          dataHTML += "<option value=''>No Data</option>";
+          $("#staff_function").html(dataHTML);
+        }
+        //hide Loading gif
+        $(".loader").hide();
+      },
+      error: function(){
+        //Show error here
+        alert("Cannot load data. Please try again later.");
+        location.reload();
+      }
+    });//End Ajax
+
+  }
 </script>
 {/block}

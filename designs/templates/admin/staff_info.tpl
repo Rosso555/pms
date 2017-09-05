@@ -126,9 +126,13 @@
             <td valign="top">{$v.role_name}</td>
             <td valign="top">{$v.phone}</td>
             <td>{if $v.status eq 1}
-            <button type="button" class="btn btn-success btn-xs" {if $v.staff_role_id|@count eq 1 and $v.staff_role_id eq 1}disabled{/if} data-toggle="modal" data-target="#myModal_{$v.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate (Key Lang:text_click_change_status){/if}"><i class="fa fa-circle" aria-hidden="true"></i> {if $multiLang.text_show_Active}{$multiLang.text_show_Active}{else}No Translate (Key Lang:text_show_Active){/if}</button>
+            <button type="button" class="btn btn-success btn-xs" {if $v.staff_role_id|@count eq 1 and $v.staff_role_id eq 1}disabled{/if} data-toggle="modal" data-target="#myModal_{$v.id}" data-toggle1="tooltip" data-placement="top" title="{if $v.staff_role_id|@count eq 1 and $v.staff_role_id eq 1}Can not change status, Because this Super Admin.{else}{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate (Key Lang:text_click_change_status){/if}{/if}">
+              <i class="fa fa-circle" aria-hidden="true"></i>{if $multiLang.text_show_Active}{$multiLang.text_show_Active}{else}No Translate (Key Lang:text_show_Active){/if}
+            </button>
             {elseif $v.status eq 2}
-            <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$v.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate (Key Lang:text_click_change_status){/if}"><i class="fa fa-square" aria-hidden="true"></i> {if $multiLang.text_show_stope}{$multiLang.text_show_stope}{else}No Translate (Key Lang:text_show_stope){/if}</button>
+            <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$v.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate (Key Lang:text_click_change_status){/if}">
+              <i class="fa fa-square" aria-hidden="true"></i> {if $multiLang.text_show_stope}{$multiLang.text_show_stope}{else}No Translate (Key Lang:text_show_stope){/if}
+            </button>
             {/if}
             <!-- Trigger the modal with a button -->
             <div class="modal fade" id="myModal_{$v.id}" role="dialog">
@@ -194,7 +198,7 @@
         </tbody>
       </table>
     </div>
-    <div class="pull-right">{include file = "common/paginate.tpl"}</div>
+    {include file = "common/paginate.tpl"}
   </div>
 </div>
 {/block}
