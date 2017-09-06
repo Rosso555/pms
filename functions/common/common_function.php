@@ -63,7 +63,7 @@ function getStaffPermissionData($srid)
     $stmt->bindValue(':staff_role_id', $srid, PDO::PARAM_INT);
     $stmt->execute();
     $rows = $stmt->fetchAll();
-  
+
     $newResult = array();
     foreach ($rows as $key => $value) {
       //Get Action Name
@@ -340,6 +340,27 @@ function listCategory($kwd, $lang)
     if($debug)  echo 'Errors: listCategory'.$e->getMessage();
   }
 
+  return $result;
+}
+/**
+ * checkDeleteCategory
+ * @param  int $id is category_id
+ * @return array or boolean
+ */
+function checkDeleteCategory($id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count, c.name FROM `test` t INNER JOIN category c ON c.id = t.category_id WHERE t.category_id = :id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetch();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkDeleteCategory'.$e->getMessage();
+  }
   return $result;
 }
 /**

@@ -109,49 +109,66 @@ if('multi_language' === $task)
   if(empty($_POST)) unset($_SESSION['translate']);
 
   $error = array();
-  if($_POST)
+  //Action add
+  if('add' === $action)
   {
-    //get value from form
-    $key_lang       = $common->clean_string($_POST['key_lang']);
-    $unique_id      = time();
-
-    //add value to session to use in template
-    $_SESSION['translate'] = $_POST;
-
-    //form validation
-    if(empty($key_lang))    $error['key_lang']  = 1;
-
-    $result = $common->find('multi_lang', $condition = ['unique_id' => $_GET['unique_id']], $type = 'one');
-
-    if(!empty($key_lang) && $result['key_lang'] !== $key_lang && is_key_lang_exist($key_lang) > 0) $error['is_key_lang_exist'] = 2;
-
-
-    //Add question
-    if(0 === count($error) && empty($_GET['unique_id']))
+    if($_POST)
     {
-      foreach ($_POST['title'] as $k => $v) {
-        $common->save('multi_lang', $field = ['unique_id' => $unique_id, 'language_id' => $_POST['language_id'][$k], 'title' => $_POST['title'][$k], 'key_lang' => $key_lang, 'lang' => $_POST['lang'][$k]]);
-      }
-      //unset session
-      unset($_SESSION['translate']);
-      //Redirect
-      header('location: '.$admin_file.'?task=multi_language');
-      exit;
-    }
-    //update question
-    if(0 === count($error) && !empty($_GET['unique_id']))
-    {
-      foreach ($_POST['title'] as $k => $v) {
-        $common->update('multi_lang', $field = ['title' => $_POST['title'][$k], 'key_lang' => $key_lang, 'lang' => $_POST['lang'][$k]], $condition = ['id' => $_POST['id'][$k]]);
-      }
-      //unset session
-      unset($_SESSION['translate']);
-      //Redirect
-      header('location: '.$admin_file.'?task=multi_language');
-      exit;
-    }
+      //get value from form
+      $key_lang   = $common->clean_string($_POST['key_lang']);
+      $unique_id  = time();
+      //add value to session to use in template
+      $_SESSION['translate'] = $_POST;
+      //form validation
+      if(empty($key_lang))    $error['key_lang']  = 1;
+      if(!empty($key_lang) && is_key_lang_exist($key_lang) > 0) $error['is_key_lang_exist'] = 2;
 
+      //Add question
+      if(0 === count($error))
+      {
+        foreach ($_POST['title'] as $k => $v) {
+          $common->save('multi_lang', $field = ['unique_id' => $unique_id, 'language_id' => $_POST['language_id'][$k], 'title' => $_POST['title'][$k], 'key_lang' => $key_lang, 'lang' => $_POST['lang'][$k]]);
+        }
+        //unset session
+        unset($_SESSION['translate']);
+        //Redirect
+        header('location: '.$admin_file.'?task=multi_language');
+        exit;
+      }
+    }
+  }//End Action add
+
+  //get edit question
+  if('edit' === $action && !empty($_GET['unique_id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $key_lang       = $common->clean_string($_POST['key_lang']);
+      $unique_id      = time();
+      //add value to session to use in template
+      $_SESSION['translate'] = $_POST;
+      //form validation
+      if(empty($key_lang))    $error['key_lang']  = 1;
+      $result = $common->find('multi_lang', $condition = ['unique_id' => $_GET['unique_id']], $type = 'one');
+      if(!empty($key_lang) && $result['key_lang'] !== $key_lang && is_key_lang_exist($key_lang) > 0) $error['is_key_lang_exist'] = 2;
+
+      //update question
+      if(0 === count($error))
+      {
+        foreach ($_POST['title'] as $k => $v) {
+          $common->update('multi_lang', $field = ['title' => $_POST['title'][$k], 'key_lang' => $key_lang, 'lang' => $_POST['lang'][$k]], $condition = ['id' => $_POST['id'][$k]]);
+        }
+        //unset session
+        unset($_SESSION['translate']);
+        //Redirect
+        header('location: '.$admin_file.'?task=multi_language');
+        exit;
+      }
+    }
+    $smarty_appform->assign('getMultilangByUID', getMultilangByID($_GET['unique_id']));
   }
+
   //action delete question
   if('delete' === $action && !empty($_GET['unique_id']))
   {
@@ -159,11 +176,7 @@ if('multi_language' === $task)
     header('location: '.$admin_file.'?task=multi_language');
     exit;
   }
-  //get edit question
-  if('edit' === $action && !empty($_GET['unique_id']))
-  {
-    $smarty_appform->assign('getMultilangByUID', getMultilangByID($_GET['unique_id']));
-  }
+
   //Calculate for set limit
   $result_language = $common->find('language', $condition = null, $type = 'all');
   $slimit = COUNT($result_language) * 5;
@@ -185,48 +198,72 @@ if('add_language' === $task)
   if(empty($_POST)) unset($_SESSION['add_language']);
 
   $error = array();
-  if($_POST)
+  //action add
+  if('add' === $action)
   {
-    //get value from form
-    $id         = $common->clean_string($_POST['id']);
-    $title      = $common->clean_string($_POST['title']);
-    $language   = $common->clean_string($_POST['language']);
-
-    //add value to session to use in template
-    $_SESSION['add_language'] = $_POST;
-    //form validation
-    if(empty($title))     $error['title'] = 1;
-    if(empty($language))  $error['language'] = 1;
-    $result = $common->find('language', $condition = ['id' => $id], $type = 'one');
-    if(!empty($language) && $result['lang_name'] !== $language && is_lang_name_exist($language) > 0) $error['is_lang_name_exist'] = 2;
-
-    //Add language
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      $language_id = $common->save('language', $field = ['title' => $title, 'lang_name' => $language]);
-      $result_multil_lang = $common->find('multi_lang', $condition = ['lang' => 'en'], $type = 'all');
-      foreach ($result_multil_lang as $key => $value) {
-        $common->save('multi_lang', $field = ['unique_id' => $value['unique_id'], 'language_id' => $language_id, 'title' => $value['title'], 'key_lang' => $value['key_lang'], 'lang' => $language]);
+      //get value from form
+      $title      = $common->clean_string($_POST['title']);
+      $language   = $common->clean_string($_POST['language']);
+      //add value to session to use in template
+      $_SESSION['add_language'] = $_POST;
+      //form validation
+      if(empty($title))     $error['title'] = 1;
+      if(empty($language))  $error['language'] = 1;
+      if(!empty($language) && is_lang_name_exist($language) > 0) $error['is_lang_name_exist'] = 2;
+
+      //Add language
+      if(0 === count($error))
+      {
+        $language_id = $common->save('language', $field = ['title' => $title, 'lang_name' => $language]);
+        $result_multil_lang = $common->find('multi_lang', $condition = ['lang' => 'en'], $type = 'all');
+        foreach ($result_multil_lang as $key => $value) {
+          $common->save('multi_lang', $field = ['unique_id' => $value['unique_id'], 'language_id' => $language_id, 'title' => $value['title'], 'key_lang' => $value['key_lang'], 'lang' => $language]);
+        }
+        //unset session
+        unset($_SESSION['add_language']);
+        //Redirect
+        header('location: '.$admin_file.'?task=add_language');
+        exit;
       }
-      //unset session
-      unset($_SESSION['add_language']);
-      //Redirect
-      header('location: '.$admin_file.'?task=add_language');
-      exit;
+      $smarty_appform->assign('error', $error);
     }
-    //update language
-    if(0 === count($error) && !empty($id))
+  }//End action add
+
+  //action exit edit language
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('language', $field = ['title' => $title, 'lang_name'  => $language], $condition = ['id' => $id]);
-      $common->update('multi_lang', $field = ['lang' => $language], $condition = ['language_id' => $id]);
-      //unset session
-      unset($_SESSION['add_language']);
-      //Redirect
-      header('location: '.$admin_file.'?task=add_language');
-      exit;
+      //get value from form
+      $id         = $common->clean_string($_POST['id']);
+      $title      = $common->clean_string($_POST['title']);
+      $language   = $common->clean_string($_POST['language']);
+      //add value to session to use in template
+      $_SESSION['add_language'] = $_POST;
+      //form validation
+      if(empty($title))     $error['title'] = 1;
+      if(empty($language))  $error['language'] = 1;
+      $result = $common->find('language', $condition = ['id' => $id], $type = 'one');
+      if(!empty($language) && $result['lang_name'] !== $language && is_lang_name_exist($language) > 0) $error['is_lang_name_exist'] = 2;
+
+      //update language
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('language', $field = ['title' => $title, 'lang_name'  => $language], $condition = ['id' => $id]);
+        $common->update('multi_lang', $field = ['lang' => $language], $condition = ['language_id' => $id]);
+        //unset session
+        unset($_SESSION['add_language']);
+        //Redirect
+        header('location: '.$admin_file.'?task=add_language');
+        exit;
+      }
+      $smarty_appform->assign('error', $error);
     }
-    $smarty_appform->assign('error', $error);
-  }
+    $smarty_appform->assign('getLanguageByID', $common->find('language', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }//End action edit
+
   //action delete language
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -236,11 +273,7 @@ if('add_language' === $task)
     header('location: '.$admin_file.'?task=add_language');
     exit;
   }
-  //get edit language
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getLanguageByID', $common->find('language', $condition = ['id' => $_GET['id']], $type = 'one'));
-  }
+
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $result = listLanguage($kwd);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
@@ -256,49 +289,70 @@ if('category' === $task)
   if(empty($_POST)) unset($_SESSION['category']);
 
   $error = array();
-  if($_POST)
+  //action add
+  if('add' === $action)
   {
-    //get value from form
-    $name = $common->clean_string($_POST['name']);
-    $id   = $common->clean_string($_POST['id']);
-
-    //add value to session to use in template
-    $_SESSION['category'] = $_POST;
-    //form validation
-    if(empty($name))  $error['name']  = 1;
-
-    //Add test
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      $common->save('category', $field = ['name' => $name, 'lang' => $lang]);
-      //unset session
-      unset($_SESSION['category']);
-      //Redirect
-      header('location: '.$admin_file.'?task=category');
-      exit;
-    }
-    //update test
-    if(0 === count($error) && !empty($id))
-    {
-      $common->update('category', $field = ['name' => $name, 'lang' => $lang], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['category']);
-      //Redirect
-      header('location: '.$admin_file.'?task=category');
-      exit;
+      //get value from form
+      $name = $common->clean_string($_POST['name']);
+      //add value to session to use in template
+      $_SESSION['category'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //Add test
+      if(0 === count($error))
+      {
+        $common->save('category', $field = ['name' => $name, 'lang' => $lang]);
+        //unset session
+        unset($_SESSION['category']);
+        //Redirect
+        header('location: '.$admin_file.'?task=category');
+        exit;
+      }
     }
   }
+
+  //action edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $name = $common->clean_string($_POST['name']);
+      $id   = $common->clean_string($_POST['id']);
+      //add value to session to use in template
+      $_SESSION['category'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //update test
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('category', $field = ['name' => $name, 'lang' => $lang], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['category']);
+        //Redirect
+        header('location: '.$admin_file.'?task=category');
+        exit;
+      }
+    }
+    $smarty_appform->assign('getCategoryByID', $common->find('category', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
   //action delete category
   if('delete' === $action && !empty($_GET['id']))
   {
-    $common->delete('category', $field = ['id' => $_GET['id']]);
+    $result = checkDeleteCategory($_GET['id']);
+    if('0' === $result['total_count'])
+    {
+      $common->delete('category', $field = ['id' => $_GET['id']]);
+    }else {
+      setcookie('checkCategory', $result['name'], time() + 5);
+    }
     header('location: '.$admin_file.'?task=category');
     exit;
-  }
-  //get edit category
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getCategoryByID', $common->find('category', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
@@ -369,6 +423,74 @@ if('staff_permission' === $task)
     $smarty_appform->assign('error', $error);
   }
 
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      $staff_function_id = $common->clean_string_array($_POST['staff_function_id']);
+      $staff_role_id     = $common->clean_string($_POST['staff_role_id']);
+
+      if(empty($staff_function_id)) $error['staff_function_id'] = 1;
+      if(empty($staff_role_id))     $error['staff_role_id'] = 1;
+      //Check existed
+      if(!empty($staff_function_id) && empty($_POST['id'])){
+        $existed_per = 0;
+        foreach ($staff_function_id as $key => $value) {
+          $existed_per += is_staff_permission_exist('staff_permission', $staff_role_id, $value);
+        }
+        if($existed_per > 0) $error['existed_per'] = 1;
+      }
+      $_SESSION['staff_permission'] = $_POST;
+
+      if(0 === count($error))
+      {
+        foreach ($staff_function_id as $key => $value) {
+          $common->save('staff_permission', $field = ['staff_function_id'=> $value, 'staff_role_id'=> $staff_role_id]);
+        }
+        //reset session
+        unset($_SESSION['staff_permission']);
+        //Redirect
+        header('location: '.$admin_file.'?task=staff_permission');
+        exit;
+      }
+      $smarty_appform->assign('error', $error);
+    }
+  }//End action add
+
+  //action edit staff permission
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      $spid = $common->clean_string($_POST['id']);
+      $staff_function_id = $common->clean_string($_POST['staff_function_id']);
+      $staff_role_id     = $common->clean_string($_POST['staff_role_id']);
+
+      if(empty($staff_function_id)) $error['staff_function_id'] = 1;
+      if(empty($staff_role_id))     $error['staff_role_id'] = 1;
+      //Check existed
+      if(!empty($staff_function_id) && !empty($_POST['id'])){
+        $result = $common->find('staff_permission', $condition = ['id' => $_GET['id']], $type = 'one');
+        if(($result['staff_function_id'] != $staff_function_id || $result['staff_role_id'] != $staff_role_id) && is_staff_permission_exist('staff_permission', $staff_role_id, $staff_function_id) > 0)
+        {
+          $error['existed_per'] = 1;
+        }
+      }
+      $_SESSION['staff_permission'] = $_POST;
+
+      if(0 === count($error) && !empty($spid))
+      {
+        $common->update('staff_permission', $field = ['staff_function_id' => $staff_function_id, 'staff_role_id' => $staff_role_id], $conditon = ['id' => $spid]);
+        //reset session
+        unset($_SESSION['staff_permission']);
+        header('location: '.$admin_file.'?task=staff_permission');
+        exit;
+      }
+      $smarty_appform->assign('error', $error);
+    }
+    $smarty_appform->assign('edit_staff_permission', $common->find('staff_permission', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
   if('delete' === $action && !empty($_GET['id']))
   {
     $common->delete('staff_permission', $field = ['id'=>$_GET['id']]);
@@ -383,8 +505,6 @@ if('staff_permission' === $task)
     echo json_encode($results);
     exit;
   }
-  //action edit staff permission
-  if('edit' === $action && !empty($_GET['id'])) $smarty_appform->assign('edit_staff_permission', $common->find('staff_permission', $condition = ['id' => $_GET['id']], $type = 'one'));
 
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $srid = !empty($_GET['srid']) ? $_GET['srid'] : '';
@@ -406,32 +526,52 @@ if('staff_role' === $task)
   if(empty($_POST)) unset($_SESSION['staff_role']);
 
   $error = array();
-  if($_POST)
+  //Action add
+  if('add' === $action)
   {
-    $id    = $common->clean_string($_POST['id']);
-    $title = $common->clean_string($_POST['name']);
-    $_SESSION['staff_role'] = $_POST;
-    if(empty($title)) $error['title'] = 1;
-    if(empty($id) && 0 === count($error))
+    if($_POST)
     {
-      $common->save('staff_role',$field = ['name' => $title]);
-      $_SESSION['staff_role'] = '';
-      unset($_SESSION['staff_role']);
-      //Redirect
-      header('location:'.$admin_file.'?task=staff_role');
-      exit;
+      $id    = $common->clean_string($_POST['id']);
+      $title = $common->clean_string($_POST['name']);
+      $_SESSION['staff_role'] = $_POST;
+      if(empty($title)) $error['title'] = 1;
+      if(empty($id) && 0 === count($error))
+      {
+        $common->save('staff_role',$field = ['name' => $title]);
+        $_SESSION['staff_role'] = '';
+        unset($_SESSION['staff_role']);
+        //Redirect
+        header('location:'.$admin_file.'?task=staff_role');
+        exit;
+      }
+      $smarty_appform->assign('error', $error);
     }
-    if(!empty($id) && 0 === count($error))
-    {
-      $common->update('staff_role', $field = ['name' => $title], $condition = ['id' => $id]);
-      $_SESSION['staff_role'] = '';
-      unset($_SESSION['staff_role']);
-      //Redirect
-      header('location:'.$admin_file.'?task=staff_role');
-      exit;
-    }
-    $smarty_appform->assign('error', $error);
   }
+
+  //action edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      $id    = $common->clean_string($_POST['id']);
+      $title = $common->clean_string($_POST['name']);
+      $_SESSION['staff_role'] = $_POST;
+      if(empty($title)) $error['title'] = 1;
+
+      if(!empty($id) && 0 === count($error))
+      {
+        $common->update('staff_role', $field = ['name' => $title], $condition = ['id' => $id]);
+        $_SESSION['staff_role'] = '';
+        unset($_SESSION['staff_role']);
+        //Redirect
+        header('location:'.$admin_file.'?task=staff_role');
+        exit;
+      }
+      $smarty_appform->assign('error', $error);
+    }
+    $smarty_appform->assign('edit',$common->find('staff_role', $condition = ['id' => $_GET['id']], $type='one'));
+  }
+
   //action delete staff role
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -444,10 +584,7 @@ if('staff_role' === $task)
       exit;
     }
   }
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('edit',$common->find('staff_role', $condition = ['id' => $_GET['id']], $type='one'));
-  }
+
   $smarty_appform->assign('error', $error);
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $results = ListStaffRole($kwd);
@@ -464,77 +601,42 @@ if('staff_info' === $task)
   if(empty($_POST)) unset($_SESSION['staff_info']);
 
   $error = array();
-  if($_POST)
+  if('add' === $action)
   {
-    $id       = $common->clean_string($_POST['id']);
-    $name     = $common->clean_string($_POST['name']);
-    $pass     = $common->clean_string($_POST['password']);
-    $gender   = $common->clean_string($_POST['gender']);
-    $phone    = $common->clean_string($_POST['phone']);
-    $staff_role   = $common->clean_string($_POST['staff_role']);
-    $old_fle = $common->clean_string($_POST['old_file']);
+    if($_POST)
+    {
+      $id       = $common->clean_string($_POST['id']);
+      $name     = $common->clean_string($_POST['name']);
+      $pass     = $common->clean_string($_POST['password']);
+      $gender   = $common->clean_string($_POST['gender']);
+      $phone    = $common->clean_string($_POST['phone']);
+      $staff_role   = $common->clean_string($_POST['staff_role']);
+      $old_fle = $common->clean_string($_POST['old_file']);
 
-    //add value to session to use in template
-    $_SESSION['staff_info'] = $_POST;
-    //check validate form
-    if(empty($name))   $error['name'] = 1;
-    if(empty($pass))   $error['pass'] = 1;
-    if(empty($phone))  $error['phone'] = 1;
-    if(empty($staff_role))  $error['staff_role'] = 1;
-    if(!empty($pass) && !$common->checkPassword($pass))
-    {
-      $error['password'] = 2;
-    }
-    if(!empty($_POST['old_file'])){
-      $image = $old_fle;
-    }
-
-    if(!empty($_FILES['image']['name']))
-    {
-      if($_FILES['image']['size'] > $allows['SIZE'][0])  $error['size'] = 1;
-      if(!in_array($_FILES['image']['type'], $allows['TYPE']['image'])) $error['type'] = 1;
-    }
-    if(empty($id) && 0 === count($error))
-    {
-      if(!empty($_FILES['image']) && !empty($_FILES['image']['name']))
+      //add value to session to use in template
+      $_SESSION['staff_info'] = $_POST;
+      //check validate form
+      if(empty($name))   $error['name'] = 1;
+      if(empty($pass))   $error['pass'] = 1;
+      if(empty($phone))  $error['phone'] = 1;
+      if(empty($staff_role))  $error['staff_role'] = 1;
+      if(!empty($pass) && !$common->checkPassword($pass))
       {
-        $image = $common->uploadFile($_FILES, time(), IMAGE_PATH, 'image');
-        // echo $image;exit;
-        if($_FILES['image']['error'] > 0)  $error['error'] = 1;
-        //Generate thumbnail
-        $images = new Zubrag_image;
-        $images->max_x        = $thumbnail_width;
-        $images->max_y        = $thumbnail_height;
-        $images->save_to_file = 1;
-        $images->image_type   = '-1';
-        $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
-        $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
+        $error['password'] = 2;
+      }
+      if(!empty($_POST['old_file'])){
+        $image = $old_fle;
       }
 
-      $common->save('staff', $field = ['name'     => $name,
-      'password'  => $pass,
-      'gender'    => $gender,
-      'phone'     => $phone,
-      'status'    => 1,
-      'photo'     => $image,
-      'staff_role_id' =>$staff_role]);
-      $_SESSION['staff_info'] = '';
-      unset($_SESSION['staff_info']);
-      //Redirect
-      header('location:'.$admin.'?task=staff_info');
-      exit;
-    }
-    if(!empty($id) && 0 === count($error))
-    {
-      if(empty($_POST['old_fle'])){
+      if(!empty($_FILES['image']['name']))
+      {
+        if($_FILES['image']['size'] > $allows['SIZE'][0])  $error['size'] = 1;
+        if(!in_array($_FILES['image']['type'], $allows['TYPE']['image'])) $error['type'] = 1;
+      }
+      if(empty($id) && 0 === count($error))
+      {
         if(!empty($_FILES['image']) && !empty($_FILES['image']['name']))
         {
-          $photo = $common->find('staff', $condition = ['id' => $id], $type = 'one');
-          if(!empty($photo['photo']))
-          {
-            @unlink(IMAGE_PATH.$photo['photo']);
-            @unlink(IMAGE_PATH.'thumbnail__'.$photo['photo']);
-          }
           $image = $common->uploadFile($_FILES, time(), IMAGE_PATH, 'image');
           if($_FILES['image']['error'] > 0)  $error['error'] = 1;
           //Generate thumbnail
@@ -546,28 +648,96 @@ if('staff_info' === $task)
           $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
           $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
         }
+
+        $common->save('staff', $field =['name'      => $name,
+                                        'password'  => $pass,
+                                        'gender'    => $gender,
+                                        'phone'     => $phone,
+                                        'status'    => 1,
+                                        'photo'     => $image,
+                                        'staff_role_id' =>$staff_role]);
+        $_SESSION['staff_info'] = '';
+        unset($_SESSION['staff_info']);
+        //Redirect
+        header('location:'.$admin.'?task=staff_info');
+        exit;
       }
-      $common->update('staff', $field = ['name' => $name,
-      'password'  => $pass,
-      'gender'    => $gender,
-      'phone'     => $phone,
-      'photo'     => $image,
-      'staff_role_id' =>$staff_role], $condition = ['id' => $id]);
-      $_SESSION['staff_info'] = '';
-      unset($_SESSION['staff_info']);
-      //Redirect
-      header('location:'.$admin_file.'?task=staff_info');
-      exit;
+      $smarty_appform->assign('error', $error);
     }
-    $smarty_appform->assign('error', $error);
-  }
-  //action delete staff role
-  if('delete' === $action && !empty($_GET['id']))
+  }//End action add
+  //action edit
+  if('edit' === $action && !empty($_GET['id']))
   {
-    $common->delete("staff_role", $field = ['id' => $_GET['id']]);
-    header('location: '.$admin_file.'?task=staff_info');
-    exit;
+    if($_POST)
+    {
+      $id       = $common->clean_string($_POST['id']);
+      $name     = $common->clean_string($_POST['name']);
+      $pass     = $common->clean_string($_POST['password']);
+      $gender   = $common->clean_string($_POST['gender']);
+      $phone    = $common->clean_string($_POST['phone']);
+      $staff_role   = $common->clean_string($_POST['staff_role']);
+      $old_fle = $common->clean_string($_POST['old_file']);
+
+      //add value to session to use in template
+      $_SESSION['staff_info'] = $_POST;
+      //check validate form
+      if(empty($name))   $error['name'] = 1;
+      if(empty($pass))   $error['pass'] = 1;
+      if(empty($phone))  $error['phone'] = 1;
+      if(empty($staff_role))  $error['staff_role'] = 1;
+      if(!empty($pass) && !$common->checkPassword($pass))
+      {
+        $error['password'] = 2;
+      }
+      if(!empty($_POST['old_file'])){
+        $image = $old_fle;
+      }
+
+      if(!empty($_FILES['image']['name']))
+      {
+        if($_FILES['image']['size'] > $allows['SIZE'][0])  $error['size'] = 1;
+        if(!in_array($_FILES['image']['type'], $allows['TYPE']['image'])) $error['type'] = 1;
+      }
+      if(!empty($id) && 0 === count($error))
+      {
+        if(empty($_POST['old_fle'])){
+          if(!empty($_FILES['image']) && !empty($_FILES['image']['name']))
+          {
+            $photo = $common->find('staff', $condition = ['id' => $id], $type = 'one');
+            if(!empty($photo['photo']))
+            {
+              @unlink(IMAGE_PATH.$photo['photo']);
+              @unlink(IMAGE_PATH.'thumbnail__'.$photo['photo']);
+            }
+            $image = $common->uploadFile($_FILES, time(), IMAGE_PATH, 'image');
+            if($_FILES['image']['error'] > 0)  $error['error'] = 1;
+            //Generate thumbnail
+            $images = new Zubrag_image;
+            $images->max_x        = $thumbnail_width;
+            $images->max_y        = $thumbnail_height;
+            $images->save_to_file = 1;
+            $images->image_type   = '-1';
+            $thumbnail_image = IMAGE_PATH.'thumbnail__'.$image;
+            $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
+          }
+        }
+        $common->update('staff', $field =['name'      => $name,
+                                          'password'  => $pass,
+                                          'gender'    => $gender,
+                                          'phone'     => $phone,
+                                          'photo'     => $image,
+                                          'staff_role_id' =>$staff_role], $condition = ['id' => $id]);
+        $_SESSION['staff_info'] = '';
+        unset($_SESSION['staff_info']);
+        //Redirect
+        header('location:'.$admin_file.'?task=staff_info');
+        exit;
+      }
+      $smarty_appform->assign('error', $error);
+    }
+    $smarty_appform->assign('edit',$common->find('staff', $condition = ['id' => $_GET['id']], $type='one'));
   }
+  //action change status
   if('change_status' === $action && !empty($_GET['id']))
   {
     if(!empty($_GET['status'] == 1))
@@ -579,10 +749,7 @@ if('staff_info' === $task)
     header('location:'.$admin_file.'?task=staff_info');
     exit;
   }
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('edit',$common->find('staff', $condition = ['id' => $_GET['id']], $type='one'));
-  }
+
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
   $results = ListStaffInfo($kwd, $status);
@@ -601,55 +768,80 @@ if('staff_function' === $task)
   if(empty($_POST)) unset($_SESSION['staff_function']);
 
   $error = array();
-  if($_POST)
+  //action add
+  if('add' === $action)
   {
-    $id       = $common->clean_string($_POST['id']);
-    $title    = $common->clean_string($_POST['title']);
-    $task     = $common->clean_string($_POST['task']);
-    $action   = $common->clean_string($_POST['action']);
-    $_SESSION['staff_function'] = $_POST;
-    //check validate form
-    if(empty($title))   $error['title'] = 1;
-    if(empty($task))    $error['task'] = 1;
-    //Get Staff Function
-    $resultSFun = $common->find('staff_function', $condition = ['id' => $id], $type='one');
-    if($resultSFun['task_name'] !== $task && $s_function['action_name'] !== $action || $resultSFun['task_name'] === $task && $resultSFun['action_name'] !== $action || $resultSFun['task_name'] !== $task && $resultSFun['action_name'] === $action)
+    if($_POST)
     {
-      if($resultSFun['task_name'] !== $task || $s_function['action_name'] !== $action){
-        if(!empty($task) && empty($action) && is_staff_function_exits($task, '') > 0) $error['is_staff_fun_exist_task'] = 2;
-      }
+      $id       = $common->clean_string($_POST['id']);
+      $title    = $common->clean_string($_POST['title']);
+      $task     = $common->clean_string($_POST['task']);
+      $action   = $common->clean_string($_POST['action']);
+      $_SESSION['staff_function'] = $_POST;
+      //check validate form
+      if(empty($title))   $error['title'] = 1;
+      if(empty($task))    $error['task'] = 1;
+      if(!empty($task) && empty($action) && is_staff_function_exits($task, '') > 0) $error['is_staff_fun_exist_task'] = 2;
       if(!empty($task) && !empty($action) && is_staff_function_exits($task, $action) > 0) $error['is_staff_fun_exist_action'] = 2;
 
+      if(!empty($action)){
+        $rAction = $action;
+      } else {
+        $rAction = NULL;
+      }
+      if(count($error) === 0 && empty($id))
+      {
+        $common->save('staff_function',$field = ['title' => $title, 'task_name' => $task, 'action_name' => $action]);
+        $_SESSION['staff_function'] = '';
+        unset($_SESSION['staff_function']);
+        //Redirect
+        header('location:'.$admin_file.'?task=staff_function');
+        exit;
+      }
+      $smarty_appform->assign('error', $error);
     }
-    if(!empty($action)){
-      $rAction = $action;
-    } else {
-      $rAction = NULL;
-    }
-    if(count($error) === 0 && empty($id))
+  }//End action add
+
+  //action edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      // if(empty($action)){
-      $common->save('staff_function',$field = ['title' => $title, 'task_name' => $task, 'action_name' => $action]);
-      // } else {
-      //   $common->save('staff_function',$field = ['title' => $title, 'task_name' => $task]);
-      // }
-      $_SESSION['staff_function'] = '';
-      unset($_SESSION['staff_function']);
-      //Redirect
-      header('location:'.$admin_file.'?task=staff_function');
-      exit;
+      $id       = $common->clean_string($_POST['id']);
+      $title    = $common->clean_string($_POST['title']);
+      $task     = $common->clean_string($_POST['task']);
+      $action   = $common->clean_string($_POST['action']);
+      $_SESSION['staff_function'] = $_POST;
+      //check validate form
+      if(empty($title))   $error['title'] = 1;
+      if(empty($task))    $error['task'] = 1;
+      //Get Staff Function
+      $resultSFun = $common->find('staff_function', $condition = ['id' => $id], $type='one');
+      if($resultSFun['task_name'] !== $task || $resultSFun['action_name'] !== $action){
+        if(!empty($task) && empty($action) && is_staff_function_exits($task, '') > 0) $error['is_staff_fun_exist_task'] = 2;
+        if(!empty($task) && !empty($action) && is_staff_function_exits($task, $action) > 0) $error['is_staff_fun_exist_action'] = 2;
+      }
+
+      if(!empty($action)){
+        $rAction = $action;
+      } else {
+        $rAction = NULL;
+      }
+
+      if(count($error) === 0 && !empty($id))
+      {
+        $common->update('staff_function', $field = ['title' => $title, 'task_name' => $task, 'action_name' => $action], $condition = ['id' => $id]);
+        $_SESSION['staff_function'] = '';
+        unset($_SESSION['staff_function']);
+        //Redirect
+        header('location:'.$admin_file.'?task=staff_function');
+        exit;
+      }
+      $smarty_appform->assign('error', $error);
     }
-    if(count($error) === 0 && !empty($id))
-    {
-      $common->update('staff_function', $field = ['title' => $title, 'task_name' => $task, 'action_name' => $action], $condition = ['id' => $id]);
-      $_SESSION['staff_function'] = '';
-      unset($_SESSION['staff_function']);
-      //Redirect
-      header('location:'.$admin_file.'?task=staff_function');
-      exit;
-    }
-    $smarty_appform->assign('error', $error);
+    $smarty_appform->assign('edit', $common->find('staff_function', $condition = ['id' => $_GET['id']], $type='one'));
   }
+
   //action delete staff function
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -662,10 +854,7 @@ if('staff_function' === $task)
       exit;
     }
   }
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('edit', $common->find('staff_function', $condition = ['id' => $_GET['id']], $type='one'));
-  }
+
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $list_function = listFunction($kwd);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
@@ -682,66 +871,106 @@ if('patient' === $task)
   if(empty($_POST)) unset($_SESSION['patient']);
 
   $error = array();
-  if($_POST){
-    //get value from form
-    $id     = $common->clean_string($_POST['id']);
-    $psy_id = $common->clean_string($_POST['psy_id']);
-    $username = $common->clean_string($_POST['username']);
-    $email  = $common->clean_string($_POST['email']);
-    $phone  = $common->clean_string($_POST['phone']);
-    $gender = $common->clean_string($_POST['gender']);
-    $age    = $common->clean_string($_POST['age']);
-    $password = $common->clean_string($_POST['password']);
-    //add value to session to use in template
-    $_SESSION['patient'] = $_POST;
-    //form validation
-    if(empty($username))  $error['username']  = 1;
-    if(empty($email))   $error['email']   = 1;
-    if(empty($phone))   $error['phone']   = 1;
-    if(empty($gender))  $error['gender']  = 1;
-    if(empty($age))     $error['age']     = 1;
-    if(empty($password))  $error['password']  = 1;
-    if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
-      $error['invalid_email'] = 1;
-    }
-    if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
-      $result = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
-      if($result['email'] !== $email && check_patient_email($email) > 0){
-        $error['exist_email'] = 1;
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      //get value from form
+      $id     = $common->clean_string($_POST['id']);
+      $psy_id = $common->clean_string($_POST['psy_id']);
+      $username = $common->clean_string($_POST['username']);
+      $email  = $common->clean_string($_POST['email']);
+      $phone  = $common->clean_string($_POST['phone']);
+      $gender = $common->clean_string($_POST['gender']);
+      $age    = $common->clean_string($_POST['age']);
+      $password = $common->clean_string($_POST['password']);
+      //add value to session to use in template
+      $_SESSION['patient'] = $_POST;
+      //form validation
+      if(empty($username))  $error['username']  = 1;
+      if(empty($email))   $error['email']   = 1;
+      if(empty($phone))   $error['phone']   = 1;
+      if(empty($gender))  $error['gender']  = 1;
+      if(empty($age))     $error['age']     = 1;
+      if(empty($password))  $error['password']  = 1;
+      if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $error['invalid_email'] = 1;
+      }
+      if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $result = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
+        if($result['email'] !== $email && check_patient_email($email) > 0){
+          $error['exist_email'] = 1;
+        }
+      }
+      //Save
+      if(empty($id) && COUNT($error) === 0){
+        $common->save('patient', $field =['psychologist_id' => $psy_id,
+                                          'username'=> $username,
+                                          'email'   => $email,
+                                          'phone'   => $phone,
+                                          'gender'  => $gender,
+                                          'age'     => $age,
+                                          'password'=> $password]);
+        //unset session
+        unset($_SESSION['patient']);
+        //Redirect
+        header('location: '.$admin_file.'?task=patient');
+        exit;
       }
     }
-    //Save
-    if(empty($id) && COUNT($error) === 0){
-      $common->save('patient', $field =['psychologist_id' => $psy_id,
-      'username'=> $username,
-      'email'   => $email,
-      'phone'   => $phone,
-      'gender'  => $gender,
-      'age'     => $age,
-      'password'=> $password]);
-      //unset session
-      unset($_SESSION['patient']);
-      //Redirect
-      header('location: '.$admin_file.'?task=patient');
-      exit;
+  }//End action add
+
+  //Action: edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $id     = $common->clean_string($_POST['id']);
+      $psy_id = $common->clean_string($_POST['psy_id']);
+      $username = $common->clean_string($_POST['username']);
+      $email  = $common->clean_string($_POST['email']);
+      $phone  = $common->clean_string($_POST['phone']);
+      $gender = $common->clean_string($_POST['gender']);
+      $age    = $common->clean_string($_POST['age']);
+      $password = $common->clean_string($_POST['password']);
+      //add value to session to use in template
+      $_SESSION['patient'] = $_POST;
+      //form validation
+      if(empty($username))  $error['username']  = 1;
+      if(empty($email))   $error['email']   = 1;
+      if(empty($phone))   $error['phone']   = 1;
+      if(empty($gender))  $error['gender']  = 1;
+      if(empty($age))     $error['age']     = 1;
+      if(empty($password))  $error['password']  = 1;
+      if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $error['invalid_email'] = 1;
+      }
+      if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $result = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
+        if($result['email'] !== $email && check_patient_email($email) > 0){
+          $error['exist_email'] = 1;
+        }
+      }
+      //Update
+      if(!empty($id) && COUNT($error) === 0){
+        $common->update('patient', $field= ['psychologist_id' => $psy_id,
+                                            'username' => $username,
+                                            'email'    => $email,
+                                            'phone'    => $phone,
+                                            'gender'   => $gender,
+                                            'age'      => $age,
+                                            'password' => $password], $condition = ['id' => $_GET['id']]);
+        //unset session
+        unset($_SESSION['patient']);
+        //Redirect
+        header('location: '.$admin_file.'?task=patient');
+        exit;
+      }
     }
-    //Update
-    if(!empty($id) && COUNT($error) === 0){
-      $common->update('patient', $field= ['psychologist_id' => $psy_id,
-      'username' => $username,
-      'email'    => $email,
-      'phone'    => $phone,
-      'gender'   => $gender,
-      'age'      => $age,
-      'password' => $password],
-      $condition = ['id' => $_GET['id']]);
-      //unset session
-      unset($_SESSION['patient']);
-      //Redirect
-      header('location: '.$admin_file.'?task=patient');
-      exit;
-    }
+    $smarty_appform->assign('editPatient', $common->find('patient', $condition = ['id' => $_GET['id']], $type='one'));
   }
+
   //Change staus patient
   if('change_status' === $action && !empty($_GET['id']))
   {
@@ -754,6 +983,7 @@ if('patient' === $task)
     header('location:'.$admin_file.'?task=patient');
     exit;
   }
+
   //action delete staff role
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -761,11 +991,6 @@ if('patient' === $task)
     $common->update('patient', $field = ['deleted_at' => $deleted_at], $condition = ['id' => $_GET['id']]);
     header('location:'.$admin_file.'?task=patient');
     exit;
-  }
-  //Action: edit
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('editPatient', $common->find('patient', $condition = ['id' => $_GET['id']], $type='one'));
   }
 
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
@@ -789,61 +1014,100 @@ if('psychologist' === $task)
   if(!$_POST) unset($_SESSION['psychologist']);
 
   $error = array();
-  if($_POST){
-    //get value from form
-    $id     = $common->clean_string($_POST['id']);
-    $username = $common->clean_string($_POST['username']);
-    $password = $common->clean_string($_POST['password']);
-    $email    = $common->clean_string($_POST['email']);
-    $job      = $common->clean_string($_POST['job']);
-    $address  = $common->clean_string($_POST['address']);
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      //get value from form
+      $id     = $common->clean_string($_POST['id']);
+      $username = $common->clean_string($_POST['username']);
+      $password = $common->clean_string($_POST['password']);
+      $email    = $common->clean_string($_POST['email']);
+      $job      = $common->clean_string($_POST['job']);
+      $address  = $common->clean_string($_POST['address']);
 
-    //add value to session to use in template
-    $_SESSION['psychologist'] = $_POST;
-    //form validation
-    if(empty($username))  $error['username']  = 1;
-    if(empty($password))  $error['password']  = 1;
-    if(empty($email))     $error['email']   = 1;
-    if(empty($job))       $error['job']   = 1;
-    if(empty($address))   $error['address']   = 1;
+      //add value to session to use in template
+      $_SESSION['psychologist'] = $_POST;
+      //form validation
+      if(empty($username))  $error['username']  = 1;
+      if(empty($password))  $error['password']  = 1;
+      if(empty($email))     $error['email']   = 1;
+      if(empty($job))       $error['job']   = 1;
+      if(empty($address))   $error['address']   = 1;
 
-    if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
-      $error['invalid_email'] = 1;
-    }
-    if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
-      $result = $common->find('psychologist', $condition = ['id' => $_GET['id']], $type='one');
-      if($result['email'] !== $email &&  check_psychologist_email($email) > 0){
-        $error['exist_email'] = 1;
+      if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $error['invalid_email'] = 1;
+      }
+      if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $result = $common->find('psychologist', $condition = ['id' => $_GET['id']], $type='one');
+        if($result['email'] !== $email &&  check_psychologist_email($email) > 0){
+          $error['exist_email'] = 1;
+        }
+      }
+      //Save
+      if(empty($id) && COUNT($error) === 0){
+        $common->save('psychologist', $field = ['username'=> $username,
+                                                'email'   => $email,
+                                                'job'     => $job,
+                                                'password'=> $password,
+                                                'address' => $address]);
+        //unset session
+        unset($_SESSION['psychologist']);
+        //Redirect
+        header('location: '.$admin_file.'?task=psychologist');
+        exit;
       }
     }
-    //Save
-    if(empty($id) && COUNT($error) === 0){
-      $common->save('psychologist', $field = ['username'=> $username,
-      'email'   => $email,
-      'job'     => $job,
-      'password'=> $password,
-      'address' => $address]);
-      //unset session
-      unset($_SESSION['psychologist']);
-      //Redirect
-      header('location: '.$admin_file.'?task=psychologist');
-      exit;
+  }//End action add
+
+  //Action: edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $id     = $common->clean_string($_POST['id']);
+      $username = $common->clean_string($_POST['username']);
+      $password = $common->clean_string($_POST['password']);
+      $email    = $common->clean_string($_POST['email']);
+      $job      = $common->clean_string($_POST['job']);
+      $address  = $common->clean_string($_POST['address']);
+
+      //add value to session to use in template
+      $_SESSION['psychologist'] = $_POST;
+      //form validation
+      if(empty($username))  $error['username']  = 1;
+      if(empty($password))  $error['password']  = 1;
+      if(empty($email))     $error['email']   = 1;
+      if(empty($job))       $error['job']   = 1;
+      if(empty($address))   $error['address']   = 1;
+
+      if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $error['invalid_email'] = 1;
+      }
+      if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $result = $common->find('psychologist', $condition = ['id' => $_GET['id']], $type='one');
+        if($result['email'] !== $email &&  check_psychologist_email($email) > 0){
+          $error['exist_email'] = 1;
+        }
+      }
+      //Update
+      if(!empty($id) && COUNT($error) === 0){
+        $common->update('psychologist', $field=['username' => $username,
+                                                'email'    => $email,
+                                                'job'      => $job,
+                                                'password' => $password,
+                                                'address'  => $address], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['psychologist']);
+        //Redirect
+        header('location: '.$admin_file.'?task=psychologist');
+        exit;
+      }
     }
-    //Update
-    if(!empty($id) && COUNT($error) === 0){
-      $common->update('psychologist', $field=['username' => $username,
-      'email'    => $email,
-      'job'      => $job,
-      'password' => $password,
-      'address'  => $address],
-      $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['psychologist']);
-      //Redirect
-      header('location: '.$admin_file.'?task=psychologist');
-      exit;
-    }
+    $smarty_appform->assign('editPsychologist', $common->find('psychologist', $condition = ['id' => $_GET['id']], $type='one'));
   }
+
   //Change staus psychologist
   if('change_status' === $action && !empty($_GET['id']))
   {
@@ -855,11 +1119,6 @@ if('psychologist' === $task)
     }
     header('location:'.$admin_file.'?task=psychologist');
     exit;
-  }
-  //Action: edit
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('editPsychologist', $common->find('psychologist', $condition = ['id' => $_GET['id']], $type='one'));
   }
 
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
@@ -883,47 +1142,71 @@ if('question' === $task)
   if(!$_POST) unset($_SESSION['question']);
 
   $error = array();
-  if($_POST)
+  //action add
+  if('add' === $action)
   {
-    //get value from form
-    $title = $common->clean_string($_POST['title']);
-    $type  = $common->clean_string($_POST['type']);
-    $is_email  = $common->clean_string($_POST['is_email']);
-    $desc  = $common->clean_string($_POST['description']);
-    $hide_title = $common->clean_string($_POST['hide_title']);
-    $id    = $common->clean_string($_POST['id']);
-
-    //add value to session to use in template
-    $_SESSION['question'] = $_POST;
-    //form validation
-    if(empty($title))   $error['title'] = 1;
-    if(empty($type))    $error['type']  = 1;
-    if(empty($desc))    $error['desc']  = 1;
-
-    //Add question
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      $common->save('question', $field = ['title' => $title, 'description' => $desc, 'type' => $type, 'is_email' => $is_email, 'hide_title' => $hide_title, 'lang' => $lang]);
-      //unset session
-      unset($_SESSION['question']);
-      //Redirect
-      header('location: '.$admin_file.'?task=question');
-      exit;
-    }
+      //get value from form
+      $id     = $common->clean_string($_POST['id']);
+      $title  = $common->clean_string($_POST['title']);
+      $type   = $common->clean_string($_POST['type']);
+      $desc   = $common->clean_string($_POST['description']);
+      $is_email   = $common->clean_string($_POST['is_email']);
+      $hide_title = $common->clean_string($_POST['hide_title']);
 
-    //update question
-    if(0 === count($error) && !empty($id))
-    {
-      $common->update('question', $field = ['title' => $title, 'description' => $desc, 'type' => $type, 'is_email' => $is_email, 'hide_title' => $hide_title], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['question']);
-      //Redirect
-      header('location: '.$admin_file.'?task=question');
-      exit;
-    }
+      //add value to session to use in template
+      $_SESSION['question'] = $_POST;
+      //form validation
+      if(empty($title))   $error['title'] = 1;
+      if(empty($type))    $error['type']  = 1;
+      if(empty($desc))    $error['desc']  = 1;
 
+      //Add question
+      if(0 === count($error) && empty($id))
+      {
+        $common->save('question', $field = ['title' => $title, 'description' => $desc, 'type' => $type, 'is_email' => $is_email, 'hide_title' => $hide_title, 'lang' => $lang]);
+        //unset session
+        unset($_SESSION['question']);
+        //Redirect
+        header('location: '.$admin_file.'?task=question');
+        exit;
+      }
+    }
   }
+  //get edit question
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $id     = $common->clean_string($_POST['id']);
+      $title  = $common->clean_string($_POST['title']);
+      $type   = $common->clean_string($_POST['type']);
+      $desc   = $common->clean_string($_POST['description']);
+      $is_email   = $common->clean_string($_POST['is_email']);
+      $hide_title = $common->clean_string($_POST['hide_title']);
 
+      //add value to session to use in template
+      $_SESSION['question'] = $_POST;
+      //form validation
+      if(empty($title))   $error['title'] = 1;
+      if(empty($type))    $error['type']  = 1;
+      if(empty($desc))    $error['desc']  = 1;
+
+      //update question
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('question', $field = ['title' => $title, 'description' => $desc, 'type' => $type, 'is_email' => $is_email, 'hide_title' => $hide_title], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['question']);
+        //Redirect
+        header('location: '.$admin_file.'?task=question');
+        exit;
+      }
+    }
+    $smarty_appform->assign('getQuestionByID', getQuestionByID($_GET['id']));
+  }
   //action delete question
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -938,12 +1221,6 @@ if('question' === $task)
     header('location: '.$admin_file.'?task=question');
     exit;
 
-  }
-
-  //get edit question
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getQuestionByID', getQuestionByID($_GET['id']));
   }
 
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
@@ -963,104 +1240,127 @@ if('test_question' === $task)
   if(empty($_POST)) unset($_SESSION['test_question']);
 
   $error = array();
-  if($_POST)
+  if('add' === $action)
   {
-    //get value from form
-    // $topic_id   = $common->clean_string($_POST['topic_id']);
-    $test_question_id = $common->clean_string($_POST['test_question_id']);
-    $test_id      = $common->clean_string($_POST['test']);
-    $question_id  = $common->clean_string($_POST['question']);
-    $view_order   = $common->clean_string($_POST['view_order']);
-    $required     = $common->clean_string($_POST['required']);
-    $copy_test_que  = $common->clean_string($_POST['copy_test_que']);
-
-
-    //add value to session to use in template
-    $_SESSION['test_question'] = $_POST;
-    //form validation
-    // if(empty($topic_id))    $error['topic'] = 1;
-    if(empty($test_id))     $error['test'] = 1;
-    if(empty($question_id)) $error['question'] = 1;
-    if(empty($view_order))  $error['view_order'] = 1;
-    //Check is existed topic
-    $rTestQues = $common->find('test_question', $condition = ['id' => $test_question_id], $type = 'one');
-    if($rTestQues['test_id'] !== $test_id && $rTestQues['question_id'] !== $question_id && is_exist_test_question($test_id, $question_id) > 0) {
-      $error['is_exist_test_que']   = 1;
-    }
-
-    //Add test question
-    if(0 === count($error) && empty($test_question_id))
+    if($_POST)
     {
-      $tque_id = $common->save('test_question', $field = ['test_id' => $test_id,
-      'question_id'  => $question_id,
-      'view_order'   => $view_order,
-      'is_required'  => $required]);
-      // //Get answer
-      $rAnswer = $common->find('answer', $condition = ['test_question_id' => $copy_test_que], $type = 'all');
-      //Get question
-      $rQuestion = $common->find('question', $condition = ['id' => $question_id], $type = 'one');
-      //Get test question
-      $rTestues = $common->find('test_question', $condition = ['id' => $copy_test_que], $type = 'one');
+      //get value from form
+      $test_question_id = $common->clean_string($_POST['test_question_id']);
+      $test_id      = $common->clean_string($_POST['test']);
+      $question_id  = $common->clean_string($_POST['question']);
+      $view_order   = $common->clean_string($_POST['view_order']);
+      $required     = $common->clean_string($_POST['required']);
+      $copy_test_que= $common->clean_string($_POST['copy_test_que']);
 
-      if(!empty($rAnswer) && $rQuestion['type'] == 3 || $rQuestion['type'] == 4){
-        //Fetch anser
-        foreach ($rAnswer as $key => $value) {
-          //Get answer_topic
-          $rAnswerTopic = $common->find('answer_topic', $condition = ['answer_id' => $value['id']], $type = 'all');
-          if(!empty($rAnswerTopic)){
-            foreach ($rAnswerTopic as $key => $va) {
-              if(checkTopicResult($test_id, $va['topic_id']) == 0){
-                $rResult = $common->find('result', $condition = ['test_id' => $rTestues['test_id'], 'topic_id' => $va['topic_id']], $type = 'all');
-                //fetch save result
-                foreach ($rResult as $key => $v) {
-                  $common->save('result', $field = ['test_id' => $test_id, 'topic_id' => $v['topic_id'], 'score_from' => $v['score_from'], 'score_to' => $v['score_to'], 'message' => $v['message']]);
-                }//end fetch $rResult
-              }
-            }//end fetch $rAnswerTopic
-          }
+      //add value to session to use in template
+      $_SESSION['test_question'] = $_POST;
+      //form validation
+      if(empty($test_id))     $error['test'] = 1;
+      if(empty($question_id)) $error['question'] = 1;
+      if(empty($view_order))  $error['view_order'] = 1;
+      if(is_exist_test_question($test_id, $question_id) > 0) $error['is_exist_test_que'] = 1;
 
-          // Save answer
-          $answer_id = $common->save('answer', $field = ['title' => $value['title'], 'test_question_id' => $tque_id, 'view_order' => $value['view_order'], 'calculate' => $value['calculate']]);
-          if(!empty($rAnswerTopic)){
-            foreach ($rAnswerTopic as $key => $va) {
-              //Save answer_topic
-              $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $va['topic_id'], 'default_value' => $va['default_value'], 'weight_value' => $va['weight_value']]);
-            }//end fetch $rAnswerTopic
-          }
-        }//end Fetch anser
+      //Add test question
+      if(0 === count($error) && empty($test_question_id))
+      {
+        $tque_id = $common->save('test_question', $field = ['test_id'     => $test_id,
+                                                            'question_id' => $question_id,
+                                                            'view_order'  => $view_order,
+                                                            'is_required' => $required]);
+        // //Get answer
+        $rAnswer = $common->find('answer', $condition = ['test_question_id' => $copy_test_que], $type = 'all');
+        //Get question
+        $rQuestion = $common->find('question', $condition = ['id' => $question_id], $type = 'one');
+        //Get test question
+        $rTestues = $common->find('test_question', $condition = ['id' => $copy_test_que], $type = 'one');
 
+        if(!empty($rAnswer) && $rQuestion['type'] == 3 || $rQuestion['type'] == 4){
+          //Fetch anser
+          foreach ($rAnswer as $key => $value) {
+            //Get answer_topic
+            $rAnswerTopic = $common->find('answer_topic', $condition = ['answer_id' => $value['id']], $type = 'all');
+            if(!empty($rAnswerTopic)){
+              foreach ($rAnswerTopic as $key => $va) {
+                if(checkTopicResult($test_id, $va['topic_id']) == 0){
+                  $rResult = $common->find('result', $condition = ['test_id' => $rTestues['test_id'], 'topic_id' => $va['topic_id']], $type = 'all');
+                  //fetch save result
+                  foreach ($rResult as $key => $v) {
+                    $common->save('result', $field = ['test_id' => $test_id, 'topic_id' => $v['topic_id'], 'score_from' => $v['score_from'], 'score_to' => $v['score_to'], 'message' => $v['message']]);
+                  }//end fetch $rResult
+                }
+              }//end fetch $rAnswerTopic
+            }
+
+            // Save answer
+            $answer_id = $common->save('answer', $field = ['title' => $value['title'], 'test_question_id' => $tque_id, 'view_order' => $value['view_order'], 'calculate' => $value['calculate']]);
+            if(!empty($rAnswerTopic)){
+              foreach ($rAnswerTopic as $key => $va) {
+                //Save answer_topic
+                $common->save('answer_topic', $field = ['answer_id' => $answer_id, 'topic_id'  => $va['topic_id'], 'default_value' => $va['default_value'], 'weight_value' => $va['weight_value']]);
+              }//end fetch $rAnswerTopic
+            }
+          }//end Fetch anser
+
+        }
+        //unset session
+        unset($_SESSION['test_question']);
+        //Redirect
+        if($_GET['kwd'] || $_GET['tid'] || $_GET['next']){
+          header('location: '.$admin_file.'?task=test_question&tid='.$_GET['tid'].'&kwd='.$_GET['kwd'].'&next='.$_GET['next']);
+        }else {
+          header('location: '.$admin_file.'?task=test_question');
+        }
+        exit;
       }
-      //unset session
-      unset($_SESSION['test_question']);
-      //Redirect
-      if($_GET['kwd'] || $_GET['tid'] || $_GET['next']){
-        header('location: '.$admin_file.'?task=test_question&tid='.$_GET['tid'].'&kwd='.$_GET['kwd'].'&next='.$_GET['next']);
-      }else {
-        header('location: '.$admin_file.'?task=test_question');
-      }
-      exit;
+      $smarty_appform->assign('listAnswer', $common->find('answer', $condition = ['test_question_id' => $copy_test_que], $type = 'all'));
     }
-    //update test question
-    if(0 === count($error) && !empty($test_question_id))
-    {
-      $common->update('test_question', $field = ['test_id'      => $test_id,
-      'question_id'  => $question_id,
-      'view_order'   => $view_order,
-      'is_required'  => $required],
-      $condition = ['id' => $test_question_id]);
-      //unset session
-      unset($_SESSION['test_question']);
-      //Redirect
-      if($_GET['kwd'] || $_GET['tid'] || $_GET['next']){
-        header('location: '.$admin_file.'?task=test_question&tid='.$_GET['tid'].'&kwd='.$_GET['kwd'].'&next='.$_GET['next']);
-      }else {
-        header('location: '.$admin_file.'?task=test_question');
-      }
-      exit;
-    }
-
-    $smarty_appform->assign('listAnswer', $common->find('answer', $condition = ['test_question_id' => $copy_test_que], $type = 'all'));
   }
+  //get edit test question
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $test_question_id = $common->clean_string($_POST['test_question_id']);
+      $test_id      = $common->clean_string($_POST['test']);
+      $question_id  = $common->clean_string($_POST['question']);
+      $view_order   = $common->clean_string($_POST['view_order']);
+      $required     = $common->clean_string($_POST['required']);
+      $copy_test_que= $common->clean_string($_POST['copy_test_que']);
+
+      //add value to session to use in template
+      $_SESSION['test_question'] = $_POST;
+      //form validation
+      if(empty($test_id))     $error['test'] = 1;
+      if(empty($question_id)) $error['question'] = 1;
+      if(empty($view_order))  $error['view_order'] = 1;
+      //Check is existed topic
+      $rTestQues = $common->find('test_question', $condition = ['id' => $test_question_id], $type = 'one');
+      if($rTestQues['test_id'] !== $test_id && $rTestQues['question_id'] !== $question_id && is_exist_test_question($test_id, $question_id) > 0) {
+        $error['is_exist_test_que']   = 1;
+      }
+
+      //update test question
+      if(0 === count($error) && !empty($test_question_id))
+      {
+        $common->update('test_question', $field =['test_id'     => $test_id,
+                                                  'question_id' => $question_id,
+                                                  'view_order'  => $view_order,
+                                                  'is_required' => $required], $condition = ['id' => $test_question_id]);
+        //unset session
+        unset($_SESSION['test_question']);
+        //Redirect
+        if($_GET['kwd'] || $_GET['tid'] || $_GET['next']){
+          header('location: '.$admin_file.'?task=test_question&tid='.$_GET['tid'].'&kwd='.$_GET['kwd'].'&next='.$_GET['next']);
+        }else {
+          header('location: '.$admin_file.'?task=test_question');
+        }
+        exit;
+      }
+    }
+    $smarty_appform->assign('getTestQByID', $common->find('test_question', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
   //action delete
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -1127,11 +1427,6 @@ if('test_question' === $task)
       header('location: '.$admin_file.'?task=test_question');
     }
     exit;
-  }
-  //get edit test question
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getTestQByID', $common->find('test_question', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';

@@ -57,7 +57,7 @@
             {if $edit_staff_permission.id}
             <form action="{$admin_file}?task=staff_permission&amp;action=edit&amp;id={$edit_staff_permission.id}" method="post">
             {else}
-            <form action="{$admin_file}?task=staff_permission" method="post">
+            <form action="{$admin_file}?task=staff_permission&amp;action=add" method="post">
             {/if}
               <div class="row">
                 <div class="col-md-6">

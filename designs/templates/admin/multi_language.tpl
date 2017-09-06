@@ -23,7 +23,7 @@
         {if $getMultilangByUID|@count > 0}
           <form action="{$admin_file}?task=multi_language&amp;action=edit&amp;unique_id={$smarty.get.unique_id}" method="post">
         {else}
-          <form action="{$admin_file}?task=multi_language&amp;unique_id={$smarty.get.unique_id}" method="post">
+          <form action="{$admin_file}?task=multi_language&amp;action=add" method="post">
         {/if}
             <div class="row">
             {foreach from=$language item=v}

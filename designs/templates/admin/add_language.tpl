@@ -20,7 +20,11 @@
           </div>
         </form>
         <div id="demo" class="collapse {if $error or $getLanguageByID|@count > 0} in {/if}">
-          <form action="{$admin_file}?task=add_language" method="post">
+          {if $getLanguageByID.id}
+          <form action="{$admin_file}?task=add_language&amp;action=edit&amp;id={$getLanguageByID.id}" method="post">
+          {else}
+          <form action="{$admin_file}?task=add_language&amp;action=add" method="post">
+          {/if}
             <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">

@@ -13,7 +13,11 @@
       <div class="panel-body">
         <div class="row">
           <div class="col-md-6">
-            <form class="form-inline" action="{$admin_file}?task=category" method="post">
+            {if $getCategoryByID.id}
+            <form class="form-inline" action="{$admin_file}?task=category&amp;action=edit&amp;id=$getCategoryByID.id" method="post">
+            {else}
+            <form class="form-inline" action="{$admin_file}?task=category&amp;action=add" method="post">
+            {/if}
               <div class="form-group">
                 <label for="name">{if $multiLang.text_category_name}{$multiLang.text_category_name}{else}No Translate (Key Lang:text_category_name){/if}:</label>
                 <input type="text" name="name" class="form-control" value="{$getCategoryByID.name}" id="name" placeholder="Enter Category" required>

@@ -51,7 +51,7 @@
           {if $getTestQByID.id}
           <form action="{$admin_file}?task=test_question&amp;action=edit&amp;tid={$smarty.get.tid}&amp;kwd={$smarty.get.kwd}&amp;id={$getTestQByID.id}&amp;next={$smarty.get.next}" method="post">
           {else}
-          <form action="{$admin_file}?task=test_question&amp;tid={$smarty.get.tid}&amp;kwd={$smarty.get.kwd}&amp;next={$smarty.get.next}" method="post">
+          <form action="{$admin_file}?task=test_question&amp;action=add&amp;tid={$smarty.get.tid}&amp;kwd={$smarty.get.kwd}&amp;next={$smarty.get.next}" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">

@@ -33,7 +33,7 @@
             {if $getQuestionByID.id}
             <form action="{$admin_file}?task=question&amp;action=edit&amp;id={$getQuestionByID.id}" method="post">
             {else}
-            <form action="{$admin_file}?task=question" method="post">
+            <form action="{$admin_file}?task=question&amp;action=add" method="post">
             {/if}
               <div class="row">
                 <div class="col-md-5">

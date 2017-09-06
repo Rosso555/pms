@@ -47,7 +47,7 @@
           {if $editPsychologist.id}
           <form action="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$editPsychologist.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=psychologist" method="post">
+          <form action="{$admin_file}?task=psychologist&amp;action=add" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">

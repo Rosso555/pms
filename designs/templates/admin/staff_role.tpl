@@ -10,7 +10,7 @@
 {if $error.title}
 <div class="alert alert-danger" id="{if $error.title eq 1}flash{/if}">
   <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-  <strong>{if $multiLang.text_warning}{$multiLang.text_warning}{else}No Translate (Key Lang:text_warning){/if}!</strong>{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_staff_role_header}{$multiLang.text_staff_role_header}{else}No Translate (Key Lang:text_staff_role_header){/if}.
+  <strong>{if $multiLang.text_warning}{$multiLang.text_warning}{else}No Translate (Key Lang:text_warning){/if}!</strong> {if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_staff_role_header}{$multiLang.text_staff_role_header}{else}No Translate (Key Lang:text_staff_role_header){/if}.
 </div>
 {/if}
 {if $error.exist_delete eq 1}
@@ -26,7 +26,11 @@
     <div class="panel panel-default">
 			<div class="panel-body">
         <div class="col-md-8">
-          <form class="form-inline" role="form" action="{$admin_file_name}?task=staff_role" method="post">
+          {if $error OR $edit.id}
+          <form class="form-inline" role="form" action="{$admin_file_name}?task=staff_role&amp;action=edit&amp;id={$edit.id}" method="post">
+          {else}
+          <form class="form-inline" role="form" action="{$admin_file_name}?task=staff_role&amp;action=add" method="post">
+          {/if}
             <div class="form-group">
               <label for="">{if $multiLang.text_role_name}{$multiLang.text_role_name}{else}No Translate (Key Lang:text_role_name){/if}:</label>
               <input type="text" class="form-control" name="name" value="{$edit.name}{if $smarty.session.staff_role.name|escape}{$smarty.session.staff_role.name|escape}{/if}" />

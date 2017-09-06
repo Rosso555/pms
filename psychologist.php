@@ -432,7 +432,7 @@ if('test_question' === $task)
 
 $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
 $cid    = !empty($_GET['cid']) ? $_GET['cid'] : '';
-$status = !empty($_GET['status']) ? $_GET['status'] : '';
+$status = !empty($_GET['status']) ? $_GET['status'] : '1';
 
 $results = getListTestPsychologist($_SESSION['is_psycho_login_id'], $tid, $cid, $status);
 

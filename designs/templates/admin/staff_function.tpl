@@ -39,9 +39,9 @@
         </div>
         <div class="collapse {if $error Or $edit.id}in{/if}" id="demo" style="margin-top: 10px;">
           {if $edit.id}
-          <form class="form" role="form" action="{$admin_file}?task=staff_function&amp;action=edit&amp;id={$edit.id}" method="post" enctype="multipart/form-data">
+          <form class="form" role="form" action="{$admin_file}?task=staff_function&amp;action=edit&amp;id={$edit.id}" method="post">
           {else}
-          <form class="form" role="form" action="{$admin_file}?task=staff_function" method="post" enctype="multipart/form-data">
+          <form class="form" role="form" action="{$admin_file}?task=staff_function&amp;action=add" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">

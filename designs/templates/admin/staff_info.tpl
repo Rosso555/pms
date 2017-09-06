@@ -39,7 +39,11 @@
           </div>
         </div>
         <div class="collapse {if $error Or $edit.id}in{/if}" id="collapseExample" style="margin-top: 10px;">
-          <form class="form" role="form" action="{$admin_file}?task=staff_info" method="post" enctype="multipart/form-data">
+          {if $edit.id}
+          <form class="form" role="form" action="{$admin_file}?task=staff_info&amp;action=edit&amp;id={$edit.id}" method="post" enctype="multipart/form-data">
+          {else}
+          <form class="form" role="form" action="{$admin_file}?task=staff_info&amp;action=add" method="post" enctype="multipart/form-data">
+          {/if}
             <div class="form-group">
               <label>{if $multiLang.text_staff_full_name}{$multiLang.text_staff_full_name}{else}No Translate (Key Lang:text_staff_full_name){/if}:</label><span class="text-danger"> *{if $error.name eq 1}{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate (Key Lang:text_please_input){/if} {if $multiLang.text_staff_full_name}{$multiLang.text_staff_full_name}{else}No Translate (Key Lang:text_staff_full_name){/if}.{/if}</span>
               <input type="text" class="form-control" name="name" value="{if $edit.name}{$edit.name}{else}{if $smarty.session.staff_info.name|escape}{$smarty.session.staff_info.name|escape}{/if}{/if}" />

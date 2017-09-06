@@ -54,7 +54,7 @@
           {if $editPatient.id}
           <form action="{$admin_file}?task=patient&amp;action=edit&amp;id={$editPatient.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=patient" method="post">
+          <form action="{$admin_file}?task=patient&amp;action=add" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">
@@ -99,7 +99,7 @@
                 <div class="form-group">
                   <label for="phone"><span style="color:red">*</span> Phone:</label>
                   {if $error.phone}<span style="color:red">Please enter phone!</span>{/if}
-                  <input type="text" class="form-control" id="phone" placeholder="Enter phone" name="phone" value="{if $editPatient.phone}{$editPatient.phone}{else}{$smarty.session.patient.phone}{/if}">
+                  <input type="text" class="form-control" id="phone" placeholder="Enter phone" name="phone" value="{if $editPatient.phone}{$editPatient.phone}{else}{$smarty.session.patient.phone}{/if}" onkeyup="NumAndTwoDecimals(event, this);">
                 </div>
               </div>
               <div class="col-md-6">
