@@ -29,7 +29,7 @@
             {if $getTopicQHideByID.id}
             <form action="{$admin_file}?task=topic_hide&amp;action=edit&amp;tid={$smarty.get.tid}&amp;id={$getTopicQHideByID.id}" method="post">
             {else}
-            <form action="{$admin_file}?task=topic_hide&amp;tid={$smarty.get.tid}" method="post">
+            <form action="{$admin_file}?task=topic_hide&amp;action=add&amp;tid={$smarty.get.tid}" method="post">
             {/if}
               <div class="row">
                 <div class="col-md-6">

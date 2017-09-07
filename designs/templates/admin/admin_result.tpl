@@ -35,7 +35,7 @@
           {if $getResultByID.id}
           <form action="{$admin_file}?task=result&amp;action=edit&amp;tid={$smarty.get.tid}&amp;id={$getResultByID.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=result&amp;tid={$smarty.get.tid}" method="post">
+          <form action="{$admin_file}?task=result&amp;action=add&amp;tid={$smarty.get.tid}" method="post">
           {/if}
 
             <input type="hidden" name="tid" value="{$smarty.get.tid}">

@@ -570,7 +570,7 @@ function checkDeleteTopic($id)
   global $debug, $connected;
   $result = true;
   try{
-    $sql= ' SELECT COUNT(*) AS total_count, t.name FROM `test_question_topic` tqt INNER JOIN topic t ON t.id = tqt.topic_id WHERE tqt.topic_id = :id ';
+    $sql= ' SELECT COUNT(*) AS total_count, t.name FROM `result` r INNER JOIN topic t ON t.id = r.topic_id WHERE r.topic_id = :id ';
     $query = $connected->prepare($sql);
     $query->bindValue(':id', (int)$id, PDO::PARAM_INT);
     $query->execute();

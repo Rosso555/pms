@@ -24,12 +24,12 @@
         {if $getResultConByID.show_result_id}
         <form  role="form" action="{$admin_file}?task=result_condition&amp;action=edit&amp;tid={$smarty.get.tid}&amp;tpid={$smarty.get.tpid}&amp;rid={$smarty.get.rid}&amp;id={$getResultConByID.id}" method="post" style="padding: 1px 0px 12px 1px;">
         {else}
-        <form  role="form" action="{$admin_file}?task=result_condition&amp;tid={$smarty.get.tid}&amp;tpid={$smarty.get.tpid}&amp;rid={$smarty.get.rid}" method="post" style="padding: 1px 0px 12px 1px;">
+        <form  role="form" action="{$admin_file}?task=result_condition&amp;action=add&amp;tid={$smarty.get.tid}&amp;tpid={$smarty.get.tpid}&amp;rid={$smarty.get.rid}" method="post" style="padding: 1px 0px 12px 1px;">
         {/if}
           <input type="hidden" name="rid" value="{$smarty.get.rid}">
           {if $error.show_result_id}
             <div class="col-md-12">
-              <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_result_condition}{$multiLang.text_result_condition}{else}No Translate(Key Lang: text_result_condition){/if}.</span>
+              <span style="color: red">* {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_result_condition}{$multiLang.text_result_condition}{else}No Translate(Key Lang: text_result_condition){/if}.</span>
             </div>
           {/if}
           <div class="row">

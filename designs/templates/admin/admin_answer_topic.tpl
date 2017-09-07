@@ -48,7 +48,7 @@
           {if $getAnswerTopicByID.id}
           <form action="{$admin_file}?task=answer_topic&amp;action=edit&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}&amp;ans_id={$smarty.get.ans_id}&amp;id={$getAnswerTopicByID.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=answer_topic&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}&amp;ans_id={$smarty.get.ans_id}" method="post">
+          <form action="{$admin_file}?task=answer_topic&amp;action=add&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}&amp;ans_id={$smarty.get.ans_id}" method="post">
           {/if}
             <input type="hidden" name="ans_id" value="{$smarty.get.ans_id}">
             <div class="row">

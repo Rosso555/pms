@@ -18,9 +18,20 @@
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
+        {if $error}
+        <div class="row">
+          <div class="col-md-12">
+            <span style="color: red">* {if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate(Key Lang: text_please_input){/if} {if $multiLang.text_topic}{$multiLang.text_topic}{else}No Translate(Key Lang: text_topic){/if} {if $multiLang.text_name}{$multiLang.text_name}{else}No Translate(Key Lang: text_name){/if}.</span>
+          </div>
+        </div>
+        {/if}
         <div class="row">
           <div class="col-md-6">
-            <form class="form-inline" action="{$admin_file}?task=topic" method="post">
+            {if $getTopicByID.id}
+            <form class="form-inline" action="{$admin_file}?task=topic&amp;action=edit&amp;id={$getTopicByID.id}" method="post">
+            {else}
+            <form class="form-inline" action="{$admin_file}?task=topic&amp;action=add" method="post">
+            {/if}
               <div class="form-group">
                 <label for="name">{if $multiLang.text_name}{$multiLang.text_name}{else}No Translate(Key Lang:text_name){/if}:</label>
                 <input type="text" name="name" class="form-control" value="{$getTopicByID.name}" id="name" placeholder="Enter Topic" required autofocus>

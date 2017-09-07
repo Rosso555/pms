@@ -20,43 +20,46 @@
     </div>
     <div class="panel panel-default">
       <div class="panel-body">
-          <form action="{$admin_file}?task=jump_to&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}&amp;ans_id={$smarty.get.ans_id}" method="post">
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label for="title"><span style="color: red">*</span> {if $multiLang.text_jump_to_question}{$multiLang.text_jump_to_question}{else}No Translate(Key Lang: text_jump_to_question){/if}:</label>
-                  {if $error.question}
-                    <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if}{if $multiLang.text_jump_to_question}{$multiLang.text_jump_to_question}{else}No Translate(Key Lang: text_jump_to_question){/if}.</span>
-                  {/if}
-                  <br>
-                  <select class="form-control select2" name="question" style="width:100%">
-                    <option value="">--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} {if $multiLang.text_jump_to_question}{$multiLang.text_jump_to_question}{else}No Translate(Key Lang: text_jump_to_question){/if} ---</option>
-                    {foreach from=$listTestQuestion item=data}
-                    <option value="{$data.id}" {if $jump_toByID.jump_to eq $data.id}selected{/if}{if $getCheckViewOrder.jump_to_view_order}{if $data.view_order lte $getCheckViewOrder.jump_to_view_order}disabled{/if}{else}{if $data.view_order lte $test_question.view_order}disabled{/if}{/if}>
-                      {$data.q_title} (Type:{if $data.type eq 1} Text Input{elseif $data.type eq 2}Text Area{elseif $data.type eq 3}Redio{elseif $data.type eq 4}CheckBox{/if})
-                    </option>
-                    {/foreach}
-                  </select>
-                </div>
+        {if $jump_toByID.id}
+        <form action="{$admin_file}?task=jump_to&amp;action=edit&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}&amp;ans_id={$smarty.get.ans_id}" method="post">
+        {else}
+        <form action="{$admin_file}?task=jump_to&amp;action=add&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}&amp;ans_id={$smarty.get.ans_id}" method="post">
+        {/if}
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="title"><span style="color: red">*</span> {if $multiLang.text_jump_to_question}{$multiLang.text_jump_to_question}{else}No Translate(Key Lang: text_jump_to_question){/if}:</label>
+                {if $error.question}
+                  <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if}{if $multiLang.text_jump_to_question}{$multiLang.text_jump_to_question}{else}No Translate(Key Lang: text_jump_to_question){/if}.</span>
+                {/if}
+                <br>
+                <select class="form-control select2" name="question" style="width:100%">
+                  <option value="">--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} {if $multiLang.text_jump_to_question}{$multiLang.text_jump_to_question}{else}No Translate(Key Lang: text_jump_to_question){/if} ---</option>
+                  {foreach from=$listTestQuestion item=data}
+                  <option value="{$data.id}" {if $jump_toByID.jump_to eq $data.id}selected{/if}{if $getCheckViewOrder.jump_to_view_order}{if $data.view_order lte $getCheckViewOrder.jump_to_view_order}disabled{/if}{else}{if $data.view_order lte $test_question.view_order}disabled{/if}{/if}>
+                    {$data.q_title} (Type:{if $data.type eq 1} Text Input{elseif $data.type eq 2}Text Area{elseif $data.type eq 3}Redio{elseif $data.type eq 4}CheckBox{/if})
+                  </option>
+                  {/foreach}
+                </select>
               </div>
             </div>
+          </div>
 
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  {if $jump_toByID.jump_to}
-                    <button type="submit" name="butsubmit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate(Key Lang: button_update){/if}</button>
-                  {else}
-                    <button type="submit" name="butsubmit" class="btn btn-info" {if $answer.jump_to}disabled{/if}><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
-                  {/if}
-                  <a id="btnBack" href="javascript:history.back()" class="btn btn-warning"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                {if $jump_toByID.jump_to}
+                  <button type="submit" name="butsubmit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate(Key Lang: button_update){/if}</button>
+                {else}
+                  <button type="submit" name="butsubmit" class="btn btn-info" {if $answer.jump_to}disabled{/if}><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
+                {/if}
+                <a id="btnBack" href="javascript:history.back()" class="btn btn-warning"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
 
-                  <!-- <a class="btn btn-warning" href="{$admin_file}?task=answer&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}"><i class="fa fa-step-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a> -->
-                </div>
+                <!-- <a class="btn btn-warning" href="{$admin_file}?task=answer&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}"><i class="fa fa-step-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a> -->
               </div>
             </div>
-          </form>
-        <!-- </div> -->
+          </div>
+        </form>
       </div>
     </div>
     <!--panel panel-body-->

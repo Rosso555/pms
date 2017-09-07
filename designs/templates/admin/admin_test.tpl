@@ -60,7 +60,7 @@
           {if $getTestByID.id}
           <form action="{$admin_file}?task=test&amp;action=edit&amp;catid={$smarty.get.catid}&amp;id={$getTestByID.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=test&amp;catid={$smarty.get.catid}" method="post">
+          <form action="{$admin_file}?task=test&amp;action=add&amp;catid={$smarty.get.catid}" method="post">
           {/if}
             <div class="row">
               <div class="col-md-4">

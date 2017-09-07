@@ -61,7 +61,7 @@
           {if $getAnswerByID.id}
           <form action="{$admin_file}?task=answer&amp;action=edit&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}&amp;id={$getAnswerByID.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=answer&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}" method="post">
+          <form action="{$admin_file}?task=answer&amp;action=add&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}" method="post">
           {/if}
             <input type="hidden" name="tqid" value="{$smarty.get.tqid}">
             <input type="hidden" name="qid" value="{$smarty.get.qid|escape}">
