@@ -1,3 +1,4 @@
+{if $paginate.total gt $paginate.limit}<hr style="border-top: 2px solid #eee; border-radius: 4px;">{/if}
 <div class="col-md-12 text-center">
   <div class="pagination pagination-centered" style="font-weight: 700; margin-bottom: 0px; margin-top: 0;">
     {if $paginate.total gt $paginate.limit}

@@ -14,6 +14,7 @@
 {if $mode eq "psychologist" OR $mode eq "index" OR $mode eq "patient"}<link rel="stylesheet" href="/css/index_style.css" type="text/css"/>{/if}
 {if $mode eq "psychologist"}<link rel="stylesheet" href="/css/psychologist_style.css" type="text/css"/>{/if}
 <link rel="stylesheet" href="/css/style_select2.css" type="text/css"/>
+<link rel="stylesheet" href="/css/common_style.css" type="text/css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
 <title>{block name="title"}{/block}PMS-ADMIN</title>

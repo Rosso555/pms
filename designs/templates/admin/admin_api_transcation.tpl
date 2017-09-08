@@ -49,7 +49,7 @@
             {if $getApiTranByID.id}
               <form class="from" action="{$admin_file}?task=apitransaction&amp;action=edit&amp;mlid={$smarty.get.mlid}&amp;id={$getApiTranByID.id}" method="post">
             {else}
-              <form class="from" action="{$admin_file}?task=apitransaction&amp;mlid={$smarty.get.mlid}" method="post">
+              <form class="from" action="{$admin_file}?task=apitransaction&amp;action=add&amp;mlid={$smarty.get.mlid}" method="post">
             {/if}
               <div class="row">
                 <div class="col-md-6">

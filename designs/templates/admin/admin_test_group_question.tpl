@@ -29,7 +29,7 @@
           {if $getTestGQByID.id}
           <form action="{$admin_file}?task=test_group_question&amp;action=edit&amp;{$smarty.get.tid}&amp;tgid={$smarty.get.tgid}&amp;id={$getTestGQByID.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=test_group_question&amp;tid={$smarty.get.tid}&amp;tgid={$smarty.get.tgid}" method="post">
+          <form action="{$admin_file}?task=test_group_question&amp;action=add&amp;tid={$smarty.get.tid}&amp;tgid={$smarty.get.tgid}" method="post">
           {/if}
             <div class="row">
               <div class="col-md-12">
@@ -37,7 +37,7 @@
                   <input type="hidden" id="select2_placeholder" value="{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}">
                   <label for="title"><span style="color: red">*</span> {if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}:</label>
                   {if $error.test_question}
-                    <span style="color: red">{if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}</span>
+                    <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}</span>
                   {/if}
                   {if $error.is_exist_test_group_que}
                     <span style="color: red">{if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if} {if $multiLang.text_is_existed}{$multiLang.text_is_existed}{else}No Translate(Key Lang: text_is_existed){/if}</span>

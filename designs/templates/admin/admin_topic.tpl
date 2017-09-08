@@ -33,7 +33,7 @@
             <form class="form-inline" action="{$admin_file}?task=topic&amp;action=add" method="post">
             {/if}
               <div class="form-group">
-                <label for="name">{if $multiLang.text_name}{$multiLang.text_name}{else}No Translate(Key Lang:text_name){/if}:</label>
+                <label for="name"><span style="color: red">*</span> {if $multiLang.text_name}{$multiLang.text_name}{else}No Translate(Key Lang:text_name){/if}:</label>
                 <input type="text" name="name" class="form-control" value="{$getTopicByID.name}" id="name" placeholder="Enter Topic" required autofocus>
               </div>
               {if $getTopicByID.id}

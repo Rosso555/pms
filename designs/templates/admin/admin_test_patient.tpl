@@ -50,7 +50,7 @@
           {if $getTestPat.id}
           <form action="{$admin_file}?task=test_patient&amp;action=edit&amp;id={$getTestPat.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=test_patient" method="post">
+          <form action="{$admin_file}?task=test_patient&amp;action=add" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">

@@ -41,7 +41,7 @@
           {if $getTestTopicAsisByID.id}
           <form action="{$admin_file}?task=test_topic_analysis&amp;action=edit&amp;tid={$smarty.get.tid}&amp;id={$getTestTopicAsisByID.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=test_topic_analysis&amp;tid={$smarty.get.tid}" method="post">
+          <form action="{$admin_file}?task=test_topic_analysis&amp;action=add&amp;tid={$smarty.get.tid}" method="post">
           {/if}
             <input type="hidden" name="test_id" value="{$smarty.get.tid}">
             <div class="row">

@@ -281,7 +281,7 @@ function listFunction($kwd = "")
     }
 
     $sql = 'SELECT * , (SELECT COUNT(*) FROM `staff_function` '.$condition.') AS total
-             FROM `staff_function` '.$condition.' ORDER BY id DESC LIMIT :offset, :limit';
+             FROM `staff_function` '.$condition.' ORDER BY task_name DESC LIMIT :offset, :limit';
     $stmt = $connected->prepare($sql);
     if(!empty($kwd)) $stmt->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
@@ -1215,9 +1215,9 @@ function getListTestQuestion($kwd, $testid, $type_check, $test_g_ques, $lang, $s
     if(!empty($testid)) $condition .= ' AND tq.test_id = :testid ';
     if(!empty($test_g_ques)) $condition .= ' AND tgq.id IS NULL ';
     //$type_check eq 1 OR 2 is text free
-    if(!empty($type_check) && $type_check == 1 || $type_check == 2) $condition .= ' AND q.type = 1 OR q.type = 2';
+    if(!empty($type_check) && $type_check == 1 || $type_check == 2) $condition .= ' AND (q.type = 1 OR q.type = 2) ';
     //$type_check eq 3 OR 4 is check box
-    if(!empty($type_check) && $type_check == 3 || $type_check == 4) $condition .= ' AND q.type = 3 OR q.type = 4';
+    if(!empty($type_check) && $type_check == 3 || $type_check == 4) $condition .= ' AND (q.type = 3 OR q.type = 4) ';
 
     $sql= ' SELECT tq.id, tq.test_id, tq.question_id, tq.is_required, tq.view_order, t.title AS test_title,
               q.title AS q_title, q.type, t.lang AS test_lang, q.lang AS q_lang, tq.parent AS parent_id, COUNT(asw.id) AS count_answer,
@@ -1972,7 +1972,11 @@ function is_exist_test_group_question($test_id, $t_que_id)
 
   return $result;
 }
-
+/**
+ * getStaffFunctionIsNullStaffPer
+ * @param  int $srid is staff_role_id
+ * @return array or boolean
+ */
 function getStaffFunctionIsNullStaffPer($srid)
 {
   global $debug, $connected;
@@ -1989,5 +1993,27 @@ function getStaffFunctionIsNullStaffPer($srid)
     if($debug)  echo 'Errors: getStaffFunctionIsNullStaffPer'.$e->getMessage();
   }
 
+  return $result;
+}
+/**
+ * checkDeleteMailerLite
+ * @param  int $id mailerlite_id
+ * @return boolean
+ */
+function checkDeleteMailerLite($id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count, ml.title FROM `apitransaction` apit
+            INNER JOIN mailerlite ml ON ml.id = apit.ml_id WHERE apit.ml_id = :id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetch();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkDeleteMailerLite'.$e->getMessage();
+  }
   return $result;
 }

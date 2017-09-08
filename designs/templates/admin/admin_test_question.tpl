@@ -242,9 +242,6 @@
                       <div class="col-md-12">
                         <div class="form-group" id="error_input">
                           <label for="title"><span style="color: red">*</span> {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang:text_test){/if}:</label>
-                          {if $error.test}
-                            <span style="color: red">{if $multiLang.text_test_empty}{$multiLang.text_test_empty}{else}No Translate(Key Lang:text_test_empty){/if}.</span>
-                          {/if}
                           <br>
                           <select class="form-control select2" name="test" style="width:100%" id="test">
                             <option value="">--- {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang:text_test){/if} ---</option>
@@ -299,7 +296,8 @@
 {block name="javascript"}
 <script>
 
- function copytest_question(id){
+ function copytest_question(id)
+ {
    var test_que_title = $("#test_que"+id).text();
 
    $("#test_que_title").text(test_que_title);
@@ -307,12 +305,14 @@
    $('#myModal_Copy').modal('show');
  }
 
- function save_copytest_question(id){
+ function save_copytest_question(id)
+ {
   var test_id = $("#test").val();
   if($("input[type='radio'].rdoRequired").is(':checked')) {
     var required = $("input[type='radio'].rdoRequired:checked").val();
   }
   $(".loader").show();
+
   if(test_id != ''){
 
     $.ajax({
@@ -323,7 +323,6 @@
          $("#error").text("* Sorry! You can't add test question. Because duplication test question in test.");
          $(".loader").hide();
        }else {
-         alert("helllo");
          location.reload();
        }
       },

@@ -28,14 +28,14 @@
             {if $getTopicAsisByID.id}
             <form class="form-inline" action="{$admin_file}?task=topic_analysis&amp;action=edit&amp;id={$getTopicAsisByID.id}" method="post">
             {else}
-            <form class="form-inline" action="{$admin_file}?task=topic_analysis" method="post">
+            <form class="form-inline" action="{$admin_file}?task=topic_analysis&amp;action=add" method="post">
             {/if}
               <div class="form-group">
                 <label for="name"><span style="color: red">*</span> {if $multiLang.text_name}{$multiLang.text_name}{else}No Translate(Key Lang: text_name){/if}:</label>
 
                 <input type="text" name="name" class="form-control" value="{$getTopicAsisByID.name}" id="name" placeholder="Enter Analysis Topic" autofocus>
-              <!-- </div>
-              <div class="form-group"> -->
+              </div>
+              <div class="form-group">
                 {if $getTopicAsisByID.id}
                   <input type="hidden" name="topic_asis_id" value="{$getTopicAsisByID.id}" />
                   <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate(Key Lang: button_update){/if}</button>

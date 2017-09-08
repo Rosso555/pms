@@ -50,7 +50,7 @@
           {if $getTestPsy.id}
           <form action="{$admin_file}?task=test_psychologist&amp;action=edit&amp;id={$getTestPsy.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=test_psychologist" method="post">
+          <form action="{$admin_file}?task=test_psychologist&amp;action=add" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">
@@ -61,7 +61,7 @@
                   {/if}
                   <select class="form-control select2_test_psy" {if $getTestPsy.id} name="test" {else} name="test[]" multiple="multiple" {/if} style="width:100%">
                     {foreach from=$test item=data}
-                    <option value="{$data.id}" {if $smarty.session.test_psy.test}{if $smarty.session.test_psy.test eq $data.id}selected{/if}{else}{if $getTestPsy.test_id eq $data.id}selected{/if}{/if}>{$data.title}</option>
+                    <option value="{$data.id}" {if $getTestPsy.test_id}{if $getTestPsy.test_id eq $data.id}selected{/if}{else}{foreach from=$smarty.session.test_psy.test item=v}{if $v eq $data.id}selected{/if}{/foreach}{/if}>{$data.title}</option>
                     {/foreach}
                   </select>
                 </div>

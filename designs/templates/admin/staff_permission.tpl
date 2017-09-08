@@ -202,6 +202,10 @@
           dataHTML += "<option value=''>No Data</option>";
           $("#staff_function").html(dataHTML);
         }
+        if(data == false)
+        {
+          window.location.replace('{$admin_file}?task=perror');
+        }
         //hide Loading gif
         $(".loader").hide();
       },

@@ -59,6 +59,8 @@ if('login' === $task){
         //Check is super admin
         if($resultAdminLogin['staff_role_id'] == 1){
           $_SESSION['is_super_admin'] = $resultAdminLogin['staff_role_id'];
+        } else {
+          $_SESSION['is_super_admin'] = '';
         }
         //remove session from post
         unset($_SESSION['admin']);
@@ -78,6 +80,7 @@ if('login' === $task){
 //task: logout by clear session
 if('logout' === $task){
   unset($_SESSION['is_admin_login']);
+  unset($_SESSION['is_super_admin']);
   header('Location:'.$admin_file.'?task=login');
   exit;
 }
@@ -86,6 +89,7 @@ if(empty($_SESSION['is_admin_login'])){
   header('Location:'.$admin_file.'?task=login');
   exit;
 }
+
 //Check Staff Permission On template
 $smarty_appform->assign('staffPermission', getStaffPermissionData($_SESSION['staff_login_role']));
 //redirect if no permission
@@ -95,10 +99,18 @@ if($task == 'perror')
   $smarty_appform->display('common/permission_error.tpl');
   exit;
 }
+
 //Check permission
 $permission = auth($_SESSION['staff_login_role'], $task, $action);
 if(!empty($task) && false === $permission)
 {
+  //Check: If ajax request
+  if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
+  {
+    header('Content-type: application/json');
+    echo json_encode(false);
+    exit;
+  }
   header('location:'.$admin_file.'?task=perror');
   exit;
 }
@@ -1670,6 +1682,7 @@ if('answer_topic' === $task)
     header('location: '.$admin_file.'?task=answer_topic&tid='.$_GET['tid'].'&qid='.$_GET['qid'].'&tqid='.$_GET['tqid'].'&ans_id='.$_GET['ans_id']);
     exit;
   }
+
   //action delete permanently answer topic
   if('delete_permanently' === $action && !empty($_GET['id']))
   {
@@ -2253,7 +2266,7 @@ if('topic_hide' === $task)
       if(empty($bigger_than)) $error['bigger_than']  = 1;
       if(empty($tid_first))   $error['topic_first']  = 1;
       if(empty($tid_second))   $error['topic_second']  = 1;
-  
+
       //update topic
       if(0 === count($error) && !empty($id))
       {
@@ -2299,38 +2312,59 @@ if('topic_analysis' === $task)
   if(!$_POST) unset($_SESSION['topic_analysis']);
 
   $error = array();
-  if($_POST)
+  //action: add topic_analysis
+  if('add' === $action)
   {
-    //get value from form
-    $name = $common->clean_string($_POST['name']);
-    $id   = $common->clean_string($_POST['topic_asis_id']);
-
-    //add value to session to use in template
-    $_SESSION['topic_analysis'] = $_POST;
-    //form validation
-    if(empty($name))        $error['name']  = 1;
-
-    //Add topic
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      $common->save('topic_analysis', $field = ['name' => $name, 'lang' => $lang]);
-      //unset session
-      unset($_SESSION['topic_analysis']);
-      //Redirect
-      header('location: '.$admin_file.'?task=topic_analysis');
-      exit;
+      //get value from form
+      $name = $common->clean_string($_POST['name']);
+      $id   = $common->clean_string($_POST['topic_asis_id']);
+
+      //add value to session to use in template
+      $_SESSION['topic_analysis'] = $_POST;
+      //form validation
+      if(empty($name))        $error['name']  = 1;
+
+      //Add topic
+      if(0 === count($error) && empty($id))
+      {
+        $common->save('topic_analysis', $field = ['name' => $name, 'lang' => $lang]);
+        //unset session
+        unset($_SESSION['topic_analysis']);
+        //Redirect
+        header('location: '.$admin_file.'?task=topic_analysis');
+        exit;
+      }
     }
-    //update topic
-    if(0 === count($error) && !empty($id))
+  }//End action: add topic_analysis
+
+  //action: edit topic_analysis
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('topic_analysis', $field = ['name' => $name, 'lang' => $lang], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['topic_analysis']);
-      //Redirect
-      header('location: '.$admin_file.'?task=topic_analysis');
-      exit;
+      //get value from form
+      $name = $common->clean_string($_POST['name']);
+      $id   = $common->clean_string($_POST['topic_asis_id']);
+
+      //add value to session to use in template
+      $_SESSION['topic_analysis'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name'] = 1;
+      //update topic
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('topic_analysis', $field = ['name' => $name, 'lang' => $lang], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['topic_analysis']);
+        //Redirect
+        header('location: '.$admin_file.'?task=topic_analysis');
+        exit;
+      }
     }
-  }
+    $smarty_appform->assign('getTopicAsisByID', $common->find('topic_analysis', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }//End action: edit topic_analysis
 
   //action delete topic
   if('delete' === $action && !empty($_GET['id']))
@@ -2345,12 +2379,6 @@ if('topic_analysis' === $task)
 
     header('location: '.$admin_file.'?task=topic_analysis');
     exit;
-  }
-
-  //get edit category
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getTopicAsisByID', $common->find('topic_analysis', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
@@ -2373,11 +2401,12 @@ if('test_topic' === $task)
     $topic_id   = $_POST['topicid'];
     $view_order = $_POST['view_order'];
 
-    if(!empty($test_id) && !empty($topic_id) && !empty($view_order)){
+    if(!empty($test_id) && !empty($topic_id) && !empty($view_order))
+    {
       $result = $common->update('result', $field = ['view_order' => $view_order], $condition = ['test_id' => $test_id, 'topic_id' => $topic_id]);
     }
-    $resultCount = checkViewOrderTopic($test_id);
 
+    $resultCount = checkViewOrderTopic($test_id);
     header('Content-type: application/json');
     echo json_encode(array('status' => $result, 'checkCountView' => $resultCount));
     exit;
@@ -2398,53 +2427,75 @@ if('test_topic_analysis' === $task)
   if(!$_POST) unset($_SESSION['test_topic_analysis']);
 
   $error = array();
-  if($_POST)
+  //action: add test_topic_analysis
+  if('add' === $action)
   {
-    //get value from form
-    $test_id      = $common->clean_string($_POST['test_id']);
-    $topic_id     = $common->clean_string($_POST['topic_id']);
-    $ana_topic_id = $common->clean_string($_POST['ana_topic_id']);
-    $less_than    = $common->clean_string($_POST['less_than_value']);
-    $bigger_than  = $common->clean_string($_POST['bigger_than_value']);
-    $id   = $common->clean_string($_POST['test_topic_asis_id']);
-
-    //add value to session to use in template
-    $_SESSION['test_topic_analysis'] = $_POST;
-    //form validation
-    if(empty($topic_id))    $error['topic_id']  = 1;
-    if(empty($ana_topic_id))$error['ana_topic_id']  = 1;
-    if(empty($less_than))   $error['less_than']   = 1;
-    if(empty($bigger_than)) $error['bigger_than'] = 1;
-
-    //Add topic
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      $common->save('test_topic_analysis', $field = ['test_id' => $test_id,
-      'topic_id'=> $topic_id,
-      'topic_analysis_id' => $ana_topic_id,
-      'less_than'    => $less_than,
-      'bigger_than'  => $bigger_than]);
-      //unset session
-      unset($_SESSION['test_topic_analysis']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_topic_analysis&tid='.$test_id);
-      exit;
+      //get value from form
+      $test_id      = $common->clean_string($_POST['test_id']);
+      $topic_id     = $common->clean_string($_POST['topic_id']);
+      $ana_topic_id = $common->clean_string($_POST['ana_topic_id']);
+      $less_than    = $common->clean_string($_POST['less_than_value']);
+      $bigger_than  = $common->clean_string($_POST['bigger_than_value']);
+      $id   = $common->clean_string($_POST['test_topic_asis_id']);
+
+      //add value to session to use in template
+      $_SESSION['test_topic_analysis'] = $_POST;
+      //form validation
+      if(empty($topic_id))    $error['topic_id']  = 1;
+      if(empty($ana_topic_id))$error['ana_topic_id']  = 1;
+      if(empty($less_than))   $error['less_than']   = 1;
+      if(empty($bigger_than)) $error['bigger_than'] = 1;
+
+      //Add topic
+      if(0 === count($error) && empty($id))
+      {
+        $common->save('test_topic_analysis', $field = ['test_id' => $test_id, 'topic_id' => $topic_id, 'topic_analysis_id' => $ana_topic_id, 'less_than' => $less_than, 'bigger_than' => $bigger_than]);
+        //unset session
+        unset($_SESSION['test_topic_analysis']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_topic_analysis&tid='.$test_id);
+        exit;
+      }
     }
-    //update topic
-    if(0 === count($error) && !empty($id))
+  }//End action: add test_topic_analysis
+
+  //action: edit test_topic_analysis
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('test_topic_analysis', $field = ['topic_id'=> $topic_id,
-      'topic_analysis_id' => $ana_topic_id,
-      'less_than' => $less_than,
-      'bigger_than' => $bigger_than],
-      $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['test_topic_analysis']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_topic_analysis&tid='.$test_id);
-      exit;
+      //get value from form
+      $test_id      = $common->clean_string($_POST['test_id']);
+      $topic_id     = $common->clean_string($_POST['topic_id']);
+      $ana_topic_id = $common->clean_string($_POST['ana_topic_id']);
+      $less_than    = $common->clean_string($_POST['less_than_value']);
+      $bigger_than  = $common->clean_string($_POST['bigger_than_value']);
+      $id   = $common->clean_string($_POST['test_topic_asis_id']);
+
+      //add value to session to use in template
+      $_SESSION['test_topic_analysis'] = $_POST;
+      //form validation
+      if(empty($topic_id))    $error['topic_id']  = 1;
+      if(empty($ana_topic_id))$error['ana_topic_id']  = 1;
+      if(empty($less_than))   $error['less_than']   = 1;
+      if(empty($bigger_than)) $error['bigger_than'] = 1;
+
+      //update topic
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('test_topic_analysis', $field = ['topic_id'=> $topic_id, 'topic_analysis_id' => $ana_topic_id, 'less_than' => $less_than, 'bigger_than' => $bigger_than], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['test_topic_analysis']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_topic_analysis&tid='.$test_id);
+        exit;
+      }
     }
-  }
+    $smarty_appform->assign('getTestTopicAsisByID', $common->find('test_topic_analysis', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }//End action: edit test_topic_analysis
+
   //action delete topic
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -2478,59 +2529,90 @@ if('test_topic_answer' === $task)
   if(!$_POST) unset($_SESSION['test_topic_answer']);
 
   $error = array();
-  if($_POST)
+  //action: test_topic_answer
+  if('add' === $action)
   {
-    $id       = $common->clean_string($_POST['id']);
-    $topic_id = $common->clean_string($_POST['topic_id']);
-    $average  = $common->clean_string($_POST['average']);
-    $stdd     = $common->clean_string($_POST['stdd']);
-    $multiplier = $common->clean_string($_POST['multiplier']);
-    $constant   = $common->clean_string($_POST['constant']);
-
-    //add value to session to use in template
-    $_SESSION['test_topic_answer'] = $_POST;
-    //form validation
-    if(empty($topic_id))    $error['topic_id'] = 1;
-    if(empty($average))     $error['average'] = 1;
-    if(empty($stdd))        $error['stdd'] = 1;
-    if(empty($multiplier))  $error['multiplier'] = 1;
-    if(empty($constant))    $error['constant'] = 1;
-
-    $result = $common->find('test_topic_answer', $condition = ['id' => $id], $type = 'one');
-
-    if(!empty($topic_id) && $result['topic_id'] !== $topic_id && is_test_topic_answer_exist($_GET['tid'], $topic_id) > 0) $error['is_key_test_topic_ans_exist'] = 2;
-
-    //Add test
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      $common->save('test_topic_answer', $field =['test_id'     => $_GET['tid'],
-      'topic_id'    => $topic_id,
-      'average'     => $average,
-      'stdd'        => $stdd,
-      'multiplier'  => $multiplier,
-      'constant'    => $constant]);
-      //unset session
-      unset($_SESSION['test_topic_answer']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_topic_answer&tid='.$_GET['tid']);
-      exit;
+      $id       = $common->clean_string($_POST['id']);
+      $topic_id = $common->clean_string($_POST['topic_id']);
+      $average  = $common->clean_string($_POST['average']);
+      $stdd     = $common->clean_string($_POST['stdd']);
+      $multiplier = $common->clean_string($_POST['multiplier']);
+      $constant   = $common->clean_string($_POST['constant']);
+
+      //add value to session to use in template
+      $_SESSION['test_topic_answer'] = $_POST;
+      //form validation
+      if(empty($topic_id))    $error['topic_id'] = 1;
+      if(empty($average))     $error['average'] = 1;
+      if(empty($stdd))        $error['stdd'] = 1;
+      if(empty($multiplier))  $error['multiplier'] = 1;
+      if(empty($constant))    $error['constant'] = 1;
+
+      if(!empty($topic_id) && is_test_topic_answer_exist($_GET['tid'], $topic_id) > 0) $error['is_key_test_topic_ans_exist'] = 2;
+
+      //Add test
+      if(0 === count($error) && empty($id))
+      {
+        $common->save('test_topic_answer', $field =['test_id'     => $_GET['tid'],
+                                                    'topic_id'    => $topic_id,
+                                                    'average'     => $average,
+                                                    'stdd'        => $stdd,
+                                                    'multiplier'  => $multiplier,
+                                                    'constant'    => $constant]);
+        //unset session
+        unset($_SESSION['test_topic_answer']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_topic_answer&tid='.$_GET['tid']);
+        exit;
+      }
     }
-    //update test
-    if(0 === count($error) && !empty($id))
+  }//End action: add test_topic_answer
+
+  //action: edit test_topic_answer
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('test_topic_answer', $field =['test_id'     => $_GET['tid'],
-      'topic_id'    => $topic_id,
-      'average'     => $average,
-      'stdd'        => $stdd,
-      'multiplier'  => $multiplier,
-      'constant'    => $constant], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['test_topic_answer']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_topic_answer&tid='.$_GET['tid']);
-      exit;
+      $id       = $common->clean_string($_POST['id']);
+      $topic_id = $common->clean_string($_POST['topic_id']);
+      $average  = $common->clean_string($_POST['average']);
+      $stdd     = $common->clean_string($_POST['stdd']);
+      $multiplier = $common->clean_string($_POST['multiplier']);
+      $constant   = $common->clean_string($_POST['constant']);
+
+      //add value to session to use in template
+      $_SESSION['test_topic_answer'] = $_POST;
+      //form validation
+      if(empty($topic_id))    $error['topic_id'] = 1;
+      if(empty($average))     $error['average'] = 1;
+      if(empty($stdd))        $error['stdd'] = 1;
+      if(empty($multiplier))  $error['multiplier'] = 1;
+      if(empty($constant))    $error['constant'] = 1;
+
+      $result = $common->find('test_topic_answer', $condition = ['id' => $id], $type = 'one');
+      if(!empty($topic_id) && $result['topic_id'] !== $topic_id && is_test_topic_answer_exist($_GET['tid'], $topic_id) > 0) $error['is_key_test_topic_ans_exist'] = 2;
+
+      //update test
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('test_topic_answer', $field =['test_id'     => $_GET['tid'],
+                                                      'topic_id'    => $topic_id,
+                                                      'average'     => $average,
+                                                      'stdd'        => $stdd,
+                                                      'multiplier'  => $multiplier,
+                                                      'constant'    => $constant], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['test_topic_answer']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_topic_answer&tid='.$_GET['tid']);
+        exit;
+      }
     }
-  }
+    $smarty_appform->assign('getTestTopicAnsByID', $common->find('test_topic_answer', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }//End action: edit test_topic_answer
+
   //action delete topic
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -2538,11 +2620,7 @@ if('test_topic_answer' === $task)
     header('location: '.$admin_file.'?task=test_topic_answer&tid='.$_GET['tid']);
     exit;
   }
-  //get edit test_topic_answer
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getTestTopicAnsByID', $common->find('test_topic_answer', $condition = ['id' => $_GET['id']], $type = 'one'));
-  }
+
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $results = listTestTopicAnswer($_GET['tid'], $kwd);
 
@@ -2564,48 +2642,72 @@ if('test_group' === $task)
   if(empty($_POST)) unset($_SESSION['test_group']);
 
   $error = array();
-  if($_POST)
+  //action: add test group
+  if('add' === $action)
   {
-    //get value from form
-    $testid   = $common->clean_string($_POST['test']);
-    $title    = $common->clean_string($_POST['title']);
-    $id       = $common->clean_string($_POST['id']);
-
-    //add value to session to use in template
-    $_SESSION['test_group'] = $_POST;
-    //form validation
-    if(empty($title))   $error['title']   = 1;
-    if(empty($testid))  $error['testid']  = 1;
-
-    //Add test group
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      $common->save('test_group', $field = ['test_id' => $testid, 'title' => $title]);
-      //unset session
-      unset($_SESSION['test_group']);
-      //Redirect
-      if($_GET['tid']){
-        header('location: '.$admin_file.'?task=test_group&tid='.$_GET['tid']);
-      }else {
-        header('location: '.$admin_file.'?task=test_group');
+      //get value from form
+      $testid   = $common->clean_string($_POST['test']);
+      $title    = $common->clean_string($_POST['title']);
+      $id       = $common->clean_string($_POST['id']);
+
+      //add value to session to use in template
+      $_SESSION['test_group'] = $_POST;
+      //form validation
+      if(empty($title))   $error['title']   = 1;
+      if(empty($testid))  $error['testid']  = 1;
+
+      //Add test group
+      if(0 === count($error) && empty($id))
+      {
+        $common->save('test_group', $field = ['test_id' => $testid, 'title' => $title]);
+        //unset session
+        unset($_SESSION['test_group']);
+        //Redirect
+        if($_GET['tid']){
+          header('location: '.$admin_file.'?task=test_group&tid='.$_GET['tid']);
+        }else {
+          header('location: '.$admin_file.'?task=test_group');
+        }
+        exit;
       }
-      exit;
     }
-    //update test group
-    if(0 === count($error) && !empty($id))
+  }//End action: add test group
+
+  //action: edit test group
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('test_group', $field = ['test_id' => $testid, 'title' => $title], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['test_group']);
-      //Redirect
-      if($_GET['tid']){
-        header('location: '.$admin_file.'?task=test_group&tid='.$_GET['tid']);
-      }else {
-        header('location: '.$admin_file.'?task=test_group');
+      //get value from form
+      $testid   = $common->clean_string($_POST['test']);
+      $title    = $common->clean_string($_POST['title']);
+      $id       = $common->clean_string($_POST['id']);
+
+      //add value to session to use in template
+      $_SESSION['test_group'] = $_POST;
+      //form validation
+      if(empty($title))   $error['title']   = 1;
+      if(empty($testid))  $error['testid']  = 1;
+      //update test group
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('test_group', $field = ['test_id' => $testid, 'title' => $title], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['test_group']);
+        //Redirect
+        if($_GET['tid']){
+          header('location: '.$admin_file.'?task=test_group&tid='.$_GET['tid']);
+        }else {
+          header('location: '.$admin_file.'?task=test_group');
+        }
+        exit;
       }
-      exit;
     }
-  }
+    $smarty_appform->assign('getTestGroupByID', $common->find('test_group', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }//End action: edit test group
+
   //action delete test group
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -2618,11 +2720,6 @@ if('test_group' === $task)
       header('location: '.$admin_file.'?task=test_group');
     }
     exit;
-  }
-  //get edit test group
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getTestGroupByID', $common->find('test_group', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $testid = !empty($_GET['tid']) ? $_GET['tid'] : '';
@@ -2644,61 +2741,49 @@ if('test_group_question' === $task)
   if(empty($_POST)) unset($_SESSION['test_g_question']);
 
   $error = array();
-  if($_POST)
+  //action: add test_group_question
+  if('add' === $action)
   {
-    //get value from form
-    // $tquestion_id = $common->clean_string($_POST['test_question']);
-    $tgroup_id    = $common->clean_string($_GET['tgid']);
-    $id   = $common->clean_string($_POST['id']);
+    if($_POST)
+    {
+      //get value from form
+      $tgroup_id    = $common->clean_string($_GET['tgid']);
+      $id   = $common->clean_string($_POST['id']);
 
-    //add value to session to use in template
-    $_SESSION['test_g_question'] = $_POST;
-    //form validation
-    if(empty($_POST['test_question']))  $error['test_question'] = 1;
-    if(empty($tgroup_id))     $error['test_g_id']     = 1;
-
-    if(!empty($_POST['test_question'])){
-      foreach ($_POST['test_question'] as $key => $value) {
-        if(empty($id) && is_exist_test_group_question($_GET['tid'], $value) > 0) {
-          $error['is_exist_test_group_que'] += 1;
+      //add value to session to use in template
+      $_SESSION['test_g_question'] = $_POST;
+      //form validation
+      if(empty($_POST['test_question']))  $error['test_question'] = 1;
+      if(empty($tgroup_id)) $error['test_g_id']     = 1;
+      if(!empty($_POST['test_question'])){
+        foreach ($_POST['test_question'] as $key => $value) {
+          if(empty($id) && is_exist_test_group_question($_GET['tid'], $value) > 0) {
+            $error['is_exist_test_group_que'] += 1;
+          }
         }
       }
-    }
 
-    //Add test group
-    if(0 === count($error) && empty($id))
-    {
-      foreach ($_POST['test_question'] as $key => $value) {
-        $common->save('test_group_question', $field = ['test_group_id' => $tgroup_id, 'test_question_id' => $value]);
+      //Add test group
+      if(0 === count($error) && empty($id))
+      {
+        foreach ($_POST['test_question'] as $key => $value) {
+          $common->save('test_group_question', $field = ['test_group_id' => $tgroup_id, 'test_question_id' => $value]);
+        }
+        //unset session
+        unset($_SESSION['test_g_question']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_group_question&tid='.$_GET['tid'].'&tgid='.$_GET['tgid']);
+        exit;
       }
-      //unset session
-      unset($_SESSION['test_g_question']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_group_question&tid='.$_GET['tid'].'&tgid='.$_GET['tgid']);
-      exit;
     }
-    //update test group
-    if(0 === count($error) && !empty($id))
-    {
-      $common->update('test_group_question', $field = ['test_question_id' => $tquestion_id], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['test_g_question']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_group_question&tid='.$_GET['tid'].'&tgid='.$_GET['tgid']);
-      exit;
-    }
-  }
+  }//End action: add test_group_question
+
   //action delete test group
   if('delete' === $action && !empty($_GET['id']))
   {
     $common->delete('test_group_question', $field = ['id' => $_GET['id']]);
     header('location: '.$admin_file.'?task=test_group_question&tid='.$_GET['tid'].'&tgid='.$_GET['tgid']);
     exit;
-  }
-  //get edit test group question
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getTestGQByID', $common->find('test_group_question', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $result = listTestGroupQuestionAdmin($_GET['tgid']);
@@ -2708,7 +2793,6 @@ if('test_group_question' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listTestGroupQuestion', $result);
-  // $smarty_appform->assign('listTestQuestion', getListTestQuestion('',$_GET['tid'], '', $test_g_ques = 1, $lang, $slimit = ''));
   $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionGroupAnswer($_GET['tid']));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->assign('test_group', $common->find('test_group', $condition = ['id' => $_GET['tgid']], $type = 'one'));
@@ -2722,68 +2806,140 @@ if('group_answer_question' === $task)
   if(empty($_POST)) unset($_SESSION['g_answer_ques']);
 
   $error = array();
-  if($_POST)
+  //action: add group_answer_question
+  if('add' === $action)
   {
-    //get value from form
-    $id  = $common->clean_string($_GET['id']);
-    $tid = $common->clean_string($_GET['tid']);
-    $g_answer_title = $common->clean_string($_POST['g_answer_title']);
-    $g_ans_test_que = $common->clean_string($_POST['g_ans_test_que']);
+    if($_POST)
+    {
+      //get value from form
+      $id  = $common->clean_string($_GET['id']);
+      $tid = $common->clean_string($_GET['tid']);
+      $g_answer_title = $common->clean_string($_POST['g_answer_title']);
+      $g_ans_test_que = $common->clean_string($_POST['g_ans_test_que']);
 
-    //add value to session to use in template
-    $_SESSION['g_answer_ques'] = $_POST;
+      //add value to session to use in template
+      $_SESSION['g_answer_ques'] = $_POST;
 
-    //form validation
-    if(empty($id)){
-      if(!empty($_POST['test_question'])){
-        foreach ($_POST['test_question'] as $key => $value) {
-          if(is_exist_group_answer_question($tid, $value) > 0) {
-            $error['is_exist_group_answer_que']   = 1;
+      //form validation
+      if(empty($id)){
+        if(!empty($_POST['test_question'])){
+          foreach ($_POST['test_question'] as $key => $value) {
+            if(is_exist_group_answer_question($tid, $value) > 0) {
+              $error['is_exist_group_answer_que']   = 1;
+            }
           }
         }
+        if(count($_POST['test_question']) == 0)  $error['test_question'] = 1;
       }
-      if(count($_POST['test_question']) == 0)  $error['test_question'] = 1;
-    }
-    if(empty($g_answer_title))  $error['g_answer_title'] = 1;
+      if(empty($g_answer_title))  $error['g_answer_title'] = 1;
 
-    //Add test group answer
-    if(0 === count($error) && empty($id))
-    {
-      $group_ans_id = '';
-      foreach ($_POST['test_question'] as $key => $value) {
-        if($key == 0){
-          $group_ans_id = $common->save('group_answer', $field = ['test_id' => $tid, 'test_question_id' => $value, 'g_answer_title' => $g_answer_title, 'flag' => 1]);
-        }else {
-          $common->save('group_answer', $field = ['test_id' => $tid, 'test_question_id' => $value]);
+      //Add test group answer
+      if(0 === count($error) && empty($id))
+      {
+        $group_ans_id = '';
+        foreach ($_POST['test_question'] as $key => $value) {
+          if($key == 0){
+            $group_ans_id = $common->save('group_answer', $field = ['test_id' => $tid, 'test_question_id' => $value, 'g_answer_title' => $g_answer_title, 'flag' => 1]);
+          }else {
+            $common->save('group_answer', $field = ['test_id' => $tid, 'test_question_id' => $value]);
+          }
+          //Delete test_question_view_order by test_question_id
+          $common->delete('test_question_view_order', $field = ['test_id' => $tid, 'test_question_id' => $value]);
+          //Delete test_group_question by test_question
+          $common->delete('test_group_question', $field = ['test_question_id' => $value]);
         }
-        //Delete test_question_view_order by test_question_id
-        $common->delete('test_question_view_order', $field = ['test_id' => $tid, 'test_question_id' => $value]);
-        //Delete test_group_question by test_question
-        $common->delete('test_group_question', $field = ['test_question_id' => $value]);
-      }
 
-      if(!empty($group_ans_id)){
-        //for update sub_id in group answer
-        updateGroupAnswer($tid, $group_ans_id);
-      }
+        if(!empty($group_ans_id)){
+          //for update sub_id in group answer
+          updateGroupAnswer($tid, $group_ans_id);
+        }
 
-      //unset session
-      unset($_SESSION['g_answer_ques']);
-      //Redirect
-      header('location: '.$admin_file.'?task=group_answer_question&tid='.$tid);
-      exit;
+        //unset session
+        unset($_SESSION['g_answer_ques']);
+        //Redirect
+        header('location: '.$admin_file.'?task=group_answer_question&tid='.$tid);
+        exit;
+      }
+      //Update test group answer
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('group_answer', $field = ['g_answer_title' => $g_answer_title], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['g_answer_ques']);
+        //Redirect
+        header('location: '.$admin_file.'?task=group_answer_question&tid='.$tid);
+        exit;
+      }
     }
-    //Update test group answer
-    if(0 === count($error) && !empty($id))
+  }//End action: add group_answer_question
+
+  //get edit language
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('group_answer', $field = ['g_answer_title' => $g_answer_title], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['g_answer_ques']);
-      //Redirect
-      header('location: '.$admin_file.'?task=group_answer_question&tid='.$tid);
-      exit;
+      //get value from form
+      $id  = $common->clean_string($_GET['id']);
+      $tid = $common->clean_string($_GET['tid']);
+      $g_answer_title = $common->clean_string($_POST['g_answer_title']);
+      $g_ans_test_que = $common->clean_string($_POST['g_ans_test_que']);
+      //add value to session to use in template
+      $_SESSION['g_answer_ques'] = $_POST;
+
+      //form validation
+      if(empty($id)){
+        if(!empty($_POST['test_question'])){
+          foreach ($_POST['test_question'] as $key => $value) {
+            if(is_exist_group_answer_question($tid, $value) > 0) {
+              $error['is_exist_group_answer_que']   = 1;
+            }
+          }
+        }
+        if(count($_POST['test_question']) == 0)  $error['test_question'] = 1;
+      }
+      if(empty($g_answer_title))  $error['g_answer_title'] = 1;
+
+      //Add test group answer
+      if(0 === count($error) && empty($id))
+      {
+        $group_ans_id = '';
+        foreach ($_POST['test_question'] as $key => $value) {
+          if($key == 0){
+            $group_ans_id = $common->save('group_answer', $field = ['test_id' => $tid, 'test_question_id' => $value, 'g_answer_title' => $g_answer_title, 'flag' => 1]);
+          }else {
+            $common->save('group_answer', $field = ['test_id' => $tid, 'test_question_id' => $value]);
+          }
+          //Delete test_question_view_order by test_question_id
+          $common->delete('test_question_view_order', $field = ['test_id' => $tid, 'test_question_id' => $value]);
+          //Delete test_group_question by test_question
+          $common->delete('test_group_question', $field = ['test_question_id' => $value]);
+        }
+
+        if(!empty($group_ans_id)){
+          //for update sub_id in group answer
+          updateGroupAnswer($tid, $group_ans_id);
+        }
+
+        //unset session
+        unset($_SESSION['g_answer_ques']);
+        //Redirect
+        header('location: '.$admin_file.'?task=group_answer_question&tid='.$tid);
+        exit;
+      }
+      //Update test group answer
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('group_answer', $field = ['g_answer_title' => $g_answer_title], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['g_answer_ques']);
+        //Redirect
+        header('location: '.$admin_file.'?task=group_answer_question&tid='.$tid);
+        exit;
+      }
     }
+    $smarty_appform->assign('getGroupAnswerByID', $common->find('group_answer', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
+
   if('detail' === $action && !empty($_GET['tid']))
   {
     $results = getListGroupAnswer($_GET['tid'], $_GET['id'], '', $slimit = 10);
@@ -2792,7 +2948,8 @@ if('group_answer_question' === $task)
     exit;
   }
 
-  if('change_flag' === $action){
+  if('change_flag' === $action)
+  {
     $flag_id = $_GET['flag_id'];
     $id  = $_GET['id'];
     $tid =  $_GET['tid'];
@@ -2816,7 +2973,8 @@ if('group_answer_question' === $task)
     exit;
   }
 
-  if('change_flag_byid' === $action){
+  if('change_flag_byid' === $action)
+  {
     $flag = 1;
     $rGAnswer = $common->find('group_answer', $condition = ['test_id' => $_GET['tid'], 'flag' => $flag], $type = 'one');
 
@@ -2855,7 +3013,8 @@ if('group_answer_question' === $task)
     exit;
   }
 
-  if('view_all' === $action){
+  if('view_all' === $action)
+  {
 
     $result = getListGroupAnswer($_GET['tid'], $_GET['gaid'], '', $slimit = 10);
     (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
@@ -2868,12 +3027,6 @@ if('group_answer_question' === $task)
     $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
     $smarty_appform->display('admin/admin_group_answer_que_view_all.tpl');
     exit;
-  }
-
-  //get edit language
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getGroupAnswerByID', $common->find('group_answer', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $result = getListGroupAnswer($_GET['tid'], '', $flag = 1, $slimit = 10);
@@ -2895,55 +3048,75 @@ if('test_question_view_order' === $task)
   if(empty($_POST)) unset($_SESSION['view_order']);
 
   $error = array();
-  if($_POST)
+  //action: add test_question_view_order
+  if('add' === $action)
   {
-    $id       = $common->clean_string($_POST['id']);
-    $tid      = $common->clean_string($_GET['tid']);
-    $view_order   = $common->clean_string($_POST['view_order']);
-    $test_que_id  = $common->clean_string($_POST['test_question']);
-
-    //add value to session to use in template
-    $_SESSION['view_order'] = $_POST;
-    //form validation
-    if(empty($view_order))    $error['view_order'] = 1;
-    if(empty($test_que_id))   $error['test_question'] = 1;
-
-    $result = $common->find('test_question_view_order', $condition = ['test_id' => $tid, 'test_question_id' => $test_que_id], $type = 'one');
-
-    if(!empty($test_que_id) && $result['test_question_id'] !== $test_que_id && is_view_order_exist($_GET['tid'], $test_que_id) > 0) $error['is_view_order_exist'] = 1;
-
-    //Add test
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      $common->save('test_question_view_order', $field =['test_id' => $tid, 'test_question_id' => $test_que_id, 'view_order' => $view_order]);
-      //unset session
-      unset($_SESSION['view_order']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_question_view_order&tid='.$_GET['tid']);
-      exit;
+      $id       = $common->clean_string($_POST['id']);
+      $tid      = $common->clean_string($_GET['tid']);
+      $view_order   = $common->clean_string($_POST['view_order']);
+      $test_que_id  = $common->clean_string($_POST['test_question']);
+
+      //add value to session to use in template
+      $_SESSION['view_order'] = $_POST;
+      //form validation
+      if(empty($view_order))    $error['view_order'] = 1;
+      if(empty($test_que_id))   $error['test_question'] = 1;
+      if(!empty($test_que_id) && is_view_order_exist($_GET['tid'], $test_que_id) > 0) $error['is_view_order_exist'] = 1;
+
+      //Add test
+      if(0 === count($error) && empty($id))
+      {
+        $common->save('test_question_view_order', $field =['test_id' => $tid, 'test_question_id' => $test_que_id, 'view_order' => $view_order]);
+        //unset session
+        unset($_SESSION['view_order']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_question_view_order&tid='.$_GET['tid']);
+        exit;
+      }
     }
-    //update test
-    if(0 === count($error) && !empty($id))
+  }//End action: add test_question_view_order
+
+  //action: edit test_question_view_order
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('test_question_view_order', $field =['test_id' => $tid, 'test_question_id' => $test_que_id,'view_order' => $view_order], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['view_order']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_question_view_order&tid='.$_GET['tid']);
-      exit;
+      $id       = $common->clean_string($_POST['id']);
+      $tid      = $common->clean_string($_GET['tid']);
+      $view_order   = $common->clean_string($_POST['view_order']);
+      $test_que_id  = $common->clean_string($_POST['test_question']);
+
+      //add value to session to use in template
+      $_SESSION['view_order'] = $_POST;
+      //form validation
+      if(empty($view_order))    $error['view_order'] = 1;
+      if(empty($test_que_id))   $error['test_question'] = 1;
+      //Get test_question_view_order By Id
+      $result = $common->find('test_question_view_order', $condition = ['test_id' => $tid, 'test_question_id' => $test_que_id], $type = 'one');
+      if(!empty($test_que_id) && $result['test_question_id'] !== $test_que_id && is_view_order_exist($_GET['tid'], $test_que_id) > 0) $error['is_view_order_exist'] = 1;
+
+      //update test
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('test_question_view_order', $field =['test_id' => $tid, 'test_question_id' => $test_que_id,'view_order' => $view_order], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['view_order']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_question_view_order&tid='.$_GET['tid']);
+        exit;
+      }
     }
-  }
+    $smarty_appform->assign('getViewOrderByID', $common->find('test_question_view_order', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }//End action: test_question_view_order
+
   //action delete topic
   if('delete' === $action && !empty($_GET['id']))
   {
     $common->delete('test_question_view_order', $field = ['id' => $_GET['id']]);
     header('location: '.$admin_file.'?task=test_question_view_order&tid='.$_GET['tid']);
     exit;
-  }
-  //get edit test_topic_answer
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getViewOrderByID', $common->find('test_question_view_order', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $results = getListViewOrderTestQuestion($_GET['tid']);
@@ -2965,39 +3138,63 @@ if('mailerlite' === $task)
   if(!$_POST) unset($_SESSION['mailerlite']);
 
   $error = array();
-  if($_POST)
+  //action: add mailerlite
+  if('add' === $action)
   {
-    //get value from form
-    $title    = $common->clean_string($_POST['title']);
-    $api_key  = $common->clean_string($_POST['api_key']);
-    $id       = $common->clean_string($_POST['id']);
+    if($_POST)
+    {
+      //get value from form
+      $title    = $common->clean_string($_POST['title']);
+      $api_key  = $common->clean_string($_POST['api_key']);
+      $id       = $common->clean_string($_POST['id']);
 
-    //add value to session to use in template
-    $_SESSION['mailerlite'] = $_POST;
-    //form validation
-    if(empty($title))     $error['title']   = 1;
-    if(empty($api_key))   $error['api_key'] = 1;
-    //Add mailerlite
-    if(0 === count($error) && empty($id))
-    {
-      $common->save('mailerlite', $field = ['title' => $title, 'api_key' => $api_key]);
-      //unset session
-      unset($_SESSION['mailerlite']);
-      //Redirect
-      header('location: '.$admin_file.'?task=mailerlite');
-      exit;
+      //add value to session to use in template
+      $_SESSION['mailerlite'] = $_POST;
+      //form validation
+      if(empty($title))     $error['title']   = 1;
+      if(empty($api_key))   $error['api_key'] = 1;
+      //Add mailerlite
+      if(0 === count($error) && empty($id))
+      {
+        $common->save('mailerlite', $field = ['title' => $title, 'api_key' => $api_key]);
+        //unset session
+        unset($_SESSION['mailerlite']);
+        //Redirect
+        header('location: '.$admin_file.'?task=mailerlite');
+        exit;
+      }
     }
-    //update mailerlite
-    if(0 === count($error) && !empty($id))
+  }//End action: add mailerlite
+
+  //action: edit mailerlite
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('mailerlite', $field = ['title' => $title, 'api_key' => $api_key], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['mailerlite']);
-      //Redirect
-      header('location: '.$admin_file.'?task=mailerlite');
-      exit;
+      //get value from form
+      $title    = $common->clean_string($_POST['title']);
+      $api_key  = $common->clean_string($_POST['api_key']);
+      $id       = $common->clean_string($_POST['id']);
+
+      //add value to session to use in template
+      $_SESSION['mailerlite'] = $_POST;
+      //form validation
+      if(empty($title))     $error['title']   = 1;
+      if(empty($api_key))   $error['api_key'] = 1;
+      //update mailerlite
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('mailerlite', $field = ['title' => $title, 'api_key' => $api_key], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['mailerlite']);
+        //Redirect
+        header('location: '.$admin_file.'?task=mailerlite');
+        exit;
+      }
     }
-  }
+    $smarty_appform->assign('getMailerliteByID', $common->find('mailerlite', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }//End action: edit mailerlite
+
   //Delete: mailerlite
   if('delete' === $action && !empty($_GET['id']))
   {
@@ -3010,12 +3207,6 @@ if('mailerlite' === $task)
     }
     header('location: '.$admin_file.'?task=mailerlite');
     exit;
-  }
-
-  //get edit mailerlite
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getMailerliteByID', $common->find('mailerlite', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
@@ -3036,80 +3227,111 @@ if('apitransaction' === $task)
   if(!$_POST) unset($_SESSION['apitransaction']);
 
   $result_mailer = $common->find('mailerlite', $condition = ['id' => $_GET['mlid']], $type = 'one');
-  if(!empty($result_mailer['api_key'])){
+  if(!empty($result_mailer['api_key']))
+  {
     $groupsApi = (new \MailerLiteApi\MailerLite($result_mailer['api_key']))->groups();
     $allGroups = $groupsApi->get();
   }
 
   $error = array();
-  if($_POST)
+  //action: add apitransaction
+  if('add' === $action)
   {
-    //get value from form
-    $title   = $common->clean_string($_POST['title']);
-    $testid  = $common->clean_string($_POST['testid']);
-    $ml_id   = $common->clean_string($_GET['mlid']);
-    $id      = $common->clean_string($_POST['id']);
-
-    //add value to session to use in template
-    $_SESSION['apitransaction'] = $_POST;
-    //form validation
-    if(empty($title))  $error['title'] = 1;
-    if(empty($ml_id))  $error['mlid']   = 1;
-    if(empty($testid)) $error['testid']   = 1;
-    if(empty($_POST['groupid'])) $error['groupid']   = 1;
-
-    $result_trans = $common->find('apitransaction', $condition = ['id' => $id], $type = 'one');
-
-    if($result_trans['test_id'] !== $testid && is_exist_transaction_test($testid, $ml_id) > 0) {
-      $result_test = $common->find('test', $condition = ['id' => $testid], $type = 'one');
-      $error['is_exist_test']   = 1;
-      $error['test_id'] = $result_test['id'];
-      $error['test_title'] = $result_test['title'];
-    }
-    //Add apitransaction
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      //Add data to apitransaction
-      $transaction_id = $common->save('apitransaction', $field = ['test_id' => $testid, 'ml_id' => $ml_id, 'title' => $title]);
+      //get value from form
+      $title   = $common->clean_string($_POST['title']);
+      $testid  = $common->clean_string($_POST['testid']);
+      $ml_id   = $common->clean_string($_GET['mlid']);
+      $id      = $common->clean_string($_POST['id']);
 
-      foreach ($allGroups as $value) {
-        foreach ($_POST['groupid'] as $key => $v) {
-          if($v == $value->id){
-            //Add data to mailerlite_group
-            $common->save('mailerlite_group', $field = ['transaction_id' => $transaction_id, 'group_title' => $value->name, 'group_id' => $value->id]);
+      //add value to session to use in template
+      $_SESSION['apitransaction'] = $_POST;
+      //form validation
+      if(empty($title))  $error['title'] = 1;
+      if(empty($ml_id))  $error['mlid']   = 1;
+      if(empty($testid)) $error['testid']   = 1;
+      if(empty($_POST['groupid'])) $error['groupid']   = 1;
+      if(is_exist_transaction_test($testid, $ml_id) > 0) {
+        $result_test = $common->find('test', $condition = ['id' => $testid], $type = 'one');
+        $error['is_exist_test']   = 1;
+        $error['test_id'] = $result_test['id'];
+        $error['test_title'] = $result_test['title'];
+      }
+      //Add apitransaction
+      if(0 === count($error) && empty($id))
+      {
+        //Add data to apitransaction
+        $transaction_id = $common->save('apitransaction', $field = ['test_id' => $testid, 'ml_id' => $ml_id, 'title' => $title]);
+        foreach ($allGroups as $value) {
+          foreach ($_POST['groupid'] as $key => $v) {
+            if($v == $value->id){
+              //Add data to mailerlite_group
+              $common->save('mailerlite_group', $field = ['transaction_id' => $transaction_id, 'group_title' => $value->name, 'group_id' => $value->id]);
+            }
           }
         }
+        //unset session
+        unset($_SESSION['apitransaction']);
+        //Redirect
+        header('location: '.$admin_file.'?task=apitransaction&mlid='.$ml_id);
+        exit;
       }
-      //unset session
-      unset($_SESSION['apitransaction']);
-      //Redirect
-      header('location: '.$admin_file.'?task=apitransaction&mlid='.$ml_id);
-      exit;
     }
-    //update mailerlite
-    if(0 === count($error) && !empty($id))
+  }//End action: add apitransaction
+
+  //action: edit apitransaction
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      //Delete: mailerlite group
-      $common->delete('mailerlite_group', $field = ['transaction_id' => $id]);
+      //get value from form
+      $title   = $common->clean_string($_POST['title']);
+      $testid  = $common->clean_string($_POST['testid']);
+      $ml_id   = $common->clean_string($_GET['mlid']);
+      $id      = $common->clean_string($_POST['id']);
 
-      $common->update('apitransaction', $field = ['test_id' => $testid, 'title' => $title], $condition = ['id' => $id]);
+      //add value to session to use in template
+      $_SESSION['apitransaction'] = $_POST;
+      //form validation
+      if(empty($title))  $error['title'] = 1;
+      if(empty($ml_id))  $error['mlid']   = 1;
+      if(empty($testid)) $error['testid']   = 1;
+      if(empty($_POST['groupid'])) $error['groupid']   = 1;
 
-      foreach ($allGroups as $value) {
-        foreach ($_POST['groupid'] as $key => $v) {
-          if($v == $value->id){
-            //Add data to mailerlite_group
-            $common->save('mailerlite_group', $field = ['transaction_id' => $id, 'group_title' => $value->name, 'group_id' => $value->id]);
+      $result_trans = $common->find('apitransaction', $condition = ['id' => $id], $type = 'one');
+
+      if($result_trans['test_id'] !== $testid && is_exist_transaction_test($testid, $ml_id) > 0) {
+        $result_test = $common->find('test', $condition = ['id' => $testid], $type = 'one');
+        $error['is_exist_test'] = 1;
+        $error['test_id'] = $result_test['id'];
+        $error['test_title'] = $result_test['title'];
+      }
+      //update mailerlite
+      if(0 === count($error) && !empty($id))
+      {
+        //Delete: mailerlite group
+        $common->delete('mailerlite_group', $field = ['transaction_id' => $id]);
+        $common->update('apitransaction', $field = ['test_id' => $testid, 'title' => $title], $condition = ['id' => $id]);
+        foreach ($allGroups as $value) {
+          foreach ($_POST['groupid'] as $key => $v) {
+            if($v == $value->id){
+              //Add data to mailerlite_group
+              $common->save('mailerlite_group', $field = ['transaction_id' => $id, 'group_title' => $value->name, 'group_id' => $value->id]);
+            }
           }
         }
+        //unset session
+        unset($_SESSION['apitransaction']);
+        //Redirect
+        header('location: '.$admin_file.'?task=apitransaction&mlid='.$ml_id);
+        exit;
       }
-
-      //unset session
-      unset($_SESSION['apitransaction']);
-      //Redirect
-      header('location: '.$admin_file.'?task=apitransaction&mlid='.$ml_id);
-      exit;
     }
-  }
+    $smarty_appform->assign('getApiTranByID', $common->find('apitransaction', $condition = ['id' => $_GET['id']], $type = 'one'));
+    $smarty_appform->assign('listEditMailerlite', $common->find('mailerlite_group', $condition = ['transaction_id' => $_GET['id']], $type = 'all'));
+  }//End action: edit apitransaction
+
   if('detail' === $action && !empty($_GET['tid']))
   {
     $result_detail = $common->find('mailerlite_group', $condition = ['transaction_id' => $_GET['tid']], $type = 'all');
@@ -3139,12 +3361,6 @@ if('apitransaction' === $task)
     echo json_encode(array('status' => $result, 'countMG' => $countMG));
     exit;
   }
-  //get edit apitransaction
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getApiTranByID', $common->find('apitransaction', $condition = ['id' => $_GET['id']], $type = 'one'));
-    $smarty_appform->assign('listEditMailerlite', $common->find('mailerlite_group', $condition = ['transaction_id' => $_GET['id']], $type = 'all'));
-  }
 
   $testid = !empty($_GET['tid']) ? $_GET['tid'] : '';
   $result = getListTransaction($_GET['mlid'], $testid, $lang);
@@ -3163,15 +3379,30 @@ if('apitransaction' === $task)
 //Task: Respone
 if('response' === $task)
 {
-  if('view_topic_sum' === $action){
+  if('export' === $action)
+  {
+    if($_POST)
+    {
+      $tid = $_GET['tid'];
+      //Get Test By Id
+      $resultTest = $common->find('test', $condition = ['id' => $tid], $type = 'one');
+      $tqTitle  = preg_replace('/[^A-Za-z0-9 ().]/u','', $resultTest['title']);
+      $fileName = str_replace(' ', '-', $tqTitle);
+      $dateTime = date('Y-m-d h:i:s');
+      $dateFile = date('Y-m-d-(h-i-s)');
 
-    $results = getResultAnswerTopic($_GET['unique_id'], $_GET['tid'], '', '');
-    header('Content-type: application/json');
-    echo json_encode($results);
-    exit;
+      $fileNameCsv  = $fileName.'-'.$dateFile.'.csv';
+
+      $results = $common->save('download', $field =['test_id'     => $tid,
+                                                    'title'       => $resultTest['title'],
+                                                    'file_name'   => $fileNameCsv,
+                                                    'created_at'  => $dateTime]);
+      header('Content-type: application/json');
+      echo json_encode($results);
+      exit;
+    }
   }
 
-  // $result = getListResponse($_GET['tid'], $slimit = 10);
   $result = getListResponseByTopic($_GET['tid'], $slimit = 10);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
@@ -3202,57 +3433,71 @@ if('test_psychologist' === $task)
   if(empty($_POST)) unset($_SESSION['test_psy']);
 
   $error = array();
-  if($_POST)
+  //action: add test_psychologist
+  if('add' === $action)
   {
-    //get value from form
-    if(!empty($_POST['id'])){
-      $testid   = $common->clean_string($_POST['test']);
-    }else {
+    if($_POST)
+    {
       $testid   = $common->clean_string_array($_POST['test']);
-    }
-    $psy_id   = $common->clean_string($_POST['psy_id']);
-    $id       = $common->clean_string($_POST['id']);
+      $psy_id   = $common->clean_string($_POST['psy_id']);
+      $id       = $common->clean_string($_POST['id']);
 
-    //add value to session to use in template
-    $_SESSION['test_psy'] = $_POST;
-    //form validation
-    if(empty($testid))  $error['testid']  = 1;
-    if(empty($psy_id))  $error['psy_id']  = 1;
+      //add value to session to use in template
+      $_SESSION['test_psy'] = $_POST;
+      //form validation
+      if(empty($testid))  $error['testid']  = 1;
+      if(empty($psy_id))  $error['psy_id']  = 1;
 
-    //Add test group
-    if(0 === count($error) && empty($id))
-    {
-      foreach ($testid as $key => $va) {
-        $common->save('test_psychologist', $field = ['psychologist_id' => $psy_id, 'test_id' => $va]);
+      //Add test group
+      if(0 === count($error) && empty($id))
+      {
+        foreach ($testid as $key => $va) {
+          $common->save('test_psychologist', $field = ['psychologist_id' => $psy_id, 'test_id' => $va]);
+        }
+        //unset session
+        unset($_SESSION['test_psy']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_psychologist');
+        exit;
       }
-      //unset session
-      unset($_SESSION['test_psy']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_psychologist');
-      exit;
     }
-    //update test group
-    if(0 === count($error) && !empty($id))
+  }//End action: add test_psychologist
+
+  //action: edit test_psychologist
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('test_psychologist', $field = ['psychologist_id' => $psy_id, 'test_id' => $testid], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['test_psy']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_psychologist');
-      exit;
+      $testid   = $common->clean_string($_POST['test']);
+      $psy_id   = $common->clean_string($_POST['psy_id']);
+      $id       = $common->clean_string($_POST['id']);
+
+      //add value to session to use in template
+      $_SESSION['test_psy'] = $_POST;
+      //form validation
+      if(empty($testid))  $error['testid']  = 1;
+      if(empty($psy_id))  $error['psy_id']  = 1;
+
+      //update test group
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('test_psychologist', $field = ['psychologist_id' => $psy_id, 'test_id' => $testid], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['test_psy']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_psychologist');
+        exit;
+      }
     }
-  }
+    $smarty_appform->assign('getTestPsy', $common->find('test_psychologist', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }//End action: test_psychologist
+
   //Delete: test psychologist
   if('delete' === $action && !empty($_GET['id']))
   {
     $common->delete('test_psychologist', $field = ['id' => $_GET['id']]);
     header('location: '.$admin_file.'?task=test_psychologist');
     exit;
-  }
-  //get edit apitransaction
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getTestPsy', $common->find('test_psychologist', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
@@ -3279,57 +3524,73 @@ if('test_patient' === $task)
   if(empty($_POST)) unset($_SESSION['test_patient']);
 
   $error = array();
-  if($_POST)
+  //action: add test_patient
+  if('add' === $action)
   {
-    //get value from form
-    if(!empty($_POST['id'])){
-      $testid   = $common->clean_string($_POST['test']);
-    }else {
+    if($_POST)
+    {
+      //get value from form
       $testid   = $common->clean_string_array($_POST['test']);
-    }
-    $pat_tid  = $common->clean_string($_POST['pat_id']);
-    $id       = $common->clean_string($_POST['id']);
+      $pat_tid  = $common->clean_string($_POST['pat_id']);
+      $id       = $common->clean_string($_POST['id']);
 
-    //add value to session to use in template
-    $_SESSION['test_psy'] = $_POST;
-    //form validation
-    if(empty($testid))  $error['testid']  = 1;
-    if(empty($pat_tid))  $error['psy_id']  = 1;
+      //add value to session to use in template
+      $_SESSION['test_psy'] = $_POST;
+      //form validation
+      if(empty($testid))  $error['testid']  = 1;
+      if(empty($pat_tid))  $error['psy_id']  = 1;
 
-    //Add test group
-    if(0 === count($error) && empty($id))
-    {
-      foreach ($testid as $key => $va) {
-        $common->save('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $va]);
+      //Add test group
+      if(0 === count($error) && empty($id))
+      {
+        foreach ($testid as $key => $va) {
+          $common->save('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $va]);
+        }
+        //unset session
+        unset($_SESSION['test_patient']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_patient');
+        exit;
       }
-      //unset session
-      unset($_SESSION['test_patient']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_patient');
-      exit;
     }
-    //update test group
-    if(0 === count($error) && !empty($id))
+  }//action: add test_patient
+
+  //action: edit test_patient
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
     {
-      $common->update('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $testid], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['test_patient']);
-      //Redirect
-      header('location: '.$admin_file.'?task=test_patient');
-      exit;
+      //get value from form
+      $testid   = $common->clean_string($_POST['test']);
+      $pat_tid  = $common->clean_string($_POST['pat_id']);
+      $id       = $common->clean_string($_POST['id']);
+
+      //add value to session to use in template
+      $_SESSION['test_psy'] = $_POST;
+      //form validation
+      if(empty($testid))  $error['testid']  = 1;
+      if(empty($pat_tid))  $error['psy_id']  = 1;
+
+      //update test group
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $testid], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['test_patient']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_patient');
+        exit;
+      }
     }
-  }
+    $smarty_appform->assign('getTestPat', $common->find('test_patient', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }//action: edit test_patient
+
   //Delete: test psychologist
   if('delete' === $action && !empty($_GET['id']))
   {
     $common->delete('test_patient', $field = ['id' => $_GET['id']]);
     header('location: '.$admin_file.'?task=test_patient');
     exit;
-  }
-  //get edit apitransaction
-  if('edit' === $action && !empty($_GET['id']))
-  {
-    $smarty_appform->assign('getTestPat', $common->find('test_patient', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
@@ -3348,58 +3609,21 @@ if('test_patient' === $task)
   $smarty_appform->display('admin/admin_test_patient.tpl');
   exit;
 }
-//Create And download CSV file
-if('download_csv' === $task)
-{
-  $resultTest = $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one');
-  $result = getResponseAnswerCSVdownload($_GET['tid']);
-
-  $title = preg_replace('/[^A-Za-z0-9 ().]/u','', $resultTest['title']);
-
-  if(!empty($result)){
-    //open the file
-    $file = fopen('file_csv/'.$title.'.csv', 'w');
-    //loop header
-    for ($i=0; $i < $total_data; $i++) {
-      $headerTitle[] =  'Question';
-      $headerTitle[] =  'Answer';
-    }
-
-    //save column header
-    fputcsv($file, $headerTitle);
-
-    foreach ($result as $row)
-    {
-      if(!empty($result['answer'.$row['id']])){
-        //save row of data
-        fputcsv($file, $result['answer'.$row['id']]);
-      }
-    }
-
-    fclose($file);
-    header('location: /file_csv/'.$title.'.csv');
-  }else {
-    header('location: '.$admin_file.'?task=response&tid='.$_GET['tid']);
-  }
-
-  exit;
-}
 // Task copy_test_question "Copy Test Question, Answer, Answer Topic to other Test"
 if('copy_test_question' === $task)
 {
   //Get test question
   $rTestQues = $common->find('test_question', $condition = ['id' => $_GET['tqid']], $type = 'one');
   //Check is existed topic
-  if(is_exist_test_question($_GET['test_id'], $rTestQues['question_id']) > 0) {
-
+  if(is_exist_test_question($_GET['test_id'], $rTestQues['question_id']) > 0)
+  {
     $copy_result   = false;
-
-  }else {
+  } else {
     //Save test question
-    $tque_id = $common->save('test_question', $field =['test_id' => $_GET['test_id'],
-    'question_id'  => $rTestQues['question_id'],
-    'view_order'   => $rTestQues['view_order'],
-    'is_required'  => $_GET['required']]);
+    $tque_id = $common->save('test_question', $field = ['test_id' => $_GET['test_id'],
+                                                        'question_id' => $rTestQues['question_id'],
+                                                        'view_order'  => $rTestQues['view_order'],
+                                                        'is_required' => $_GET['required']]);
     //Get answer
     $rAnswer = $common->find('answer', $condition = ['test_question_id' => $_GET['tqid']], $type = 'all');
     //Get Topic in Result
@@ -3424,8 +3648,6 @@ if('copy_test_question' === $task)
 
     $copy_result = true;
   }
-
-
   header('Content-type: application/json');
   echo json_encode($copy_result);
   exit;
@@ -3594,7 +3816,8 @@ if('copy_test_answer' === $task)
 if('ajax' === $task)
 {
   //action save_group_answer
-  if('save_group_answer' === $action){
+  if('save_group_answer' === $action)
+  {
     $error = array();
     if($_POST){
       $data   = json_decode($_POST['data']);
@@ -3629,14 +3852,16 @@ if('ajax' === $task)
     exit;
   }
   //action list_answer
-  if('list_answer' === $action){
+  if('list_answer' === $action)
+  {
     $results = $common->find('answer', $condition = ['test_question_id' => $_GET['tqid']], $type = 'all');
     header('Content-type: application/json');
     echo json_encode($results);
     exit;
   }
   //action check_que_type
-  if('check_que_type' === $action){
+  if('check_que_type' === $action)
+  {
     $results = $common->find('question', $condition = ['id' => $_GET['qid']], $type = 'one');
     header('Content-type: application/json');
     echo json_encode($results);

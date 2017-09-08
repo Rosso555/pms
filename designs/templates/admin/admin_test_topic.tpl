@@ -50,7 +50,7 @@
             <td>
               <div class="input-group">
                 <span class="input-group-addon" style="color:red;"><i id="refresh{$data.topic_id}" class="fa fa-refresh" aria-hidden="true"></i></span>
-                <input type="text" id="view_order{$data.topic_id}" class="form-control" value="{$data.view_order}" placeholder="Example: 123..." onchange="updateTestTopic({$data.test_id}, {$data.topic_id});" onkeyup="NumAndTwoDecimals(event , this);">
+                <input type="text" id="view_order{$data.topic_id}" class="form-control" value="{$data.view_order}" placeholder="Example: 123..." onchange="updateTestTopic({$data.test_id}, {$data.topic_id});" onkeyup="NumAndTwoDecimals(event , this);" data-toggle1="tooltip" data-placement="top" title="Enter number for view order.">
               </div>
             </td>
           </tr>

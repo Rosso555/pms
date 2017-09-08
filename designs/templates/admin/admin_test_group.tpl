@@ -30,7 +30,7 @@
           {if $getTestGroupByID.id}
           <form action="{$admin_file}?task=test_group&amp;action=edit&amp;catid={$smarty.get.catid}&amp;id={$getTestGroupByID.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=test_group&amp;catid={$smarty.get.catid}" method="post">
+          <form action="{$admin_file}?task=test_group&amp;action=add&amp;catid={$smarty.get.catid}" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">
@@ -51,7 +51,7 @@
                 <div class="form-group">
                   <label for="title"><span style="color: red">*</span> {if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}:</label>
                   {if $error.title}
-                    <span style="color: red">{if $multiLang.text_title_empty}{$multiLang.text_title_empty}{else}No Translate(Key Lang: text_title_empty){/if}</span>
+                    <span style="color: red">{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate(Key Lang: text_please_input){/if} {if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}.</span>
                   {/if}
                   <input type="text" name="title" class="form-control" placeholder="Title"
                   value="{if $smarty.session.test_group.title}{$smarty.session.test_group.title}{elseif $getTestGroupByID.title}{$getTestGroupByID.title}{/if}">

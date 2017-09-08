@@ -29,7 +29,7 @@
           {if $getViewOrderByID.id}
           <form action="{$admin_file}?task=test_question_view_order&amp;action=edit&amp;tid={$smarty.get.tid}&amp;id={$getViewOrderByID.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=test_question_view_order&amp;tid={$smarty.get.tid}" method="post">
+          <form action="{$admin_file}?task=test_question_view_order&amp;action=add&amp;tid={$smarty.get.tid}" method="post">
           {/if}
             <div class="row">
               <div class="col-md-12">

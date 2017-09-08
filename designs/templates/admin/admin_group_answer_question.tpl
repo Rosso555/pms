@@ -29,7 +29,7 @@
           {if $getGroupAnswerByID.id}
           <form action="{$admin_file}?task=group_answer_question&amp;action=edit&amp;tid={$smarty.get.tid}&amp;id={$getGroupAnswerByID.id}" method="post">
           {else}
-          <form action="{$admin_file}?task=group_answer_question&amp;tid={$smarty.get.tid}" method="post">
+          <form action="{$admin_file}?task=group_answer_question&amp;action=add&amp;tid={$smarty.get.tid}" method="post">
           {/if}
             <div class="row">
               <div class="col-md-12">

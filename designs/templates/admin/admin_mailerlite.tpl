@@ -36,7 +36,7 @@
             {if $getMailerliteByID.id}
             <form action="{$admin_file}?task=mailerlite&amp;action=edit&amp;id={$getMailerliteByID.id}" method="post">
             {else}
-            <form action="{$admin_file}?task=mailerlite" method="post">
+            <form action="{$admin_file}?task=mailerlite&amp;action=add" method="post">
             {/if}
               <div class="row">
                 <div class="col-md-6">

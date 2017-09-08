@@ -95,6 +95,7 @@
           </tr>
         </thead>
         <tbody>
+        {if $list_function|@count gt 0}
           {foreach from=$list_function item= v }
           <tr>
             <td valign="top">{$v.title}</td>
@@ -125,6 +126,11 @@
             </td>
           </tr>
           {/foreach}
+        {else}
+          <tr>
+            <td colspan="4"><h4 style="text-align:center">{if $multiLang.text_there_are_no_record}{$multiLang.text_there_are_no_record}{else}No Translate (Key Lang: text_there_are_no_record){/if}</h4></td>
+          </tr>
+        {/if}
         </tbody>
       </table>
     </div>
