@@ -197,9 +197,11 @@ Best Regard,
   exit;
 }
 
-if('new_password' === $task){
+if('new_password' === $task)
+{
   $error = array();
-  if($_POST){
+  if($_POST)
+  {
     //get value from form
     $id        = $common->clean_string($_POST['id']);
     $user_role = $common->clean_string($_POST['user_role']);
@@ -213,10 +215,12 @@ if('new_password' === $task){
     if(empty($user_role))   $error['user_role'] = 1;
     if(empty($password))    $error['password']  = 1;
     if(empty($re_password)) $error['re_password']  = 1;
-    if(!empty($password) && !empty($re_password) && $password !== $re_password){
+    if(!empty($password) && !empty($re_password) && $password !== $re_password)
+    {
       $error['not_match_password'] = 1;
     }
-    if(!empty($password) && !$common->checkPassword($password)){
+    if(!empty($password) && !$common->checkPassword($password))
+    {
       $error['less_password_not_letter'] = 1;
     }
 
@@ -265,7 +269,8 @@ if('page_not_found' === $task){
   exit;
 }
 //task: login
-if('login' === $task){
+if('login' === $task)
+{
   $error = array();
   if($_POST)
   {
@@ -281,12 +286,15 @@ if('login' === $task){
     if(empty($user_role)) $error['user_role']  = 1;
 
 
-    if(0 === count($error)){
+    if(0 === count($error))
+    {
       //$user_role eqaul 1 patient
-      if($user_role == 1){
+      if($user_role == 1)
+      {
         $patient_login = patient_login($email, $password);
 
-        if(!empty($patient_login)){
+        if(!empty($patient_login))
+        {
           //assign value to session
           $_SESSION['is_patient_login_id'] = $patient_login['id'];
           $_SESSION['is_patient_username'] = $patient_login['username'];

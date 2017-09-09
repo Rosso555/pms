@@ -145,7 +145,7 @@
               </button>
               {else}
               <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
-                <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Stop
+                <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Stoped
               </button>
               {/if}
                 <!-- Modal -->

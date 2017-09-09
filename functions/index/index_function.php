@@ -40,7 +40,7 @@ function patient_login($email, $password)
 
   try{
 
-    $sql = ' SELECT * FROM `patient` WHERE email = :email AND password = :password AND status = 1 ';
+    $sql = ' SELECT * FROM `patient` WHERE email = :email AND password = :password AND status = 1 AND deleted_at IS NULL ';
     $query = $connected->prepare($sql);
     $query->bindValue(':email', (string)$email, PDO::PARAM_STR);
     $query->bindValue(':password', (string)$password, PDO::PARAM_STR);

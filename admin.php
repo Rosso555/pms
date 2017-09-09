@@ -1400,6 +1400,24 @@ if('test_question' === $task)
     exit;
   }
 
+  //action list_answer
+  if('list_answer' === $action)
+  {
+    $results = $common->find('answer', $condition = ['test_question_id' => $_GET['tqid']], $type = 'all');
+    header('Content-type: application/json');
+    echo json_encode($results);
+    exit;
+  }
+  
+  //action check_que_type
+  if('check_que_type' === $action)
+  {
+    $results = $common->find('question', $condition = ['id' => $_GET['qid']], $type = 'one');
+    header('Content-type: application/json');
+    echo json_encode($results);
+    exit;
+  }
+
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $testid = !empty($_GET['tid']) ? $_GET['tid'] : '';
 
@@ -3847,22 +3865,6 @@ if('ajax' === $task)
       $results = getListGroupAnswer($tid, $gans_flag_id, '', $slimit = 10);
     }
 
-    header('Content-type: application/json');
-    echo json_encode($results);
-    exit;
-  }
-  //action list_answer
-  if('list_answer' === $action)
-  {
-    $results = $common->find('answer', $condition = ['test_question_id' => $_GET['tqid']], $type = 'all');
-    header('Content-type: application/json');
-    echo json_encode($results);
-    exit;
-  }
-  //action check_que_type
-  if('check_que_type' === $action)
-  {
-    $results = $common->find('question', $condition = ['id' => $_GET['qid']], $type = 'one');
     header('Content-type: application/json');
     echo json_encode($results);
     exit;

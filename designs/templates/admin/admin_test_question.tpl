@@ -346,7 +346,7 @@
    $(".loader").show();
    $.ajax({
      type: "GET",
-     url: "{$admin_file}?task=ajax&action=list_answer&tqid="+tqid,
+     url: "{$admin_file}?task=test_question&action=list_answer&tqid="+tqid,
      success: function(data){
 
        var dataHTML = "";
@@ -374,7 +374,7 @@
    var qid = sel.value;
    $.ajax({
      type: "GET",
-     url: "{$admin_file}?task=ajax&action=check_que_type&qid="+qid,
+     url: "{$admin_file}?task=test_question&action=check_que_type&qid="+qid,
      success: function(data){
        if(data.type == 1 || data.type == 2){
          $("#copy_test_que").attr("disabled", true);
