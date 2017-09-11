@@ -1,5 +1,12 @@
 {extends file="common/layout.tpl"}
 {block name="main"}
+<ul class="breadcrumb">
+  <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.language_header}{$multiLang.language_header}{else}No Translate (Key Lang:language_header){/if}</li>
+  {if $smarty.get.action eq 'edit'}
+  <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
+  {/if}
+</ul>
 <div class="panel panel-primary">
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.language_header}{$multiLang.language_header}{else}No Translate (Key Lang:language_header){/if}</h4></div>
   <div class="panel-body">
@@ -67,7 +74,7 @@
       </div>
     </div><!--panel panel-body-->
     <div class="table-responsive">
-      <table class="table table-bordered">
+      <table class="table table-striped">
         <thead>
           <tr bgcolor="#eeeeee">
             <th>{if $multiLang.text_title_language}{$multiLang.text_title_language}{else}No Translate (Key Lang: text_title_language){/if}</th>

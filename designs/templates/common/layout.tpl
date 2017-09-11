@@ -67,6 +67,8 @@ $(document).ready(function(){
 		// select2 form
 		$(".select2").select2();
 
+		$(".select2_search").select2();
+
 		$(".select2_mul").select2({
 				placeholder: placeholder_val,
 		});
@@ -85,6 +87,22 @@ $(document).ready(function(){
 		$(".select2_test_psy").select2({
 			  placeholder: "{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if}",
 		});
+
+		//Run function when browser resizes
+		$(window).resize( resizeBrowser );
+
+		function resizeBrowser(){
+			var width = window.innerWidth;
+			var height = window.innerHeight;
+
+			if(width < 768){
+				$('.select2_search_inline > .select2_search, .select2_search_inline > .select2-container').attr('style', 'width: 100%;');
+			}else {
+				$('.select2_search_inline > .select2_search, .select2_search_inline > .select2-container').attr('style', 'width: 220px;');
+			}
+		}
+		//Run function after finished loading
+		resizeBrowser();
 
 });
 function NumAndTwoDecimals(e , field)

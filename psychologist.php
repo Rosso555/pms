@@ -41,7 +41,7 @@ if(empty($_SESSION['is_psycho_login_id'])){
 
 //Task: page not found
 if('page_not_found' === $task){
-  $smarty_appform->display('psychologist/page_error_404.tpl');
+  $smarty_appform->display('common/page_error_404.tpl');
   exit;
 }
 
@@ -430,18 +430,36 @@ if('test_question' === $task)
   exit;
 }
 
-$tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
-$cid    = !empty($_GET['cid']) ? $_GET['cid'] : '';
-$status = !empty($_GET['status']) ? $_GET['status'] : '1';
+if('test_psychologist' === $task)
+{
+  $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
+  $cid    = !empty($_GET['cid']) ? $_GET['cid'] : '';
+  $status = !empty($_GET['status']) ? $_GET['status'] : '1';
 
-$results = getListTestPsychologist($_SESSION['is_psycho_login_id'], $tid, $cid, $status);
+  $results = getListTestPsychologist($_SESSION['is_psycho_login_id'], $tid, $cid, $status);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('listTestPsychologist', $results);
+  $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang], $type = 'all'));
+  $smarty_appform->assign('category', $common->find('category', $condition = ['lang' => $lang], $type = 'all'));
+  $smarty_appform->display('psychologist/test_psychologist.tpl');
+  exit;
+}
+
+$tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
+$pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
+
+$results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status = 1);
 
 (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
 SmartyPaginate::assign($smarty_appform);
 
-$smarty_appform->assign('listTestPsychologist', $results);
-$smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang], $type = 'all'));
-$smarty_appform->assign('category', $common->find('category', $condition = ['lang' => $lang], $type = 'all'));
+$smarty_appform->assign('error', $error);
+$smarty_appform->assign('testPatient', $results);
+$smarty_appform->assign('test', getListTestPsychologistCompleted($_SESSION['is_psycho_login_id']));
+$smarty_appform->assign('patient', $common->find('patient', $condition = ['psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'all'));
 $smarty_appform->display('psychologist/index.tpl');
 exit;
 ?>

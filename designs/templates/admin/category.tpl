@@ -1,5 +1,12 @@
 {extends file="common/layout.tpl"}
 {block name="main"}
+<ul class="breadcrumb">
+  <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_category_header}{$multiLang.text_category_header}{else}No Translate (Key Lang:text_category_header){/if}</li>
+  {if $smarty.get.action eq 'edit'}
+  <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
+  {/if}
+</ul>
 {if $smarty.cookies.checkCategory}
   <div class="alert alert-danger">
     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>

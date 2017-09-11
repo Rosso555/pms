@@ -277,7 +277,7 @@ function listFunction($kwd = "")
     $condition = '';
     if(!empty($kwd))
     {
-      $condition .= ' WHERE title LIKE :kwd ';
+      $condition .= ' WHERE title LIKE :kwd OR task_name LIKE :kwd OR action_name LIKE :kwd ';
     }
 
     $sql = 'SELECT * , (SELECT COUNT(*) FROM `staff_function` '.$condition.') AS total

@@ -767,11 +767,12 @@ function getListTestPatient($pat_id, $psy_id, $tid, $status)
 
     if(!empty($condition)) $where .= ' WHERE '.$condition;
 
-    $sql =' SELECT tpt.*, pt.username, t.category_id, t.title,
-              (SELECT COUNT(*) FROM `test_patient` tpt INNER JOIN patient pt ON pt.id = tpt.patient_id INNER JOIN test t ON t.id = tpt.test_id '.$where.') AS total_count
+    $sql =' SELECT tpt.*, pt.username, t.category_id, t.title, t.description, c.name AS catName,
+              (SELECT COUNT(*) FROM `test_patient` tpt INNER JOIN patient pt ON pt.id = tpt.patient_id INNER JOIN test t ON t.id = tpt.test_id INNER JOIN category c ON c.id = t.category_id '.$where.') AS total_count
             FROM `test_patient` tpt
               INNER JOIN patient pt ON pt.id = tpt.patient_id
-              INNER JOIN test t ON t.id = tpt.test_id '.$where.' ORDER BY tpt.patient_id LIMIT :offset, :limit ';
+              INNER JOIN test t ON t.id = tpt.test_id
+              INNER JOIN category c ON c.id = t.category_id '.$where.' ORDER BY tpt.patient_id LIMIT :offset, :limit ';
 
     $stmt = $connected->prepare($sql);
 

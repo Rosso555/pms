@@ -19,24 +19,24 @@
               <i class="fa fa-plus-circle"></i> {if $multiLang.button_add_test_patient}{$multiLang.button_add_test_patient}{else}No Translate(Key Lang: button_add_test_patient){/if}
             </button>
           </div>
-          <div class="form-group" style="margin-bottom:5px;">
-            <select class="form-control select2" name="pat_id" style="width:100%;">
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2_search" name="pat_id" style="width:100%;">
               <option value="">---Select {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if}---</option>
               {foreach from=$patient item=v}
               <option value="{$v.id}" {if $smarty.get.pat_id eq $v.id}selected{/if}>{$v.username}</option>
               {/foreach}
             </select>
           </div>
-          <div class="form-group" style="margin-bottom:5px;">
-            <select class="form-control select2" name="tid" style="width:100%;">
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2_search" name="tid" style="width:100%;">
               <option value="">---Select Test---</option>
               {foreach from=$test item=v}
               <option value="{$v.id}" {if $smarty.get.tid eq $v.id}selected{/if}>{$v.title}</option>
               {/foreach}
             </select>
           </div>
-          <div class="form-group" style="margin-bottom:5px;">
-            <select class="form-control select2" name="status" style="width:100%;">
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2_search" name="status" style="width:100%;">
               <option value="">--- Select Status ---</option>
               <option value="1" {if $smarty.get.status eq 1}selected{/if}>Pendding...</option>
               <option value="2" {if $smarty.get.status eq 2}selected{/if}>Completed</option>

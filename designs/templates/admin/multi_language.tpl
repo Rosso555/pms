@@ -1,7 +1,14 @@
 {extends file="common/layout.tpl"}
 {block name="main"}
+<ul class="breadcrumb">
+  <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_translate_language}{$multiLang.text_translate_language}{else}No Translate (Key Lang:text_translate_language){/if}</li>
+  {if $smarty.get.action eq 'edit'}
+  <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
+  {/if}
+</ul>
 <div class="panel panel-primary">
-  <div class="panel-heading"><h4 class="panel-title">{if $multiLang.multil_language_title}{$multiLang.multil_language_title}{else}No Translate(Key Lang: multil_language_title){/if}</h4></div>
+  <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_translate_language}{$multiLang.text_translate_language}{else}No Translate(Key Lang: text_translate_language){/if}</h4></div>
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
