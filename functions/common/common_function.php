@@ -1244,4 +1244,26 @@ function getTestGroupById($id, $lang)
   return $result;
 }
 
+function getCheckTestPatientByPsyChologist($psy_id, $pat_id, $test_id, $tpat_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    $sql =' SELECT tp.* FROM `patient` p INNER JOIN test_patient tp ON tp.patient_id = p.id WHERE p.psychologist_id = :psychologist_id AND p.id = :patient_id AND tp.test_id = :test_id AND tp.id = :test_patient_id ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':psychologist_id', (int)$psy_id, PDO::PARAM_INT);
+    $stmt->bindValue(':patient_id', (int)$pat_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_patient_id', (int)$tpat_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch();
+
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getCheckTestPatientByPsyChologist'.$e->getMessage();
+  }
+  return $result;
+}
 ?>

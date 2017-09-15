@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" xmlns:og="http://ogp.me/ns#" xmlns:fb="http://www.facebook.com/2008/fbml">
+<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +15,7 @@
 {if $mode eq "psychologist"}<link rel="stylesheet" href="/css/psychologist_style.css" type="text/css"/>{/if}
 <link rel="stylesheet" href="/css/style_select2.css" type="text/css"/>
 <link rel="stylesheet" href="/css/common_style.css" type="text/css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
 <title>{block name="title"}{/block}PMS-ADMIN</title>
 <script>

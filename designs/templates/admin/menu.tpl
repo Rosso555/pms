@@ -48,6 +48,7 @@
             <li><a href="{$admin_file}?task=test_patient"><i class="fa fa-user-md" aria-hidden="true"></i> {if $multiLang.menu_patient}{$multiLang.menu_patient}{else}No Translate (Key Lang: menu_patient){/if}</a></li>
           </ul>
         </li>
+        <li><a href="{$admin_file}?task=download_list"><i class="fa fa-download" aria-hidden="true"></i> {if $multiLang.menu_download_list}{$multiLang.menu_download_list}{else}No Translate (Key Lang: menu_download_list){/if}</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown" id="animated">

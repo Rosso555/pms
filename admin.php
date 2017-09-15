@@ -1408,7 +1408,7 @@ if('test_question' === $task)
     echo json_encode($results);
     exit;
   }
-  
+
   //action check_que_type
   if('check_que_type' === $action)
   {
@@ -3442,6 +3442,44 @@ if('response_answer' === $task)
   $smarty_appform->assign('listResponseAnswer', $result);
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->display('admin/admin_response_answer.tpl');
+  exit;
+}
+//Task: Download List
+if('download_list' === $task)
+{
+  if('export_all_email' === $action)
+  {
+    if($_POST)
+    {
+      $fileName = 'All-Email';
+      $dateTime = date('Y-m-d h:i:s');
+      $dateFile = date('Y-m-d-(h-i-s)');
+
+      $fileNameCsv  = $fileName.'-'.$dateFile.'.csv';
+
+      $results = $common->save('download', $field =['title'     => $fileName,
+                                                    'file_name' => $fileNameCsv,
+                                                    'is_email'  => 2,
+                                                    'created_at'=> $dateTime]);
+
+      header('Content-type: application/json');
+      echo json_encode($results);
+      exit;
+    }
+  }
+
+  $testid = !empty($_GET['tid']) ? $_GET['tid'] : '';
+  $is_email = !empty($_GET['is_email']) ? $_GET['is_email'] : '';
+  $status = !empty($_GET['status']) ? $_GET['status'] : '';
+
+  $results = getListDownloadCSVfile($testid, $is_email, $status);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('listDownload', $results);
+  $smarty_appform->assign('test', $common->find('test', $condition = null, $type = 'all'));
+  $smarty_appform->display('admin/admin_download_list.tpl');
   exit;
 }
 //Task: Test Psychologist

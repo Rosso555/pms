@@ -39,7 +39,7 @@
 }
 
 .body-test h3 {
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.4;
   color: #00897b;
 }
@@ -68,4 +68,8 @@
 .margin-clear {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
+}
+
+.small-90 {
+  font-size: 90%;
 }

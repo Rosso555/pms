@@ -2017,3 +2017,53 @@ function checkDeleteMailerLite($id)
   }
   return $result;
 }
+/**
+ * getListDownloadCSVfile
+ * @param  int  $testid
+ * @param  boolean $is_email
+ * @param  int $status
+ * @return array or boolean
+ */
+function getListDownloadCSVfile($testid, $is_email, $status)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try{
+    $condition = $where = '';
+    if(!empty($testid)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' test_id = :test_id ';
+    }
+    if(!empty($is_email)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' is_email = :is_email ';
+    }
+    if(!empty($status)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' status = :status ';
+    }
+
+    if(!empty($condition)) $where .= ' WHERE '.$condition;
+
+    $sql =' SELECT *, (SELECT COUNT(*) FROM `download` '.$where.') AS total_count FROM `download` '.$where.' ORDER BY id DESC LIMIT :offset, :limit';
+    $query = $connected->prepare($sql);
+
+    if(!empty($testid)) $query->bindValue(':test_id', $testid, PDO::PARAM_INT);
+    if(!empty($is_email)) $query->bindValue(':is_email', $is_email, PDO::PARAM_INT);
+    if(!empty($status)) $query->bindValue(':status', $status, PDO::PARAM_INT);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total_count'];
+
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListDownloadCSVfile'.$e->getMessage();
+  }
+
+  return $result;
+}

@@ -15,6 +15,7 @@ if(empty($lang) and empty($_SESSION['lang'])) $lang = $result['lang_name'];
 if(!empty($lang) and empty($_SESSION['lang'])) $_SESSION['lang'] = $lang;
 if(!empty($lang) and $lang != $_SESSION['lang']) $_SESSION['lang'] = $lang;
 if(empty($lang) and $_SESSION['lang']) $lang = $_SESSION['lang'];
+
 $smarty_appform->assign('mode', 'patient');
 $smarty_appform->assign('patient_file', $patient_file);
 
@@ -66,6 +67,7 @@ if('test_question' === $task)
   $error = array();
   if($_POST)
   {
+    echo "string";exit;
     $ques_answer  = $_POST['answer'];
     $t_groupid    = $_POST['test_group_id'];
     $content      = $_POST['content'];
@@ -241,7 +243,88 @@ if('test_question' === $task)
   $smarty_appform->assign('sessionContentBack', $_SESSION['contentBack'.$test_group_id]);
   $smarty_appform->assign('testQueGroup', $resultTestGroup);
   $smarty_appform->assign('countTestGroupSession', COUNT($_SESSION['tgroupid']) + 1);
-  $smarty_appform->display('common/test_question_responsive.tpl');
+  $smarty_appform->display('common/test_question_responsive_patient.tpl');
+  exit;
+}
+
+if('test_save_draft' === $task)
+{
+  if($_POST)
+  {
+
+    $test_id        = $common->clean_string($_POST['test_id']);
+    $test_pat_id    = $common->clean_string($_POST['test_pat_id']);
+    $test_que_data  = json_decode($_POST['test_que_data']);
+    
+    //Get test_tmp By id
+    $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $test_id, 'test_patient_id' => $test_pat_id], $type = 'one');
+
+    if(empty($resultTestTmp)){
+      $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $test_id, 'test_patient_id' => $test_pat_id]);
+
+      if(!empty($test_que_data)){
+        foreach ($test_que_data as $v)
+        {
+          if($v->answer_id === 'NULL')
+          {
+            $answer_id = NULL;
+          } else {
+            $answer_id = $v->answer_id;
+          }
+          if($v->content === 'NULL')
+          {
+            $content = NULL;
+          } else {
+            $content = $v->content;
+          }
+        	$result = $common->save('test_tmp_question', $field =['test_tmp_id'  => $test_tmp_id,
+                                                                'test_question_id'  => $v->test_que_id,
+                                                                'answer_id' => $answer_id,
+                                                                'content'   => $content]);
+        }
+        $resultValue = true;
+  		}
+
+    } else {
+      if(!empty($test_que_data))
+      {
+        foreach ($test_que_data as $v)
+        {
+          //Get test_tmp By id
+          $rTestTmpQue = $common->find('test_tmp_question', $condition = ['test_tmp_id' => $resultTestTmp['id'], 'test_question_id' => $v->test_que_id], $type = 'one');
+
+          if($v->answer_id === 'NULL')
+          {
+            $answer_id = NULL;
+          } else {
+            $answer_id = $v->answer_id;
+          }
+          if($v->content === 'NULL')
+          {
+            $content = NULL;
+          } else {
+            $content = $v->content;
+          }
+
+          if(empty($rTestTmpQue))
+          {
+            $result = $common->save('test_tmp_question', $field =['test_tmp_id'  => $resultTestTmp['id'],
+                                                                  'test_question_id'  => $v->test_que_id,
+                                                                  'answer_id' => $answer_id,
+                                                                  'content'   => $content]);
+          }else {
+            $common->update('test_tmp_question', $field = ['answer_id' => $answer_id, 'content' => $content], $condition = ['id' => $rTestTmpQue['id']]);
+          }
+
+        }//End foreach
+        $resultValue = true;
+      }
+    }
+
+
+  }
+  header('Content-type: application/json');
+  echo json_encode($resultValue);
   exit;
 }
 

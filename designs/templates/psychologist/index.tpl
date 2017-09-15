@@ -32,7 +32,38 @@
         </form>
       </div>
     </div><!--panel panel-body-->
-    <div class="table-responsive">
+    {if $testPatient|@count gt 0}
+    <div class="row">
+      {foreach from=$testPatient item=data key=k}
+      <div class="col-md-6 col-sm-12">
+        <div class="body-test">
+          <h3 class="margin-clear"> {$data.title|escape}</h3>
+          <p class="small-90">
+            <i class="fa fa-tag" aria-hidden="true"></i> {$data.catName|escape} &nbsp;/&nbsp;
+            <i class="fa fa-calendar" aria-hidden="true"></i> {$data.created_at|date_format:"%B %e, %Y"} &nbsp;/&nbsp;
+            <i class="fa fa-user" aria-hidden="true"></i> <a href="{$psychologist_file}?pat_id={$data.patient_id}">{$data.username}</a> &nbsp;/&nbsp;
+            <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span>
+          </p>
+          <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
+          <div class="body-test-footer">
+            <a href="{$psychologist_file}?task=test_question&amp;tid={$data.test_id}&amp;pat_id={$data.patient_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">Start Test &nbsp;&nbsp;<i class="fa fa-chevron-circle-right" aria-hidden="true"></i></a>
+          </div>
+        </div>
+      </div>
+      {/foreach}
+    </div>
+    {else}
+    <div class="row">
+      <div class="col-md-12 col-sm-12">
+        <div class="body-test text-center">
+          <h4>{if $multiLang.text_there_are_no_record}{$multiLang.text_there_are_no_record}{else}No Translate (Key Lang: text_there_are_no_record){/if}</h4>
+        </div>
+      </div>
+    </div>
+    {/if}
+    <br>
+
+    <!-- <div class="table-responsive">
       <table class="table table-striped">
         <thead>
           <tr bgcolor="#eeeeee">
@@ -72,7 +103,8 @@
         </tr>
         {/if}
       </table>
-    </div><!--table-responsive  -->
+    </div> -->
+    <!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->

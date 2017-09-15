@@ -131,7 +131,7 @@ function smarty_function_paginate_middle($params, &$smarty) {
             $_this_url = $_url;
             $_this_url .= (strpos($_url, '?') === false) ? '?' : '&';
             $_this_url .= SmartyPaginate::getUrlVar($_id) . '=' . $_item;
-            $_ret .= $_link_prefix . '<a href="' . str_replace('&', '&amp;', $_this_url) . '"' . $_attrs . '>' . $_text . '</a>&nbsp;' . $_link_suffix;
+            $_ret .= $_link_prefix . '<a href="' . str_replace('&', '&amp;', $_this_url) . '"' . $_attrs . '>' . $_text . '</a>' . $_link_suffix;
         } else {
             if(isset($_active_link_prefix) && isset($_active_link_suffix)) {
               $_ret .= $_active_link_prefix . $_text . $_active_link_suffix;

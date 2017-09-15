@@ -18,7 +18,7 @@
   <div class="row">
     <div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
       <ul class="breadcrumb">
-        <li><a href="{$index_file}?task=login"><span class="label label-success">Login</span></a></li>
+        <li><a href="{$index_file}?task=login"><span class="label label-success">PMS</span></a></li>
         <li class="active">Register</li>
       </ul>
 

@@ -11,14 +11,6 @@
       <div class="panel-body">
         <form class="form-inline" role="form" action="{$psychologist_file}" method="GET">
           <div class="form-group select2_search_inline" style="margin-bottom:5px;">
-            <select class="form-control select2_search" name="pat_id" style="width:100%;">
-              <option value="">---Select {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if}---</option>
-              {foreach from=$patient item=v}
-              <option value="{$v.id}" {if $smarty.get.pat_id eq $v.id}selected{/if}>{$v.username}</option>
-              {/foreach}
-            </select>
-          </div>
-          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
             <select class="form-control select2_search" name="tid" style="width:100%;">
               <option value="">---Select Test---</option>
               {foreach from=$test item=v}
@@ -38,7 +30,7 @@
       <div class="col-md-6 col-sm-12">
         <div class="body-test">
           <h3 class="margin-clear"> {$data.title|escape}</h3>
-          <p><i class="fa fa-tag" aria-hidden="true"></i> {$data.catName|escape}</p>
+          <p class="small-90"><i class="fa fa-tag" aria-hidden="true"></i> {$data.catName|escape} &nbsp;/&nbsp; <i class="fa fa-calendar" aria-hidden="true"></i> {$data.created_at|date_format:"%B %e, %Y"}</p>
           <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
           <div class="body-test-footer">
             <a href="{$patient_file}?task=test_question&amp;tid={$data.test_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">Start Test &nbsp;&nbsp;<i class="fa fa-chevron-circle-right" aria-hidden="true"></i></a>

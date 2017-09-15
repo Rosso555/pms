@@ -233,7 +233,7 @@ if('test_patient' === $task)
 //Task: Test Question
 if('test_question' === $task)
 {
-  $resultTestPsychologist = $common->find('test_psychologist', $condition = ['id' => $_GET['id'], 'test_id' => $_GET['tid'], 'psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'one');
+  $resultTestPsychologist = getCheckTestPatientByPsyChologist($_SESSION['is_psycho_login_id'], $_GET['pat_id'], $_GET['tid'], $_GET['id']);
 
   if(empty($resultTestPsychologist)){
     header('Location:'.$psychologist_file.'?task=page_not_found');

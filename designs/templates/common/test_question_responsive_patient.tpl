@@ -206,9 +206,8 @@
           {else}
           <button type="submit" class="btn btn-success"> {if $multiLang.button_show_my_score}{$multiLang.button_show_my_score}{else}No Translate (Key Lang: button_show_my_score){/if}</button>
           {/if}
-
+          <button type="button" class="btn btn-warning" onclick="save_draft();"> {if $multiLang.button_save_draft}{$multiLang.button_save_draft}{else}No Translate (Key Lang: button_save_draft){/if}</button>
         </div>
-
     </form>
 
   </div>
@@ -238,6 +237,47 @@ $(document).ready( function(){
 
 });
 
+function save_draft()
+{
+  $(".loader").show();
+  var tque_id = document.getElementsByName('tq_id[]');
+  var answer  = document.getElementsByName('answer_id[]');
+  var content = document.getElementsByName('content[]');
+
+  var test_id = {$smarty.get.tid};
+  var test_pat_id = {$smarty.get.id};
+  var test_que_data = [];
+
+  for (var i=0; i<tque_id.length; i++) {
+    if(tque_id[i].disabled == false || answer[i].disabled == false || content[i].disabled == false) {
+      test_que_data.push({ test_que_id: tque_id[i].value, answer_id: answer[i].value, content: content[i].value });
+    }
+  }
+
+
+  var paramdata = { test_id : test_id,
+                    test_pat_id : test_pat_id,
+                    test_que_data: JSON.stringify(test_que_data) };
+
+  $.ajax({
+    type: "POST",
+    url: "{$patient_file}?task=test_save_draft",
+    dataType:'json',
+    data: paramdata,
+    success: function(data){
+      var dataHTML = "";
+      alert(data);
+      //hide Loading gif
+      $(".loader").hide();
+    },
+    error: function(){
+      //Show error here
+      alert("Cannot save data. Please try again later.");
+      // location.reload();
+    }
+  });//End Ajax
+}
+
 function checkvalue(e, field, id) {
   {foreach item = v from= $result key=id}
 
@@ -261,7 +301,7 @@ function checkvalue(e, field, id) {
       $('#is_email_{$v.id}').attr('disabled','disabled');
     }
 
-    $('#content{$v.id}').val(text);
+    $('#content_{$v.id}').val(text);
 
   {/foreach}
 

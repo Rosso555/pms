@@ -15,6 +15,7 @@
       <ul class="nav navbar-nav">
         <li><a href="{$psychologist_file}?task=patient"><i class="fa fa-user-md" aria-hidden="true"></i> Patient</a></li>
 				<li><a href="{$psychologist_file}?task=test_psychologist"><i class="fa fa-user-md" aria-hidden="true"></i> Test Psychologist</a></li>
+        <li><a href="{$psychologist_file}?task=bill"><i class="fa fa-usd" aria-hidden="true"></i> Bill</a></li>
         <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-share-square-o" aria-hidden="true"></i> Test Assign <span class="caret"></span></a>
           <ul class="dropdown-menu">
