@@ -72,7 +72,7 @@
                       <input type="hidden" id="racontent{$va.id}" name="content[]" value="NULL" disabled>
                       {/if}
                       <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$va.id}" name="answer[{$va.id}]" class="check_value{$va.id}" value="{$ans.id|escape}" onclick="removeRequired({$va.id}, {$ans.id} , {$va.type}, {$ans.jump_to}, {$va.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
-                      {if $sessionAnswerIdError|@COUNT gt 0}{foreach from=$sessionAnswerIdError item=ansid}{if $ansid eq $ans.id}checked{/if}{/foreach} {else} {if $sessionAnswerId|@count gt 0}{foreach from=$sessionAnswerId item=d}{if $d eq $ans.id}checked{/if}{/foreach}{else}{if $va.is_required eq 1}required{/if}{/if} {/if}>
+                      {if $sessionAnswerIdError|@COUNT gt 0}{foreach from=$sessionAnswerIdError item=ansid}{if $ansid eq $ans.id}checked{/if}{/foreach} {else} {if $sessionAnswerId|@count gt 0}{foreach from=$sessionAnswerId item=d}{if $d eq $ans.id}checked{/if}{/foreach}{else}{if $va.is_required eq 1}required{/if}{/if}{/if}>
 
                     </label>
 
@@ -209,13 +209,13 @@
           <button type="button" class="btn btn-warning" onclick="save_draft();"> {if $multiLang.button_save_draft}{$multiLang.button_save_draft}{else}No Translate (Key Lang: button_save_draft){/if}</button>
         </div>
     </form>
-
   </div>
 </div>
 {/block}
 {block name="javascript"}
 <script>
-$(document).ready( function(){
+$(document).ready( function()
+{
   //Run function when browser resizes
   $(window).resize( resizeBrowser );
 
@@ -243,7 +243,6 @@ function save_draft()
   var tque_id = document.getElementsByName('tq_id[]');
   var answer  = document.getElementsByName('answer_id[]');
   var content = document.getElementsByName('content[]');
-
   var test_id = {$smarty.get.tid};
   var test_pat_id = {$smarty.get.id};
   var test_que_data = [];
@@ -254,61 +253,63 @@ function save_draft()
     }
   }
 
-
   var paramdata = { test_id : test_id,
                     test_pat_id : test_pat_id,
                     test_que_data: JSON.stringify(test_que_data) };
 
-  $.ajax({
-    type: "POST",
-    url: "{$patient_file}?task=test_save_draft",
-    dataType:'json',
-    data: paramdata,
-    success: function(data){
-      var dataHTML = "";
-      alert(data);
-      //hide Loading gif
-      $(".loader").hide();
-    },
-    error: function(){
-      //Show error here
-      alert("Cannot save data. Please try again later.");
-      // location.reload();
-    }
-  });//End Ajax
+  if(test_que_data.length > 0)
+  {
+    $.ajax({
+      type: "POST",
+      url: "{$patient_file}?task=test_save_draft",
+      dataType:'json',
+      data: paramdata,
+      success: function(data){
+        var dataHTML = "";
+        if(data == true)
+        {
+          //hide Loading gif
+          $(".loader").hide();
+        }
+      },
+      error: function(){
+        //Show error here
+        alert("Cannot save data. Please try again later.");
+        // location.reload();
+      }
+    });//End Ajax
+  }
 }
 
-function checkvalue(e, field, id) {
-  {foreach item = v from= $result key=id}
+function checkvalue(e, field, id)
+{
+    var text = $('#test'+id).val();
 
-    var text = $('#test{$v.id}').val();
-
-    if($('#test{$v.id}').val() !== '')
+    if(text !== '')
     {
-      $('#tq_id_{$v.id}').removeAttr('disabled');
-      $('#text_is_required_{$v.id}').val(0);
-      $('#answer_id_{$v.id}').removeAttr('disabled');
-      $('#content_{$v.id}').removeAttr('disabled');
-      $('#is_email_{$v.id}').removeAttr('disabled');
-
-    }
-    if($('#test{$v.id}').val() == '')
-    {
-      $('#tq_id_{$v.id}').attr('disabled','disabled');
-      $('#text_is_required_{$v.id}').val(1);
-      $('#answer_id_{$v.id}').attr('disabled','disabled');
-      $('#content_{$v.id}').attr('disabled','disabled');
-      $('#is_email_{$v.id}').attr('disabled','disabled');
+      $('#tq_id_'+id).removeAttr('disabled');
+      $('#text_is_required_'+id).val(0);
+      $('#answer_id_'+id).removeAttr('disabled');
+      $('#content_'+id).removeAttr('disabled');
+      $('#is_email_'+id).removeAttr('disabled');
+      $('#test'+id).removeAttr('required');
     }
 
-    $('#content_{$v.id}').val(text);
-
-  {/foreach}
-
+    if(text == '')
+    {
+      $('#tq_id_'+id).attr('disabled','disabled');
+      $('#text_is_required_'+id).val(1);
+      $('#answer_id_'+id).attr('disabled', 'disabled');
+      $('#content_'+id).attr('disabled', 'disabled');
+      $('#is_email_'+id).attr('disabled', 'disabled');
+      $('#test'+id).attr('required', true);
+    }
+    $('#content_'+id).val(text);
 }
 
 //Remove Requeired and check jumping to
-function removeRequired(id, ansid, type, jump_to, view_order, q_jumpto_view_order) {
+function removeRequired(id, ansid, type, jump_to, view_order, q_jumpto_view_order)
+{
 
   var flag = $("#flag"+id+ansid).val();
 
@@ -849,7 +850,8 @@ function clear_session_jump_to()
   {/if}
 }
 
-window.onload = function(e){
+window.onload = function(e)
+{
   clear_session_jump_to();
   session_jumping_to();
   sessionAnswerId();
@@ -867,6 +869,49 @@ window.onload = function(e){
       // Remove saved data from sessionStorage
       sessionStorage.removeItem('jump_to{$va.id}');
       sessionStorage.removeItem('view_order{$va.id}');
+    {/foreach}
+  {/if}
+
+  //Save draft: if has do it
+  {if $testTmpQuestion|@COUNT gt 0}
+    {foreach from=$testTmpQuestion item=v}
+
+      {if $v.type == 1 || $v.type == 2}
+        $('#text_is_required_{$v.tqid}').val(0);
+        $('#tq_id_{$v.tqid}').removeAttr('disabled');
+        $('#is_email_{$v.tqid}').removeAttr('disabled');
+        $('#answer_id_{$v.tqid}').removeAttr('disabled');
+        $('#content_{$v.tqid}').removeAttr('disabled');
+        $('#content_{$v.tqid}').val('{$v.content}');
+        $('#test{$v.tqid}').removeAttr('required');
+        $('#test{$v.tqid}').val('{$v.content}');
+      {/if}
+
+      {if $v.type == 3}
+        $('#is_required{$v.tqid}').val(0);
+        $('#tq_id{$v.id}').removeAttr("disabled");
+        $('#rais_email{$v.tqid}').removeAttr('disabled');
+        $('#raanswer_id{$v.tqid}').removeAttr('disabled');
+        $('#racontent{$v.tqid}').removeAttr('disabled');
+        $('#radio{$v.answer_id}_{$v.tqid}').removeAttr("required");
+        $('#radio{$v.answer_id}_{$v.tqid}').attr('checked', true);
+      {/if}
+
+      {if $v.type == 4}
+        //Action button check box
+        $('#is_required{$v.answer_id}_{$v.tqid}').val(0);
+        $("#flag{$v.tqid}{$v.answer_id}").val(1);
+
+        $('#chk_tqid{$v.tqid}{$v.answer_id}').removeAttr("disabled");
+        $('#is_email{$v.tqid}{$v.answer_id}').removeAttr('disabled');
+        $('#answer_id{$v.tqid}{$v.answer_id}').removeAttr('disabled');
+        $('#content{$v.tqid}{$v.answer_id}').removeAttr('disabled');
+
+        $("#checkbox{$v.answer_id}_{$v.tqid}").removeAttr("required");
+        $("#checkbox{$v.answer_id}_{$v.tqid}").attr('checked', true);
+
+      {/if}
+
     {/foreach}
   {/if}
 

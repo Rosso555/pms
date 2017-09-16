@@ -230,6 +230,7 @@ if('test_question' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('sumAnswerCol', $sumAnswerCol);
+  $smarty_appform->assign('testTmpQuestion', getTestTmpQuestion($_GET['id'], $_GET['tid']));
   $smarty_appform->assign('totalAnswer', $total_data);
   $smarty_appform->assign('resultQueIdJumpTo', $resultQueIdJumpTo);
   $smarty_appform->assign('contentError', $_SESSION['contentError']);
@@ -255,7 +256,7 @@ if('test_save_draft' === $task)
     $test_id        = $common->clean_string($_POST['test_id']);
     $test_pat_id    = $common->clean_string($_POST['test_pat_id']);
     $test_que_data  = json_decode($_POST['test_que_data']);
-    
+
     //Get test_tmp By id
     $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $test_id, 'test_patient_id' => $test_pat_id], $type = 'one');
 

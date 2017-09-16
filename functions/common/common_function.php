@@ -767,12 +767,14 @@ function getListTestPatient($pat_id, $psy_id, $tid, $status)
 
     if(!empty($condition)) $where .= ' WHERE '.$condition;
 
-    $sql =' SELECT tpt.*, pt.username, t.category_id, t.title, t.description, c.name AS catName,
-              (SELECT COUNT(*) FROM `test_patient` tpt INNER JOIN patient pt ON pt.id = tpt.patient_id INNER JOIN test t ON t.id = tpt.test_id INNER JOIN category c ON c.id = t.category_id '.$where.') AS total_count
+    $sql =' SELECT tpt.*, pt.username, t.category_id, t.title, t.description, c.name AS catName, ttmp.status AS test_tmp_status,
+              (SELECT COUNT(*) FROM `test_patient` tpt INNER JOIN patient pt ON pt.id = tpt.patient_id INNER JOIN test t ON t.id = tpt.test_id
+              INNER JOIN category c ON c.id = t.category_id LEFT JOIN test_tmp ttmp ON ttmp.test_patient_id = tpt.id '.$where.') AS total_count
             FROM `test_patient` tpt
               INNER JOIN patient pt ON pt.id = tpt.patient_id
               INNER JOIN test t ON t.id = tpt.test_id
-              INNER JOIN category c ON c.id = t.category_id '.$where.' ORDER BY tpt.patient_id LIMIT :offset, :limit ';
+              INNER JOIN category c ON c.id = t.category_id
+              LEFT JOIN test_tmp ttmp ON ttmp.test_patient_id = tpt.id '.$where.' ORDER BY tpt.created_at DESC LIMIT :offset, :limit ';
 
     $stmt = $connected->prepare($sql);
 
@@ -1266,4 +1268,30 @@ function getCheckTestPatientByPsyChologist($psy_id, $pat_id, $test_id, $tpat_id)
   }
   return $result;
 }
+
+function getTestTmpQuestion($tpat_id, $test_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    $sql =' SELECT ttq.*, q.type, q.is_email, tq.id AS tqid FROM `test_tmp` ttmp
+              INNER JOIN test_tmp_question ttq ON ttq.test_tmp_id = ttmp.id
+              INNER JOIN test_question tq ON tq.id = ttq.test_question_id
+              INNER JOIN question q ON q.id = tq.question_id
+            WHERE ttmp.test_patient_id = :test_patient_id AND ttmp.test_id = :test_id ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_patient_id', (int)$tpat_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+
+    return $rows;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getTestTmpQuestion'.$e->getMessage();
+  }
+  return $result;
+}
+
 ?>
