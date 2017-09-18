@@ -278,7 +278,11 @@ function save_draft()
         // location.reload();
       }
     });//End Ajax
+  } else {
+    alert("You don't check answer.");
+    $(".loader").hide();
   }
+
 }
 
 function checkvalue(e, field, id)

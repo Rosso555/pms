@@ -42,7 +42,12 @@
             <i class="fa fa-tag" aria-hidden="true"></i> {$data.catName|escape} &nbsp;/&nbsp;
             <i class="fa fa-calendar" aria-hidden="true"></i> {$data.created_at|date_format:"%B %e, %Y"} &nbsp;/&nbsp;
             <i class="fa fa-user" aria-hidden="true"></i> <a href="{$psychologist_file}?pat_id={$data.patient_id}">{$data.username}</a> &nbsp;/&nbsp;
+            {if $data.test_tmp_status}
             <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span>
+            {else}
+            <span class="label label-info"><i class="fa fa-file-text" aria-hidden="true"></i> New Assign</span>
+            {/if}
+            <!-- <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span> -->
           </p>
           <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
           <div class="body-test-footer">

@@ -413,6 +413,7 @@ if('test_question' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('sumAnswerCol', $sumAnswerCol);
+  $smarty_appform->assign('testTmpQuestion', getTestTmpQuestion($_GET['id'], $_GET['tid']));
   $smarty_appform->assign('totalAnswer', $total_data);
   $smarty_appform->assign('resultQueIdJumpTo', $resultQueIdJumpTo);
   $smarty_appform->assign('contentError', $_SESSION['contentError']);
@@ -426,7 +427,7 @@ if('test_question' === $task)
   $smarty_appform->assign('sessionContentBack', $_SESSION['contentBack'.$test_group_id]);
   $smarty_appform->assign('testQueGroup', $resultTestGroup);
   $smarty_appform->assign('countTestGroupSession', COUNT($_SESSION['tgroupid']) + 1);
-  $smarty_appform->display('common/test_question_responsive.tpl');
+  $smarty_appform->display('common/test_question_responsive_patient.tpl');
   exit;
 }
 
