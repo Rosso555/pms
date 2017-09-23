@@ -738,9 +738,12 @@ function getListTestPsychologist($psy_id, $tid, $cid, $status)
  * @param  int $pat_id is patient_id
  * @param  int $tid is test_id
  * @param  int $status
+ * @param  int $tmpstus is test_tmp of status
+ * @param  int $f_date is from date
+ * @param  int $t_date is to date
  * @return array or bool
  */
-function getListTestPatient($pat_id, $psy_id, $tid, $status)
+function getListTestPatient($pat_id, $psy_id, $tid, $status, $tmpstus, $f_date, $t_date)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
@@ -763,6 +766,33 @@ function getListTestPatient($pat_id, $psy_id, $tid, $status)
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' tpt.status = :status ';
     }
+    if(!empty($tmpstus)){
+      if(!empty($condition)) $condition .= ' AND ';
+      //if eqaul 1 is pending
+      if($tmpstus == 1) {
+        $condition .= ' ttmp.status = :tmpstus ';
+      }
+      //if eqaul 2 is commpleted
+      if($tmpstus == 2) {
+        $condition .= ' ttmp.status = :tmpstus ';
+      }
+      //if eqaul 3 is new assign
+      if($tmpstus == 3) {
+        $condition .= ' ttmp.status IS NULL ';
+      }
+    }
+    if(!empty($f_date) && empty($t_date)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' DATE_FORMAT(tpt.created_at , "%Y-%m-%d") >= :f_date ';
+    }
+    if(empty($f_date) && !empty($t_date)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' DATE_FORMAT(tpt.created_at , "%Y-%m-%d") <= :t_date ';
+    }
+    if(!empty($f_date) && !empty($t_date)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' DATE_FORMAT(tpt.created_at , "%Y-%m-%d") BETWEEN :f_date AND :t_date ';
+    }
 
 
     if(!empty($condition)) $where .= ' WHERE '.$condition;
@@ -782,6 +812,12 @@ function getListTestPatient($pat_id, $psy_id, $tid, $status)
     if(!empty($pat_id)) $stmt->bindValue(':pat_id', $pat_id, PDO::PARAM_INT);
     if(!empty($psy_id)) $stmt->bindValue(':psy_id', $psy_id, PDO::PARAM_INT);
     if(!empty($status)) $stmt->bindValue(':status', $status, PDO::PARAM_INT);
+    if(!empty($f_date)) $stmt->bindValue(':f_date', $f_date, PDO::PARAM_STR);
+    if(!empty($t_date)) $stmt->bindValue(':t_date', $t_date, PDO::PARAM_STR);
+    if(!empty($tmpstus))
+    {
+      if($tmpstus == 1 || $tmpstus = 2) $stmt->bindValue(':tmpstus', $tmpstus, PDO::PARAM_INT);
+    }
 
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);

@@ -3653,7 +3653,7 @@ if('test_patient' === $task)
   $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
 
-  $results = getListTestPatient($pat_id, '', $tid, $status);
+  $results = getListTestPatient($pat_id, '', $tid, $status, '', '', '');
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);

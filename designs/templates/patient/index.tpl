@@ -11,13 +11,25 @@
       <div class="panel-body">
         <form class="form-inline" role="form" action="{$psychologist_file}" method="GET">
           <div class="form-group select2_search_inline" style="margin-bottom:5px;">
-            <select class="form-control select2_search" name="tid" style="width:100%;">
-              <option value="">---Select Test---</option>
-              {foreach from=$test item=v}
-              <option value="{$v.id}" {if $smarty.get.tid eq $v.id}selected{/if}>{$v.title}</option>
-              {/foreach}
+            <select class="form-control select2_search" name="stus" style="width:100%;">
+              <option value="">---Select Status---</option>
+              <!-- assign value 3 is new assign test to patient -->
+              <option value="3" {if $smarty.get.stus eq 3}selected{/if}>New</option>
+              <option value="1" {if $smarty.get.stus eq 1}selected{/if}>Not Completed</option>
             </select>
           </div>
+          <div class="form-group" style="margin-bottom:5px;">
+						<div class="input-group">
+							<input id="f_date" class="form-control" type="text" placeholder="From Date" name="f_date" value="{$smarty.get.f_date}">
+              <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+						</div>
+					</div>
+          <div class="form-group" style="margin-bottom:5px;">
+						<div class="input-group">
+							<input id="t_date" class="form-control" type="text" placeholder="To Date" name="t_date" value="{$smarty.get.t_date}">
+              <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+						</div>
+					</div>
           <div class="form-group" style="margin-bottom:5px;">
             <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
           </div>
@@ -41,7 +53,9 @@
           </p>
           <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
           <div class="body-test-footer">
-            <a href="{$patient_file}?task=test_question&amp;tid={$data.test_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">Start Test &nbsp;&nbsp;<i class="fa fa-chevron-circle-right" aria-hidden="true"></i></a>
+            <a href="{$patient_file}?task=test_question&amp;tid={$data.test_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
+              {if $data.test_tmp_status}Continue Test{else}Start Test{/if} &nbsp;&nbsp;<i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
+            </a>
           </div>
         </div>
       </div>
@@ -60,4 +74,13 @@
     {include file="common/paginate.tpl"}
   </div><!--panel-body-->
 </div><!--panel-primary-->
+{/block}
+
+{block name="javascript"}
+<script>
+  $(document).ready(function(){
+    $('#f_date').datetimepicker({ locale: 'en', format: 'YYYY-MM-DD'});
+    $('#t_date').datetimepicker({ locale: 'en', format: 'YYYY-MM-DD'});
+  });
+</script>
 {/block}

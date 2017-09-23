@@ -51,7 +51,9 @@
           </p>
           <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
           <div class="body-test-footer">
-            <a href="{$psychologist_file}?task=test_question&amp;tid={$data.test_id}&amp;pat_id={$data.patient_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">Start Test &nbsp;&nbsp;<i class="fa fa-chevron-circle-right" aria-hidden="true"></i></a>
+            <a href="{$psychologist_file}?task=test_question&amp;tid={$data.test_id}&amp;pat_id={$data.patient_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
+              {if $data.test_tmp_status}Continue Test{else}Start Test{/if} &nbsp;&nbsp;<i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
+            </a>
           </div>
         </div>
       </div>

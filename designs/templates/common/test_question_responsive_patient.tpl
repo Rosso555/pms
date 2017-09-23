@@ -17,14 +17,13 @@
 </style>
 {/block}
 {block name="main"}
-<div class="col-md-12">
-  <div class="inbox-top">
-    {if $getTestById.test_title}<h3 class="text-center">{$getTestById.test_title}</h3>{/if}
-    <h4 class="text-center">{$getTestById.title} {if $countTestGroupSession eq $testQueGroup|@count} ({if $multiLang.text_final_step}{$multiLang.text_final_step}{else}No Translate (Key Lang: text_final_step){/if}) {/if}</h4>
-    <p class="text-center">{$getTestById.description}</p>
-  </div>
-  {if $error}<div class="alert alert-warning" role="alert">{if $multiLang.text_error_check_all_required}{$multiLang.text_error_check_all_required}{else}No Translate (Key Lang: text_error_check_all_required){/if}</div>{/if}
-  <div class="inbox-test sansserif" style="margin-bottom: 20px;">
+<div class="inbox-top">
+  {if $getTestById.test_title}<h3 class="text-center">{$getTestById.test_title}</h3>{/if}
+  <h4 class="text-center">{$getTestById.title} {if $countTestGroupSession eq $testQueGroup|@count} ({if $multiLang.text_final_step}{$multiLang.text_final_step}{else}No Translate (Key Lang: text_final_step){/if}) {/if}</h4>
+  <p class="text-center">{$getTestById.description}</p>
+</div>
+{if $error}<div class="alert alert-warning" role="alert">{if $multiLang.text_error_check_all_required}{$multiLang.text_error_check_all_required}{else}No Translate (Key Lang: text_error_check_all_required){/if}</div>{/if}
+<div class="inbox-test sansserif" style="margin-bottom: 20px;">
     <form class="form" action="{$index_file}?task=test_question&amp;id={$smarty.get.id}" method="post">
       <input type="hidden" id="test_group_id" name="test_group_id" value="{$test_group_id|escape}">
     {if $result|@COUNT gt 0}
@@ -210,7 +209,30 @@
         </div>
     </form>
   </div>
+
+<!-- Modal -->
+<div class="modal fade" id="model_leave" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="panel panel-primary modal-content">
+      <div class="panel-heading modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate(Key Lang: text_confirmation){/if}</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+          {if $multiLang.text_confirm_delete}{$multiLang.text_confirm_delete}{else}No Translate(Key Lang: text_confirm_delete){/if}
+           <b>({$data.username|escape} ~ {$data.title|escape})</b>?</p>
+      </div>
+      <div class="modal-footer">
+        <a href="{$psychologist_file}?task=test_patient&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</i></a>
+        <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
+      </div>
+    </div>
+  </div>
 </div>
+<!-- Modal -->
+
 {/block}
 {block name="javascript"}
 <script>
@@ -234,6 +256,7 @@ $(document).ready( function()
   }
   //Run function after finished loading
   resizeBrowser();
+  
 
 });
 

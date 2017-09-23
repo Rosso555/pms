@@ -217,7 +217,7 @@ if('test_patient' === $task)
   $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
 
-  $results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status);
+  $results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status, '', '', '');
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -452,7 +452,7 @@ if('test_psychologist' === $task)
 $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
 $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
 
-$results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status = 1);
+$results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status = 1, $tmpstus = 1, '', '');
 
 (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
 SmartyPaginate::assign($smarty_appform);
