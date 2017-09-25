@@ -4,7 +4,6 @@
   <li><a href="{$psychologist_file}"><i class="fa fa-fw fa-home"></i></a></li>
   <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_home}{$multiLang.text_home}{else}No Translate(Key Lang: text_home){/if}</li>
 </ul>
-
 <div class="panel panel-primary">
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if} {if $multiLang.text_list}{$multiLang.text_list}{else}No Translate(Key Lang: text_list){/if}</h4></div>
   <div class="panel-body">
@@ -12,6 +11,7 @@
       <div class="panel-body">
         <div class="row">
           <form class="form-inline" role="form" action="{$psychologist_file}" method="GET" style="padding: 1px 0px 12px 1px;">
+          <input type="hidden" name="task" value="test_psychologist">
           <div class="col-md-3 form-group" style="margin-bottom:5px;">
             <select class="form-control select2" name="cid" style="width:100%;">
               <option value="">---Select Category---</option>
@@ -42,7 +42,7 @@
         </div>
       </div>
     </div><!--panel panel-body-->
-    
+
     <div class="table-responsive">
       <table class="table table-striped">
         <thead>
@@ -61,13 +61,13 @@
             <td>{$data.title}</td>
             <td>
               {if $data.status eq 1}
-              <button type="button" class="btn btn-danger btn-xs">
+              <span class="label label-warning">
                 <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Pendding...
-              </button>
+              </span>
               {else}
-              <button type="button" class="btn btn-success btn-xs">
+              <span class="label label-info">
                 <i class="fa fa-check-circle"></i> Completed
-              </button>
+              </span>
               {/if}
             </td>
             <td>

@@ -67,8 +67,6 @@ if('test_question' === $task)
   $error = array();
   if($_POST)
   {
-    echo "string";exit;
-    $ques_answer  = $_POST['answer'];
     $t_groupid    = $_POST['test_group_id'];
     $content      = $_POST['content'];
     $is_email     = $_POST['is_email'];
@@ -122,58 +120,125 @@ if('test_question' === $task)
       //Condition test group for assign value to Result
       if(COUNT($_SESSION['tgroupid']) === COUNT($resultTestGroup) && COUNT($resultTestGroup) > 0)
       {
-        foreach ($resultTestGroup as $key => $v) {
+        //Save Data to table response
+        $responseid = $common->save('response', $field = ['unique_id' => time(), 'test_id' => $_GET['id'], 'test_patient_id' => $_GET['id']]);
 
-          if(!empty($_SESSION['answer_'.$v['id']])){
-            //fetch session answer
-            foreach ($_SESSION['answer_'.$v['id']] as $key => $value) {
-              //Add answer id to new session answer_id
-              $_SESSION['answer_id'][] = $value;
-              //Clear session answer
-              unset($_SESSION['answer_'.$v['id']]);
-            }
-          }
-
-          if(!empty($_SESSION['testque_id_'.$v['id']])){
-            foreach ($_SESSION['testque_id_'.$v['id']] as $key => $value) {
-              //Add test_question_id id to new session testque_id
-              $_SESSION['testque_id'][] = $value;
-              //Clear session answer
-              unset($_SESSION['testque_id_'.$v['id']]);
-            }
-          }
-
+        foreach ($resultTestGroup as $key => $v)
+        {
           if(COUNT($_SESSION['content_'.$v['id']]) > 0 && !empty($_SESSION['content_'.$v['id']]))
           {
             //fetch session content
-            foreach ($_SESSION['content_'.$v['id']] as $key => $value) {
-              //Add content to new session content
-              $_SESSION['content'][] = array('id' => $value['id'], 'is_email' => $value['is_email'] , 'content' => $value['content']);
-              //Clear session content
+            foreach ($_SESSION['content_'.$v['id']] as $key => $value)
+            {
+              if($value['content'] == 'NULL') {
+                $r_content = NULL;
+              } else {
+                $r_content = $value['content'];
+              }
+              if($value['id'] == 'NULL') {
+                $r_answer_id = NULL;
+              } else {
+                $r_answer_id = $value['id'];
+              }
+              if($value['is_email'] == 1)
+              {
+                $username = explode("@", $value['content']);
+                $subscribers[] = array('email' => $value['content'], 'name' => $username[0]);
+              }
+
+              if(!empty($responseid))
+              {
+                $common->save('response_answer', $field = ['response_id' => $responseid,
+                                                           'test_question_id' => $value['test_question_id'],
+                                                           'answer_id'  => $r_answer_id,
+                                                           'content'    => $r_content,
+                                                           'is_email'   => $value['is_email']]);
+              }//End check $responseid
+
+              //Clear session
+              unset($_SESSION['answer_'.$v['id']]);
+              unset($_SESSION['testque_id_'.$v['id']]);
               unset($_SESSION['content_'.$v['id']]);
               unset($_SESSION['contentBack'.$v['id']]);
-            }
+            }//End foreach $_SESSION['content_'.$v['id']]
+
           }
 
+        }//End foreach $resultTestGroup
+        $common->update('test_patient', $field = ['status' => 2, 'pat_working_by' => NULL], $condition = ['id' => $_GET['id'], 'patient_id' => $_SESSION['is_patient_login_id'], 'test_id' => $_GET['tid']]);
+        // Get List Mailer Lite By Test Id
+        $resultMailer = getMailerLiteByTestId($_GET['id']);
+        //fetch mailer lite
+        foreach ($resultMailer as $key => $value) {
+          $groupsApi = (new \MailerLiteApi\MailerLite($value['api_key']))->groups();
+
+          $mailerGroup = $common->find('mailerlite_group', $condition = ['transaction_id' => $value['transaction_id']], $type = 'all');
+          //fetch Mailer Lite Group
+          foreach ($mailerGroup as $k => $v) {
+            //Add mail to mailer lite
+            $groupsApi->importSubscribers($v['group_id'], $subscribers);
+          }
         }
+
         //Clear sesson
         unset($_SESSION['tgroupid']);
-        header('Location:'.$psychologist_file.'?task=result&tid='.$_GET['tid'].'&id='.$_GET['id']);
+        header('Location:'.$patient_file.'?task=result_patient&tid='.$_GET['tid']);
         exit;
       }
       //Condition test no group
       if(!empty($answer_id) && COUNT($resultTestGroup) == 0)
       {
-        foreach ($answer_id as $key => $value) {
-          //Add Content to session
-          $_SESSION['content'][] = array('id' => $value, 'is_email' => $is_email[$key] , 'content' => $content[$key]);
-          $_SESSION['testque_id'] = $testque_id;
+        //Save Data to table response
+        $responseid = $common->save('response', $field = ['unique_id' => time(), 'test_id' => $_GET['id'], 'test_patient_id' => $_GET['id']]);
+
+        foreach ($answer_id as $key => $value)
+        {
+          if($content[$key] == 'NULL') {
+            $r_content = NULL;
+          } else {
+            $r_content = $content[$key];
+          }
+          if($value == 'NULL') {
+            $r_answer_id = NULL;
+          } else {
+            $r_answer_id = $value;
+          }
+          if($is_email[$key] == 1)
+          {
+            $username = explode("@", $content[$key]);
+            $subscribers[] = array('email' => $content[$key], 'name' => $username[0]);
+          }
+
+          if(!empty($responseid))
+          {
+            $common->save('response_answer', $field = ['response_id' => $responseid,
+                                                       'test_question_id' => $testque_id[$key],
+                                                       'answer_id'  => $r_answer_id,
+                                                       'content'    => $r_content,
+                                                       'is_email'   => $is_email[$key]]);
+          }//End check $responseid
         }
+
+        $common->update('test_patient', $field = ['status' => 2, 'pat_working_by' => NULL], $condition = ['id' => $_GET['id'], 'patient_id' => $_SESSION['is_patient_login_id'], 'test_id' => $_GET['tid']]);
+        // Get List Mailer Lite By Test Id
+        $resultMailer = getMailerLiteByTestId($_GET['id']);
+        //fetch mailer lite
+        foreach ($resultMailer as $key => $value) {
+          $groupsApi = (new \MailerLiteApi\MailerLite($value['api_key']))->groups();
+
+          $mailerGroup = $common->find('mailerlite_group', $condition = ['transaction_id' => $value['transaction_id']], $type = 'all');
+          //fetch Mailer Lite Group
+          foreach ($mailerGroup as $k => $v) {
+            //Add mail to mailer lite
+            $groupsApi->importSubscribers($v['group_id'], $subscribers);
+          }
+        }
+
         //Clear sesson
         unset($_SESSION['tgroupid']);
-        header('Location:'.$patient_file.'?task=result&tid='.$_GET['tid'].'&id='.$_GET['id']);
+        header('Location:'.$patient_file.'?task=result_patient&tid='.$_GET['tid']);
         exit;
-      }
+      }//End Condition test no group
 
     }else {
       //Condition has test group
@@ -248,11 +313,18 @@ if('test_question' === $task)
   exit;
 }
 
+if('result_patient' === $task)
+{
+
+  $smarty_appform->assign('getTestById', $common->find('test', $condition = ['id' => $_GET['tid'], 'lang' => $lang], $type = 'one'));
+  $smarty_appform->display('common/test_result_patient.tpl');
+  exit;
+}
+
 if('test_save_draft' === $task)
 {
   if($_POST)
   {
-
     $test_id        = $common->clean_string($_POST['test_id']);
     $test_pat_id    = $common->clean_string($_POST['test_pat_id']);
     $test_que_data  = json_decode($_POST['test_que_data']);

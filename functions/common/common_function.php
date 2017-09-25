@@ -49,7 +49,32 @@ function auth($role_id, $task, $action = '')
 
  return $result;
 }
-
+/**
+ * getMailerLiteByTestId
+ * @param  int $testid is test_id
+ * @return array or boolean
+ */
+function getMailerLiteByTestId($testid)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT m.*, apit.id AS transaction_id FROM `apitransaction` apit INNER JOIN mailerlite m ON m.id = apit.ml_id WHERE apit.test_id = :test_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$testid, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetchAll();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getMailerLiteByTestId'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getStaffPermissionData
+ * @param  int $srid is staff role id
+ * @return array or boolean
+ */
 function getStaffPermissionData($srid)
 {
   global $debug, $connected;

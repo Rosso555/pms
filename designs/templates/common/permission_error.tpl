@@ -1,7 +1,7 @@
 {extends file="common/layout.tpl"}
 {block name="main"}
 <ul class="breadcrumb">
-  <li><a href="{$mode_file}">Home</a></li>
+  <li><a href="{$mode_file}"><i class="fa fa-fw fa-home"></i></a></li>
   <li class="active">Permission Error</li>
 </ul>
 

@@ -13,7 +13,7 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li><a href="{$patient_file}?task=bill"><i class="fa fa-usd" aria-hidden="true"></i> Bill</a></li>
+        <!-- <li><a href="{$patient_file}?task=bill"><i class="fa fa-usd" aria-hidden="true"></i> Bill</a></li> -->
 			</ul>
 
       <ul class="nav navbar-nav navbar-right">

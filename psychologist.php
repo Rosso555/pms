@@ -233,12 +233,12 @@ if('test_patient' === $task)
 //Task: Test Question
 if('test_question' === $task)
 {
-  $resultTestPsychologist = getCheckTestPatientByPsyChologist($_SESSION['is_psycho_login_id'], $_GET['pat_id'], $_GET['tid'], $_GET['id']);
-
-  if(empty($resultTestPsychologist)){
-    header('Location:'.$psychologist_file.'?task=page_not_found');
-    exit;
-  }
+  // $resultTestPsychologist = getCheckTestPatientByPsyChologist($_SESSION['is_psycho_login_id'], $_GET['pat_id'], $_GET['tid'], $_GET['id']);
+  //
+  // if(empty($resultTestPsychologist)){
+  //   header('Location:'.$psychologist_file.'?task=page_not_found');
+  //   exit;
+  // }
 
   if(!empty($_SESSION['testid'])){
     header('Location:'.$psychologist_file);
