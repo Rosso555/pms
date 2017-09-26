@@ -1018,7 +1018,7 @@ function getTestQuestionViewOrder($test_id)
               INNER JOIN question q ON q.id = tq.question_id
               LEFT JOIN group_answer ga ON ga.test_id = :test_id AND ga.test_question_id = tq.id
               LEFT JOIN test_question_view_order tqvo ON tqvo.test_id = :test_id AND tqvo.test_question_id = tq.id
-            WHERE tq.test_id = :test_id AND ga.test_question_id IS NULL OR ga.flag = 1 ';
+            WHERE tq.test_id = :test_id AND ga.test_question_id IS NULL AND ga.id IS NULL AND tqvo.id IS NULL ORDER BY tq.view_order ASC ';
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
     $query->execute();
@@ -1052,6 +1052,7 @@ function ListTestQuestion($tid, $lang)
     $newdata = array();
 
     if(!empty($rows)){
+
       foreach ($rows as $key => $va) {
         $result1 = getTestQuestionByTestQuesID($tid, $va['test_question_id'], $lang);
 
@@ -1083,7 +1084,7 @@ function ListTestQuestion($tid, $lang)
                           'answer'       => $dataanwser,
                           'group_answer' => $row2);
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
-        }else {
+        } else {
           $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
 
           $newdata[] = array('id'       => $result1['id'],
@@ -1120,6 +1121,7 @@ function ListTestQuestion($tid, $lang)
 
       foreach ($rTestQueNotViewOrder as $key => $va) {
         if(empty($va['tq_view_order_id'])){
+
           $result1 = getTestQuestionByTestQuesID($tid, $va['tqid'], $lang);
 
           if($result1['flag'] == 1){
@@ -1354,5 +1356,101 @@ function getTestTmpQuestion($tpat_id, $test_id)
   }
   return $result;
 }
+
+function getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    $sql= ' SELECT * FROM `test_question_view_order` WHERE test_id = :tid ORDER BY view_order ASC ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':tid', (int)$tid, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+
+    $newdata = array();
+
+    if(!empty($rows)){
+      foreach ($rows as $key => $va) {
+        $result1 = getTestQuestionByTestQuesID($tid, $va['test_question_id'], $lang);
+
+        if($result1['flag'] == 1){
+          $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
+
+          foreach ($row2 as $k => $va) {
+            $resultJumpto = getJumpToTestQuestionById($va['test_question_id']);
+
+            $newdata[] = array('id'       => $va['id'],
+                            'title'       => $va['title'],
+                            'description' => $va['description'],
+                            'type'        => $va['type'],
+                            'view_order'  => $va['view_order'],
+                            'test_question_id'  => $va['test_question_id'],
+                            'jump_to'     => $resultJumpto);
+          }//End foreach
+
+        } else {
+          $resultJumpto = getJumpToTestQuestionById($result1['test_question_id']);
+          $newdata[] = array('id'       => $result1['id'],
+                          'title'       => $result1['title'],
+                          'description' => $result1['description'],
+                          'type'        => $result1['type'],
+                          'view_order'  => $result1['view_order'],
+                          'test_question_id'  => $result1['test_question_id'],
+                          'jump_to'     => $resultJumpto);
+        }
+
+
+      }//End fetch rows
+    }
+    //Get Test Question No in View Order
+    $rTestQueNotViewOrder = getTestQuestionViewOrder($tid);
+
+    if(!empty($rTestQueNotViewOrder)){
+      foreach ($rTestQueNotViewOrder as $key => $va) {
+        if(empty($va['tq_view_order_id'])){
+          $result1 = getTestQuestionByTestQuesID($tid, $va['tqid'], $lang);
+          $resultJumpto = getJumpToTestQuestionById($va['tqid']);
+          $newdata[] = array('id'       => $result1['id'],
+                          'title'       => $result1['title'],
+                          'description' => $result1['description'],
+                          'type'        => $result1['type'],
+                          'view_order'  => $result1['view_order'],
+                          'test_question_id'  => $result1['test_question_id'],
+                          'jump_to'     => $resultJumpto);
+        }
+      }//End fetch rows
+    }
+
+    // print_r($newdata);
+    return $newdata;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListQuestionByViewOrderGroupNonGroup'.$e->getMessage();
+  }
+  return $result;
+
+}
+
+function getJumpToTestQuestionById($tqid)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT * FROM `answer` WHERE test_question_id = :tqid AND jump_to IS NOT NULL  ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':tqid', (int)$tqid, PDO::PARAM_INT);
+    $query->execute();
+
+    return $query->fetchAll();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getJumpToTestQuestionById'.$e->getMessage();
+  }
+
+  return $result;
+}
+
 
 ?>

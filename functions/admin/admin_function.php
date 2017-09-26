@@ -2010,11 +2010,13 @@ function checkDeleteMailerLite($id)
     $query = $connected->prepare($sql);
     $query->bindValue(':id', (int)$id, PDO::PARAM_INT);
     $query->execute();
+
     return $query->fetch();
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: checkDeleteMailerLite'.$e->getMessage();
   }
+
   return $result;
 }
 /**

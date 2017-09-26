@@ -55,6 +55,7 @@
               {if $va.answer}
               {foreach item=ans from=$va.answer name=foo}
                 <td>
+                {$ans.jump_to}
                 {if $va.type eq 3}
                   <label for="radio{$ans.id}_{$va.id}" class="radio-inline" style="margin-bottom: 10px;">
                     {if $smarty.foreach.foo.first}
@@ -65,21 +66,20 @@
                     <input type="hidden" id="raanswer_id{$va.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
                     <input type="hidden" id="racontent{$va.id}" name="content[]" value="NULL" disabled>
                     {/if}
-                    <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$va.id}" name="answer[{$va.id}]" class="check_value{$va.id}" value="{$ans.id|escape}" onclick="removeRequired({$va.id}, {$ans.id} , {$va.type}, {$ans.jump_to}, {$va.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
+                    <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$va.id}" name="answer[{$va.id}]" class="check_value{$va.id}" value="{$ans.id|escape}" onclick="removeRequired({$va.id}, {$ans.id} , {$va.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$va.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
                     {if $sessionAnswerIdError|@COUNT gt 0}{foreach from=$sessionAnswerIdError item=ansid}{if $ansid eq $ans.id}checked{/if}{/foreach} {else} {if $sessionAnswerId|@count gt 0}{foreach from=$sessionAnswerId item=d}{if $d eq $ans.id}checked{/if}{/foreach}{else}{if $va.is_required eq 1}required{/if}{/if}{/if}>
                   </label>
 
                 {elseif $va.type eq 4}
                   <label for="checkbox{$ans.id}_{$va.id}" class="checkbox-inline" style="margin-bottom: 10px;">
-                    {if $va.is_required eq 1}<input type="hidden" name="is_required[]" id="is_required{$ans.id}_{$va.id}" value="{$va.is_required|escape}"/>{/if}
-                    <input type="hidden" id="flag{$va.id}{$ans.id}" value="0">
+                    {if $va.is_required eq 1}<input type="hidden" name="is_required[]" class="chk_box_is_required{$v.id}" id="is_required{$va.id}" value="{$va.is_required|escape}"/>{/if}
                     <!-- hidden test_question_id -->
                     <input type="hidden" id="chk_tqid{$va.id}{$ans.id}" name="tq_id[]" value="{$va.test_question_id|escape}" disabled>
                     <input type="hidden" id="is_email{$va.id}{$ans.id}" name="is_email[]" value="{if $va.is_email eq 1}1{else}0{/if}" disabled>
                     <input type="hidden" id="answer_id{$va.id}{$ans.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
                     <input type="hidden" id="content{$va.id}{$ans.id}" name="content[]" value="NULL" disabled>
 
-                    <input style="margin-top: -4px;" type="checkbox" id="checkbox{$ans.id}_{$va.id}" name="answer[]" class="check_value{$va.id}" value="{$ans.id|escape}" onclick="removeRequired({$va.id}, {$ans.id} , {$va.type}, {$ans.jump_to}, {$va.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
+                    <input style="margin-top: -4px;" type="checkbox" id="checkbox{$ans.id}_{$va.id}" name="answer[]" class="check_box_value{$va.id}" value="{$ans.id|escape}" onclick="removeRequired({$va.id}, {$ans.id} , {$va.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$va.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
                     {if $sessionAnswerIdError|@COUNT gt 0}{foreach from=$sessionAnswerIdError item=ansid}{if $ansid eq $ans.id}checked{/if}{/foreach}{else} {if $sessionAnswerId|@count gt 0}{foreach from=$sessionAnswerId item=d}{if $d eq $ans.id}checked{/if}{/foreach}{else}{if $va.is_required eq 1}required{/if}{/if} {/if}>
 
                   </label>
@@ -95,7 +95,6 @@
         {/foreach}
       {/if}
 
-
       {else}
       <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
@@ -106,6 +105,7 @@
           <div style="margin-left: 5px;">
             <!-- fetch answer -->
             {foreach item=ans from=$v.answer name=foo}
+            {$ans.jump_to}
               {if $v.type eq 3}
               <div class="radio" >
                 <label for="radio{$ans.id}_{$v.id}" class="radio-inline" style="margin-bottom: 10px;">
@@ -113,12 +113,11 @@
                   {if $v.is_required eq 1}<input type="hidden" name="is_required[]" id="is_required{$v.id}" value="{$v.is_required|escape}"/>{/if}
                   <!-- hidden test_question_id -->
                   <input type="hidden" id="tq_id{$v.id}" name="tq_id[]" value="{$v.test_question_id|escape}" disabled>
-
                   <input type="hidden" id="rais_email{$v.id}" name="is_email[]" value="{if $v.is_email eq 1}1{else}0{/if}" disabled>
                   <input type="hidden" id="raanswer_id{$v.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
                   <input type="hidden" id="racontent{$v.id}" name="content[]" value="NULL" disabled>
                   {/if}
-                  <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$v.id}" name="answer[{$v.id}]" class="check_value{$v.id}" value="{$ans.id|escape}" onclick="removeRequired({$v.id}, {$ans.id}, {$v.type}, {$ans.jump_to}, {$v.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
+                  <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$v.id}" name="answer[{$v.id}]" class="check_value{$v.id}" value="{$ans.id|escape}" onclick="removeRequired({$v.id}, {$ans.id}, {$v.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$v.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
                   {if $sessionAnswerIdError|@COUNT gt 0}{foreach from=$sessionAnswerIdError item=ansid}{if $ansid eq $ans.id}checked{/if}{/foreach} {else} {if $sessionAnswerId|@count gt 0}{foreach from=$sessionAnswerId item=d}{if $d eq $ans.id}checked{/if}{/foreach}{else}{if $v.is_required eq 1}required{/if}{/if} {/if}>
 
                   <span style="line-height: 1.2;">{$ans.title}</span>
@@ -127,16 +126,14 @@
               {elseif $v.type eq 4}
               <div class="checkbox">
                 <label for="checkbox{$ans.id}_{$v.id}" class="checkbox-inline" style="margin-bottom: 10px;">
-                  {if $v.is_required eq 1}<input type="hidden" name="is_required[]" id="is_required{$ans.id}_{$v.id}" value="{$v.is_required|escape}"/>{/if}
-                  <input type="hidden" id="flag{$v.id}{$ans.id}" value="0">
+                  {if $v.is_required eq 1}<input type="hidden" name="is_required[]" class="chk_box_is_required{$v.id}" id="is_required{$v.id}" value="{$v.is_required|escape}"/>{/if}
                   <!-- hidden test_question_id -->
                   <input type="hidden" id="chk_tqid{$v.id}{$ans.id}" name="tq_id[]" value="{$v.test_question_id|escape}" disabled>
-
                   <input type="hidden" id="is_email{$v.id}{$ans.id}" name="is_email[]" value="{if $v.is_email eq 1}1{else}0{/if}" disabled>
                   <input type="hidden" id="answer_id{$v.id}{$ans.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
                   <input type="hidden" id="content{$v.id}{$ans.id}" name="content[]" value="NULL" disabled>
 
-                  <input style="margin-top: -4px;" type="checkbox" id="checkbox{$ans.id}_{$v.id}" name="answer[]" class="check_value{$v.id}" value="{$ans.id|escape}" onclick="removeRequired({$v.id}, {$ans.id}, {$v.type}, {$ans.jump_to}, {$v.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
+                  <input style="margin-top: -4px;" type="checkbox" id="checkbox{$ans.id}_{$v.id}" name="answer[]" class="check_box_value{$v.id}" value="{$ans.id|escape}" onclick="removeRequired({$v.id}, {$ans.id}, {$v.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$v.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
                   {if $sessionAnswerIdError|@COUNT gt 0}{foreach from=$sessionAnswerIdError item=ansid}{if $ansid eq $ans.id}checked{/if}{/foreach}{else} {if $sessionAnswerId|@count gt 0}{foreach from=$sessionAnswerId item=d}{if $d eq $ans.id}checked{/if}{/foreach}{else}{if $v.is_required eq 1}required{/if}{/if} {/if}>
 
                   <span style="line-height: 1.2;">{$ans.title}</span>
@@ -154,7 +151,6 @@
             {if $v.is_required eq 1}<input type="hidden" name="is_required[]" id="text_is_required_{$v.id}" value="{$v.is_required|escape}"/>{/if}
             <!-- hidden test_question_id -->
             <input type="hidden" id="tq_id_{$v.id}" name="tq_id[]" value="{$v.test_question_id|escape}" disabled>
-
             <input type="hidden" id="is_email_{$v.id}" name="is_email[]" value="{if $v.is_email eq 1}1{else}0{/if}" disabled>
             <input type="hidden" id="answer_id_{$v.id}" name="answer_id[]" value="NULL" disabled>
             <input type="hidden" id="content_{$v.id}" name="content[]" value="{foreach from=$sessionContent item=va}{if $va.id eq $ans.id}{$va.content}{/if}{/foreach}" disabled>
@@ -167,7 +163,6 @@
             {if $v.is_required eq 1}<input type="hidden" name="is_required[]" id="text_is_required_{$v.id}" value="{$v.is_required|escape}"/>{/if}
             <!-- hidden test_question_id -->
             <input type="hidden" id="tq_id_{$v.id}" name="tq_id[]" value="{$v.test_question_id|escape}" disabled>
-
             <input type="hidden" id="is_email_{$v.id}" name="is_email[]" value="{if $v.is_email eq 1}1{else}0{/if}" disabled>
             <input type="hidden" id="answer_id_{$v.id}" name="answer_id[]" value="NULL" disabled>
             <input type="hidden" id="content_{$v.id}" name="content[]" value="{foreach from=$sessionContent item=va}{if $va.id eq $ans.id}{$va.content}{/if}{/foreach}" disabled>
@@ -229,6 +224,12 @@
 {/block}
 {block name="javascript"}
 <script>
+var jump_to_value = {$ResultJumpTo};
+
+// {foreach from=$ResultJumpTo.12 item=v}
+//   jump_to_value.push({ chk_answer: check_bok_value[i].value });
+// {/foreach}
+
 $(document).ready( function()
 {
   //Run function when browser resizes
@@ -249,7 +250,6 @@ $(document).ready( function()
   }
   //Run function after finished loading
   resizeBrowser();
-
 
 });
 
@@ -300,7 +300,7 @@ function save_draft()
   }
 
 }
-
+//Event type on text input & textarea
 function checkvalue(e, field, id)
 {
     var text = $('#test'+id).val();
@@ -327,571 +327,74 @@ function checkvalue(e, field, id)
     $('#content_'+id).val(text);
 }
 
-//Remove Requeired and check jumping to
+//Remove Requeired and check box, radio & jumping to
 function removeRequired(id, ansid, type, jump_to, view_order, q_jumpto_view_order)
 {
+  // for check or uncheck
+  var chk_box = document.getElementById('checkbox'+ansid+'_'+id);
 
-  var flag = $("#flag"+id+ansid).val();
+  if(type == 4)
+  {
+    if(chk_box.checked == true)
+    {
+      //Action button check box
+      $('.chk_box_is_required'+id).val(0);
+      $('#chk_tqid'+id+ansid).removeAttr('disabled');
+      $('#is_email'+id+ansid).removeAttr('disabled');
+      $('#answer_id'+id+ansid).removeAttr('disabled');
+      $('#content'+id+ansid).removeAttr('disabled');
 
-  if(jump_to != 0){
-    //Set session
-    sessionStorage.setItem('jump_to'+id, jump_to);
-    sessionStorage.setItem('view_order'+id, view_order);
-    sessionStorage.setItem('q_jumpto_view_order'+id, q_jumpto_view_order);
+      $('#checkbox'+ansid+'_'+id).removeAttr('required');
+      $('.check_box_value'+id).removeAttr('required');
+    } else {
+      //Action button uncheck
+      $('#chk_tqid'+id+ansid).attr('disabled', true);
+      $('#is_email'+id+ansid).attr('disabled', true);
+      $('#answer_id'+id+ansid).attr('disabled', true);
+      $('#content'+id+ansid).attr('disabled', true);
+    }
   }
-  {if $test_group_id}
-    //Set session
-    sessionStorage.setItem('jump_to_group{$test_group_id}', jump_to);
-    sessionStorage.setItem('view_order_group{$test_group_id}', view_order);
-    sessionStorage.setItem('q_jumpto_view_order_group{$test_group_id}', q_jumpto_view_order);
-  {/if}
 
-  var check_value = document.getElementsByClassName('check_value'+id);
-  {foreach item = v from= $result key=id}
-    {if $v.flag eq 1}
+  if(type == 3)
+  {
+    $('#is_required'+id).val(0);
+    $('#tq_id'+id).removeAttr("disabled");
+    $('#rais_email'+id).removeAttr('disabled');
+    $('#raanswer_id'+id).removeAttr('disabled');
+    $('#racontent'+id).removeAttr('disabled');
+    $('#radio'+ansid+'_'+id).removeAttr("required");
+    $('#raanswer_id'+id).val(ansid);
+  }
+
+  var check_bok_value = document.getElementsByClassName('check_box_value'+id);
+  var chk_value = [];
+
+  for (var i=0; i<check_bok_value.length; i++) {
+    //Get checked value
+    if (check_bok_value[i].checked == true) {
+      chk_value.push({ chk_answer: check_bok_value[i].value });
+    }
+  }
+  //Add Requeired = 1 & required is true, if user uncheck
+  if(chk_value.length == 0)
+  {
+    $('.chk_box_is_required'+id).val(1);
+    $('.check_box_value'+id).attr('required', true);
+  }
+
+  if(jump_to > 0)
+  {
+    console.log(jump_to_value[jump_to].length);
+
+    for (var i = 0; i < jump_to_value[jump_to].length; i++) {
+      alert(jump_to_value[jump_to][i]);
+    }
+  }
 
-      {foreach item=g_v from= $v.group_answer key=id}
-        {if $g_v.id neq ''}
-          var check_value{$g_v.id} = [];
-          for (var i=0; i<check_value.length; i++) {
-          //Get checked box
-            if (check_value[i].checked) {
-              if(id == {$g_v.id}){
-                check_value{$g_v.id}.push({ answer_id: check_value[i].value });
-              }
-            }
-          }
-        {/if}
-      {/foreach}
-
-    {else}
-
-      var check_value{$v.id} = [];
-      for (var i=0; i<check_value.length; i++) {
-      //Get checked box
-        if (check_value[i].checked) {
-          if(id == {$v.id}){
-            check_value{$v.id}.push({ answer_id: check_value[i].value });
-          }
-        }
-      }
-
-    {/if}
-
-  {/foreach}
-  //Get session jumping to
-  var session_jump_to = sessionStorage.getItem('jump_to'+id);
-  var session_view_order = sessionStorage.getItem('view_order'+id);
-  var session_q_jumpto_view_order = sessionStorage.getItem('q_jumpto_view_order'+id);
-
-  //fetch question
-  {foreach item = v from= $result key=id}
-    {if $v.flag eq 1}
-
-      {if $v.group_answer|COUNT gt 0}
-        {foreach from=$v.group_answer item=g_v}
-            // fetch answer
-            {foreach item=g_value from=$g_v.answer}
-              //Check Add disabled jumping to
-              if({$g_v.view_order} > view_order && {$g_v.view_order} <= q_jumpto_view_order && q_jumpto_view_order != 0){
-                if(jump_to != {$g_v.id} && jump_to != 0){
-                  $("#required_{$g_v.id}").hide();
-
-                  {if $g_v.type == 1 || $g_v.type == 2}
-                    $('#is_required{$g_value.id}_{$g_v.id}').val(0);
-                    $('#tq_id{$g_v.id}').attr("disabled", "true");
-                    $("#test{$g_v.id}").attr("disabled", "true");
-                  {/if}
-
-                  {if $g_v.type == 3}
-                    $('#is_required{$g_v.id}').val(0);
-                    $('#tq_id{$g_v.id}').attr("disabled", "true");
-                    $("#radio{$g_value.id}_{$g_v.id}").attr("disabled", "true");
-                  {/if}
-
-                  {if $g_v.type == 4}
-                    $('#is_required{$g_value.id}_{$g_v.id}').val(0);
-                    $('#chk_tqid{$g_v.id}{$g_value.id}').attr("disabled", "true");
-                    $("#checkbox{$g_value.id}_{$g_v.id}").attr("disabled", "true");
-                  {/if}
-
-                }else {
-                  $("#required_{$g_v.id}").show();
-
-                  {if $g_v.type == 1 || $g_v.type == 2}
-                    $('#is_required{$g_value.id}_{$g_v.id}').val(1);
-                    $('#tq_id{$g_v.id}').removeAttr("disabled");
-                    $("#test{$g_v.id}").removeAttr("disabled");
-                  {/if}
-
-                  {if $g_v.type == 3}
-                    $('#is_required{$g_v.id}').val(1);
-                    $('#tq_id{$g_v.id}').removeAttr("disabled");
-                    $("#radio{$g_value.id}_{$g_v.id}").removeAttr("disabled");
-                  {/if}
-
-                  {if $g_v.type == 4}
-                    $('#is_required{$g_value.id}_{$g_v.id}').val(1);
-                    $('#chk_tqid{$g_v.id}{$g_value.id}').removeAttr("disabled");
-                    $("#checkbox{$g_value.id}_{$g_v.id}").removeAttr("disabled");
-                  {/if}
-                }
-              }
-              //Clear all input disabled
-              if({$g_v.view_order} > view_order && {$g_v.view_order} <= session_q_jumpto_view_order && q_jumpto_view_order == 0 && jump_to == 0){
-                //Get session jumping to
-                var session_jump_to1 = sessionStorage.getItem('jump_to{$g_v.id}');
-                var session_view_order1 = sessionStorage.getItem('view_order{$g_v.id}');
-                var session_q_jumpto_view_order1 = sessionStorage.getItem('q_jumpto_view_order{$g_v.id}');
-
-                if(session_jump_to1 != {$g_v.id} && session_jump_to1 != null){
-                  //Set session
-                  sessionStorage.setItem('sess_jump_to_view_order', session_q_jumpto_view_order1);
-                  sessionStorage.setItem('sess_view_order', session_view_order1);
-                  $("#required_{$g_v.id}").show();
-
-                  {if $g_v.type == 1 || $g_v.type == 2}
-                    $('#is_required{$g_value.id}_{$g_v.id}').val(1);
-                    $('#tq_id{$g_v.id}').removeAttr("disabled");
-                    $("#test{$g_v.id}").removeAttr("disabled");
-                  {/if}
-
-                  {if $g_v.type == 3}
-                    $('#is_required{$g_v.id}').val(1);
-                    $('#tq_id{$g_v.id}').removeAttr("disabled");
-                    $("#radio{$g_value.id}_{$g_v.id}").removeAttr("disabled");
-                  {/if}
-
-                  {if $g_v.type == 4}
-                    $('#is_required{$g_value.id}_{$g_v.id}').val(1);
-                    $('#chk_tqid{$g_v.id}{$g_value.id}').removeAttr("disabled");
-                    $("#checkbox{$g_value.id}_{$g_v.id}").removeAttr("disabled");
-                  {/if}
-
-                }else {
-                  // Get session jumping to
-                  var sess_jump_to_view_order = sessionStorage.getItem('sess_jump_to_view_order');
-                  var sess_view_order = sessionStorage.getItem('sess_view_order');
-
-                  if({$g_v.view_order} > sess_view_order && {$g_v.view_order} <= sess_jump_to_view_order && sess_jump_to_view_order != null){
-                    $("#required_{$g_v.id}").hide();
-
-                    {if $g_v.type == 1 || $g_v.type == 2}
-                      $('#is_required{$g_value.id}_{$g_v.id}').val(0);
-                      $('#tq_id{$g_v.id}').attr("disabled", "true");
-                      $("#test{$g_v.id}").attr("disabled", "true");
-                    {/if}
-
-                    {if $g_v.type == 3}
-                      $('#is_required{$g_v.id}').val(0);
-                      $('#tq_id{$g_v.id}').attr("disabled", "true");
-                      $("#radio{$g_value.id}_{$g_v.id}").attr("disabled", "true");
-                    {/if}
-
-                    {if $g_v.type == 4}
-                      $('#is_required{$g_value.id}_{$g_v.id}').val(0);
-                      $('#chk_tqid{$g_v.id}{$g_value.id}').attr("disabled", "true");
-                      $("#checkbox{$g_value.id}_{$g_v.id}").attr("disabled", "true");
-                    {/if}
-
-                  }else {
-                    $("#required_{$g_v.id}").show();
-
-                    {if $g_v.type == 1 || $g_v.type == 2}
-                      $('#is_required{$g_value.id}_{$g_v.id}').val(1);
-                      $('#tq_id{$g_v.id}').removeAttr("disabled");
-                      $("#test{$g_v.id}").removeAttr("disabled");
-                    {/if}
-
-                    {if $g_v.type == 3}
-                      $('#is_required{$g_v.id}').val(1);
-                      $('#tq_id{$g_v.id}').removeAttr("disabled");
-                      $("#radio{$g_value.id}_{$g_v.id}").removeAttr("disabled");
-                    {/if}
-
-                    {if $g_v.type == 4}
-                      $("#flag"+id+ansid).val(0);
-                      $('#is_required{$g_value.id}_{$g_v.id}').val(1);
-                      $('#chk_tqid{$g_v.id}{$g_value.id}').removeAttr("disabled");
-                      $("#checkbox{$g_value.id}_{$g_v.id}").removeAttr("disabled");
-                    {/if}
-                  }
-                }
-              }
-              //Remove Required
-              {if $g_v.type == 4}
-                if(check_value{$g_v.id}.length == 0){
-                  $("#flag"+id+"{$g_value.id}").val(0);
-                  $('#is_required{$g_value.id}_'+id).val(1);
-                  $("#checkbox{$g_value.id}_"+id).attr("required", "true");
-
-                  //Action button check box
-                  $('#answer_id'+id+'{$g_value.id}').attr('disabled', 'true');
-                  $('#content'+id+'{$g_value.id}').attr('disabled', 'true');
-                  $('#is_email'+id+'{$g_value.id}').attr('disabled', 'true');
-                  $('#chk_tqid'+id+'{$g_value.id}').attr('disabled', 'true');
-                }else {
-                  if(flag == 0){
-                    $("#flag"+id+ansid).val(1);
-                    //Action button check box
-                    $('#answer_id'+id+ansid).removeAttr('disabled');
-                    $('#content'+id+ansid).removeAttr('disabled');
-                    $('#is_email'+id+ansid).removeAttr('disabled');
-                    $('#chk_tqid'+id+ansid).removeAttr('disabled');
-                  }else {
-                    $("#flag"+id+ansid).val(0);
-                    //Action button check box
-                    $('#answer_id'+id+ansid).attr('disabled', 'true');
-                    $('#content'+id+ansid).attr('disabled', 'true');
-                    $('#is_email'+id+ansid).attr('disabled', 'true');
-                    $('#chk_tqid'+id+ansid).attr('disabled', 'true');
-                  }
-                  $("#is_required{$g_value.id}_"+id).val(0);
-                  $("#checkbox{$g_value.id}_"+id).removeAttr("required");
-                }
-              {/if}
-
-              {if $g_v.type == 3}
-                $('#is_required'+id).val(0);
-                // $('#tq_id{$v.id}').removeAttr("disabled");
-                $("#radio{$g_value.id}_"+id).removeAttr("required");
-              {/if}
-
-            {/foreach} //end fetch answer
-        {/foreach}
-      {/if}
-
-    {else}
-      //fetch answer
-      {foreach item=value from=$v.answer}
-        //Check Add disabled jumping to
-        if({$v.view_order} > view_order && {$v.view_order} <= q_jumpto_view_order && q_jumpto_view_order != 0){
-          if(jump_to != {$v.id} && jump_to != 0){
-            $("#required_{$v.id}").hide();
-
-            {if $v.type == 1 || $v.type == 2}
-              $('#is_required{$value.id}_{$v.id}').val(0);
-              $('#tq_id{$v.id}').attr("disabled", "true");
-              $("#test{$v.id}").attr("disabled", "true");
-            {/if}
-
-            {if $v.type == 3}
-              $('#is_required{$v.id}').val(0);
-              $('#tq_id{$v.id}').attr("disabled", "true");
-              $("#radio{$value.id}_{$v.id}").attr("disabled", "true");
-            {/if}
-
-            {if $v.type == 4}
-              $('#is_required{$value.id}_{$v.id}').val(0);
-              $('#chk_tqid{$v.id}{$value.id}').attr("disabled", "true");
-              $("#checkbox{$value.id}_{$v.id}").attr("disabled", "true");
-            {/if}
-
-          }else {
-            $("#required_{$v.id}").show();
-
-            {if $v.type == 1 || $v.type == 2}
-              $('#is_required{$value.id}_{$v.id}').val(1);
-              $('#tq_id{$v.id}').removeAttr("disabled");
-              $("#test{$v.id}").removeAttr("disabled");
-            {/if}
-
-            {if $v.type == 3}
-              $('#is_required{$v.id}').val(1);
-              $('#tq_id{$v.id}').removeAttr("disabled");
-              $("#radio{$value.id}_{$v.id}").removeAttr("disabled");
-            {/if}
-
-            {if $v.type == 4}
-              $('#is_required{$value.id}_{$v.id}').val(1);
-              $('#chk_tqid{$v.id}{$value.id}').removeAttr("disabled");
-              $("#checkbox{$value.id}_{$v.id}").removeAttr("disabled");
-            {/if}
-          }
-        }
-        //Clear all input disabled
-        if({$v.view_order} > view_order && {$v.view_order} <= session_q_jumpto_view_order && q_jumpto_view_order == 0 && jump_to == 0){
-          //Get session jumping to
-          var session_jump_to1 = sessionStorage.getItem('jump_to{$v.id}');
-          var session_view_order1 = sessionStorage.getItem('view_order{$v.id}');
-          var session_q_jumpto_view_order1 = sessionStorage.getItem('q_jumpto_view_order{$v.id}');
-
-          if(session_jump_to1 != {$v.id} && session_jump_to1 != null){
-            //Set session
-            sessionStorage.setItem('sess_jump_to_view_order', session_q_jumpto_view_order1);
-            sessionStorage.setItem('sess_view_order', session_view_order1);
-            $("#required_{$v.id}").show();
-
-            {if $v.type == 1 || $v.type == 2}
-              $('#is_required{$value.id}_{$v.id}').val(1);
-              $('#tq_id{$v.id}').removeAttr("disabled");
-              $("#test{$v.id}").removeAttr("disabled");
-            {/if}
-
-            {if $v.type == 3}
-              $('#is_required{$v.id}').val(1);
-              $('#tq_id{$v.id}').removeAttr("disabled");
-              $("#radio{$value.id}_{$v.id}").removeAttr("disabled");
-            {/if}
-
-            {if $v.type == 4}
-              $('#is_required{$value.id}_{$v.id}').val(1);
-              $('#chk_tqid{$v.id}{$value.id}').removeAttr("disabled");
-              $("#checkbox{$value.id}_{$v.id}").removeAttr("disabled");
-            {/if}
-
-          }else {
-            // Get session jumping to
-            var sess_jump_to_view_order = sessionStorage.getItem('sess_jump_to_view_order');
-            var sess_view_order = sessionStorage.getItem('sess_view_order');
-
-            if({$v.view_order} > sess_view_order && {$v.view_order} <= sess_jump_to_view_order && sess_jump_to_view_order != null){
-              $("#required_{$v.id}").hide();
-
-              {if $v.type == 1 || $v.type == 2}
-                $('#is_required{$value.id}_{$v.id}').val(0);
-                $('#tq_id{$v.id}').attr("disabled", "true");
-                $("#test{$v.id}").attr("disabled", "true");
-              {/if}
-
-              {if $v.type == 3}
-                $('#is_required{$v.id}').val(0);
-                $('#tq_id{$v.id}').attr("disabled", "true");
-                $("#radio{$value.id}_{$v.id}").attr("disabled", "true");
-              {/if}
-
-              {if $v.type == 4}
-                $('#is_required{$value.id}_{$v.id}').val(0);
-                $('#chk_tqid{$v.id}{$value.id}').attr("disabled", "true");
-                $("#checkbox{$value.id}_{$v.id}").attr("disabled", "true");
-              {/if}
-
-            }else {
-              $("#required_{$v.id}").show();
-
-              {if $v.type == 1 || $v.type == 2}
-                $('#is_required{$value.id}_{$v.id}').val(1);
-                $('#tq_id{$v.id}').removeAttr("disabled");
-                $("#test{$v.id}").removeAttr("disabled");
-              {/if}
-
-              {if $v.type == 3}
-                $('#is_required{$v.id}').val(1);
-                $('#tq_id{$v.id}').removeAttr("disabled");
-                $("#radio{$value.id}_{$v.id}").removeAttr("disabled");
-              {/if}
-
-              {if $v.type == 4}
-                $("#flag"+id+ansid).val(0);
-                $('#is_required{$value.id}_{$v.id}').val(1);
-                $('#chk_tqid{$v.id}{$value.id}').removeAttr("disabled");
-                $("#checkbox{$value.id}_{$v.id}").removeAttr("disabled");
-              {/if}
-            }
-          }
-        }
-        //Remove Required
-        {if $v.type == 4}
-          if(check_value{$v.id}.length == 0){
-            $("#flag"+id+"{$value.id}").val(0);
-            $('#is_required{$value.id}_'+id).val(1);
-            $("#checkbox{$value.id}_"+id).attr("required", "true");
-
-            //Action button check box
-            $('#answer_id'+id+'{$value.id}').attr('disabled', 'true');
-            $('#content'+id+'{$value.id}').attr('disabled', 'true');
-            $('#is_email'+id+'{$value.id}').attr('disabled', 'true');
-            $('#chk_tqid'+id+'{$value.id}').attr('disabled', 'true');
-          }else {
-            if(flag == 0){
-              $("#flag"+id+ansid).val(1);
-              //Action button check box
-              $('#answer_id'+id+ansid).removeAttr('disabled');
-              $('#content'+id+ansid).removeAttr('disabled');
-              $('#is_email'+id+ansid).removeAttr('disabled');
-              $('#chk_tqid'+id+ansid).removeAttr('disabled');
-            }else {
-              $("#flag"+id+ansid).val(0);
-              //Action button check box
-              $('#answer_id'+id+ansid).attr('disabled', 'true');
-              $('#content'+id+ansid).attr('disabled', 'true');
-              $('#is_email'+id+ansid).attr('disabled', 'true');
-              $('#chk_tqid'+id+ansid).attr('disabled', 'true');
-            }
-            $("#is_required{$value.id}_"+id).val(0);
-            $("#checkbox{$value.id}_"+id).removeAttr("required");
-          }
-        {/if}
-
-        {if $v.type == 3}
-          $('#is_required'+id).val(0);
-          // $('#tq_id{$v.id}').removeAttr("disabled");
-          $("#radio{$value.id}_"+id).removeAttr("required");
-        {/if}
-
-      {/foreach} //end fetch answer
-    {/if}
-
-  {/foreach} //fetch question
-
-  //Action button radio
-  $('#raanswer_id'+id).removeAttr('disabled');
-  $('#racontent'+id).removeAttr('disabled');
-  $('#rais_email'+id).removeAttr('disabled');
-  $('#raanswer_id'+id).val(ansid);
-
-  $('#tq_id'+id).removeAttr('disabled');
-
-}
-//if error submit
-function sessionAnswerId(){
-
-  {if $sessionAnswerIdError|@count gt 0}
-    //fetch question
-    {foreach item=v from=$result key=id}
-      {if $v.flag eq 1}
-
-        {foreach item=g_v from= $v.group_answer key=id}
-          //fetch answer
-          {foreach item=g_value from=$g_v.answer}
-            //fetch sessionAnswerIdError
-            {foreach from=$sessionAnswerIdError item=ansid}
-              {if $g_value.id eq $ansid}
-                {if $g_v.type == 3}
-                  $('#is_required{$g_v.id}').val(0);
-                  $('#tq_id{$g_v.id}').removeAttr("disabled");
-                  $("#radio{$ansid}_{$g_v.id}").removeAttr("required");
-                {/if}
-
-                {if $g_v.type == 4}
-                  {foreach item=g_value from=$g_v.answer}
-                    $('#is_required{$g_value.id}_{$g_v.id}').val(0);
-                  {/foreach}
-
-                  $('#chk_tqid{$g_v.id}{$ansid}').removeAttr("disabled");
-                  $("#checkbox{$ansid}_{$g_v.id}").removeAttr("required");
-
-                  $("#flag{$g_v.id}{$ansid}").val(1);
-                  //Action button check box
-                  $('#answer_id{$g_v.id}{$ansid}').removeAttr('disabled');
-                  $('#content{$g_v.id}{$ansid}').removeAttr('disabled');
-                  $('#is_email{$g_v.id}{$ansid}').removeAttr('disabled');
-                  $('#chk_tqid{$g_v.id}{$ansid}').removeAttr('disabled');
-                {/if}
-
-                //Action button radio
-                $('#raanswer_id{$g_v.id}').removeAttr('disabled');
-                $('#racontent{$g_v.id}').removeAttr('disabled');
-                $('#rais_email{$g_v.id}').removeAttr('disabled');
-                $('#raanswer_id{$g_v.id}').val({$ansid});
-              {/if}
-            {/foreach}//endfetch sessionAnswerIdError
-          {/foreach}//end fetch answer
-        {/foreach}
-      {else}
-        //fetch answer
-        {foreach item=value from=$v.answer}
-
-          {foreach from=$sessionAnswerIdError item=ansid}
-            {if $value.id eq $ansid}
-
-              {if $v.type == 3}
-                $('#is_required{$v.id}').val(0);
-                $('#tq_id{$v.id}').removeAttr("disabled");
-                $("#radio{$ansid}_{$v.id}").removeAttr("required");
-              {/if}
-
-              {if $v.type == 4}
-                {foreach item=value from=$v.answer}
-                  $('#is_required{$value.id}_{$v.id}').val(0);
-                {/foreach}
-
-                $('#chk_tqid{$v.id}{$ansid}').removeAttr("disabled");
-                $("#checkbox{$ansid}_{$v.id}").removeAttr("required");
-
-                $("#flag{$v.id}{$ansid}").val(1);
-                //Action button check box
-                $('#answer_id{$v.id}{$ansid}').removeAttr('disabled');
-                $('#content{$v.id}{$ansid}').removeAttr('disabled');
-                $('#is_email{$v.id}{$ansid}').removeAttr('disabled');
-                $('#chk_tqid{$v.id}{$ansid}').removeAttr('disabled');
-
-              {/if}
-
-              //Action button radio
-              $('#raanswer_id{$v.id}').removeAttr('disabled');
-              $('#racontent{$v.id}').removeAttr('disabled');
-              $('#rais_email{$v.id}').removeAttr('disabled');
-              $('#raanswer_id{$v.id}').val({$ansid});
-            {/if}
-          {/foreach}//end fetch sessionAnswerIdError
-
-        {/foreach}//end fetch answer
-
-      {/if}
-
-    {/foreach}
-  {/if}
-
-  {if $contentError|@count gt 0}
-    {foreach from=$contentError item=va}
-      {if $va.content neq 'NULL'}
-        $('#tq_id{$va.tqid}').removeAttr('disabled');
-        $('#answer_id{$va.tqid}').removeAttr('disabled');
-        $('#content{$va.tqid}').removeAttr('disabled');
-        $('#is_email{$va.tqid}').removeAttr('disabled');
-        $('#text_is_required{$va.tqid}').val(0);
-        $('#content{$va.tqid}').val("{$va.content}");
-        $('#test{$va.tqid}').val("{$va.content}");
-
-      {/if}
-    {/foreach}
-
-  {/if}
-
-}
-
-// Remove saved data from sessionStorage
-function clear_session_jump_to()
-{
-  {foreach item = v from= $result key=id}
-    {if $test_group_id eq '' OR $error}
-      sessionStorage.removeItem('jump_to{$v.id}');
-      sessionStorage.removeItem('view_order{$v.id}');
-      sessionStorage.removeItem('q_jumpto_view_order{$v.id}');
-    {/if}
-  {/foreach}
-  sessionStorage.removeItem('sess_jump_to_view_order');
-  sessionStorage.removeItem('sess_view_order');
-
-  {if $error}
-  sessionStorage.removeItem('jump_to_group{$test_group_id|escape}');
-  sessionStorage.removeItem('view_order_group{$test_group_id|escape}');
-  {/if}
 }
 
 window.onload = function(e)
 {
-  clear_session_jump_to();
-  session_jumping_to();
-  sessionAnswerId();
-  // check_value();
-
-  {foreach item = v from= $result key=id}
-    {if $error}
-      // Remove saved data from sessionStorage
-      sessionStorage.removeItem('session_jump_to{$v.id}');
-    {/if}
-  {/foreach}
-
-  {if $error}
-    {foreach from=$testQueGroup item=va}
-      // Remove saved data from sessionStorage
-      sessionStorage.removeItem('jump_to{$va.id}');
-      sessionStorage.removeItem('view_order{$va.id}');
-    {/foreach}
-  {/if}
-
   //Save draft: if has do it
   {if $testTmpQuestion|@COUNT gt 0}
     {foreach from=$testTmpQuestion item=v}
@@ -919,9 +422,7 @@ window.onload = function(e)
 
       {if $v.type == 4}
         //Action button check box
-        $('#is_required{$v.answer_id}_{$v.tqid}').val(0);
-        $("#flag{$v.tqid}{$v.answer_id}").val(1);
-
+        $('.chk_box_is_required{$v.tqid}').val(0);
         $('#chk_tqid{$v.tqid}{$v.answer_id}').removeAttr("disabled");
         $('#is_email{$v.tqid}{$v.answer_id}').removeAttr('disabled');
         $('#answer_id{$v.tqid}{$v.answer_id}').removeAttr('disabled');
@@ -929,7 +430,7 @@ window.onload = function(e)
 
         $("#checkbox{$v.answer_id}_{$v.tqid}").removeAttr("required");
         $("#checkbox{$v.answer_id}_{$v.tqid}").attr('checked', true);
-
+        $('.check_box_value{$v.tqid}').removeAttr('required');
       {/if}
 
     {/foreach}
@@ -937,201 +438,9 @@ window.onload = function(e)
 
 }
 
-function check_value(){
-
-  {foreach item = v from= $result key=id}
-    {if $v.is_required eq 1}
-      var check_value = document.getElementsByClassName('check_value{$v.id}');
-
-      var check_value{$v.id} = [];
-
-      for (var i=0; i<check_value.length; i++) {
-        //Get checked value
-        if (check_value[i].checked && check_value[i].value > 0) {
-          check_value{$v.id}.push({ answer: check_value[i].value });
-        }
-        if({$v.type} == 1 || {$v.type} == 2){
-          if(check_value[i].value != ''){
-            check_value{$v.id}.push({ answer: check_value[i].value });
-          }
-        }
-      }
-
-      //fetch answer
-      {foreach item=value from=$v.answer key=k}
-        //Remove Required
-        if(check_value{$v.id}.length == 0){
-          $('#is_required{$value.id}_{$v.id}').val(1);
-          $("#checkbox{$value.id}_{$v.id}").attr("required", "true");
-          $("#radio{$value.id}_{$v.id}").attr("required", "true");
-          $('#answer{$v.id}').attr('disabled','disabled');
-          $('#answer_id{$v.id}').attr('disabled','disabled');
-          $('#content{$v.id}').attr('disabled','disabled');
-          $('#is_email{$v.id}').attr('disabled','disabled');
-        }else {
-
-          $('#is_required{$value.id}_{$v.id}').val(0);
-          $("#checkbox{$value.id}_{$v.id}").removeAttr("required");
-          $("#radio{$value.id}_{$v.id}").removeAttr("required");
-          $('#answer{$v.id}').removeAttr('disabled');
-          $('#answer_id{$v.id}').removeAttr('disabled');
-          $('#content{$v.id}').removeAttr('disabled');
-          $('#is_email{$v.id}').removeAttr('disabled');
-          //Action button radio
-          $('#raanswer_id{$v.id}').removeAttr('disabled');
-          $('#racontent{$v.id}').removeAttr('disabled');
-          $('#rais_email{$v.id}').removeAttr('disabled');
-          //Action button check box
-          $('#answer_id{$v.id}{$value.id}').removeAttr('disabled');
-          $('#content{$v.id}{$value.id}').removeAttr('disabled');
-          $('#is_email{$v.id}{$value.id}').removeAttr('disabled');
-        }
-
-      {/foreach}
-
-    {/if}
-  {/foreach}
-
-}
-
-function session_jumping_to()
+//Remove Requeired: When check box has one or two check
+function check_value()
 {
-  var jump_to = sessionStorage.getItem('jump_to_group{$test_group_id}');
-  var view_order = sessionStorage.getItem('view_order_group{$test_group_id}');
-
-  {if $sessionAnswerId|@count gt 0}
-    //fetch question
-    {foreach item = v from= $result key=id}
-      {if $v.flag eq 1}
-
-        {foreach item=g_v from= $v.group_answer key=id}
-          //fetch answer
-          {foreach item=g_value from=$g_v.answer}
-            //fetch sessionAnswerIdError
-            {foreach from=$sessionAnswerId item=ansid}
-              {if $g_value.id eq $ansid}
-                {if $g_v.type == 3}
-                  $('#is_required{$g_v.id}').val(0);
-                  $('#tq_id{$g_v.id}').removeAttr("disabled");
-                  $("#radio{$ansid}_{$g_v.id}").removeAttr("required");
-                {/if}
-
-                {if $g_v.type == 4}
-                  $('#is_required{$ansid}_{$g_v.id}').val(0);
-                  $('#chk_tqid{$g_v.id}{$ansid}').removeAttr("disabled");
-                  $("#checkbox{$ansid}_{$g_v.id}").removeAttr("required");
-
-                  $("#flag{$g_v.id}{$ansid}").val(1);
-                  //Action button check box
-                  $('#answer_id{$g_v.id}{$ansid}').removeAttr('disabled');
-                  $('#content{$g_v.id}{$ansid}').removeAttr('disabled');
-                  $('#is_email{$g_v.id}{$ansid}').removeAttr('disabled');
-                  $('#chk_tqid{$g_v.id}{$ansid}').removeAttr('disabled');
-                {/if}
-
-                //Action button radio
-                $('#raanswer_id{$g_v.id}').removeAttr('disabled');
-                $('#racontent{$g_v.id}').removeAttr('disabled');
-                $('#rais_email{$g_v.id}').removeAttr('disabled');
-                $('#raanswer_id{$g_v.id}').val({$ansid});
-              {/if}
-            {/foreach}//endfetch sessionAnswerIdError
-          {/foreach}//end fetch answer
-        {/foreach}
-
-      {else}
-        //fetch answer
-        {foreach item=value from=$v.answer}
-
-          {foreach from=$sessionAnswerIdError item=ansid}
-            {if $value.id eq $ansid}
-
-              {if $v.type == 3}
-                $('#is_required{$v.id}').val(0);
-                $('#tq_id{$v.id}').removeAttr("disabled");
-                $("#radio{$ansid}_{$v.id}").removeAttr("required");
-              {/if}
-
-              {if $v.type == 4}
-                $('#is_required{$ansid}_{$v.id}').val(0);
-                $('#chk_tqid{$v.id}{$ansid}').removeAttr("disabled");
-                $("#checkbox{$ansid}_{$v.id}").removeAttr("required");
-              {/if}
-
-              //Action button radio
-              $('#raanswer_id{$v.id}').removeAttr('disabled');
-              $('#racontent{$v.id}').removeAttr('disabled');
-              $('#rais_email{$v.id}').removeAttr('disabled');
-              $('#raanswer_id{$v.id}').val({$ansid});
-            {/if}
-          {/foreach}//end fetch sessionAnswerIdError
-
-        {/foreach}//end fetch answer
-
-      {/if}
-
-    {/foreach}
-
-    {if $sessionContentBack|@count gt 0}
-      {foreach from=$sessionContentBack item=va}
-        {if $va.content neq 'NULL'}
-          $('#tq_id{$va.tqid}').removeAttr('disabled');
-          $('#answer_id{$va.tqid}').removeAttr('disabled');
-          $('#content{$va.tqid}').removeAttr('disabled');
-          $('#is_email{$va.tqid}').removeAttr('disabled');
-          $('#text_is_required{$va.tqid}').val(0);
-          $('#content{$va.tqid}').val("{$va.content}");
-          $('#test{$va.tqid}').val("{$va.content}");
-
-        {/if}
-      {/foreach}
-
-    {/if}
-
-  {else}
-
-    {foreach from=$testQueGroup item=va}
-    // sessionStorage.setItem('q_jumpto_view_order_group{$test_group_id}', q_jumpto_view_order);
-      var jump_to = sessionStorage.getItem('jump_to_group{$va.id|escape}');
-      var view_order = sessionStorage.getItem('view_order_group{$va.id|escape}');
-      var q_jumpto_view_order = sessionStorage.getItem('q_jumpto_view_order_group{$va.id|escape}');
-      //fetch question check get view_order
-      {foreach item = v from= $result key=id}
-        {if $v.id neq ''}
-          if(jump_to == {$v.id}) view_order = {$v.view_order};
-        {/if}
-      {/foreach}
-
-      if(q_jumpto_view_order != null){
-        //fetch question
-        {foreach item = v from= $result key=id}
-          //fetch answer
-          {foreach item=value from=$v.answer}
-            if({$v.view_order} < q_jumpto_view_order){
-              $("#required_{$v.id}").hide();
-
-              {if $v.type == 1 || $v.type == 2}
-                $('#is_required{$value.id}_{$v.id}').val(0);
-                $("#test{$v.id}").attr("disabled", "true");
-              {/if}
-
-              {if $v.type == 3}
-                $('#is_required{$value.id}_{$v.id}').val(0);
-                $("#radio{$value.id}_{$v.id}").attr("disabled", "true");
-              {/if}
-
-              {if $v.type == 4}
-                $('#is_required{$value.id}_{$v.id}').val(0);
-                $("#checkbox{$value.id}_{$v.id}").attr("disabled", "true");
-              {/if}
-            }
-          {/foreach}
-        {/foreach}
-      }
-    {/foreach}
-  {/if}
-
-
 
 }
 

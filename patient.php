@@ -281,6 +281,26 @@ if('test_question' === $task)
     }
   }
 
+
+  $resultsJumpTo = getListQuestionByViewOrderGroupNonGroupJumpTo($_GET['tid'], $lang);
+
+  $newResultJumpTo = [];
+
+  foreach ($resultsJumpTo as $key => $value)
+  {
+    if($key > 2)
+    {
+      if($value['test_question_id'] != 12)
+      {
+        $newResultJumpTo['12'][] = $value['test_question_id'];echo "<br>";
+      } else {
+        break;
+      }
+    }
+  }
+
+  // var_dump($newResultJumpTo);
+
   if(empty($result) && COUNT($result) === 0 && empty($getTestByID)){
     header('Location:'.$patient_file.'?task=page_not_found');
     exit;
@@ -294,6 +314,7 @@ if('test_question' === $task)
   }
 
   $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('ResultJumpTo', json_encode($newResultJumpTo));
   $smarty_appform->assign('sumAnswerCol', $sumAnswerCol);
   $smarty_appform->assign('testTmpQuestion', getTestTmpQuestion($_GET['id'], $_GET['tid']));
   $smarty_appform->assign('totalAnswer', $total_data);

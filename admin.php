@@ -1804,13 +1804,18 @@ if('jump_to' === $task)
     exit;
   }
 
-  $result_test_question = $common->find('test_question', $condition = ['id' => $_GET['tqid']], $type = 'one');
+  $results = getListQuestionByViewOrderGroupNonGroupJumpTo($_GET['tid'], $lang);
 
-  $smarty_appform->assign('listTestQuestion', getListTestQuestion('', $_GET['tid'], '', '', $lang, $slimit = ''));
+  $currentViewOrder = 0;
+  foreach ($results as $k => $va) {
+    if($va['test_question_id'] === $_GET['tqid']) $currentViewOrder = $k;
+  }
+
+  // $smarty_appform->assign('listTestQuestion', getListTestQuestion('', $_GET['tid'], '', '', $lang, $slimit = ''));
+  $smarty_appform->assign('listTestQuestion', $results);
   $smarty_appform->assign('answer', $common->find('answer', $condition = ['id' => $_GET['ans_id']], $type = 'one'));
   $smarty_appform->assign('question', $common->find('question', $condition = ['id' => $_GET['qid'], 'lang' => $lang], $type = 'one'));
-  $smarty_appform->assign('test_question', $result_test_question);
-  $smarty_appform->assign('getCheckViewOrder', getCheckViewOrder($_GET['tid'], $result_test_question['view_order']));
+  $smarty_appform->assign('currentViewOrder', $currentViewOrder);
   $smarty_appform->assign('question_jump_to', getListQuestionJumpTo($_GET['ans_id']));
   $smarty_appform->display('admin/admin_jump_to.tpl');
   exit;
