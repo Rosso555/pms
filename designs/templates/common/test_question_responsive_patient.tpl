@@ -65,6 +65,7 @@
                     <input type="hidden" id="rais_email{$va.id}" name="is_email[]" value="{if $va.is_email eq 1}1{else}0{/if}" disabled>
                     <input type="hidden" id="raanswer_id{$va.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
                     <input type="hidden" id="racontent{$va.id}" name="content[]" value="NULL" disabled>
+                    <input type="hidden" id="jumping_to{$v.id}" value="0">
                     {/if}
                     <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$va.id}" name="answer[{$va.id}]" class="check_value{$va.id}" value="{$ans.id|escape}" onclick="removeRequired({$va.id}, {$ans.id} , {$va.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$va.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
                     {if $sessionAnswerIdError|@COUNT gt 0}{foreach from=$sessionAnswerIdError item=ansid}{if $ansid eq $ans.id}checked{/if}{/foreach} {else} {if $sessionAnswerId|@count gt 0}{foreach from=$sessionAnswerId item=d}{if $d eq $ans.id}checked{/if}{/foreach}{else}{if $va.is_required eq 1}required{/if}{/if}{/if}>
@@ -116,6 +117,7 @@
                   <input type="hidden" id="rais_email{$v.id}" name="is_email[]" value="{if $v.is_email eq 1}1{else}0{/if}" disabled>
                   <input type="hidden" id="raanswer_id{$v.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
                   <input type="hidden" id="racontent{$v.id}" name="content[]" value="NULL" disabled>
+                  <input type="hidden" id="jumping_to{$v.id}" value="0">
                   {/if}
                   <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$v.id}" name="answer[{$v.id}]" class="check_value{$v.id}" value="{$ans.id|escape}" onclick="removeRequired({$v.id}, {$ans.id}, {$v.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$v.view_order}, {if $ans.q_jump_to_view_order}{$ans.q_jump_to_view_order}{else}0{/if})"
                   {if $sessionAnswerIdError|@COUNT gt 0}{foreach from=$sessionAnswerIdError item=ansid}{if $ansid eq $ans.id}checked{/if}{/foreach} {else} {if $sessionAnswerId|@count gt 0}{foreach from=$sessionAnswerId item=d}{if $d eq $ans.id}checked{/if}{/foreach}{else}{if $v.is_required eq 1}required{/if}{/if} {/if}>
@@ -225,10 +227,6 @@
 {block name="javascript"}
 <script>
 var jump_to_value = {$ResultJumpTo};
-
-// {foreach from=$ResultJumpTo.12 item=v}
-//   jump_to_value.push({ chk_answer: check_bok_value[i].value });
-// {/foreach}
 
 $(document).ready( function()
 {
@@ -366,6 +364,7 @@ function removeRequired(id, ansid, type, jump_to, view_order, q_jumpto_view_orde
     $('#raanswer_id'+id).val(ansid);
   }
 
+// Block check user check or uncheck on checkbox button
   var check_bok_value = document.getElementsByClassName('check_box_value'+id);
   var chk_value = [];
 
@@ -381,15 +380,56 @@ function removeRequired(id, ansid, type, jump_to, view_order, q_jumpto_view_orde
     $('.chk_box_is_required'+id).val(1);
     $('.check_box_value'+id).attr('required', true);
   }
+//End: Block check user check or uncheck on checkbox button
 
-  if(jump_to > 0)
+//Block jump to test_question
+  // get jump to "test_question_id" from hidden
+  var jumping_to = $('#jumping_to'+id).val();
+  //Add Jump To "test_question_id"
+  $('#jumping_to'+id).val(jump_to);
+  //Case: if user check on has jum_to, We need to removed disabled first
+  if(jumping_to > 0 && jump_to_value != '')
   {
-    console.log(jump_to_value[jump_to].length);
+    for (var i = 0; i < jump_to_value[jumping_to+'_'+id].length; i++) {
+      $('.check_value'+jump_to_value[jumping_to+'_'+id][i]).removeAttr("disabled");
+      $('#is_required'+jump_to_value[jumping_to+'_'+id][i]).val(1);
+      $('#text_is_required_'+jump_to_value[jumping_to+'_'+id][i]).val(1);
+      $('#required_'+jump_to_value[jumping_to+'_'+id][i]).text('*');
+      //For Text
+      $('#test'+jump_to_value[jumping_to+'_'+id][i]).removeAttr("disabled");
+    }
+    check_value(id, jumping_to);
+  }
 
-    for (var i = 0; i < jump_to_value[jump_to].length; i++) {
-      alert(jump_to_value[jump_to][i]);
+  //If has jump_to
+  if(jump_to > 0 && jump_to_value != '')
+  {
+    for (var i = 0; i < jump_to_value[jump_to+'_'+id].length; i++) {
+      $('.check_value'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+      $('#is_required'+jump_to_value[jump_to+'_'+id][i]).val(0);
+      $('#text_is_required_'+jump_to_value[jump_to+'_'+id][i]).val(0);
+      $('#required_'+jump_to_value[jump_to+'_'+id][i]).html('&nbsp;');
+
+      //For Text
+      $('#test'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+    }
+
+    check_value(id, jump_to);
+
+  } else {
+    if(jumping_to > 0 && jump_to_value != '')
+    {
+      for (var i = 0; i < jump_to_value[jumping_to+'_'+id].length; i++) {
+        $('.check_value'+jump_to_value[jumping_to+'_'+id][i]).removeAttr("disabled");
+        $('#is_required'+jump_to_value[jumping_to+'_'+id][i]).val(1);
+        $('#required_'+jump_to_value[jumping_to+'_'+id][i]).text('*');
+        //For Text
+        $('#test'+jump_to_value[jumping_to+'_'+id][i]).removeAttr("disabled");
+      }
+      check_value(id, jumping_to);
     }
   }
+//End: Block jump to test_question
 
 }
 
@@ -435,13 +475,82 @@ window.onload = function(e)
 
     {/foreach}
   {/if}
-
 }
 
 //Remove Requeired: When check box has one or two check
-function check_value()
+function check_value(id, jump_to)
 {
+  if(jump_to_value != '')
+  {
+    for (var i = 0; i < jump_to_value[jump_to+'_'+id].length; i++)
+    {
+      var check_bok_value = document.getElementsByClassName('check_box_value'+jump_to_value[jump_to+'_'+id][i]);
+      var check_value = document.getElementsByClassName('check_value'+jump_to_value[jump_to+'_'+id][i]);
+      var text_field = document.getElementById('test'+jump_to_value[jump_to+'_'+id][i]);
 
+      if(check_value.length > 0)
+      {
+        var chk_val_disable = [];
+        var chk_val_undisable = [];
+        for (var j = 0; j < check_value.length; j++)
+        {
+          if(check_value[j].checked == true && check_value[j].disabled == true)
+          {
+            chk_val_disable.push({ chk_val: check_value[j].value });
+          }
+          if(check_value[j].checked == true && check_value[j].disabled == false)
+          {
+            chk_val_undisable.push({ chk_val: check_value[j].value });
+          }
+        }
+        if(chk_val_disable.length > 0)
+        {
+          $('#tq_id'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+          $('#rais_email'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+          $('#raanswer_id'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+          $('#racontent'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+        }
+        if(chk_val_undisable.length > 0)
+        {
+          $('#is_required'+jump_to_value[jump_to+'_'+id][i]).val(0);
+          $('#tq_id'+jump_to_value[jump_to+'_'+id][i]).removeAttr("disabled");
+          $('#rais_email'+jump_to_value[jump_to+'_'+id][i]).removeAttr("disabled");
+          $('#raanswer_id'+jump_to_value[jump_to+'_'+id][i]).removeAttr("disabled");
+          $('#racontent'+jump_to_value[jump_to+'_'+id][i]).removeAttr("disabled");
+        }
+      }
+
+      if(check_bok_value.length > 0)
+      {
+        // for (var i = 0; i < array.length; i++) {
+        //   array[i]
+        // }
+        // console.log(check_bok_value);
+      }
+    //Block: Text Field
+      if(text_field != null)
+      {
+        if(text_field.disabled == true && text_field.value != '')
+        {
+          $('#tq_id_'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+          $('#answer_id_'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+          $('#content_'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+          $('#is_email_'+jump_to_value[jump_to+'_'+id][i]).attr('disabled', true);
+        }
+
+        if(text_field.disabled == false && text_field.value != '')
+        {
+          $('#text_is_required_'+jump_to_value[jump_to+'_'+id][i]).val(0);
+          $('#tq_id_'+jump_to_value[jump_to+'_'+id][i]).removeAttr("disabled");
+          $('#answer_id_'+jump_to_value[jump_to+'_'+id][i]).removeAttr("disabled");
+          $('#content_'+jump_to_value[jump_to+'_'+id][i]).removeAttr("disabled");
+          $('#is_email_'+jump_to_value[jump_to+'_'+id][i]).removeAttr("disabled");
+        }
+
+      }
+    //Block: Text Field
+    }//End for
+  }
 }
 
 

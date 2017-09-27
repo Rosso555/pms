@@ -1422,9 +1422,26 @@ function getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang)
         }
       }//End fetch rows
     }
+    $newResultRetrun = array();
+
+    foreach ($newdata as $key => $value)
+    {
+      if(!empty($value['jump_to']))
+      {
+        foreach ($value['jump_to'] as $k => $va) {
+          $newResultRetrun['jump_to'][] = array('key' => $key, 'jump_to' => $va['jump_to'], 'test_question_id' => $value['test_question_id']);
+        }
+      }
+      $newResultRetrun[] =array('id'          => $value['id'],
+                                'title'       => $value['title'],
+                                'description' => $value['description'],
+                                'type'        => $value['type'],
+                                'view_order'  => $value['view_order'],
+                                'test_question_id'  => $value['test_question_id']);
+    }
 
     // print_r($newdata);
-    return $newdata;
+    return $newResultRetrun;
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: getListQuestionByViewOrderGroupNonGroup'.$e->getMessage();

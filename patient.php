@@ -284,21 +284,28 @@ if('test_question' === $task)
 
   $resultsJumpTo = getListQuestionByViewOrderGroupNonGroupJumpTo($_GET['tid'], $lang);
 
-  $newResultJumpTo = [];
-
-  foreach ($resultsJumpTo as $key => $value)
+  $newResultJumpTo = array();
+  if(!empty($resultsJumpTo['jump_to']))
   {
-    if($key > 2)
+    foreach ($resultsJumpTo['jump_to'] as $k => $va)
     {
-      if($value['test_question_id'] != 12)
+      foreach ($resultsJumpTo as $key => $value)
       {
-        $newResultJumpTo['12'][] = $value['test_question_id'];echo "<br>";
-      } else {
-        break;
-      }
-    }
+        if($key > $va['key'])
+        {
+          if($value['test_question_id'] !== $va['jump_to'])
+          {
+            $newResultJumpTo[$va['jump_to'].'_'.$va['test_question_id']][] = $value['test_question_id'];
+          }else {
+            break;
+          }
+        }
+      } //End foreach $resultsJumpTo
+    }//End foreach $resultsJumpTo['jump_to']
   }
 
+
+  // var_dump($resultsJumpTo);
   // var_dump($newResultJumpTo);
 
   if(empty($result) && COUNT($result) === 0 && empty($getTestByID)){
