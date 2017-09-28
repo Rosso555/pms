@@ -6,6 +6,7 @@ require_once(dirname(__FILE__).'/setting/setup.php');
 require_once(dirname(__FILE__).'/setting/common_setting.php');
 require_once(dirname(__FILE__).'/functions/common/common_function.php');
 require_once(dirname(__FILE__).'/functions/index/index_function.php');
+require_once(dirname(__FILE__).'/functions/patient/patient_function.php');
 
 //Get language By default_lang = 1
 $result = $common->find('language', $condition = ['default_lang' => 1], $type = 'one');
@@ -73,6 +74,14 @@ if('test_question' === $task)
     $answer_id    = $_POST['answer_id'];
     $is_required  = $_POST['is_required'];
     $testque_id   = $_POST['tq_id'];
+
+    // print_r($t_groupid);echo "<br>";
+    // print_r($content);echo "<br>";
+    // print_r($is_email);echo "<br>";
+    // print_r($answer_id);echo "<br>";
+    // print_r($is_required);echo "<br>";
+    // print_r($testque_id);echo "<br>";
+    // exit;
 
     if(!empty($is_required))
     {
@@ -281,7 +290,7 @@ if('test_question' === $task)
     }
   }
 
-
+  //For Jumping To
   $resultsJumpTo = getListQuestionByViewOrderGroupNonGroupJumpTo($_GET['tid'], $lang);
 
   $newResultJumpTo = array();
@@ -289,7 +298,7 @@ if('test_question' === $task)
   {
     foreach ($resultsJumpTo['jump_to'] as $k => $va)
     {
-      foreach ($resultsJumpTo as $key => $value)
+      foreach ($resultsJumpTo['question'] as $key => $value)
       {
         if($key > $va['key'])
         {
@@ -343,7 +352,6 @@ if('test_question' === $task)
 
 if('result_patient' === $task)
 {
-
   $smarty_appform->assign('getTestById', $common->find('test', $condition = ['id' => $_GET['tid'], 'lang' => $lang], $type = 'one'));
   $smarty_appform->display('common/test_result_patient.tpl');
   exit;
@@ -360,10 +368,12 @@ if('test_save_draft' === $task)
     //Get test_tmp By id
     $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $test_id, 'test_patient_id' => $test_pat_id], $type = 'one');
 
-    if(empty($resultTestTmp)){
+    if(empty($resultTestTmp))
+    {
       $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $test_id, 'test_patient_id' => $test_pat_id]);
 
-      if(!empty($test_que_data)){
+      if(!empty($test_que_data))
+      {
         foreach ($test_que_data as $v)
         {
           if($v->answer_id === 'NULL')
@@ -378,10 +388,7 @@ if('test_save_draft' === $task)
           } else {
             $content = $v->content;
           }
-        	$result = $common->save('test_tmp_question', $field =['test_tmp_id'  => $test_tmp_id,
-                                                                'test_question_id'  => $v->test_que_id,
-                                                                'answer_id' => $answer_id,
-                                                                'content'   => $content]);
+        	$result = $common->save('test_tmp_question', $field =['test_tmp_id' => $test_tmp_id, 'test_question_id' => $v->test_que_id, 'answer_id' => $answer_id, 'content' => $content]);
         }
         $resultValue = true;
   		}
@@ -389,10 +396,13 @@ if('test_save_draft' === $task)
     } else {
       if(!empty($test_que_data))
       {
+        $resultChkBox = array();
+
         foreach ($test_que_data as $v)
         {
           //Get test_tmp By id
-          $rTestTmpQue = $common->find('test_tmp_question', $condition = ['test_tmp_id' => $resultTestTmp['id'], 'test_question_id' => $v->test_que_id], $type = 'one');
+          $rTestTmpQue = getCheckTestTmpQuestion($resultTestTmp['id'], $v->test_que_id, 'one');
+          // $rTestTmpQueAll = getCheckTestTmpQuestion($resultTestTmp['id'], $v->test_que_id, 'all');
 
           if($v->answer_id === 'NULL')
           {
@@ -409,20 +419,36 @@ if('test_save_draft' === $task)
 
           if(empty($rTestTmpQue))
           {
-            $result = $common->save('test_tmp_question', $field =['test_tmp_id'  => $resultTestTmp['id'],
-                                                                  'test_question_id'  => $v->test_que_id,
-                                                                  'answer_id' => $answer_id,
-                                                                  'content'   => $content]);
-          }else {
+            $result = $common->save('test_tmp_question', $field =['test_tmp_id' => $resultTestTmp['id'], 'test_question_id' => $v->test_que_id, 'answer_id' => $answer_id, 'content' => $content]);
+          } elseif(!empty($rTestTmpQue) && $rTestTmpQue['type'] != 4) {
             $common->update('test_tmp_question', $field = ['answer_id' => $answer_id, 'content' => $content], $condition = ['id' => $rTestTmpQue['id']]);
           }
 
+          if(!empty($rTestTmpQue) && $rTestTmpQue['type'] == 4) {
+            $common->delete('test_tmp_question', $field = ['test_tmp_id' => $resultTestTmp['id'], 'test_question_id' => $v->test_que_id]);
+            //Save data
+            // $result = $common->save('test_tmp_question', $field =['test_tmp_id' => $resultTestTmp['id'], 'test_question_id' => $v->test_que_id, 'answer_id' => $answer_id, 'content' => $content]);
+          }
+
+          // if($rTestTmpQue['type'] != 4)
+          // {
+          //   $common->update('test_tmp_question', $field = ['answer_id' => $answer_id, 'content' => $content], $condition = ['id' => $rTestTmpQue['id']]);
+          // } else {
+          //   // foreach ($rTestTmpQueAll as $k => $va) {
+          //   //   //Delete first, Because is check box
+          //   //   $resultTestQueDelete[1][] = array('tmpid' => $va['id']);
+          //   //   // $common->delete('test_tmp_question', $field = ['id' => $va['id']]);
+          //   // }
+          //   $common->delete('test_tmp_question', $field = ['test_tmp_id' => $resultTestTmp['id'], 'test_question_id' => $v->test_que_id]);
+          //   //Save data
+          //   // $result = $common->save('test_tmp_question', $field =['test_tmp_id' => $resultTestTmp['id'], 'test_question_id' => $v->test_que_id, 'answer_id' => $answer_id, 'content' => $content]);
+          // }
+
         }//End foreach
         $resultValue = true;
+        // print_r($resultChkBox);
       }
     }
-
-
   }
   header('Content-type: application/json');
   echo json_encode($resultValue);

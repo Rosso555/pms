@@ -35,7 +35,7 @@
                 <br>
                 <select class="form-control select2" name="question" style="width:100%">
                   <option value="">--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} {if $multiLang.text_jump_to_question}{$multiLang.text_jump_to_question}{else}No Translate(Key Lang: text_jump_to_question){/if} ---</option>
-                  {foreach from=$listTestQuestion item=data key=k}
+                  {foreach from=$listTestQuestion.question item=data key=k}
                   <option value="{$data.test_question_id}"  {if $currentViewOrder gte $k}disabled{/if}>
                     {$data.title} (Type:{if $data.type eq 1} Text Input{elseif $data.type eq 2}Text Area{elseif $data.type eq 3}Redio{elseif $data.type eq 4}CheckBox{/if})
                   </option>

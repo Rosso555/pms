@@ -1338,10 +1338,11 @@ function getTestTmpQuestion($tpat_id, $test_id)
   $result = true;
   try{
 
-    $sql =' SELECT ttq.*, q.type, q.is_email, tq.id AS tqid FROM `test_tmp` ttmp
+    $sql =' SELECT ttq.*, q.type, q.is_email, tq.id AS tqid, a.jump_to FROM `test_tmp` ttmp
               INNER JOIN test_tmp_question ttq ON ttq.test_tmp_id = ttmp.id
               INNER JOIN test_question tq ON tq.id = ttq.test_question_id
               INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN answer a ON a.id = ttq.answer_id
             WHERE ttmp.test_patient_id = :test_patient_id AND ttmp.test_id = :test_id ';
     $stmt = $connected->prepare($sql);
     $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
@@ -1432,7 +1433,7 @@ function getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang)
           $newResultRetrun['jump_to'][] = array('key' => $key, 'jump_to' => $va['jump_to'], 'test_question_id' => $value['test_question_id']);
         }
       }
-      $newResultRetrun[] =array('id'          => $value['id'],
+      $newResultRetrun['question'][] =array('id'          => $value['id'],
                                 'title'       => $value['title'],
                                 'description' => $value['description'],
                                 'type'        => $value['type'],
