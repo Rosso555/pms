@@ -5,6 +5,7 @@ require_once('internal_libs/common.class.php');
 require_once('external_libs/thumbnail.php');
 require_once('external_libs/Smarty-3.1.14/libs/SmartyPaginate.class.php');
 require_once('external_libs/swiftmailer-5.x/lib/swift_required.php');
+require_once('external_libs/mailerlite-api-v2-php-sdk-0.1.7/vendor/autoload.php');
 
 //create common class object
 $common = new common();

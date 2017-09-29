@@ -45,6 +45,11 @@ $allows   =   array(
 $admin_username = 'admin';
 $admin_password = '783aa605875aa00477ecffeeddbbe65d';
 
+$site_url = 'http://www.pms.e-khmer.com';
+$path_exec = '/usr/local/php56/bin/php /home/scusersbnn/pms.e-khmer.com';
+//Path
+$pathinfo = '/home/scusersbnn/pms.e-khmer.com';
+
 //Email account
 define('EMAIL_USERNAME', 'noreply@e-khmer.com');
 define('EMAIL_PASSWORD', '7K<dSQ%D#$');

@@ -6,7 +6,6 @@ require_once(dirname(__FILE__).'/setting/setup.php');
 require_once(dirname(__FILE__).'/setting/common_setting.php');
 require_once(dirname(__FILE__).'/functions/admin/admin_function.php');
 require_once(dirname(__FILE__).'/functions/common/common_function.php');
-require_once(dirname(__FILE__).'/external_libs/mailerlite-api-v2-php-sdk-0.1.7/vendor/autoload.php');
 
 //Get language By default_lang = 1
 $result = $common->find('language', $condition = ['default_lang' => 1], $type = 'one');

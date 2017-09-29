@@ -63,7 +63,9 @@ function getMailerLiteByTestId($testid)
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', (int)$testid, PDO::PARAM_INT);
     $query->execute();
-    return $query->fetchAll();
+    $rows = $query->fetchAll();
+
+    return $rows;
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: getMailerLiteByTestId'.$e->getMessage();
