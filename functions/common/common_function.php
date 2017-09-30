@@ -1472,5 +1472,39 @@ function getJumpToTestQuestionById($tqid)
   return $result;
 }
 
+function getListTestGroupByTmpQuestion($test_id, $status)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    if($status === 1)
+    {
+      $condition .= ' AND (ttmp.id IS NULL OR ttmp.status = 1) ';
+      $orderBy .= ' ORDER BY tg.view_order ASC LIMIT 1 ';
+    }
+    if($status === 2)
+    {
+      $condition .= ' AND ttmp.status = 2 ';
+      $orderBy .= ' ORDER BY tg.view_order DESC LIMIT 1 ';
+    }
+
+    $sql= ' SELECT tg.* FROM `test_group` tg LEFT JOIN test_tmp_question ttmp ON ttmp.test_group_id = tg.id WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy;
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->execute();
+
+    if($status === 1) {
+      return $query->fetchAll();
+    } else {
+      return $query->fetch();
+    }
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestGroupByTmpQuestion'.$e->getMessage();
+  }
+
+  return $result;
+}
+
 
 ?>

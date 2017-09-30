@@ -17,7 +17,7 @@
 {block name="main"}
 <div class="inbox-top">
   {if $getTestById.test_title}<h3 class="text-center">{$getTestById.test_title}</h3>{/if}
-  <h4 class="text-center">{$getTestById.title} {if $countTestGroupSession eq $testQueGroup|@count} ({if $multiLang.text_final_step}{$multiLang.text_final_step}{else}No Translate (Key Lang: text_final_step){/if}) {/if}</h4>
+  <h4 class="text-center">{$getTestById.title} {if $resultTestGroupTmpQue eq 1} ({if $multiLang.text_final_step}{$multiLang.text_final_step}{else}No Translate (Key Lang: text_final_step){/if}) {/if}</h4>
   <p class="text-center">{$getTestById.description}</p>
 </div>
 {if $error}<div class="alert alert-warning" role="alert">{if $multiLang.text_error_check_all_required}{$multiLang.text_error_check_all_required}{else}No Translate (Key Lang: text_error_check_all_required){/if}</div>{/if}
@@ -177,11 +177,11 @@
   {/if}
       <hr>
       <div class="form-group text-center">
-        {if $testQueGroup|@count gt 1}
-          {if $countTestGroupSession neq 1}
-          <a href="{$index_file}?task=back_step&amp;id={$smarty.get.id}" class="btn btn-warning"> <i class="fa fa-step-backward" aria-hidden="true"></i> {if $multiLang.button_back_step}{$multiLang.button_back_step}{else}No Translate (Key Lang: button_back_step){/if}</a>
+        {if $testQueGroup gt 0}
+          {if $testQueGroup neq $resultTestGroupTmpQue}
+          <a href="{$index_file}?task=back_step&amp;tid={$smarty.get.tid}&amp;tgid={$testGroupIDTmpQue.id}&amp;id={$smarty.get.id}" class="btn btn-warning"> <i class="fa fa-step-backward" aria-hidden="true"></i> {if $multiLang.button_back_step}{$multiLang.button_back_step}{else}No Translate (Key Lang: button_back_step){/if}</a>
           {/if}
-          {if $countTestGroupSession eq $testQueGroup|@count}
+          {if $resultTestGroupTmpQue eq 1}
           <button type="submit" class="btn btn-success"> {if $multiLang.button_show_my_score}{$multiLang.button_show_my_score}{else}No Translate (Key Lang: button_show_my_score){/if} </button>
           {else}
           <button type="submit" class="btn btn-success"> {if $multiLang.button_next_step}{$multiLang.button_next_step}{else}No Translate (Key Lang: button_next_step){/if} <i class="fa fa-step-forward" aria-hidden="true"></i></button>
@@ -265,6 +265,7 @@ $(document).ready( function()
         $('#tq_id{$v.tqid}').removeAttr('disabled');
         $('#rais_email{$v.tqid}').removeAttr('disabled');
         $('#raanswer_id{$v.tqid}').removeAttr('disabled');
+        $('#raanswer_id{$v.tqid}').val('{$v.answer_id}');
         $('#racontent{$v.tqid}').removeAttr('disabled');
         $('#radio{$v.answer_id}_{$v.tqid}').removeAttr('required');
         $('#radio{$v.answer_id}_{$v.tqid}').attr('checked', true);
@@ -325,6 +326,7 @@ function save_draft()
   var content = document.getElementsByName('content[]');
   var test_id = {$smarty.get.tid};
   var test_pat_id = {$smarty.get.id};
+  var test_group_id = '{$test_group_id|escape}';
   var test_que_data = [];
 
   for (var i=0; i<tque_id.length; i++) {
@@ -334,6 +336,7 @@ function save_draft()
   }
 
   var paramdata = { test_id : test_id,
+                    test_group_id : test_group_id,
                     test_pat_id : test_pat_id,
                     test_que_data: JSON.stringify(test_que_data) };
 
@@ -359,7 +362,7 @@ function save_draft()
       }
     });//End Ajax
   } else {
-    alert("You don't check answer.");
+    alert("Please! check answer.");
     $(".loader").hide();
   }
 

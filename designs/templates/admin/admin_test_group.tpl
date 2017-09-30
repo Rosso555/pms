@@ -59,6 +59,18 @@
               </div>
             </div>
             <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="title"><span style="color: red">*</span> {if $multiLang.text_view_Order}{$multiLang.text_view_Order}{else}No Translate(Key Lang: text_view_Order){/if}:</label>
+                  {if $error.view_order}
+                    <span style="color: red">{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate(Key Lang: text_please_input){/if} {if $multiLang.text_view_Order}{$multiLang.text_view_Order}{else}No Translate(Key Lang: text_view_Order){/if}.</span>
+                  {/if}
+                  <input type="text" name="view_order" class="form-control" placeholder="Example: 123..."
+                  value="{if $smarty.session.test_group.view_order}{$smarty.session.test_group.view_order}{elseif $getTestGroupByID.view_order}{$getTestGroupByID.view_order}{/if}">
+                </div>
+              </div>
+            </div>
+            <div class="row">
               <div class="col-md-12">
                 <div class="form-group">
                   {if $getTestGroupByID.id}
@@ -81,6 +93,7 @@
           <tr bgcolor="#eeeeee">
             <th>{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</th>
             <th>{if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}</th>
+            <th>{if $multiLang.text_view_Order}{$multiLang.text_view_Order}{else}No Translate(Key Lang: text_view_Order){/if}</th>
             <th>{if $multiLang.text_group_question}{$multiLang.text_group_question}{else}No Translate(Key Lang: text_group_question){/if}</th>
             <th width="100">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate(Key Lang: text_action){/if}</th>
           </tr>
@@ -91,6 +104,7 @@
           <tr>
             <td><a href="{$admin_file}?task=test_group&amp;tid={$data.test_id}">{$data.title_test}</a></td>
             <td>{$data.title}</td>
+            <td>{$data.view_order}</td>
             <td><span class="badge">{$data.total_group_question}</span></td>
             <td>
               <a href="{$admin_file}?task=test_group&amp;action=edit&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang: button_edit){/if}"><i class="fa fa-edit"></i></a>

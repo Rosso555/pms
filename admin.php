@@ -2672,6 +2672,7 @@ if('test_group' === $task)
       //get value from form
       $testid   = $common->clean_string($_POST['test']);
       $title    = $common->clean_string($_POST['title']);
+      $view_order = $common->clean_string($_POST['view_order']);
       $id       = $common->clean_string($_POST['id']);
 
       //add value to session to use in template
@@ -2679,11 +2680,12 @@ if('test_group' === $task)
       //form validation
       if(empty($title))   $error['title']   = 1;
       if(empty($testid))  $error['testid']  = 1;
+      if(empty($view_order))  $error['view_order']  = 1;
 
       //Add test group
       if(0 === count($error) && empty($id))
       {
-        $common->save('test_group', $field = ['test_id' => $testid, 'title' => $title]);
+        $common->save('test_group', $field = ['test_id' => $testid, 'title' => $title, 'view_order' => $view_order]);
         //unset session
         unset($_SESSION['test_group']);
         //Redirect
@@ -2705,6 +2707,7 @@ if('test_group' === $task)
       //get value from form
       $testid   = $common->clean_string($_POST['test']);
       $title    = $common->clean_string($_POST['title']);
+      $view_order = $common->clean_string($_POST['view_order']);
       $id       = $common->clean_string($_POST['id']);
 
       //add value to session to use in template
@@ -2712,10 +2715,11 @@ if('test_group' === $task)
       //form validation
       if(empty($title))   $error['title']   = 1;
       if(empty($testid))  $error['testid']  = 1;
+      if(empty($view_order))  $error['view_order']  = 1;
       //update test group
       if(0 === count($error) && !empty($id))
       {
-        $common->update('test_group', $field = ['test_id' => $testid, 'title' => $title], $condition = ['id' => $id]);
+        $common->update('test_group', $field = ['test_id' => $testid, 'title' => $title, 'view_order' => $view_order], $condition = ['id' => $id]);
         //unset session
         unset($_SESSION['test_group']);
         //Redirect

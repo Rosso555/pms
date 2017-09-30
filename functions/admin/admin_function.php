@@ -1888,7 +1888,7 @@ function listTestGroup($testid, $lang)
               INNER JOIN test t ON t.id = tg.test_id
               LEFT JOIN test_group_question tgq ON tgq.test_group_id = tg.id
             WHERE t.lang = :lang '.$condition.'
-            GROUP BY tg.id ORDER BY tg.test_id DESC LIMIT :offset, :limit ';
+            GROUP BY tg.id ORDER BY tg.test_id ASC, tg.view_order ASC LIMIT :offset, :limit ';
     $query = $connected->prepare($sql);
 
     if(!empty($testid)) $query->bindValue(':test_id', $testid, PDO::PARAM_INT);
