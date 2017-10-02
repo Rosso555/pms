@@ -1310,7 +1310,14 @@ function getTestGroupById($id, $lang)
   }
   return $result;
 }
-
+/**
+ * getCheckTestPatientByPsyChologist
+ * @param  int $psy_id is psychologist_id
+ * @param  int $pat_id is patient_id
+ * @param  int $test_id is test_id
+ * @param  int $tpat_id is test_patient_id
+ * @return array or boolean
+ */
 function getCheckTestPatientByPsyChologist($psy_id, $pat_id, $test_id, $tpat_id)
 {
   global $debug, $connected, $limit, $offset, $total_data;
@@ -1333,7 +1340,12 @@ function getCheckTestPatientByPsyChologist($psy_id, $pat_id, $test_id, $tpat_id)
   }
   return $result;
 }
-
+/**
+ * getTestTmpQuestion
+ * @param  int $tpat_id is test_patient_id
+ * @param  int $test_id
+ * @return array or boolean
+ */
 function getTestTmpQuestion($tpat_id, $test_id)
 {
   global $debug, $connected, $limit, $offset, $total_data;
@@ -1359,7 +1371,12 @@ function getTestTmpQuestion($tpat_id, $test_id)
   }
   return $result;
 }
-
+/**
+ * getListQuestionByViewOrderGroupNonGroupJumpTo
+ * @param  int $tid is test_id
+ * @param  string $lang is language
+ * @return array or boolean
+ */
 function getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang)
 {
   global $debug, $connected, $limit, $offset, $total_data;
@@ -1452,7 +1469,11 @@ function getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang)
   return $result;
 
 }
-
+/**
+ * getJumpToTestQuestionById
+ * @param  int $tqid is test_question_id
+ * @return array or boolean
+ */
 function getJumpToTestQuestionById($tqid)
 {
   global $debug, $connected;
@@ -1471,7 +1492,15 @@ function getJumpToTestQuestionById($tqid)
 
   return $result;
 }
-
+/**
+ * getListTestGroupByTmpQuestion
+ * @param  int $test_id
+ * @param  int $tpid is test_patient_id
+ * @param  int $status
+ * @param  string $fetch_type for get data "one or all"
+ * @param  int $slimit for setLimit
+ * @return array or boolean
+ */
 function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $slimit)
 {
   global $debug, $connected, $offset, $limit;
@@ -1514,26 +1543,63 @@ function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $s
 
   return $result;
 }
-
-
+/**
+ * getResponseAnswerByTestPatient
+ * @param  int $test_id
+ * @param  int $tpid is test_patient_id
+ * @return array or boolean
+ */
 function getResponseAnswerByTestPatient($test_id, $tpid)
 {
   global $debug, $connected, $offset, $limit;
   $result = true;
   try{
-
-    $sql = ' SELECT ra.*, ans.jump_to, q.type, ra.test_question_id AS tqid FROM `response` r
-               INNER JOIN response_answer ra ON ra.response_id = r.id
-               INNER JOIN test_question tq ON tq.id = ra.test_question_id
-               INNER JOIN question q ON q.id = tq.question_id
-               LEFT JOIN answer ans ON ans.id = ra.answer_id
-             WHERE r.test_id = :test_id AND r.test_patient_id = :tpid ';
+    $sql =' SELECT ra.content, ra.answer_id, ans.jump_to, ans.title AS ans_title, q.type, q.title AS que_title, q.description, q.hide_title, ra.test_question_id AS tqid, tq.is_required
+            FROM `response` r
+              INNER JOIN response_answer ra ON ra.response_id = r.id
+              INNER JOIN test_question tq ON tq.id = ra.test_question_id
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN answer ans ON ans.id = ra.answer_id
+            WHERE r.test_id = :test_id AND r.test_patient_id = :tpid GROUP BY ra.test_question_id ';
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
     $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
     $query->execute();
+    $rows = $query->fetchAll();
 
-    return $query->fetchAll();
+    $newResult = array();
+    foreach ($rows as $k => $va) {
+      if($va['type'] == 4)
+      {
+        $sql1 =' SELECT ans.title AS ans_title
+                FROM `response` r
+                  INNER JOIN response_answer ra ON ra.response_id = r.id
+                  INNER JOIN test_question tq ON tq.id = ra.test_question_id
+                  INNER JOIN question q ON q.id = tq.question_id
+                  LEFT JOIN answer ans ON ans.id = ra.answer_id
+                WHERE r.test_id = :test_id AND r.test_patient_id = :tpid AND ra.test_question_id = :tqid ';
+        $query1 = $connected->prepare($sql1);
+        $query1->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+        $query1->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+        $query1->bindValue(':tqid', (int)$va['tqid'], PDO::PARAM_INT);
+        $query1->execute();
+        $rows1 = $query1->fetchAll();
+      }
+
+      $newResult[] = array('content'      => $va['content'],
+                           'answer_id'    => $va['answer_id'],
+                           'jump_to'      => $va['jump_to'],
+                           'ans_title'    => $va['ans_title'],
+                           'type'         => $va['type'],
+                           'que_title'    => $va['que_title'],
+                           'description'  => $va['description'],
+                           'hide_title'   => $va['hide_title'],
+                           'tqid'         => $va['tqid'],
+                           'is_required'  => $va['is_required'],
+                           'result_answer' => $rows1);
+    }
+
+    return $newResult;
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: getResponseAnswerByTestPatient'.$e->getMessage();
