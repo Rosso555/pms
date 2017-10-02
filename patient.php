@@ -35,18 +35,21 @@ if('logout' === $task)
   header('Location:'.$index_file.'?task=login');
   exit;
 }
+
 //redirect if no session
 if(empty($_SESSION['is_patient_login_id']))
 {
   header('Location:'.$index_file.'?task=login');
   exit;
 }
+
 //Task: page not found
 if('page_not_found' === $task)
 {
   $smarty_appform->display('common/page_error_404.tpl');
   exit;
 }
+
 //Task: test_completed
 if('test_completed' === $task)
 {
@@ -54,6 +57,7 @@ if('test_completed' === $task)
   $smarty_appform->display('common/test_completed.tpl');
   exit;
 }
+
 //Task: Test Question
 if('test_question' === $task)
 {
@@ -103,7 +107,7 @@ if('test_question' === $task)
 
     if(count($error) == 0)
     {
-      //Condition has test group, Save test_question_id is NULL
+      //Condition has test group, Save test_question_id is NULL, When skip by jump_to
       if(empty($answer_id) && COUNT($resultTestGroup) > 0)
       {
         //Get test_tmp By id
@@ -139,7 +143,7 @@ if('test_question' === $task)
           }
           $test_tmp_id = $resultTestTmp['id'];
         } else {
-          $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $test_id, 'test_patient_id' => $test_pat_id]);
+          $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $tid, 'test_patient_id' => $tpid]);
         }
 
         foreach ($answer_id as $key => $value)
@@ -162,7 +166,7 @@ if('test_question' === $task)
       }//End: Condition has test group
 
       //Get Test Group By Tmp Question
-      $resultTestGroupTmpQue = getListTestGroupByTmpQuestion($tid, $status = 1);
+      $resultTestGroupTmpQue = getListTestGroupByTmpQuestion($tid, $tpid, $status = 1, $fetch_type = 'all', $slimit = '');
       //Condition test group for assign value to Result
       if(COUNT($resultTestGroupTmpQue) === 0 && COUNT($resultTestGroup) > 0)
       {
@@ -253,32 +257,19 @@ if('test_question' === $task)
       }//End Condition test no group
 
     } else {
-      //Condition has test group
-      // if(!empty($answer_id))
-      // {
-      //   foreach ($answer_id as $key => $value) {
-      //     //Add Anser Id to session
-      //     $_SESSION['sessionAnswerIdError'][] = $value;
-      //   }
-      // }
-      //
-      // if(!empty($testque_id)){
-      //   foreach ($testque_id as $key => $value) {
-      //     $_SESSION['contentError'][] = array('tqid' => $value, 'content' => $content[$key]);
-      //   }
-      // }
+      //Condition has submit error
 
     }
 
   }//End POST
 
   //Get Test Group By Tmp Question
-  $resultTestGroupTmpQue = getListTestGroupByTmpQuestion($tid, $status = 1);
+  $resultTestGroupTmpQue = getListTestGroupByTmpQuestion($tid, $tpid, $status = 1, $fetch_type = 'all', $slimit = '');
   if(COUNT($resultTestGroup) > 0)
   {
     if(!empty($resultTestGroupTmpQue))
     {
-      foreach (getListTestGroupByTmpQuestion($tid, $status = 1) as $k => $va) {
+      foreach ($resultTestGroupTmpQue as $k => $va) {
         $test_group_id = $va['id'];
         $result = listTestGroupQuestion($va['id'], $tid, $lang);
         $getTestByID = getTestGroupById($va['id'], $lang);
@@ -318,46 +309,26 @@ if('test_question' === $task)
     }//End foreach $resultsJumpTo['jump_to']
   }
 
-
-  // var_dump($result);exit;
-  // var_dump($newResultJumpTo);
-
   if(empty($result) && COUNT($result) === 0 && empty($getTestByID)){
     header('Location:'.$patient_file.'?task=page_not_found');
     exit;
   }
 
-  // $sumAnswerCol = 0;
-  // foreach ($result as $key => $value) {
-  //   if($value['flag'] == 1){
-  //     if($value['answer'] > $sumAnswerCol) $sumAnswerCol = COUNT($value['answer']);
-  //   }
-  // }
-var_dump(getListTestGroupByTmpQuestion($tid, $status = 2));
-echo count(getListTestGroupByTmpQuestion($tid, $status = 2));
+  $sumStep = COUNT($resultTestGroup) - COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''));
+
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('ResultJumpTo', json_encode($newResultJumpTo));
-  // $smarty_appform->assign('sumAnswerCol', $sumAnswerCol);
   $smarty_appform->assign('testTmpQuestion', getTestTmpQuestion($tpid, $tid));
   $smarty_appform->assign('totalAnswer', $total_data);
   $smarty_appform->assign('resultQueIdJumpTo', $resultQueIdJumpTo);
-  // $smarty_appform->assign('contentError', $_SESSION['contentError']);
-  // $smarty_appform->assign('sessionAnswerIdError', $_SESSION['sessionAnswerIdError']);
-  // $smarty_appform->assign('resultViewOrderJumpTo', $resultViewOrderJumpTo);
   $smarty_appform->assign('getTestById', $getTestByID);
   $smarty_appform->assign('result', $result);
   $smarty_appform->assign('test_group_id', $test_group_id);
-  // $smarty_appform->assign('sessionAnswerId', $_SESSION['answer_'.$test_group_id]);
-  // $smarty_appform->assign('sessionContent', $_SESSION['content_'.$test_group_id]);
-  // $smarty_appform->assign('sessionContentBack', $_SESSION['contentBack'.$test_group_id]);
-  $smarty_appform->assign('testGroupIDTmpQue', getListTestGroupByTmpQuestion($tid, $status = 2));
-  if(empty(getListTestGroupByTmpQuestion($tid, $status = 2)))
-  {
-    $smarty_appform->assign('resultTestGroupTmpQue', 0));
-  }
-
-
+  $smarty_appform->assign('testGroupIDTmpQue', getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'one', $slimit = 1)); //For get "Test_Group_Id" Back Step
+  //Check Step
+  $smarty_appform->assign('resultTestGroupTmpQue', COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''))); //For Check Show Button Next Or Finish
   $smarty_appform->assign('testQueGroup', COUNT($resultTestGroup));
+  $smarty_appform->assign('resultStep', $sumStep);
   $smarty_appform->display('common/test_question_responsive_patient.tpl');
   exit;
 }
@@ -383,19 +354,19 @@ if('back_step' === $task && !empty($_GET['tid']))
   //Get test_tmp By id
   $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $tid, 'test_patient_id' => $tpid], $type = 'one');
   $resultTestTmpQue = $common->find('test_tmp_question', $condition = ['test_tmp_id' => $resultTestTmp['id'], 'test_group_id' => $tgid], $type = 'all');
-  if(!empty($resultTestTmpQue))
-  {
-    foreach ($resultTestTmpQue as $k => $va) {
-      //Delete: test_tmp_question
-      $common->delete('test_tmp_question', $field = ['id' => $va['id']]);
-    }
-  }
-
+  // if(!empty($resultTestTmpQue))
+  // {
+  //   foreach ($resultTestTmpQue as $k => $va) {
+  //     //Delete: test_tmp_question
+  //     $common->delete('test_tmp_question', $field = ['id' => $va['id']]);
+  //   }
+  // }
   $common->update('test_tmp_question', $field = ['status' => 1], $condition = ['test_tmp_id' => $resultTestTmp['id'], 'test_group_id' => $tgid]);
   header('Location:'.$patient_file.'?task=test_question&tid='.$tid.'&id='.$tpid);
   exit;
 }
 
+//Task Result Patient
 if('result_patient' === $task)
 {
   //Check & Clean String
@@ -406,6 +377,7 @@ if('result_patient' === $task)
   exit;
 }
 
+//Task: test save draft
 if('test_save_draft' === $task)
 {
   if($_POST)

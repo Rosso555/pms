@@ -1472,31 +1472,40 @@ function getJumpToTestQuestionById($tqid)
   return $result;
 }
 
-function getListTestGroupByTmpQuestion($test_id, $status)
+function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $slimit)
 {
-  global $debug, $connected;
+  global $debug, $connected, $offset, $limit;
   $result = true;
   try{
     if($status === 1)
     {
-      $condition .= ' AND (ttmp.id IS NULL OR ttmp.status = 1) ';
-      $orderBy .= ' ORDER BY tg.view_order ASC LIMIT 1 ';
+      $condition .= ' AND (tmp.id IS NULL OR ttmp.status = 1) ';
+      $orderBy .= ' ORDER BY tg.view_order ASC ';
     }
     if($status === 2)
     {
       $condition .= ' AND ttmp.status = 2 ';
-      $orderBy .= ' ORDER BY tg.view_order DESC LIMIT 1 ';
+      $orderBy .= ' ORDER BY tg.view_order DESC ';
+    }
+    if(!empty($slimit))
+    {
+      $setLimit .= ' LIMIT 1';
     }
 
-    $sql= ' SELECT tg.* FROM `test_group` tg LEFT JOIN test_tmp_question ttmp ON ttmp.test_group_id = tg.id WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy;
+    $sql= ' SELECT tg.* FROM `test_group` tg
+              LEFT JOIN test_tmp_question ttmp ON ttmp.test_group_id = tg.id
+              LEFT JOIN test_tmp tmp ON tmp.id = ttmp.test_tmp_id AND tmp.test_patient_id = :tpid
+            WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
     $query->execute();
 
-    if($status === 1) {
-      return $query->fetchAll();
-    } else {
+    if($fetch_type === 'one')
+    {
       return $query->fetch();
+    } else {
+      return $query->fetchAll();
     }
   } catch (Exception $e) {
     $result = false;
@@ -1506,5 +1515,66 @@ function getListTestGroupByTmpQuestion($test_id, $status)
   return $result;
 }
 
+
+function getResponseAnswerByTestPatient($test_id, $tpid)
+{
+  global $debug, $connected, $offset, $limit;
+  $result = true;
+  try{
+
+    $sql = ' SELECT ra.*, ans.jump_to, q.type, ra.test_question_id AS tqid FROM `response` r
+               INNER JOIN response_answer ra ON ra.response_id = r.id
+               INNER JOIN test_question tq ON tq.id = ra.test_question_id
+               INNER JOIN question q ON q.id = tq.question_id
+               LEFT JOIN answer ans ON ans.id = ra.answer_id
+             WHERE r.test_id = :test_id AND r.test_patient_id = :tpid ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    $query->execute();
+
+    return $query->fetchAll();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getResponseAnswerByTestPatient'.$e->getMessage();
+  }
+
+  return $result;
+}
+
+/**
+* Search Report Activity log
+* @author Mr. Hong Syden
+* @param  int $staff_id is staff_id
+* @param  string $act_log_fdate is activity_log date
+* @param  string $act_log_tdate is activity_log date
+* @param  int $slimit is slimit for assign to limit
+* @return array or boolean
+*/
+function psychologist_activity()
+{
+ global $debug, $connected, $total_data, $limit, $offset;
+ $result = true;
+ if(!empty($slimit)) $limit = $slimit;
+
+ try {
+   $sql = 'SELECT alog.content, alog.created_at, psy.*, (SELECT COUNT(*) FROM `activity_log` alog
+             INNER JOIN psychologist psy ON psy.id = alog.psychologist_id ) AS total FROM `activity_log` alog
+             INNER JOIN psychologist psy ON psy.id = alog.psychologist_id
+           LIMIT :offset, :limit ';
+   $stmt = $connected->prepare($sql);
+   $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+   $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+   $stmt->execute();
+   $rows = $stmt->fetchAll();
+   if(count($rows) > 0) $total_data = $rows[0]['total'];
+
+   return $rows;
+ } catch (Exception $e) {
+   $result = false;
+   if($debug)  echo 'Errors: psychologist_activity '.$e->getMessage();
+ }
+ return $result;
+}
 
 ?>

@@ -313,6 +313,10 @@ if('login' === $task)
         $psy_login = psychologist_login($email, $password);
 
         if(!empty($psy_login)){
+          //Record Activity
+          $act_data = ['psychologist_id' => $psy_login['id'], 'content' => 'LOGIN'];
+          @$common->save('activity_log', $act_data);
+
           //assign value to session
           $_SESSION['is_psycho_login_id'] = $psy_login['id'];
           $_SESSION['is_psycho_username'] = $psy_login['username'];

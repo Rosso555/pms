@@ -15,17 +15,17 @@
         <div class="row">
           <div class="col-md-12">
             <form class="form-inline" role="form" action="{$admin_file}" method="GET">
-              <div class="form-group">
+              <div class="form-group" style="margin-bottom:5px;">
                 <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                   <i class="fa fa-plus-circle"></i> {if $multiLang.button_add_profile}{$multiLang.button_add_profile}{else}No Translate (Key Lang:button_add_profile){/if}
                 </button>
               </div>
-              <div class="form-group" float="right">
+              <div class="form-group" style="margin-bottom:5px;">
                 <input type="hidden" name="task" value="staff_info"/>
                 <input type="text" class="form-control" name="kwd" value="{if $smarty.get.kwd eq 1 || $smarty.get.kwd eq 2}{else}{$smarty.get.kwd}{/if}" />
               </div>
-              <div class="form-group">
-                <select class="form-control " name="status" id="the_select">
+              <div class="form-group" style="margin-bottom:5px;">
+                <select class="form-control" name="status" id="the_select">
                   <option value="">Show active or stoped</option>
                   <option value="">Show all</option>
                   <option value="1" {if $smarty.get.status eq 1}selected{/if}>Active</option>

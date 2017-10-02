@@ -48,7 +48,13 @@
             <li><a href="{$admin_file}?task=test_patient"><i class="fa fa-user-md" aria-hidden="true"></i> {if $multiLang.menu_patient}{$multiLang.menu_patient}{else}No Translate (Key Lang: menu_patient){/if}</a></li>
           </ul>
         </li>
-        <li><a href="{$admin_file}?task=download_list"><i class="fa fa-download" aria-hidden="true"></i> {if $multiLang.menu_download_list}{$multiLang.menu_download_list}{else}No Translate (Key Lang: menu_download_list){/if}</a></li>
+        <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-bars" aria-hidden="true"></i> Report <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{$admin_file}?task=download_list"><i class="fa fa-download" aria-hidden="true"></i> {if $multiLang.menu_download_list}{$multiLang.menu_download_list}{else}No Translate (Key Lang: menu_download_list){/if}</a></li>
+            <li><a href="{$admin_file}?task=psychologist_activity"><i class="fa fa-user-md" aria-hidden="true"></i> Psychology Activity</a></li>
+          </ul>
+        </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown" id="animated">
@@ -122,6 +128,15 @@
           <ul class="dropdown-menu">
             {if $staffPermission.test_psychologist}<li><a href="{$admin_file}?task=test_psychologist"><i class="fa fa-user-plus" aria-hidden="true"></i> {if $multiLang.menu_psychologist}{$multiLang.menu_psychologist}{else}No Translate (Key Lang: menu_psychologist){/if}</a></li>{/if}
             {if $staffPermission.test_patient}<li><a href="{$admin_file}?task=test_patient"><i class="fa fa-user-md" aria-hidden="true"></i> {if $multiLang.menu_patient}{$multiLang.menu_patient}{else}No Translate (Key Lang: menu_patient){/if}</a></li>{/if}
+          </ul>
+        </li>
+        {/if}
+        {if $staffPermission.download_list OR $staffPermission.psychologist_activity}
+        <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fa fa-bars" aria-hidden="true"></i> Report <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            {if $staffPermission.download_list}<li><a href="{$admin_file}?task=download_list"><i class="fa fa-download" aria-hidden="true"></i> {if $multiLang.menu_download_list}{$multiLang.menu_download_list}{else}No Translate (Key Lang: menu_download_list){/if}</a></li>{/if}
+            {if $staffPermission.psychologist_activity}<li><a href="{$admin_file}?task=psychologist_activity"><i class="fa fa-user-md" aria-hidden="true"></i> Psychology Activity</a></li>{/if}
           </ul>
         </li>
         {/if}

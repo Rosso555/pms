@@ -22,16 +22,16 @@
         <div class="row">
           <div class="col-md-12">
             <form class="form-inline" role="form" action="{$admin_file}" method="GET">
-              <div class="form-group">
+              <div class="form-group" style="margin-bottom:5px;">
                 <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo"  aria-expanded="false" aria-controls="collapseExample">
                   <i class="fa fa-plus-circle"></i> {if $multiLang.button_new_function}{$multiLang.button_new_function}{else}No Translate (Key Lang:button_new_function){/if}
                 </button>
               </div>
-              <div class="form-group" float="right">
+              <div class="form-group" style="margin-bottom:5px;">
                 <input type="hidden" name="task" value="staff_function"/>
                 <input type="text" class="form-control" name="kwd" value="{$smarty.get.kwd}" />
               </div>
-              <div class="form-group">
+              <div class="form-group" style="margin-bottom:5px;">
                 <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
               </div>
             </form>

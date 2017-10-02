@@ -3916,6 +3916,23 @@ if('ajax' === $task)
     exit;
   }
 }
+
+//task report staff activity_log
+if('psychologist_activity' === $task)
+{
+  // $staff_id   = !empty($_GET['sfid']) ?       $_GET['sfid'] : '';
+  // $fdate      = !empty($_GET['fdate']) ?      $_GET['fdate'] : '';
+  // $tdate      = !empty($_GET['tdate']) ?      $_GET['tdate'] : '';
+
+  $resultPsyActivity = psychologist_activity();
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('resultPsyActivity', $resultPsyActivity);
+  $smarty_appform->assign('listPsychologist', $common->find('psychologist', $condition = null, $type = 'all'));
+  $smarty_appform->display('admin/admin_psychologist_activity.tpl');
+  exit;
+}
+
 //task home
 $smarty_appform->display('admin/index.tpl');
 exit;

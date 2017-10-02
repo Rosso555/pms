@@ -19,40 +19,28 @@
   <div class="panel-body">
       <div class="panel panel-default">
         <div class="panel-body">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
-                  <i class="fa fa-plus-circle"></i> {if $multiLang.text_new_staff_permission}{$multiLang.text_new_staff_permission}{else}No Translate (Key Lang:text_new_staff_permission){/if}
-                </button>
-              </div>
+          <form class="form-inline" role="form" action="{$admin_file}" method="GET">
+            <input type="hidden" name="task" value="staff_permission">
+            <div class="form-group" style="margin-bottom:5px;">
+              <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
+                <i class="fa fa-plus-circle"></i> {if $multiLang.text_new_staff_permission}{$multiLang.text_new_staff_permission}{else}No Translate (Key Lang:text_new_staff_permission){/if}
+              </button>
             </div>
-            <div class="col-md-6">
-              <div class="row">
-                <div class="form-group">
-                  <div class="col-md-5">
-                    <select class="form-control" id="the_select">
-                      <option value="">--- All staff role ---</option>
-                      {foreach from = $search_by_role item = staff_role}
-                      <option value="{$staff_role.staff_role_id}" {if $smarty.get.srid eq $staff_role.staff_role_id}selected{/if}>{$staff_role.staff_role_name}</option>
-                      {/foreach}
-                    </select>
-                  </div>
-                  <div class="col-md-7">
-                    <form class="form-inline" role="form" action="{$admin_file}" method="GET">
-                      <div class="input-group" style="float: right;">
-                        <input type="hidden" name="task" value="staff_permission">
-                        <input id="search" type="text" class="form-control" name="kwd" value="{$smarty.get.kwd|escape}" placeholder="">
-                        <span class="input-group-btn">
-                          <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
-                        </span>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
+            <div class="form-group" style="margin-bottom:5px;">
+              <select class="form-control" id="the_select">
+                <option value="">--- All staff role ---</option>
+                {foreach from = $search_by_role item = staff_role}
+                <option value="{$staff_role.staff_role_id}" {if $smarty.get.srid eq $staff_role.staff_role_id}selected{/if}>{$staff_role.staff_role_name}</option>
+                {/foreach}
+              </select>
             </div>
-          </div>
+            <div class="form-group" style="margin-bottom:5px;">
+              <input id="search" type="text" class="form-control" name="kwd" value="{$smarty.get.kwd|escape}" placeholder="">
+            </div>
+            <div class="form-group" style="margin-bottom:5px;">
+              <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
+            </div>
+          </form>
           <div id="demo" class="collapse {if $error or $edit_staff_permission.id}in{/if}">
             {if $edit_staff_permission.id}
             <form action="{$admin_file}?task=staff_permission&amp;action=edit&amp;id={$edit_staff_permission.id}" method="post">

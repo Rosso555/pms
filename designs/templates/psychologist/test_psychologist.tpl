@@ -9,37 +9,35 @@
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
-        <div class="row">
-          <form class="form-inline" role="form" action="{$psychologist_file}" method="GET" style="padding: 1px 0px 12px 1px;">
+        <form class="form-inline" role="form" action="{$psychologist_file}" method="GET" style="padding: 1px 0px 12px 1px;">
           <input type="hidden" name="task" value="test_psychologist">
-          <div class="col-md-3 form-group" style="margin-bottom:5px;">
-            <select class="form-control select2" name="cid" style="width:100%;">
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2" name="cid">
               <option value="">---Select Category---</option>
               {foreach from=$category item=v}
               <option value="{$v.id}" {if $smarty.get.cid eq $v.id}selected{/if}>{$v.name}</option>
               {/foreach}
             </select>
           </div>
-          <div class="col-md-3 form-group" style="margin-bottom:5px;">
-            <select class="form-control select2" name="tid" style="width:100%;">
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2" name="tid">
               <option value="">---Select Test---</option>
               {foreach from=$test item=v}
               <option value="{$v.id}" {if $smarty.get.tid eq $v.id}selected{/if}>{$v.title}</option>
               {/foreach}
             </select>
           </div>
-          <div class="col-md-3 form-group" style="margin-bottom:5px;">
-            <select class="form-control select2" name="status" style="width:100%;">
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2" name="status">
               <option value="">--- Select Status ---</option>
               <option value="1" {if $smarty.get.status eq 1}selected{/if}>Pendding...</option>
               <option value="2" {if $smarty.get.status eq 2}selected{/if}>Completed</option>
             </select>
           </div>
-          <div class="col-md-3 form-group" style="margin-bottom:5px;">
+          <div class="form-group" style="margin-bottom:5px;">
             <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
           </div>
         </form>
-        </div>
       </div>
     </div><!--panel panel-body-->
 

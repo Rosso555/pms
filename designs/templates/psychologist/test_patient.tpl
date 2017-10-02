@@ -116,16 +116,14 @@
             <td>{$data.title}</td>
             <td>
               {if $data.status eq 1}
-              <button type="button" class="btn btn-danger btn-xs">
-                <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Pendding...
-              </button>
+              <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Pending...</span>
               {else}
-              <button type="button" class="btn btn-success btn-xs">
-                <i class="fa fa-check-circle"></i> Completed
-              </button>
+              <span class="label label-info"><i class="fa fa-check-circle" aria-hidden="true"></i> Completed</span>
               {/if}
             </td>
             <td>
+              <a href="{$psychologist_file}?task=result_test_patient&amp;tid={$data.test_id}&amp;pat_id={$data.patient_id}&amp;id={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a>
+
               <a {if $data.status eq 1}href="{$psychologist_file}?task=test_patient&amp;action=edit&amp;id={$data.id}"{/if} class="btn btn-success btn-xs" {if $data.status eq 2}disabled{/if} data-toggle1="tooltip" data-placement="top"
               title="{if $data.status eq 1}{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang: button_edit){/if}{else}{if $multiLang.button_can_not_edit}{$multiLang.button_can_not_edit}{else}No Translate(Key Lang: button_can_not_edit){/if}{/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->
