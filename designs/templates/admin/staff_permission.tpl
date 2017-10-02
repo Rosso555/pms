@@ -26,8 +26,9 @@
                 <i class="fa fa-plus-circle"></i> {if $multiLang.text_new_staff_permission}{$multiLang.text_new_staff_permission}{else}No Translate (Key Lang:text_new_staff_permission){/if}
               </button>
             </div>
-            <div class="form-group" style="margin-bottom:5px;">
-              <select class="form-control" id="the_select">
+            &nbsp;&nbsp;&nbsp;
+            <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+              <select class="form-control select2_search" id="the_select" style="width:100%;">
                 <option value="">--- All staff role ---</option>
                 {foreach from = $search_by_role item = staff_role}
                 <option value="{$staff_role.staff_role_id}" {if $smarty.get.srid eq $staff_role.staff_role_id}selected{/if}>{$staff_role.staff_role_name}</option>

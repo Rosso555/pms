@@ -27,6 +27,7 @@
                   <i class="fa fa-plus-circle"></i> {if $multiLang.button_new_function}{$multiLang.button_new_function}{else}No Translate (Key Lang:button_new_function){/if}
                 </button>
               </div>
+              &nbsp;&nbsp;&nbsp;
               <div class="form-group" style="margin-bottom:5px;">
                 <input type="hidden" name="task" value="staff_function"/>
                 <input type="text" class="form-control" name="kwd" value="{$smarty.get.kwd}" />

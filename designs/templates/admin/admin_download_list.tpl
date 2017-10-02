@@ -13,40 +13,34 @@
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
-        <form class="form" role="form" action="{$admin_file}?task=download_list" method="GET" style="padding: 1px 0px 12px 1px;">
+        <form class="form-inline" role="form" action="{$admin_file}?task=download_list" method="GET" style="padding: 1px 0px 12px 1px;">
           <input type="hidden" name="task" value="download_list">
-          <div class="col-md-3">
-            <div class="form-group">
-              <select class="form-control select2" name="tid" style="width:100%">
+            <div class="form-group select2_search_inline">
+              <select class="form-control select2_search" name="tid" style="width:100%">
                 <option value="">--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if} ---</option>
                 {foreach from=$test item=data}
                 <option value="{$data.id}" {if $smarty.get.tid eq $data.id}selected{/if}>{$data.title}</option>
                 {/foreach}
               </select>
             </div>
-          </div>
-          <div class="col-md-3">
-            <div class="form-group">
-              <select class="form-control select2" name="is_email" style="width:100%">
+            <div class="form-group select2_search_inline">
+              <select class="form-control select2_search" name="is_email" style="width:100%">
                 <option value="">--- For Email ---</option>
                 <option value="1" {if $smarty.get.is_email eq 1}selected{/if}>No</option>
                 <option value="2" {if $smarty.get.is_email eq 2}selected{/if}>Yes</option>
               </select>
             </div>
-          </div>
-          <div class="col-md-2">
-            <div class="form-group">
-              <select class="form-control select2" name="status" style="width:100%">
+            <div class="form-group select2_search_inline" style="margin-botton:5px;">
+              <select class="form-control select2_search" name="status" style="width:100%">
                 <option value="">--- Status ---</option>
                 <option value="1" {if $smarty.get.status eq 1}selected{/if}>Pending</option>
                 <option value="2" {if $smarty.get.status eq 2}selected{/if}>Completed</option>
               </select>
             </div>
-          </div>
-          <div class="col-md-4">
-            <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate(Key Lang: button_search){/if}</button>
-            <button type="button" class="btn btn-primary" onclick="export_csv();">{if $multiLang.text_export_all_email}{$multiLang.text_export_all_email}{else}No Translate(Key Lang: text_export_all_email){/if}</button>
-          </div>
+            <div class="form-group" style="margin-botton:5px;">
+              <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate(Key Lang: button_search){/if}</button>
+              <button type="button" class="btn btn-primary" onclick="export_csv();">{if $multiLang.text_export_all_email}{$multiLang.text_export_all_email}{else}No Translate(Key Lang: text_export_all_email){/if}</button>
+            </div>
         </form>
       </div><!--panel panel-body-->
     </div><!--panel panel-default-->

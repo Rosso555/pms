@@ -18,33 +18,29 @@
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
-        <form class="form" role="form" action="{$admin_file}?task=test_question" method="GET" style="padding: 1px 0px 12px 1px;">
+        <form class="form-inline" role="form" action="{$admin_file}?task=test_question" method="GET" style="padding: 1px 0px 12px 1px;">
           <input type="hidden" name="task" value="test_question">
-          <div class="col-md-3">
-            <div class="form-group">
-              <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
-                <i class="fa fa-plus-circle"></i> {if $multiLang.button_add_test_question}{$multiLang.button_add_test_question}{else}No Translate(Key Lang: button_add_test_question){/if}
-              </button>
-            </div>
+          <div class="form-group" style="margin-bottom:5px;">
+            <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
+              <i class="fa fa-plus-circle"></i> {if $multiLang.button_add_test_question}{$multiLang.button_add_test_question}{else}No Translate(Key Lang: button_add_test_question){/if}
+            </button>
           </div>
-          <div class="col-md-3">&nbsp;</div>
-          <div class="col-md-3">
-            <div class="form-group">
-              <select class="form-control select2" name="tid" style="width:100%">
-                <option value="">--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if} ---</option>
-                {foreach from=$test item=data}
-                <option value="{$data.id}" {if $smarty.get.tid eq $data.id}selected{/if}>{$data.title}</option>
-                {/foreach}
-              </select>
-            </div>
+          &nbsp;&nbsp;&nbsp;
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2_search" name="tid" style="width:100%;">
+              <option value="">--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if} ---</option>
+              {foreach from=$test item=data}
+              <option value="{$data.id}" {if $smarty.get.tid eq $data.id}selected{/if}>{$data.title}</option>
+              {/foreach}
+            </select>
           </div>
-          <div class="col-md-3">
-          <div class="input-group">
+          <div class="form-group" style="margin-bottom:5px;">
             <input type="text" class="form-control" name="kwd" value="{$smarty.get.kwd|escape}" placeholder="Question Title">
-            <span class="input-group-btn">
+          </div>
+          <div class="form-group" style="margin-bottom:5px;">
+            <span class="form-group-btn">
               <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate(Key Lang:button_search){/if}</button>
             </span>
-          </div>
           </div>
         </form>
         <div id="demo" class="collapse {if $error or $getTestQByID.id} in {/if}">

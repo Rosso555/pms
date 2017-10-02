@@ -16,16 +16,16 @@
           <div class="col-md-12">
             <form class="form-inline" action="{$admin_file}?task=patient" method="get">
               <input type="hidden" name="task" value="patient">
-              <div class="form-group" style="margin-bottom:5px;">
-                <select class="form-control select2" name="psy_id">
+              <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+                <select class="form-control select2_search" name="psy_id" style="width:100%;">
                   <option value="">---Select Psychologist---</option>
                   {foreach from=$listPsychologist item=v}
                   <option value="{$v.id}" {if $smarty.get.psy_id eq $v.id}selected{/if}>{$v.username}</option>
                   {/foreach}
                 </select>
               </div>
-              <div class="form-group" style="margin-bottom:5px;">
-                <select class="form-control select2" name="gender">
+              <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+                <select class="form-control select2_search" name="gender" style="width:100%;">
                   <option value="">---Select Gender---</option>
                   <option value="1" {if $smarty.get.gender eq 1}selected{/if}>Male</option>
                   <option value="2" {if $smarty.get.gender eq 3}selected{/if}>Female</option>
@@ -33,6 +33,8 @@
               </div>
               <div class="form-group" style="margin-bottom:5px;">
                 <input type="text" class="form-control" placeholder="Keyword..." name="kwd">
+              </div>
+              <div class="form-group" style="margin-bottom:5px;">
                 <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
               </div>
             </form>

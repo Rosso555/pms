@@ -24,38 +24,45 @@
               <span style="color: red">{if $multiLang.text_please_input}{$multiLang.text_please_input}{else}No Translate(Key Lang: text_please_input){/if} {if $multiLang.text_analysis_topic}{$multiLang.text_analysis_topic}{else}No Translate(Key Lang: text_analysis_topic{/if}</span>
             {/if}
           </div>
-          <div class="col-md-6">
-            {if $getTopicAsisByID.id}
-            <form class="form-inline" action="{$admin_file}?task=topic_analysis&amp;action=edit&amp;id={$getTopicAsisByID.id}" method="post">
-            {else}
-            <form class="form-inline" action="{$admin_file}?task=topic_analysis&amp;action=add" method="post">
-            {/if}
-              <div class="form-group">
-                <label for="name"><span style="color: red">*</span> {if $multiLang.text_name}{$multiLang.text_name}{else}No Translate(Key Lang: text_name){/if}:</label>
-
-                <input type="text" name="name" class="form-control" value="{$getTopicAsisByID.name}" id="name" placeholder="Enter Analysis Topic" autofocus>
-              </div>
-              <div class="form-group">
-                {if $getTopicAsisByID.id}
-                  <input type="hidden" name="topic_asis_id" value="{$getTopicAsisByID.id}" />
-                  <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate(Key Lang: button_update){/if}</button>
-                  <a href="{$admin_file}?task=topic_analysis" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate(Key Lang: button_concel){/if}</a>
-                {else}
-                  <button type="submit" name="butsubmit" class="btn btn-info"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
-                {/if}
-              </div>
-            </form>
-          </div>
-          <div class="col-md-6">
+          <div class="col-md-12">
             <form class="form-inline" role="form" action="{$admin_file}?task=topic_analysis" method="GET" style="padding: 1px 0px 12px 1px;">
               <input type="hidden" name="task" value="topic">
-              <div class="input-group" style="float: right;">
+              <div class="form-group" style="margin-bottom:5px;">
+                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                  <i class="fa fa-plus-circle"></i> Add Analysis Topic
+                </button>
+              </div>
+              &nbsp;&nbsp;&nbsp;
+              <div class="form-group">
                 <input type="text" class="form-control" name="kwd" value="{$smarty.get.kwd|escape}" placeholder="">
-                <span class="input-group-btn">
+                <span class="form-group-btn">
                   <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate(Key Lang:button_search){/if}</button>
                 </span>
               </div>
             </form>
+          </div>
+          <div class="col-md-12">
+            <div class="collapse {if $error Or $getTopicAsisByID.id}in{/if}" id="collapseExample" style="margin-top: 10px;">
+              {if $getTopicAsisByID.id}
+              <form class="form-inline" action="{$admin_file}?task=topic_analysis&amp;action=edit&amp;id={$getTopicAsisByID.id}" method="post">
+              {else}
+              <form class="form-inline" action="{$admin_file}?task=topic_analysis&amp;action=add" method="post">
+              {/if}
+                <div class="form-group" style="margin-bottom:5px;">
+                  <label for="name"><span style="color: red">*</span> {if $multiLang.text_name}{$multiLang.text_name}{else}No Translate(Key Lang: text_name){/if}:</label>
+                  <input type="text" name="name" class="form-control" value="{$getTopicAsisByID.name}" id="name" placeholder="Enter Analysis Topic" autofocus>
+                </div>
+                <div class="form-group" style="margin-bottom:5px;">
+                  {if $getTopicAsisByID.id}
+                    <input type="hidden" name="topic_asis_id" value="{$getTopicAsisByID.id}" />
+                    <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate(Key Lang: button_update){/if}</button>
+                    <a href="{$admin_file}?task=topic_analysis" class="btn btn-danger" style="color: white;"><i class="fa fa-close"></i> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate(Key Lang: button_concel){/if}</a>
+                  {else}
+                    <button type="submit" name="butsubmit" class="btn btn-info"><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
+                  {/if}
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>

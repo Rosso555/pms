@@ -17,14 +17,17 @@
         <div class="panel-body">
           <form class="form-inline" role="form" action="{$admin_file}?task=question" method="GET" style="padding: 1px 0px 12px 1px;">
             <input type="hidden" name="task" value="question">
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:5px;">
               <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
                 <i class="fa fa-plus-circle"></i> {if $multiLang.button_add_question}{$multiLang.button_add_question}{else}No Translate(Key Lang: button_add_question){/if}
               </button>
             </div>
-            <div class="input-group" style="float: right;">
+            &nbsp;&nbsp;&nbsp;
+            <div class="form-group" style="margin-bottom:5px;">
               <input type="text" class="form-control" name="kwd" value="{$smarty.get.kwd|escape}" placeholder="{if $multiLang.text_search_by}{$multiLang.text_search_by}{else}No Translate(Key Lang: text_search_by){/if} {if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}...">
-              <span class="input-group-btn">
+            </div>
+            <div class="form-group" style="margin-bottom:5px;">
+              <span class="form-group-btn">
                 <button class="btn btn-info" type="submit"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate(Key Lang: button_search){/if}</button>
               </span>
             </div>

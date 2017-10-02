@@ -54,7 +54,7 @@
                   <select class="form-control select2" name="test_question" style="width:100%">
                     <option value="{$data.tqid}">--- {if $multiLang.text_select}{$multiLang.text_select}{else}No Translate(Key Lang: text_select){/if} ---</option>
                     {foreach from=$listTestQueGroupAnswer item=data}
-                    <option value="{$data.tqid}" {if $getViewOrderByID.id}{if $getViewOrderByID.test_question_id neq $data.tqid}{if $data.tq_view_order}disabled{/if}{/if}{else}{if $data.tq_view_order}disabled{/if}{/if} {if $getViewOrderByID.test_question_id}{if $getViewOrderByID.test_question_id eq $data.tqid}selected{/if}{else}{if $smarty.session.view_order.test_question eq $data.tqid}selected{/if}{/if}>
+                    <option value="{$data.tqid}" {if $getViewOrderByID.id}{if $getViewOrderByID.test_question_id neq $data.tqid}{if $data.tq_view_order_id}disabled{/if}{/if}{else}{if $data.tq_view_order_id}disabled{/if}{/if} {if $getViewOrderByID.test_question_id}{if $getViewOrderByID.test_question_id eq $data.tqid}selected{/if}{else}{if $smarty.session.view_order.test_question eq $data.tqid}selected{/if}{/if}>
                     {if $data.g_answer_title}
                       (Group Question): {$data.g_answer_title}
                     {else}
