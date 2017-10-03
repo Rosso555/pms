@@ -655,51 +655,6 @@ function listTopicAnalysis($kwd, $lang)
   return $result;
 }
 /**
- * getResultAnswerTopic
- * @param  int $unique_id is unique_id
- * @param  int $test_id is test_id
- * @param  int $if_topic_id is if_topic_id
- * @return array or boolean
- */
-function getResultAnswerTopic($unique_id, $test_id, $if_topic_id, $topic_id)
-{
-  global $debug, $connected, $limit, $offset, $total_data;
-  $result = true;
-  try{
-
-    if(!empty($if_topic_id)) $where .= ' AND atp.topic_id = :if_topic_id ';
-    if(!empty($topic_id)) $where .= ' AND atp.topic_id = :topic_id ';
-
-    $sql =' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
-              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
-            FROM `response` rs
-              INNER JOIN response_answer rsa ON rsa.response_id = rs.id
-              INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
-              INNER JOIN answer_topic atp ON atp.answer_id = ans.id
-              INNER JOIN topic t ON t.id = atp.topic_id
-              LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
-              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
-            WHERE rs.unique_id = :unique_id '.$where.' GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
-
-    $stmt = $connected->prepare($sql);
-    $stmt->bindValue(':unique_id', (int)$unique_id, PDO::PARAM_INT);
-    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-    if(!empty($topic_id)) $stmt->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
-    if(!empty($if_topic_id)) $stmt->bindValue(':if_topic_id', (int)$if_topic_id, PDO::PARAM_INT);
-    $stmt->execute();
-    if(!empty($if_topic_id) || !empty($topic_id)){
-      $rows = $stmt->fetch();
-    }else {
-      $rows = $stmt->fetchAll();
-    }
-    return $rows;
-  } catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: getResultAnswerTopic'.$e->getMessage();
-  }
-  return $result;
-}
-/**
  * getListTestPsychologist
  * @param  int $psy_id is psychologist_id
  * @param  int $tid is test_id
@@ -768,70 +723,60 @@ function getListTestPsychologist($psy_id, $tid, $cid, $status)
  * @param  int $tmpstus is test_tmp of status
  * @param  int $f_date is from date
  * @param  int $t_date is to date
+ * @param  string $lang is language
  * @return array or bool
  */
-function getListTestPatient($pat_id, $psy_id, $tid, $status, $tmpstus, $f_date, $t_date)
+function getListTestPatient($pat_id, $psy_id, $tid, $status, $tmpstus, $f_date, $t_date, $lang)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
     $condition = $where = '';
 
-    if(!empty($pat_id)){
-      if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' tpt.patient_id = :pat_id ';
+    if(!empty($pat_id)) {
+      $condition .= ' AND tpt.patient_id = :pat_id ';
     }
-    if(!empty($psy_id)){
-      if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' pt.psychologist_id = :psy_id ';
+    if(!empty($psy_id)) {
+      $condition .= ' AND pt.psychologist_id = :psy_id ';
     }
-    if(!empty($tid)){
-      if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' tpt.test_id = :testid ';
+    if(!empty($tid)) {
+      $condition .= ' AND tpt.test_id = :testid ';
     }
-    if(!empty($status)){
-      if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' tpt.status = :status ';
+    if(!empty($status)) {
+      $condition .= ' AND tpt.status = :status ';
     }
-    if(!empty($tmpstus)){
-      if(!empty($condition)) $condition .= ' AND ';
+    if(!empty($tmpstus)) {
       //if eqaul 1 is pending
       if($tmpstus == 1) {
-        $condition .= ' ttmp.status = :tmpstus ';
+        $condition .= ' AND ttmp.status = :tmpstus ';
       }
       //if eqaul 2 is commpleted
       if($tmpstus == 2) {
-        $condition .= ' ttmp.status = :tmpstus ';
+        $condition .= ' AND ttmp.status = :tmpstus ';
       }
       //if eqaul 3 is new assign
       if($tmpstus == 3) {
-        $condition .= ' ttmp.status IS NULL ';
+        $condition .= ' AND ttmp.status IS NULL ';
       }
     }
-    if(!empty($f_date) && empty($t_date)){
-      if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' DATE_FORMAT(tpt.created_at , "%Y-%m-%d") >= :f_date ';
+    if(!empty($f_date) && empty($t_date)) {
+      $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") >= :f_date ';
     }
-    if(empty($f_date) && !empty($t_date)){
-      if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' DATE_FORMAT(tpt.created_at , "%Y-%m-%d") <= :t_date ';
+    if(empty($f_date) && !empty($t_date)) {
+      $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") <= :t_date ';
     }
-    if(!empty($f_date) && !empty($t_date)){
-      if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' DATE_FORMAT(tpt.created_at , "%Y-%m-%d") BETWEEN :f_date AND :t_date ';
+    if(!empty($f_date) && !empty($t_date)) {
+      $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") BETWEEN :f_date AND :t_date ';
     }
-
-
-    if(!empty($condition)) $where .= ' WHERE '.$condition;
 
     $sql =' SELECT tpt.*, pt.username, t.category_id, t.title, t.description, c.name AS catName, ttmp.status AS test_tmp_status,
               (SELECT COUNT(*) FROM `test_patient` tpt INNER JOIN patient pt ON pt.id = tpt.patient_id INNER JOIN test t ON t.id = tpt.test_id
-              INNER JOIN category c ON c.id = t.category_id LEFT JOIN test_tmp ttmp ON ttmp.test_patient_id = tpt.id '.$where.') AS total_count
+              INNER JOIN category c ON c.id = t.category_id LEFT JOIN test_tmp ttmp ON ttmp.test_patient_id = tpt.id WHERE t.lang = :lang '.$condition.') AS total_count
             FROM `test_patient` tpt
               INNER JOIN patient pt ON pt.id = tpt.patient_id
               INNER JOIN test t ON t.id = tpt.test_id
               INNER JOIN category c ON c.id = t.category_id
-              LEFT JOIN test_tmp ttmp ON ttmp.test_patient_id = tpt.id '.$where.' ORDER BY tpt.created_at DESC LIMIT :offset, :limit ';
+              LEFT JOIN test_tmp ttmp ON ttmp.test_patient_id = tpt.id WHERE t.lang = :lang '.$condition.' ORDER BY tpt.created_at DESC LIMIT :offset, :limit ';
 
     $stmt = $connected->prepare($sql);
 
@@ -845,7 +790,7 @@ function getListTestPatient($pat_id, $psy_id, $tid, $status, $tmpstus, $f_date, 
     {
       if($tmpstus == 1 || $tmpstus = 2) $stmt->bindValue(':tmpstus', $tmpstus, PDO::PARAM_INT);
     }
-
+    $stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->execute();
@@ -1015,12 +960,13 @@ function getTestQuestionViewOrder($test_id)
   $result = true;
 
   try{
-    $sql =' SELECT tq.id AS tqid, q.title AS que_title, q.description, ga.g_answer_title, tqvo.id AS tq_view_order_id
+    $sql =' SELECT tq.id AS tqid, q.title AS que_title, q.description, ga.g_answer_title, tqvo.id AS tq_view_order_id, tgq.id AS test_ques_group
             FROM `test_question` tq
               INNER JOIN question q ON q.id = tq.question_id
               LEFT JOIN group_answer ga ON ga.test_id = :test_id AND ga.test_question_id = tq.id
               LEFT JOIN test_question_view_order tqvo ON tqvo.test_id = :test_id AND tqvo.test_question_id = tq.id
-            WHERE tq.test_id = :test_id AND ga.test_question_id IS NULL AND ga.id IS NULL AND tqvo.id IS NULL ORDER BY tq.view_order ASC ';
+              LEFT JOIN test_group_question tgq ON tgq.test_question_id = tq.id
+            WHERE tq.test_id = :test_id AND ga.test_question_id IS NULL OR ga.flag = 1 ';
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
     $query->execute();
@@ -1044,7 +990,6 @@ function ListTestQuestion($tid, $lang)
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
-
     $sql= ' SELECT * FROM `test_question_view_order` WHERE test_id = :tid ORDER BY view_order ASC ';
     $stmt = $connected->prepare($sql);
     $stmt->bindValue(':tid', (int)$tid, PDO::PARAM_INT);
@@ -1053,8 +998,7 @@ function ListTestQuestion($tid, $lang)
 
     $newdata = array();
 
-    if(!empty($rows)){
-
+    if(!empty($rows)) {
       foreach ($rows as $key => $va) {
         $result1 = getTestQuestionByTestQuesID($tid, $va['test_question_id'], $lang);
 
@@ -1119,13 +1063,11 @@ function ListTestQuestion($tid, $lang)
     //Get Test Question No in View Order
     $rTestQueNotViewOrder = getTestQuestionViewOrder($tid);
 
-    if(!empty($rTestQueNotViewOrder)){
+    if(!empty($rTestQueNotViewOrder)) {
 
       foreach ($rTestQueNotViewOrder as $key => $va) {
         if(empty($va['tq_view_order_id'])){
-
           $result1 = getTestQuestionByTestQuesID($tid, $va['tqid'], $lang);
-
           if($result1['flag'] == 1){
             $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
 
@@ -1460,7 +1402,6 @@ function getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang)
                                 'test_question_id'  => $value['test_question_id']);
     }
 
-    // print_r($newdata);
     return $newResultRetrun;
   } catch (Exception $e) {
     $result = false;
@@ -1641,6 +1582,710 @@ function psychologist_activity()
    if($debug)  echo 'Errors: psychologist_activity '.$e->getMessage();
  }
  return $result;
+}
+
+function getMessageResultTopic($tpid, $test_id, $lang)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+
+    //Query test_question_topic_hide by test_id
+    $sql_data2 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC LIMIT 0, 1';
+    $query4 = $connected->prepare($sql_data2);
+    $query4->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query4->execute();
+    $rowsTopic = $query4->fetch();
+
+    $sql= ' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
+              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+            FROM `response` rs
+              INNER JOIN response_answer rsa ON rsa.response_id = rs.id
+              INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
+              INNER JOIN answer_topic atp ON atp.answer_id = ans.id
+              INNER JOIN topic t ON t.id = atp.topic_id
+              LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
+              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
+            WHERE rs.test_patient_id = :tpid AND t.lang = :lang GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $query->execute();
+    $result = $query->fetchAll();
+    if(!empty($result) && COUNT($result) > 0) {
+      foreach ($result as $key => $value) {
+        $result1 = getResultTopicByAmount($value['test_id'], $value['topic_id'], $value['amount']);
+        if(!empty($result1['message'])) {
+          $newResult[] = array('result_id'=> $result1['id'], 'topic_id' => $result1['topic_id'], 'topic_title' => $value['topic_title'], 'amount' => $value['amount'], 'message' => $result1['message']);
+        }
+      }
+    }
+
+    if(!empty($newResult) && !empty($rowsTopic)){
+      foreach ($newResult as $key => $va) {
+        // Check if has test topic hide
+        if($rowsTopic['topic_id'] == $va['topic_id'])
+        {
+          $newResultRe[] = array('result_id'=> $va['result_id'], 'topic_id' => $va['topic_id'], 'topic_title' => $va['topic_title'], 'amount' => $va['amount'], 'message' => $va['message']);
+        }
+      }
+
+      //Query test_question_topic_hide
+      $sql5 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC ';
+      $query5 = $connected->prepare($sql5);
+      $query5->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+      $query5->execute();
+      $rTopicHide = $query5->fetchAll();
+
+      foreach ($rTopicHide as $key => $va) {
+        $result = getResultAnswerTopic($tpid, $test_id, '', $va['topic_id']);
+        //Get check hide/show
+        $testQueHideShow = getTestQuesHideShow($test_id, $va['topic_id'], $result['amount']);
+
+        if(!empty($testQueHideShow)) {
+          $resultAnsTopic_if = getResultAnswerTopic($tpid, $test_id, '', $testQueHideShow['if_topic_id']);
+
+          $rGetResultTopicByAmount = getResultTopicByAmount($result['test_id'], $testQueHideShow['if_topic_id'], $resultAnsTopic_if['amount']);
+          $newResultRe[] = array('result_id'=> $rGetResultTopicByAmount['id'], 'topic_id' => $rGetResultTopicByAmount['topic_id'], 'topic_title' => $resultAnsTopic_if['topic_title'], 'amount' => $resultAnsTopic_if['amount'], 'message' => $rGetResultTopicByAmount['message']);
+        }
+      }
+
+    }else {
+      $newResultRe = $newResult;
+    }
+
+      if(!empty($newResultRe)){
+        foreach ($newResultRe as $key => $va) {
+          //Get Result condition
+          $sql3 ='SELECT rt.message, t.id AS test_id, tp.name AS topic_name, tp.id AS topic_id, rt.view_order
+                  FROM `result_condition` rc
+                    INNER JOIN result rt ON rt.id = rc.show_result_id
+                    INNER JOIN test t ON t.id = rt.test_id
+                    INNER JOIN topic tp ON tp.id = rt.topic_id
+                  WHERE rc.result_id = :result_id GROUP BY rc.id ORDER BY rt.view_order ASC ';
+          $stmt3 = $connected->prepare($sql3);
+          $stmt3->bindValue(':result_id', (int)$va['result_id'], PDO::PARAM_INT);
+          $stmt3->execute();
+          $row3 = $stmt3->fetchAll();
+          $newResultTest[] = array('topic_title' => $va['topic_title'], 'amount' => $va['amount'], 'message' => $va['message'], 're_condition' => $row3);
+        }
+      }
+
+    return $newResultTest;
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getMessageResultTopic'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getResultTopicByAmount
+ * @param  int $test_id
+ * @param  int $topic_id
+ * @param  string $amount
+ * @return array or boolean
+ */
+function getResultTopicByAmount($test_id, $topic_id, $amount)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql= ' SELECT * FROM `result` WHERE test_id = :test_id AND topic_id = :topic_id AND score_from <= :amount AND score_to >= :amount ORDER BY score_to DESC LIMIT 0, 1 ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
+    $query->bindValue(':amount', (string)$amount, PDO::PARAM_STR);
+    $query->execute();
+
+    return $query->fetch();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getResultTopicByAmount'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * getResultAnswerTopic
+ * @param  int $tpid is test_patient_id
+ * @param  int $test_id is test_id
+ * @param  int $if_topic_id is if_topic_id
+ * @return array or boolean
+ */
+function getResultAnswerTopic($tpid, $test_id, $if_topic_id, $topic_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    if(!empty($if_topic_id)) $where .= ' AND atp.topic_id = :if_topic_id ';
+    if(!empty($topic_id)) $where .= ' AND atp.topic_id = :topic_id ';
+
+    $sql =' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
+              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+            FROM `response` rs
+              INNER JOIN response_answer rsa ON rsa.response_id = rs.id
+              INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
+              INNER JOIN answer_topic atp ON atp.answer_id = ans.id
+              INNER JOIN topic t ON t.id = atp.topic_id
+              LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
+              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
+            WHERE rs.test_patient_id = :tpid '.$where.' GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
+
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    if(!empty($topic_id)) $stmt->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
+    if(!empty($if_topic_id)) $stmt->bindValue(':if_topic_id', (int)$if_topic_id, PDO::PARAM_INT);
+    $stmt->execute();
+    if(!empty($if_topic_id) || !empty($topic_id)){
+      $rows = $stmt->fetch();
+    }else {
+      $rows = $stmt->fetchAll();
+    }
+
+    return $rows;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getResultAnswerTopic'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * getTestQuesHideShow
+ * @param  int $test_id
+ * @param  int $topic_id
+ * @param  string $amount
+ * @return array or boolean
+ */
+function getTestQuesHideShow($test_id, $topic_id, $amount)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try {
+
+    $sql =' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id AND topic_id = :topic_id AND less_than <= :amount AND bigger_than >= :amount ';
+
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $stmt->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
+    $stmt->bindValue(':amount', (string)$amount, PDO::PARAM_STR);
+    $stmt->execute();
+    $rows = $stmt->fetch();
+
+    return $rows;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getTestQuesHideShow'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * getListTopicDiagramSecond for list topic in diagram second
+ * @param  mix $resultsTopic is array of result topic
+ * @param  int $margin_left is margin left
+ * @param  int $margin_top is margint top
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function getListTopicDiagramSecond($resultsTopic, $margin_left, $margin_top, $lang)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sum_margin_top = $margin_top;
+    $newResult = array();
+    foreach ($resultsTopic as $key => $value) {
+      $sql= ' SELECT tta.*, ts.* FROM `test_topic_analysis` tta
+                INNER JOIN topic_analysis ts ON ts.id = tta.topic_analysis_id
+              WHERE tta.test_id = :test_id AND tta.topic_id = :topic_id AND tta.less_than <= :tsocre AND tta.bigger_than >= :tsocre AND ts.lang = :lang ORDER BY tta.id DESC LIMIT 0, 1 ';
+      $query = $connected->prepare($sql);
+      $query->bindValue(':tsocre', (string)$value['amount'], PDO::PARAM_STR);
+      $query->bindValue(':test_id', (int)$value['test_id'], PDO::PARAM_INT);
+      $query->bindValue(':topic_id', (int)$value['topic_id'], PDO::PARAM_INT);
+      $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+      $query->execute();
+      $rows = $query->fetch();
+      if(!empty($rows['topic_analysis_id']))
+      {
+        $newResult[] = array('topic_title' => $value['topic_title'], 'topic_analysis_id' => $rows['topic_analysis_id'], 'topic_analysis_title' => $rows['name'], 'margin_left' => $margin_left, 'margin_top' => $sum_margin_top);
+        $sum_margin_top += 50;
+      }
+    }
+
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTopicDiagramSecond'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * listTopicAnalysisDiagram
+ * @param  int  $margin_left
+ * @param  int  $margin_top
+ * @param  int  $space_row_col
+ * @param  string  $lang
+ * @return array or boolean
+ */
+function listTopicAnalysisDiagram($margin_left, $margin_top, $space_row_col, $test_id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sum_margin_left = $margin_left;
+
+    $sql= ' SELECT tta.*, tas.name
+            FROM `test_topic_analysis` tta
+              INNER JOIN topic_analysis tas ON tas.id = tta.topic_analysis_id
+            WHERE tta.test_id = :test_id GROUP BY tta.topic_analysis_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetchAll();
+
+    if(!empty($row))
+    {
+      foreach ($row as $key => $value) {
+        if(!empty($value['id'])){
+          $newResult[] = array('topic_analysis_id' => $value['topic_analysis_id'], 'topic_analysis_title' => $value['name'], 'margin_left' => $sum_margin_left, 'margin_top' => $margin_top);
+          $sum_margin_left += $space_row_col;
+        }
+      }
+    }
+
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listTopicAnalysisDiagram'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * getListTopicDiagram for list data in diagram
+ * @param  int $xleft is number of margin left
+ * @param  int $xtop is number of margin top
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function getListTopicDiagram($tpid, $test_id, $xleft, $xtop)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sum = $xtop;
+    $resultTopic = getResultAnswerTopic($tpid, $test_id, '', '');
+
+    //Query test_question_topic_hide by test_id
+    $sql_data2 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC LIMIT 0, 1';
+    $query2 = $connected->prepare($sql_data2);
+    $query2->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query2->execute();
+    $rowsTopic = $query2->fetch();
+
+    if(!empty($resultTopic) && COUNT($resultTopic) > 0)
+    {
+      foreach ($resultTopic as $key => $value) {
+        //Get test topic answer calculate average score
+        $averageScore = getTestTopicAnswerValueCalculate($value['test_id'], $value['topic_id'], $value['amount']);
+        // Check if has test topic hide
+        if(!empty($averageScore) && !empty($result) && $rowsTopic['topic_id'] == $value['topic_id'])
+        {
+          $newResult[] = array('test_id' => $value['test_id'], 'topic_id' => $value['topic_id'], 'topic_title' => $value['topic_title'], 'amount' => $averageScore, 'margin_left' => $xleft, 'margin_top' => $sum);
+          $sum += 50;
+        }
+        if(!empty($averageScore) && empty($rowsTopic['topic_id'])) {
+          $newResult[] = array('test_id' => $value['test_id'], 'topic_id' => $value['topic_id'], 'topic_title' => $value['topic_title'], 'amount' => $averageScore, 'margin_left' => $xleft, 'margin_top' => $sum);
+          $sum += 50;
+        }
+      }
+      //Query test_question_topic_hide
+      $sql5 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC ';
+      $query5 = $connected->prepare($sql5);
+      $query5->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+      $query5->execute();
+      $rTopicHide = $query5->fetchAll();
+
+      foreach ($rTopicHide as $key => $va) {
+        $result = getResultAnswerTopic($tpid, $test_id, '', $va['topic_id']);
+        //Get check hide/show
+        $testQueHideShow = getTestQuesHideShow($test_id, $va['topic_id'], $result['amount']);
+        // check $testQueHideShow, if it has
+        if(!empty($testQueHideShow)){
+          $topic_id = $va['if_topic_id'];
+          $resultAnsTopic_if = getResultAnswerTopic($tpid, $test_id, '', $testQueHideShow['if_topic_id']);
+          //Get test topic answer calculate average score
+          $averageScore = getTestTopicAnswerValueCalculate($resultAnsTopic_if['test_id'], $resultAnsTopic_if['topic_id'], $resultAnsTopic_if['amount']);
+          if(!empty($averageScore)){
+            $newResult[] = array('test_id' => $resultAnsTopic_if['test_id'], 'topic_id' => $resultAnsTopic_if['topic_id'], 'topic_title' => $resultAnsTopic_if['topic_title'], 'amount' => $averageScore, 'margin_left' => $xleft, 'margin_top' => $sum);
+            $sum += 50;
+          }
+        }// end check $testQueHideShow, if it has
+      }//end fetch $rTopicHide
+    }
+
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTopicDiagram'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * calWidthHeightDiagramSecond
+ * @param  int $countTopic is count topic data
+ * @param  int $countTopicAnalysis is count topic analysis
+ * @param  int $height is height of canvas
+ * @param  int $margin_left
+ * @param  int $space_result_topic
+ * @return array or boolean
+ */
+function calWidthHeightDiagramSecond($countTopic, $countTopicAnalysis, $height, $margin_left, $space_result_topic)
+{
+  $sum_height = $height;
+  $sum_width = $margin_left + $space_result_topic;
+  for ($i=0; $i < $countTopic; $i++) {
+    $sum_height += 50;
+  }
+  for ($i=0; $i < $countTopicAnalysis; $i++) {
+    $sum_width += 50;
+  }
+
+  return $newResult = array('width' => $sum_width, 'height' => $sum_height);
+}
+/**
+ * drawingPointLineResultDiagramSecond for drawing line in diagram second
+ * @param  mix $result_topic_first is array of topic
+ * @param  mix $result_topic_analysis is array of topic analysis
+ * @param  int $margin_left is margin left
+ * @param  int $margin_top is margin top
+ * @param  int $width is width of canvas
+ * @return array or boolen
+ */
+function drawingPointLineResultDiagramSecond($result_topic_first, $result_topic_analysis, $margin_left, $margin_top, $width)
+{
+  $sum_margin_top = $margin_top;
+  if(!empty($result_topic_first) && !empty($result_topic_analysis)){
+    foreach ($result_topic_first as $key => $value) {
+      foreach ($result_topic_analysis as $k => $v) {
+        if($value['topic_analysis_id'] === $v['topic_analysis_id']){
+          $newResult[] = array('topic_analysis_title' => $value['topic_analysis_title'], 'drawing_margin_left' => $v['margin_left'], 'drawing_margin_top' => $sum_margin_top, 'result_margin_left' => $width);
+        }
+      }
+      $sum_margin_top += 50;
+    }
+  }
+
+  return $newResult;
+}
+/**
+ * listXlineDiagram for list Horizontal line diagram
+ * @param  int $countTopic is number of countTopic
+ * @param  int $diagram_width is number of canvas width
+ * @param  int $space_height is number of canvas height
+ * @return array or boolean
+ */
+function listXlineDiagram($countTopic, $diagram_width, $space_height)
+{
+  $result = $countTopic + 1;
+  $sum = $space_height;
+  for ($i=0; $i < $result; $i++) {
+    $newResult[] = array('xwidth' => $diagram_width, 'xmargin_top' => $sum);
+    $sum += 50;
+  }
+
+  return $newResult;
+}
+/**
+ * listXlineDiagramCenter for list Horizontal medium line diagram
+ * @param  [int $numValue is number of count topic or test
+ * @param  int $diagram_width is number of canvas width
+ * @param  int $space_height is number of canvas height
+ * @param  int $margin_left is number of margin left
+ * @return array or boolean
+ */
+function listXlineDiagramCenter($numValue, $diagram_width, $space_height, $margin_left)
+{
+  $sum = $space_height;
+  $sum_diagram_width = $diagram_width;
+  for ($i=0; $i < $numValue; $i++) {
+    $newResult[] = array('xwidth' => $sum_diagram_width, 'xmargin_left' => $margin_left, 'xmargin_top' => $sum);
+    $sum += 50;
+  }
+
+  return $newResult;
+}
+/**
+ * calWidthHeightDiagram is Calculate get width and height for canvas size
+ * @param   int $countTopic is number of countTopic
+ * @param  int $width is number of canvas width
+ * @param  int $height is number of canvas height
+ * @return array or boolean
+ */
+function calWidthHeightDiagram($countTopic, $width, $height)
+{
+  $result = $countTopic + 2;
+  $sum_height = 60;
+  for ($i=0; $i < $result; $i++) {
+    $sum_height += $height;
+  }
+  return $newResult = array('width' => $width, 'height' => $sum_height);
+}
+/**
+ * listNumberMinMax for list text of number show above Vertical line
+ * @param  int $margin_left is number of margin left
+ * @param  int $margin_top is number of margin top
+ * @return top
+ */
+function listNumberMinMax($margin_left, $margin_top)
+{
+  $sum = $margin_left;
+  $text_number = 20;
+  for ($i=0; $i < 7; $i++) {
+    $newResult[] = array('text_number' => $text_number, 'margin_left' => $sum, 'margin_top' => $margin_top);
+    $sum += 50;
+    $text_number += 10;
+  }
+
+  return $newResult;
+}
+/**
+ * listTextMinMax for list text show above number
+ * @param  int $margin_left is number of margin left
+ * @param  int $margin_top is number of margin top
+ * @return array of boolean
+ */
+function listTextMinMax($margin_left, $margin_top)
+{
+  $text = array('min', '', '-s', 'm', '+s', '', 'max');
+  $sum = $margin_left;
+  foreach ($text as $key => $value) {
+    $newResult[] = array('text_header' => $value, 'margin_left' => $sum, 'margin_top' => $margin_top);
+    $sum += 50;
+  }
+
+  return $newResult;
+}
+/**
+ * listBackgroudColorDiagram
+ * @param  int $margin_left is number of margin left
+ * @param  int $margin_top is number of margin top
+ * @param  int $width  is number of space width each Vertical line
+ * @return array or boolean
+ */
+function listBackgroundColorDiagram($margin_left, $margin_top, $width)
+{
+  $color = array('rgba(188, 119, 91, 0.34)', 'rgba(244, 246, 174, 0.13)', 'rgba(146, 151, 210, 0.33)', 'rgba(146, 151, 210, 0.33)', 'rgba(244, 246, 174, 0.13)', 'rgba(188, 119, 91, 0.34)');
+  $sum_margin_left = $margin_left;
+  foreach ($color as $key => $value) {
+    $newResult[] = array('margin_left' => $sum_margin_left, 'margin_top' => $margin_top, 'width' => $width, 'color' => $value);
+    $sum_margin_left += 50;
+  }
+
+  return $newResult;
+}
+/**
+ * drawingPointLineResult
+ * @param   mix $resultsTopic is array of result topic
+ * @param  int $margin_left is margin left
+ * @param  int $margin_top is margint top
+ * @return array or boolean
+ */
+function drawingPointLineResult($resultsTopic, $margin_left, $margin_top, $test_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try {
+    $sumMaginTop = $margin_top;
+    $sumResultMarginLeft = $margin_left + 435;
+
+    if(!empty($resultsTopic))
+    {
+      foreach ($resultsTopic as $key => $value)
+      {
+        $calDrawingLine = $value['amount'] * 5;
+        if($value['amount'] <= 20 || $value['amount'] == 0){
+          $sumDrawingLine = $margin_left + 100;
+        }elseif ($value['amount'] >= 80) {
+          $sumDrawingLine = $margin_left + 400;
+        }else {
+          $sumDrawingLine = $calDrawingLine + $margin_left;
+        }
+        $newResult[] = array('amount_result' => $value['amount'], 'drawing_margin_left' => $sumDrawingLine, 'drawing_margin_top' => $sumMaginTop, 'result_margin_left' => $sumResultMarginLeft);
+        $sumMaginTop += 50;
+      }
+    }
+
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: drawingPointLineResult'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * listYLineDiagram for list Vertical line in diagram
+ * @param  int $yleft is number of margin left
+ * @param  int $ytop is number of margin top
+ * @return array or boolean
+ */
+function listYLineDiagram($yleft, $ytop)
+{
+  $result = array();
+  $sum = $yleft;
+  for ($i=0; $i < 7; $i++) {;
+    $result[] = array('ymargin_left' => $sum, 'ymargin_top' => $ytop);
+    $sum += 50;
+  }
+
+  return $result;
+}
+/**
+ * listYLineDiagramCenter for list Vertical medium line center
+ * @param  int $yleft is number of margin left
+ * @param  int $ytop is number of margin top
+ * @return array or boolean
+ */
+function listYLineDiagramCenter($yleft, $ytop)
+{
+  $result = array();
+  $sum = $yleft + 25;
+  for ($i=0; $i < 6; $i++) {;
+    $result[] = array('ymargin_left_center' => $sum, 'ymargin_top_center' => $ytop);
+    $sum += 50;
+  }
+
+  return $result;
+}
+/**
+ * listSmall_YlineDiagram for list Vertical small line above
+ * @param  int $yleft is number of margin left
+ * @param  int $ytop is number of margin top
+ * @return array or boolean
+ */
+function listSmall_YlineDiagram($yleft, $ytop)
+{
+  $sum = $yleft;
+  for ($i=0; $i <= 60 ; $i++) {
+    $result[] = array('y_small_margin_left' => $sum, 'y_small_margin_top' => $ytop);
+    $sum += 5;
+  }
+
+  return $result;
+}
+/**
+ * listBackgroundColorDiagramSecond
+ * @param  int $value_count
+ * @param  int $margin_left
+ * @param  int $margin_top
+ * @param  int $width
+ * @return array or boolean
+ */
+function listBackgroundColorDiagramSecond($value_count, $margin_left, $margin_top, $width)
+{
+  $color = array('red' => 'rgba(188, 119, 91, 0.34)', 'blue' => 'rgba(146, 151, 210, 0.33)');
+  // echo $value_count;
+  $sum_margin_left = $margin_left;
+  for ($i=0; $i < $value_count; $i++) {
+    $result = $i % 2;
+    if($result == 0){
+      $newResult[] = array('margin_left' => $sum_margin_left, 'margin_top' => $margin_top, 'width' => $width, 'color' => $color['red']);
+    }else {
+      $newResult[] = array('margin_left' => $sum_margin_left, 'margin_top' => $margin_top, 'width' => $width, 'color' => $color['blue']);
+    }
+    $sum_margin_left += 50;
+  }
+
+  return $newResult;
+}
+/**
+ * listRotateLineDiagramSecond
+ * @param  int $countTopic is count topic data
+ * @param  int $lineTo_left
+ * @param  int $space_height
+ * @param  int $moveTo_left
+ * @param  int $moveTo_top
+ * @param  int $space_row_col
+ * @return array or boolean
+ */
+function listRotateLineDiagramSecond($countTopic, $lineTo_left, $space_height, $moveTo_left, $moveTo_top, $space_row_col)
+{
+  $result = array();
+  $sum_moveTo_left = $moveTo_left;
+  $sum_lineTo_left = $lineTo_left;
+
+  for ($i=0; $i <= $countTopic; $i++) {;
+    $result[] = array('move_to_left' => $sum_moveTo_left, 'move_to_top' => $moveTo_top, 'line_to_left' => $sum_lineTo_left, 'line_to_top' => $space_height);
+    $sum_moveTo_left += $space_row_col;
+    $sum_lineTo_left += $space_row_col;
+  }
+  return $result;
+
+}
+/**
+ * listYLineDiagramSecond
+ * @param  int $countTopic is count topic data
+ * @param  int $yleft is margin_left
+ * @param  int $ytop is margin_top
+ * @return array or boolean
+ */
+function listYLineDiagramSecond($countTopic, $yleft, $ytop)
+{
+  $result = array();
+  $sum = $yleft;
+  for ($i=0; $i <= $countTopic; $i++) {;
+    $result[] = array('ymargin_left' => $sum, 'ymargin_top' => $ytop);
+    $sum += 50;
+  }
+  return $result;
+}
+/**
+ * getTestTopicAnswerValueCalculate
+ * @param  int $test_id is test_id
+ * @param  int $topic_id is topic_id
+ * @param  string $amount
+ * @return number
+ */
+function getTestTopicAnswerValueCalculate($test_id, $topic_id, $amount)
+{
+
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try {
+    $sql =' SELECT tta.*, tp.name AS topic_title FROM `test_topic_answer` tta
+                    INNER JOIN test t ON t.id = tta.test_id
+                    INNER JOIN topic tp ON tp.id = tta.topic_id
+                  WHERE tta.test_id = :test_id AND tta.topic_id = :topic_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query->bindValue(':topic_id', $topic_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+
+    // Calculate average
+    if (COUNT($rows) > 0 && $rows['average'] > 0 && $rows['stdd'] > 0 && $rows['multiplier'] > 0 && $rows['constant'] > 0){
+      $zScore = ($amount - $rows['average']) / $rows['stdd'];
+      $averageScore = round($zScore * $rows['multiplier'] + $rows['constant'], 2);
+    }else {
+      $averageScore = 0.00;
+    }
+
+    return $averageScore;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getTestTopicAnswerValueCalculate'.$e->getMessage();
+  }
+
+  return $result;
 }
 
 ?>

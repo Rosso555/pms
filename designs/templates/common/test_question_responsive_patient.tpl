@@ -55,7 +55,6 @@
               {if $va.answer}
               {foreach item=ans from=$va.answer name=foo}
                 <td>
-                {$ans.jump_to}
                 {if $va.type eq 3}
                   <label for="radio{$ans.id}_{$va.id}" class="radio-inline" style="margin-bottom: 10px;">
                     {if $smarty.foreach.foo.first}
@@ -80,7 +79,6 @@
                     <input type="hidden" id="content{$va.id}{$ans.id}" name="content[]" value="NULL" disabled>
 
                     <input style="margin-top: -4px;" type="checkbox" id="checkbox{$ans.id}_{$va.id}" name="answer[]" class="check_box_value{$va.id}" value="{$ans.id|escape}" onclick="removeRequired({$va.id}, {$ans.id}, {$va.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$va.is_required|escape})" {if $va.is_required eq 1}required{/if}>
-
                   </label>
                 {/if}
                 </td>
@@ -104,7 +102,6 @@
           <div style="margin-left: 5px;">
             <!-- fetch answer -->
             {foreach item=ans from=$v.answer name=foo}
-            {$ans.jump_to}
               {if $v.type eq 3}
               <div class="radio" >
                 <label for="radio{$ans.id}_{$v.id}" class="radio-inline" style="margin-bottom: 10px;">
@@ -118,7 +115,6 @@
                   <input type="hidden" id="jumping_to{$v.id}" name="jump_to[]" value="0">
                   {/if}
                   <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$v.id}" name="answer[{$v.id}]" class="check_value{$v.id}" value="{$ans.id|escape}" onclick="removeRequired({$v.id}, {$ans.id}, {$v.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$v.is_required|escape})" {if $v.is_required eq 1}required{/if}>
-
                   <span style="line-height: 1.2;">{$ans.title}</span>
                 </label>
               </div>
@@ -133,7 +129,6 @@
                   <input type="hidden" id="content{$v.id}{$ans.id}" name="content[]" value="NULL" disabled>
 
                   <input style="margin-top: -4px;" type="checkbox" id="checkbox{$ans.id}_{$v.id}" name="answer[]" class="check_box_value{$v.id}" value="{$ans.id|escape}" onclick="removeRequired({$v.id},{$ans.id}, {$v.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$v.is_required|escape})" {if $v.is_required eq 1}required{/if}>
-
                   <span style="line-height: 1.2;">{$ans.title}</span>
                 </label>
               </div>
@@ -178,9 +173,6 @@
       <hr>
       <div class="form-group text-center">
         {if $testQueGroup gt 0}
-          <!-- {if $testQueGroup neq $resultTestGroupTmpQue}
-          <a href="{$index_file}?task=back_step&amp;tid={$smarty.get.tid}&amp;tgid={$testGroupIDTmpQue.id}&amp;id={$smarty.get.id}" class="btn btn-warning"> <i class="fa fa-step-backward" aria-hidden="true"></i> {if $multiLang.button_back_step}{$multiLang.button_back_step}{else}No Translate (Key Lang: button_back_step){/if}</a>
-          {/if} -->
           {if $resultTestGroupTmpQue gt 0}
           <a href="{$index_file}?task=back_step&amp;tid={$smarty.get.tid}&amp;tgid={$testGroupIDTmpQue.id}&amp;id={$smarty.get.id}" class="btn btn-warning"> <i class="fa fa-step-backward" aria-hidden="true"></i> {if $multiLang.button_back_step}{$multiLang.button_back_step}{else}No Translate (Key Lang: button_back_step){/if}</a>
           {/if}

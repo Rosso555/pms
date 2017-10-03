@@ -1381,19 +1381,14 @@ if('test_question' === $task)
     $common->delete('test_question_topic', $field = ['test_question_id' => $_GET['id']]);
     $common->delete('response_answer', $field = ['test_question_id' => $_GET['id']]);
 
-    foreach ($rResponseAns as $key => $value) {
-      $rSumResAns = sumResponseAnswer($value['response_id'], $_GET['tid']);
-      $common->update('response', $field = ['score' => $rSumResAns], $condition = ['id' => $value['response_id']]);
-    }
-
     setcookie('test_que_id', $_GET['id'], time() - 10);
     setcookie('checkTestQues_Qtitle', $result['que_title'], time() - 10);
     setcookie('checkTestQues_Ttitle', $result['test_title'], time() - 10);
 
     //Redirect
-    if($_GET['kwd'] || $_GET['tid'] || $_GET['next']){
+    if($_GET['kwd'] || $_GET['tid'] || $_GET['next']) {
       header('location: '.$admin_file.'?task=test_question&tid='.$_GET['tid'].'&kwd='.$_GET['kwd'].'&next='.$_GET['next']);
-    }else {
+    } else {
       header('location: '.$admin_file.'?task=test_question');
     }
     exit;
@@ -2819,7 +2814,7 @@ if('test_group_question' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listTestGroupQuestion', $result);
-  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionGroupAnswer($_GET['tid']));
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid']));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->assign('test_group', $common->find('test_group', $condition = ['id' => $_GET['tgid']], $type = 'one'));
   $smarty_appform->display('admin/admin_test_group_question.tpl');
@@ -3152,7 +3147,7 @@ if('test_question_view_order' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listTestQestionViewOrder', $results);
-  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionGroupAnswer($_GET['tid']));
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid']));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->display('admin/admin_test_que_view_order.tpl');
   exit;
@@ -3661,7 +3656,7 @@ if('test_patient' === $task)
   $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
 
-  $results = getListTestPatient($pat_id, '', $tid, $status, '', '', '');
+  $results = getListTestPatient($pat_id, '', $tid, $status, '', '', '', $lang);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);

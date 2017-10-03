@@ -471,7 +471,7 @@ $tmpstus= !empty($_GET['stus']) ? $_GET['stus'] : '';
 $f_date = !empty($_GET['f_date']) ? $_GET['f_date'] : '';
 $t_date = !empty($_GET['t_date']) ? $_GET['t_date'] : '';
 
-$results = getListTestPatient($_SESSION['is_patient_login_id'], '', $tid, $status = 1, $tmpstus, $f_date, $t_date);
+$results = getListTestPatient($_SESSION['is_patient_login_id'], '', $tid, $status = 1, $tmpstus, $f_date, $t_date, $lang);
 
 (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
 SmartyPaginate::assign($smarty_appform);

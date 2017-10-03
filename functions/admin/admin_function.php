@@ -1625,35 +1625,6 @@ function getListViewOrderTestQuestion($test_id)
   return $result;
 }
 /**
- * getTestQuestionGroupAnswer
- * @param  int $test_id
- * @return array or boolean
- */
-function getTestQuestionGroupAnswer($test_id)
-{
-  global $debug, $connected;
-  $result = true;
-
-  try{
-    $sql =' SELECT tq.id AS tqid, q.title AS que_title, q.description, ga.g_answer_title, tqvo.id AS tq_view_order, tgq.id AS test_ques_group FROM `test_question` tq
-              INNER JOIN question q ON q.id = tq.question_id
-              LEFT JOIN group_answer ga ON ga.test_id = :test_id AND ga.test_question_id = tq.id
-              LEFT JOIN test_question_view_order tqvo ON tqvo.test_id = :test_id AND tqvo.test_question_id = tq.id
-              LEFT JOIN test_group_question tgq ON tgq.test_question_id = tq.id
-            WHERE tq.test_id = :test_id AND ga.test_question_id IS NULL OR ga.flag = 1 ';
-    $query = $connected->prepare($sql);
-    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
-    $query->execute();
-    return $query->fetchAll();
-  }
-  catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: getTestQuestionGroupAnswer'.$e->getMessage();
-  }
-
-  return $result;
-}
-/**
  * is_view_order_exist
  * @param  int  $test_id
  * @param  int $test_que_id

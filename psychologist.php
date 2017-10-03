@@ -217,14 +217,14 @@ if('test_patient' === $task)
   $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
 
-  $results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status, '', '', '');
+  $results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status, '', '', '', $lang);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('testPatient', $results);
-  $smarty_appform->assign('test', getListTestPsychologistCompleted($_SESSION['is_psycho_login_id']));
+  $smarty_appform->assign('test', getListTestPsychologistCompleted($_SESSION['is_psycho_login_id'], $lang));
   $smarty_appform->assign('patient', $common->find('patient', $condition = ['psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'all'));
   $smarty_appform->display('psychologist/test_patient.tpl');
   exit;
@@ -722,61 +722,63 @@ if('result_test_patient' === $task)
   $tpid = $common->clean_string($_GET['id']);
   $tid  = $common->clean_string($_GET['tid']);
   $pat_id = $common->clean_string($_GET['pat_id']);
+  $sumTotal = 0; $sumAssignWeight = 0; $sumDefault = 0; $diagram_width = 820;
+  $space_height = 50; $margin_left = 450; $space_row_col = 50;
+  $moveTo_left  = $margin_left + 90;
+  $moveTo_top   = 60;
 
-  //Get Test Group By test_id
-  $resultTestGroup = listTestGroupByTestId($tid);
+  $resultTestPsychologist = getCheckTestPatientByPsyChologist($_SESSION['is_psycho_login_id'], $pat_id, $tid, $tpid);
 
-  //Get Test Group By Tmp Question
-  $resultTestGroupTmpQue = getListTestGroupByTmpQuestion($tid, $tpid, $status = 1, $fetch_type = 'all', $slimit = '');
-  if(COUNT($resultTestGroup) > 0)
-  {
-    if(!empty($resultTestGroupTmpQue))
-    {
-      foreach ($resultTestGroupTmpQue as $k => $va) {
-        $test_group_id = $va['id'];
-        $result = listTestGroupQuestion($va['id'], $tid, $lang);
-        $getTestByID = getTestGroupById($va['id'], $lang);
-        break;
-      }
-    }
-
-  } else {
-    if(!empty($tid))
-    {
-      //List All Test Question No Group
-      $result = ListTestQuestion($tid, $lang);
-      $getTestByID = $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one');
-    }
+  if(empty($resultTestPsychologist)) {
+    header('Location:'.$psychologist_file.'?task=page_not_found');
+    exit;
   }
 
-  //For Jumping To
-  $resultsJumpTo = getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang);
+  //Get Result Answer Topic
+  $getResultTopic = getResultAnswerTopic($tpid, $tid, '', '');
+  //Get List Topic in diagram second
+  $resultTopicDiagramSecond = getListTopicDiagramSecond($getResultTopic, 10, 240, $lang);
+  //Get List Topic Analysis
+  $resultTopicAnalysis= listTopicAnalysisDiagram($margin_left + 25, 203, $space_row_col, $tid);
+  //Get List Topic in diagram first
+  $resultTopicDiagram = getListTopicDiagram($tpid, $tid,10, 140);
+  //Calculate width and height on canvas2
+  $resultWidthHeightSecond = calWidthHeightDiagramSecond(COUNT($resultTopicDiagramSecond), COUNT($resultTopicAnalysis), $space_height + 160, $margin_left, $space_result_topic = 150);
+  //Drawing Line Result Diagram Second
+  $resultDrawingLineResultDiagramSecond = drawingPointLineResultDiagramSecond($resultTopicDiagramSecond, $resultTopicAnalysis, $margin_left + 25, $margin_top = 235, $resultWidthHeightSecond['width'] - 145);
 
-  $newResultJumpTo = array();
-  if(!empty($resultsJumpTo['jump_to']))
-  {
-    foreach ($resultsJumpTo['jump_to'] as $k => $va)
-    {
-      foreach ($resultsJumpTo['question'] as $key => $value)
-      {
-        if($key > $va['key'])
-        {
-          if($value['test_question_id'] !== $va['jump_to'])
-          {
-            $newResultJumpTo[$va['jump_to'].'_'.$va['test_question_id']][] = $value['test_question_id'];
-          }else {
-            break;
-          }
-        }
-      } //End foreach $resultsJumpTo
-    }//End foreach $resultsJumpTo['jump_to']
-  }
+  //Assign value to diagram first
+  $smarty_appform->assign('listXlineDiagram', listXlineDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height + 60));//Horizontal Line
+  $smarty_appform->assign('listXdiagramCenter', listXlineDiagramCenter(COUNT($resultTopicDiagram), $diagram_width - 70, $space_height + 85, $margin_left));//List Diagram Horizontal line center
+  $smarty_appform->assign('getWidthHeight', calWidthHeightDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height));//Calculate width and Height on canvas
+  $smarty_appform->assign('listNumberMinMax', listNumberMinMax($margin_left, $margin_top = 90));//List Text Number Min & Max
+  $smarty_appform->assign('listTextMinMax', listTextMinMax($margin_left, $margin_top = 75));//List Text Min & Max
+  $smarty_appform->assign('listBackgroudColor', listBackgroundColorDiagram($margin_left, 110, 50));//List backgroud diagram
+  $smarty_appform->assign('drawingPointLine', drawingPointLineResult($resultTopicDiagram, $margin_left - 100, $margin_top = 135, $_GET['id']));//Drawing point line
+  $smarty_appform->assign('listYLineDiagram', listYLineDiagram($margin_left, 50 + 50));//Vertical Line
+  $smarty_appform->assign('listYLineDiagramCenter', listYLineDiagramCenter($margin_left, 50 + 50));//Vertical Line center
+  $smarty_appform->assign('listSmallYLineDiagram', listSmall_YlineDiagram($margin_left, 90));//Vertical small Line
+  $smarty_appform->assign('listTopicDiagram', $resultTopicDiagram);
+  //end
 
-  $smarty_appform->assign('ResultJumpTo', json_encode($newResultJumpTo));
-  $smarty_appform->assign('result', $result);
-  $smarty_appform->assign('getTestById', $getTestByID);
+  //Assign value to diagram second
+  $smarty_appform->assign('getWidthHeightSecond', $resultWidthHeightSecond);
+  $smarty_appform->assign('listTopicDiagramSecond', $resultTopicDiagramSecond);
+  $smarty_appform->assign('listTopicAnalysis', $resultTopicAnalysis);
+  $smarty_appform->assign('drawingLineResultDiagramSecond', $resultDrawingLineResultDiagramSecond);
+  $smarty_appform->assign('listBackgroudColorSecond', listBackgroundColorDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160, $space_row_col));//List background color Diagram Second
+  $smarty_appform->assign('listXlineDiagramSecond', listXlineDiagram(COUNT($resultTopicDiagramSecond), $resultWidthHeightSecond['width'], $space_height + 160));//Horizontal line
+  $smarty_appform->assign('listXlineDiagramSecondCenter', listXlineDiagramCenter(COUNT($resultTopicDiagramSecond), $resultWidthHeightSecond['width'] - 150, $space_height + 185, $margin_left)); //List Diagram Second Horizontal line center
+  $smarty_appform->assign('listRotateLineDiagramSecond', listRotateLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160, $moveTo_left, $moveTo_top, $space_row_col));//List Rotate Line Diagram Second
+  $smarty_appform->assign('listYLineDiagramSecond', listYLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160));//Vertical Line
+  //end
+
+  // var_dump(getMessageResultTopic($tpid, $tid, $lang));
+
+  $smarty_appform->assign('messageResultTopic', getMessageResultTopic($tpid, $tid, $lang));
   $smarty_appform->assign('reponseAnswerByTestPat', getResponseAnswerByTestPatient($tid, $tpid));
   $smarty_appform->assign('patient', $common->find('patient', $condition = ['id' => $pat_id,'psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'one'));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
   $smarty_appform->display('psychologist/result_test_patient.tpl');
   exit;
 }
@@ -784,14 +786,14 @@ if('result_test_patient' === $task)
 $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
 $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
 
-$results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status = 1, $tmpstus = 1, '', '');
+$results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status = 1, $tmpstus = 1, '', '', $lang);
 
 (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
 SmartyPaginate::assign($smarty_appform);
 
 $smarty_appform->assign('error', $error);
 $smarty_appform->assign('testPatient', $results);
-$smarty_appform->assign('test', getListTestPsychologistCompleted($_SESSION['is_psycho_login_id']));
+$smarty_appform->assign('test', getListTestPsychologistCompleted($_SESSION['is_psycho_login_id'], $lang));
 $smarty_appform->assign('patient', $common->find('patient', $condition = ['psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'all'));
 $smarty_appform->display('psychologist/index.tpl');
 exit;

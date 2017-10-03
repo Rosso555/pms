@@ -19,6 +19,7 @@
               <i class="fa fa-plus-circle"></i> {if $multiLang.button_add_test_patient}{$multiLang.button_add_test_patient}{else}No Translate(Key Lang: button_add_test_patient){/if}
             </button>
           </div>
+          &nbsp;&nbsp;&nbsp;
           <div class="form-group select2_search_inline" style="margin-bottom:5px;">
             <select class="form-control select2_search" name="pat_id" style="width:100%;">
               <option value="">---Select {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if}---</option>
