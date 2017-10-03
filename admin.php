@@ -612,12 +612,12 @@ if('staff_info' === $task)
         }
 
         $common->save('staff', $field =['name'      => $name,
-                                        'password'  => $pass,
-                                        'gender'    => $gender,
-                                        'phone'     => $phone,
-                                        'status'    => 1,
-                                        'photo'     => $image,
-                                        'staff_role_id' =>$staff_role]);
+        'password'  => $pass,
+        'gender'    => $gender,
+        'phone'     => $phone,
+        'status'    => 1,
+        'photo'     => $image,
+        'staff_role_id' =>$staff_role]);
         $_SESSION['staff_info'] = '';
         unset($_SESSION['staff_info']);
         //Redirect
@@ -685,11 +685,11 @@ if('staff_info' === $task)
           }
         }
         $common->update('staff', $field =['name'      => $name,
-                                          'password'  => $pass,
-                                          'gender'    => $gender,
-                                          'phone'     => $phone,
-                                          'photo'     => $image,
-                                          'staff_role_id' =>$staff_role], $condition = ['id' => $id]);
+        'password'  => $pass,
+        'gender'    => $gender,
+        'phone'     => $phone,
+        'photo'     => $image,
+        'staff_role_id' =>$staff_role], $condition = ['id' => $id]);
         $_SESSION['staff_info'] = '';
         unset($_SESSION['staff_info']);
         //Redirect
@@ -869,12 +869,12 @@ if('patient' === $task)
       //Save
       if(empty($id) && COUNT($error) === 0){
         $common->save('patient', $field =['psychologist_id' => $psy_id,
-                                          'username'=> $username,
-                                          'email'   => $email,
-                                          'phone'   => $phone,
-                                          'gender'  => $gender,
-                                          'age'     => $age,
-                                          'password'=> $password]);
+        'username'=> $username,
+        'email'   => $email,
+        'phone'   => $phone,
+        'gender'  => $gender,
+        'age'     => $age,
+        'password'=> $password]);
         //unset session
         unset($_SESSION['patient']);
         //Redirect
@@ -919,12 +919,12 @@ if('patient' === $task)
       //Update
       if(!empty($id) && COUNT($error) === 0){
         $common->update('patient', $field= ['psychologist_id' => $psy_id,
-                                            'username' => $username,
-                                            'email'    => $email,
-                                            'phone'    => $phone,
-                                            'gender'   => $gender,
-                                            'age'      => $age,
-                                            'password' => $password], $condition = ['id' => $_GET['id']]);
+        'username' => $username,
+        'email'    => $email,
+        'phone'    => $phone,
+        'gender'   => $gender,
+        'age'      => $age,
+        'password' => $password], $condition = ['id' => $_GET['id']]);
         //unset session
         unset($_SESSION['patient']);
         //Redirect
@@ -1012,10 +1012,10 @@ if('psychologist' === $task)
       //Save
       if(empty($id) && COUNT($error) === 0){
         $common->save('psychologist', $field = ['username'=> $username,
-                                                'email'   => $email,
-                                                'job'     => $job,
-                                                'password'=> $password,
-                                                'address' => $address]);
+        'email'   => $email,
+        'job'     => $job,
+        'password'=> $password,
+        'address' => $address]);
         //unset session
         unset($_SESSION['psychologist']);
         //Redirect
@@ -1059,10 +1059,10 @@ if('psychologist' === $task)
       //Update
       if(!empty($id) && COUNT($error) === 0){
         $common->update('psychologist', $field=['username' => $username,
-                                                'email'    => $email,
-                                                'job'      => $job,
-                                                'password' => $password,
-                                                'address'  => $address], $condition = ['id' => $id]);
+        'email'    => $email,
+        'job'      => $job,
+        'password' => $password,
+        'address'  => $address], $condition = ['id' => $id]);
         //unset session
         unset($_SESSION['psychologist']);
         //Redirect
@@ -1232,9 +1232,9 @@ if('test_question' === $task)
       if(0 === count($error) && empty($test_question_id))
       {
         $tque_id = $common->save('test_question', $field = ['test_id'     => $test_id,
-                                                            'question_id' => $question_id,
-                                                            'view_order'  => $view_order,
-                                                            'is_required' => $required]);
+        'question_id' => $question_id,
+        'view_order'  => $view_order,
+        'is_required' => $required]);
         // //Get answer
         $rAnswer = $common->find('answer', $condition = ['test_question_id' => $copy_test_que], $type = 'all');
         //Get question
@@ -1313,9 +1313,9 @@ if('test_question' === $task)
       if(0 === count($error) && !empty($test_question_id))
       {
         $common->update('test_question', $field =['test_id'     => $test_id,
-                                                  'question_id' => $question_id,
-                                                  'view_order'  => $view_order,
-                                                  'is_required' => $required], $condition = ['id' => $test_question_id]);
+        'question_id' => $question_id,
+        'view_order'  => $view_order,
+        'is_required' => $required], $condition = ['id' => $test_question_id]);
         //unset session
         unset($_SESSION['test_question']);
         //Redirect
@@ -1472,9 +1472,9 @@ if('answer' === $task)
         if(!empty($result)){
           foreach ($result as $key => $value) {
             $common->save('answer_topic', $field = ['answer_id' => $answer_id,
-                                                    'topic_id'  => $value['topic_id'],
-                                                    'default_value' => $default_value,
-                                                    'weight_value'  => $weight_value]);
+            'topic_id'  => $value['topic_id'],
+            'default_value' => $default_value,
+            'weight_value'  => $weight_value]);
           }
         }
         //unset session
@@ -1618,10 +1618,10 @@ if('answer_topic' === $task)
       if(0 === count($error) && empty($id))
       {
         $common->save('answer_topic', $field = ['answer_id' => $answer_id,
-                                                'topic_id'  => $topic_id,
-                                                'default_value' => $default_value,
-                                                'assign_value'  => $assign_value,
-                                                'weight_value'  => $weight_value]);
+        'topic_id'  => $topic_id,
+        'default_value' => $default_value,
+        'assign_value'  => $assign_value,
+        'weight_value'  => $weight_value]);
         //unset session
         unset($_SESSION['answer_topic']);
         //Redirect
@@ -1661,10 +1661,10 @@ if('answer_topic' === $task)
       if(0 === count($error) && !empty($id))
       {
         $common->update('answer_topic', $field = ['answer_id' => $answer_id,
-                                                  'topic_id'  => $topic_id,
-                                                  'default_value' => $default_value,
-                                                  'assign_value'  => $assign_value,
-                                                  'weight_value'  => $weight_value], $condition = ['id' => $id]);
+        'topic_id'  => $topic_id,
+        'default_value' => $default_value,
+        'assign_value'  => $assign_value,
+        'weight_value'  => $weight_value], $condition = ['id' => $id]);
         //unset session
         unset($_SESSION['answer_topic']);
         //Redirect
@@ -2136,6 +2136,212 @@ if('result_condition' === $task)
   $smarty_appform->display('admin/admin_result_condition.tpl');
   exit;
 }
+//Task New result
+if('new_result' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['newresult']);
+  $error = array();
+  if ('add' === $action) {
+    if($_POST)
+    {
+      //get value from form
+      $test_id    = $common->clean_string($_POST['tid']);
+      $n_rid      = $common->clean_string($_POST['nrid']);
+      $topic_id   = $common->clean_string($_POST['topic']);
+      $view_order = $common->clean_string($_POST['view_order']);
+      $message    = $common->clean_string($_POST['message']);
+
+      //add value to session to use in template
+      $_SESSION['newresult'] = $_POST;
+      //form validation
+      if(empty($test_id))     $error['test_id'] = 1;
+      if(empty($topic_id))    $error['topic'] = 1;
+      if(empty($view_order))  $error['view_order'] = 1;
+      if(empty($message))     $error['message']  = 1;
+
+      $rNewResult = $common->find('new_result', $condition = ['id' => $n_rid], $type = 'one');
+      if(!empty($test_id) && !empty($topic_id) && $rNewResult['topic_id'] != $topic_id && checkTopicNewResult($test_id, $topic_id) > 0) $error['is_existed'] = 1;
+      //Add result
+      if(0 === count($error) && empty($n_rid))
+      {
+
+        $common->save('new_result', $field = ['test_id' => $test_id, 'topic_id' => $topic_id, 'message' => $message, 'view_order' => $view_order]);
+        //unset session
+        unset($_SESSION['newresult']);
+        //Redirect
+        header('location: '.$admin_file.'?task=new_result&tid='.$test_id);
+        exit;
+      }
+      //update result
+      if(0 === count($error) && !empty($n_rid))
+      {
+        $common->update('new_result', $field = ['topic_id' => $topic_id, 'message' => $message, 'view_order' => $view_order], $condition = ['id' => $n_rid]);
+        //unset session
+        unset($_SESSION['newresult']);
+        //Redirect
+        header('location: '.$admin_file.'?task=new_result&tid='.$test_id);
+        exit;
+      }
+    }
+  }
+  //action delete result
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $rNewResult = $common->find('test_question_condition', $condition = ['new_result_id' => $_GET['id']], $type = 'all');
+    foreach ($rNewResult as $k => $va) {
+      $common->delete('test_question_condition', $field = ['id' => $va['id']]);
+    }
+    $common->delete('new_result', $field = ['id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=new_result&tid='.$_GET['tid']);
+    exit;
+  }
+  //get edit test
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $topic   = $common->clean_string($_POST['topic']);
+      $view_order  = $common->clean_string($_POST['view_order']);
+      $message    = $common->clean_string($_POST['message']);
+      //add value to session to use in template
+      //form validation
+      if(empty($topic)) $error['topic'] = 1;
+      if(empty($view_order))     $error['view_order'] = 1;
+      if(empty($message))     $error['message'] = 1;
+      //update result Condition
+      if(0 === count($error) && !empty($_GET['id']))
+      {
+        $common->update('new_result', $field = ['topic_id' => $topic, 'message' => $message, 'view_order' => $view_order], $condition = ['id' => $_GET['id']]);
+        //Redirect
+        header('location: '.$admin_file.'?task=new_result&tid='.$_GET['tid']);
+        exit;
+      }
+    }
+    $smarty_appform->assign('getNResultByID', $common->find('new_result', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $results = getListNewResult($_GET['tid'], $lang);
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listNewResult', $results);
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid'], 'lang' => $lang], $type = 'one'));
+  $smarty_appform->assign('topic', getListTestTopic($_GET['tid']));
+  $smarty_appform->display('admin/admin_new_result.tpl');
+  exit;
+}
+//Task: test question condition
+if('test_question_condition' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['test_que_con']);
+
+  $error = array();
+  if ('add' === $action) {
+    if($_POST)
+    {
+      //get value from form
+      $nrid       = $common->clean_string($_POST['nrid']);
+      $tqcid      = $common->clean_string($_POST['tqcid']);
+      $tqid       = $common->clean_string($_POST['tqid']);
+      $value      = $common->clean_string($_POST['value']);
+      $conditional  = $common->clean_string($_POST['conditional']);
+      $operator     = $common->clean_string($_POST['operator']);
+      //add value to session to use in template
+      $_SESSION['test_que_con'] = $_POST;
+      //form validation
+      if(empty($nrid))        $error['nrid'] = 1;
+      if(empty($tqid))        $error['tqid'] = 1;
+      // if(empty($value))       $error['value'] = 1;
+      if(empty($conditional)) $error['conditional'] = 1;
+      if(empty($operator))    $error['operator']  = 1;
+      //Add result
+      if(0 === count($error) && empty($tqcid))
+      {
+        $common->save('test_question_condition', $field = ['new_result_id' => $nrid, 'test_question_id' => $tqid, 'conditional' => $conditional, 'operator' => $operator, 'value_condition' => $value]);
+        //unset session
+        unset($_SESSION['test_que_con']);
+        //Redirect
+        if($_GET['next']){
+          header('location: '.$admin_file.'?task=test_question_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&nrid='.$nrid.'&next='.$_GET['next']);
+        }else {
+          header('location: '.$admin_file.'?task=test_question_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&nrid='.$nrid);
+        }
+        exit;
+      }
+      //update result
+      if(0 === count($error) && !empty($tqcid))
+      {
+        $common->update('test_question_condition', $field = ['new_result_id' => $nrid, 'test_question_id' => $tqid, 'conditional' => $conditional, 'operator' => $operator, 'value_condition' => $value], $condition = ['id' => $tqcid]);
+        //unset session
+        unset($_SESSION['test_que_con']);
+        //Redirect
+        if($_GET['next']){
+          header('location: '.$admin_file.'?task=test_question_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&nrid='.$nrid.'&next='.$_GET['next']);
+        }else {
+          header('location: '.$admin_file.'?task=test_question_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&nrid='.$nrid);
+        }
+        exit;
+      }
+    }
+  }
+  //action delete result
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('test_question_condition', $field = ['id' => $_GET['id']]);
+    if($_GET['next']){
+      header('location: '.$admin_file.'?task=test_question_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&nrid='.$_GET['nrid'].'&next='.$_GET['next']);
+    }else {
+      header('location: '.$admin_file.'?task=test_question_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&nrid='.$_GET['nrid']);
+    }
+    exit;
+  }
+  //get edit test question condition
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $nrid       = $common->clean_string($_POST['nrid']);
+      $tqcid      = $common->clean_string($_POST['tqcid']);
+      $tqid       = $common->clean_string($_POST['tqid']);
+      $value      = $common->clean_string($_POST['value']);
+      $conditional  = $common->clean_string($_POST['conditional']);
+      $operator     = $common->clean_string($_POST['operator']);
+      //form validation
+      if(empty($nrid))        $error['nrid'] = 1;
+      if(empty($tqid))        $error['tqid'] = 1;
+      if(empty($conditional)) $error['conditional'] = 1;
+      if(empty($operator))    $error['operator']  = 1;
+      //update result Condition
+      if(0 === count($error) && !empty($_GET['id']))
+      {
+        $common->update('test_question_condition', $field = ['new_result_id' => $nrid, 'test_question_id' => $tqid, 'conditional' => $conditional, 'operator' => $operator, 'value_condition' => $value], $condition = ['id' => $_GET['id']]);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_question_condition&tid='.$_GET['tid'].'&tpid='.$_GET['tpid'].'&nrid='.$nrid.'&next='.$_GET['next']);
+        exit;
+      }
+    }
+    $smarty_appform->assign('getTestQuesConByID', $common->find('test_question_condition', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+  $results = getListTestQuesCondition($_GET['nrid'], '', $slimit = 10);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listTestQueCondition', $results);
+  $smarty_appform->assign('getViewConditonTestQue', getViewCondtionTestQuestion($_GET['nrid']));
+  $smarty_appform->assign('listTestQuestion', getListTestQuestion('', $_GET['tid'], $type_check = 3, '', $lang, $slimit = ''));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid'], 'lang' => $lang], $type = 'one'));
+  $smarty_appform->assign('topic', $common->find('topic', $condition = ['id' => $_GET['tpid'], 'lang' => $lang], $type = 'one'));
+  $smarty_appform->assign('new_result', $common->find('new_result', $condition = ['id' => $_GET['nrid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_test_question_condition.tpl');
+  exit;
+}
 //Task: topic
 if('topic' === $task)
 {
@@ -2573,11 +2779,11 @@ if('test_topic_answer' === $task)
       if(0 === count($error) && empty($id))
       {
         $common->save('test_topic_answer', $field =['test_id'     => $_GET['tid'],
-                                                    'topic_id'    => $topic_id,
-                                                    'average'     => $average,
-                                                    'stdd'        => $stdd,
-                                                    'multiplier'  => $multiplier,
-                                                    'constant'    => $constant]);
+        'topic_id'    => $topic_id,
+        'average'     => $average,
+        'stdd'        => $stdd,
+        'multiplier'  => $multiplier,
+        'constant'    => $constant]);
         //unset session
         unset($_SESSION['test_topic_answer']);
         //Redirect
@@ -2615,11 +2821,11 @@ if('test_topic_answer' === $task)
       if(0 === count($error) && !empty($id))
       {
         $common->update('test_topic_answer', $field =['test_id'     => $_GET['tid'],
-                                                      'topic_id'    => $topic_id,
-                                                      'average'     => $average,
-                                                      'stdd'        => $stdd,
-                                                      'multiplier'  => $multiplier,
-                                                      'constant'    => $constant], $condition = ['id' => $id]);
+        'topic_id'    => $topic_id,
+        'average'     => $average,
+        'stdd'        => $stdd,
+        'multiplier'  => $multiplier,
+        'constant'    => $constant], $condition = ['id' => $id]);
         //unset session
         unset($_SESSION['test_topic_answer']);
         //Redirect
@@ -3415,9 +3621,9 @@ if('response' === $task)
       $fileNameCsv  = $fileName.'-'.$dateFile.'.csv';
 
       $results = $common->save('download', $field =['test_id'     => $tid,
-                                                    'title'       => $resultTest['title'],
-                                                    'file_name'   => $fileNameCsv,
-                                                    'created_at'  => $dateTime]);
+      'title'       => $resultTest['title'],
+      'file_name'   => $fileNameCsv,
+      'created_at'  => $dateTime]);
       header('Content-type: application/json');
       echo json_encode($results);
       exit;
@@ -3461,9 +3667,9 @@ if('download_list' === $task)
       $fileNameCsv  = $fileName.'-'.$dateFile.'.csv';
 
       $results = $common->save('download', $field =['title'     => $fileName,
-                                                    'file_name' => $fileNameCsv,
-                                                    'is_email'  => 2,
-                                                    'created_at'=> $dateTime]);
+      'file_name' => $fileNameCsv,
+      'is_email'  => 2,
+      'created_at'=> $dateTime]);
 
       header('Content-type: application/json');
       echo json_encode($results);
@@ -3680,9 +3886,9 @@ if('copy_test_question' === $task)
   } else {
     //Save test question
     $tque_id = $common->save('test_question', $field = ['test_id' => $_GET['test_id'],
-                                                        'question_id' => $rTestQues['question_id'],
-                                                        'view_order'  => $rTestQues['view_order'],
-                                                        'is_required' => $_GET['required']]);
+    'question_id' => $rTestQues['question_id'],
+    'view_order'  => $rTestQues['view_order'],
+    'is_required' => $_GET['required']]);
     //Get answer
     $rAnswer = $common->find('answer', $condition = ['test_question_id' => $_GET['tqid']], $type = 'all');
     //Get Topic in Result

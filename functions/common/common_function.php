@@ -1449,12 +1449,12 @@ function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $s
   try{
     if($status === 1)
     {
-      $condition .= ' AND (tmp.id IS NULL OR ttmp.status = 1) ';
+      $condition .= ' AND (ttmq.id IS NULL OR ttmq.status = 1) ';
       $orderBy .= ' ORDER BY tg.view_order ASC ';
     }
     if($status === 2)
     {
-      $condition .= ' AND ttmp.status = 2 ';
+      $condition .= ' AND ttmq.status = 2 ';
       $orderBy .= ' ORDER BY tg.view_order DESC ';
     }
     if(!empty($slimit))
@@ -1462,10 +1462,10 @@ function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $s
       $setLimit .= ' LIMIT 1';
     }
 
-    $sql= ' SELECT tg.* FROM `test_group` tg
-              LEFT JOIN test_tmp_question ttmp ON ttmp.test_group_id = tg.id
-              LEFT JOIN test_tmp tmp ON tmp.id = ttmp.test_tmp_id AND tmp.test_patient_id = :tpid
-            WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
+    $sql= ' SELECT tg.* FROM test_group tg
+              LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id
+              LEFT JOIN test_tmp_question ttmq ON ttmq.test_group_id = tg.id AND ttmq.test_tmp_id = tmp.id
+            WHERE tg.test_id = :test_id AND tmp.test_patient_id = :tpid '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
     $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
@@ -2285,6 +2285,44 @@ function getTestTopicAnswerValueCalculate($test_id, $topic_id, $amount)
     if($debug)  echo 'Errors: getTestTopicAnswerValueCalculate'.$e->getMessage();
   }
 
+  return $result;
+}
+/**
+ * getListTestQuesCondition
+ * @param   $nrid is new_result_id
+ * @return array or boolean
+ */
+function getListTestQuesCondition($nrid, $group_by, $slimit)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try{
+    if(!empty($slimit)) $limit = $slimit;
+    if(!empty($group_by)) $set_group_by .= ' GROUP BY test_question_id ';
+    if(!empty($slimit)) $setLimit .= ' LIMIT :offset, :limit ';
+
+    $sql =' SELECT tqc.*, q.title AS q_title, q.description, q.type, q.is_email, q.hide_title, q.lang, tq.view_order, (SELECT COUNT(*) FROM `test_question_condition` tqc INNER JOIN test_question tq ON tq.id = tqc.test_question_id INNER JOIN question q ON q.id = tq.question_id WHERE tqc.new_result_id = :nrid) AS total
+            FROM `test_question_condition` tqc
+             INNER JOIN test_question tq ON tq.id = tqc.test_question_id
+             INNER JOIN question q ON q.id = tq.question_id
+            WHERE tqc.new_result_id = :nrid '.$set_group_by.' ORDER BY tq.id ASC '.$setLimit;
+    $query = $connected->prepare($sql);
+    $query->bindValue(':nrid', $nrid, PDO::PARAM_INT);
+    if(!empty($slimit))
+    {
+      $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+      $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    }
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestQuesCondition'.$e->getMessage();
+  }
   return $result;
 }
 

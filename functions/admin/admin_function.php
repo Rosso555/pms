@@ -1565,6 +1565,64 @@ function getCheckViewOrder($test_id, $view_order)
 
 }
 /**
+ * getListNewResult
+ * @param  int $test_id
+ * @param  string $lang
+ * @return array
+ */
+function getListNewResult($test_id, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try{
+    $sql =' SELECT nr.*, t.name, COUNT(tqc.id) AS testQueCount, (SELECT COUNT(*) FROM `new_result` nr INNER JOIN topic t ON t.id = nr.topic_id WHERE nr.test_id = :testid AND t.lang = :lang) AS total
+              FROM `new_result` nr
+               INNER JOIN topic t ON t.id = nr.topic_id
+               LEFT JOIN test_question_condition tqc ON tqc.new_result_id = nr.id
+              WHERE nr.test_id = :testid AND t.lang = :lang GROUP BY nr.id ORDER BY nr.view_order ASC LIMIT :offset, :limit';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':testid', $test_id, PDO::PARAM_INT);
+    $query->bindValue(':lang', $lang, PDO::PARAM_STR);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListNewResult'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * checkTopicNewResult
+ * @param  int $test_id
+ * @param  int $topic_id
+ * @return boolean
+ */
+function checkTopicNewResult($test_id, $topic_id)
+{
+  global $debug, $connected;
+  $result = true;
+   try{
+    $sql=' SELECT COUNT(*) AS total FROM `new_result` WHERE test_id = :test_id AND topic_id = :topic_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':topic_id', $topic_id, PDO::PARAM_INT);
+    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query->execute();
+    $row = $query->fetch();
+    return $row['total'];
+   }
+   catch (Exception $e) {
+     $result = false;
+     if($debug)  echo 'Errors: checkTopicResult'.$e->getMessage();
+   }
+   return $result;
+}
+/**
  * getListQuestionJumpTo
  * @param  int $answer_id is answer_id
  * @return array or boolean
@@ -2038,5 +2096,260 @@ function getListDownloadCSVfile($testid, $is_email, $status)
     if($debug)  echo 'Errors: getListDownloadCSVfile'.$e->getMessage();
   }
 
+  return $result;
+}
+/**
+ * getViewCondtionTestQuestion
+ * @param  int $nrid is new_result_id
+ * @return array or boolean
+ */
+function getViewCondtionTestQuestion($nrid)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try{
+    $resultTestQCon = getListTestQuesCondition($nrid, $group_by = 1, '');
+    $sumRowsTestQCon = COUNT($resultTestQCon) - 1;
+
+    $ReCondional = '';
+
+    foreach ($resultTestQCon as $key => $value) {
+
+      $sql =' SELECT tqc.*, q.title AS q_title, q.description
+            FROM `test_question_condition` tqc
+             INNER JOIN test_question tq ON tq.id = tqc.test_question_id
+             INNER JOIN question q ON q.id = tq.question_id
+            WHERE tqc.new_result_id = :nrid AND tqc.test_question_id = :tqid ';
+      $query = $connected->prepare($sql);
+      $query->bindValue(':nrid', $nrid, PDO::PARAM_INT);
+      $query->bindValue(':tqid', $value['test_question_id'], PDO::PARAM_INT);
+      $query->execute();
+      $rows = $query->fetchAll();
+
+      $sumRow = COUNT($rows) - 1;
+
+      $condition = '';
+
+      foreach ($rows as $k => $va) {
+        if($va['operator'] == 1){
+
+          if($va['conditional'] == 1){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' > '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' > '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' > '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' > '.$va['value_condition'].' AND ';
+              }
+
+            }
+
+          }//End conditional eq 1
+
+          if($va['conditional'] == 2){
+
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' < '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' < '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' < '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' < '.$va['value_condition'].' AND ';
+              }
+            }
+
+          }//End conditional eq 2
+
+          if($va['conditional'] == 3){
+
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' = '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' = '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' = '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' = '.$va['value_condition'].' AND ';
+              }
+            }
+
+          }//End conditional eq 3
+
+          if($va['conditional'] == 4){
+
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].' AND ';
+              }
+            }
+
+          }//End conditional eq 4
+
+          if($va['conditional'] == 5){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].' AND ';
+              }
+            }
+
+          }//End conditional eq 5
+
+        }else {
+
+          if($va['conditional'] == 1){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' > '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' > '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' > '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' > '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 1
+
+          if($va['conditional'] == 2){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' < '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' < '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' < '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' < '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 2
+
+          if($va['conditional'] == 3){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' = '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' = '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' = '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' = '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 3
+
+          if($va['conditional'] == 4){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 3
+
+          if($va['conditional'] == 5){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 5
+
+        }
+      }//End foreach
+
+      $ReCondional .= '('.$condition;
+    }
+    return $ReCondional;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getViewCondtionTestQuestion'.$e->getMessage();
+  }
   return $result;
 }
