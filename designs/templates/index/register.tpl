@@ -53,6 +53,12 @@
 
               <input type="email" class="form-control" id="email" name="email" placeholder="example@domain.com" value="{$smarty.session.user_register.email}">
             </div>
+            <div class="form-group" id="error_re_email">
+              <label for="email"><span style="color:red">*</span> Re-Email:</label>
+              <span style="color:red" id="txt_error_re_email">{if $error.re_email}Please enter re-email !!!{/if} {if $error.email_not_match}Your email does not match !!!{/if} {if $error.exist_email}Your email is existed !!!{/if}</span>
+
+              <input type="email" class="form-control" id="re_email" name="re_email" placeholder="example@domain.com" value="{$smarty.session.user_register.re_email}" onchange="checkEmail();">
+            </div>
             <div class="form-group" id="error_job">
               <label for="job"><span style="color:red">*</span> Job:</label>
               <span style="color:red" id="txt_error_job">{if $error.job}Your email is job !!!{/if}</span>
@@ -111,12 +117,35 @@
     }
 
   }
-
+function checkEmail(){
+        var email = $("#email").val();
+        var re_email = $("#re_email").val();
+        if (email == '') {
+                $("#error_email").attr("class", "form-group has-error");
+                $("#txt_error_email").text("Please enter email !!!");
+        }else {
+                $("#error_email").attr("class", "form-group has-success");
+                $("#txt_error_email").text("");
+        }
+        if (email != '' && re_email != '' && email != re_email) {
+                $("#error_re_email").attr("class", "form-group has-error");
+                $("#txt_error_re_email").text("Your email do not match. Please try again.");
+        }else {
+                if(re_email == ''){
+                  $("#error_re_email").attr("class", "form-group has-error");
+                  $("#txt_error_re_email").text("Please enter re-email !!!");
+                }else {
+                  $("#error_re_email").attr("class", "form-group has-success");
+                  $("#txt_error_re_email").text("");
+                }
+        }
+}
 $("form").submit(function( event ) {
   var user    = $("#user").val();
   var pwd     = $("#pwd").val();
   var re_pwd  = $("#re_pwd").val();
   var email   = $("#email").val();
+  var re_email= $("#re_email").val();
   var job     = $("#job").val();
   var address = $("#address").val();
 
@@ -150,6 +179,13 @@ $("form").submit(function( event ) {
   }else {
     $("#error_email").attr("class", "form-group has-success");
     $("#txt_error_email").text("");
+  }
+  if(re_email == ''){
+    $("#error_re_email").attr("class", "form-group has-error");
+    $("#txt_error_re_email").text("Please enter re-email !!!");
+  }else {
+    $("#error_re_email").attr("class", "form-group has-success");
+    $("#txt_error_re_email").text("");
   }
 
   if(job == ''){

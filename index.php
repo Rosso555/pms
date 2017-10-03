@@ -32,13 +32,14 @@ if('user_register' === $task)
   $error = array();
   if($_POST){
     //get value from form
-    $username = $common->clean_string($_POST['username']);
-    $password = $common->clean_string($_POST['password']);
+    $username    = $common->clean_string($_POST['username']);
+    $password    = $common->clean_string($_POST['password']);
     $re_password = $common->clean_string($_POST['re_password']);
-    $email    = $common->clean_string($_POST['email']);
-    $job      = $common->clean_string($_POST['job']);
-    $address  = $common->clean_string($_POST['address']);
-    $secretkey = time();
+    $email       = $common->clean_string($_POST['email']);
+    $re_email    = $common->clean_string($_POST['re_email']);
+    $job         = $common->clean_string($_POST['job']);
+    $address     = $common->clean_string($_POST['address']);
+    $secretkey   = time();
     //add value to session to use in template
     $_SESSION['user_register'] = $_POST;
     //form validation
@@ -46,6 +47,7 @@ if('user_register' === $task)
     if(empty($password))  $error['password']  = 1;
     if(empty($re_password))  $error['re_password']  = 1;
     if(empty($email))     $error['email']  = 1;
+    if(empty($re_email)) $error['re_email']  = 1;
     if(empty($job))       $error['job']  = 1;
     if(empty($address))   $error['address']  = 1;
     if(!empty($password) && !empty($re_password) && $password !== $re_password){
@@ -53,6 +55,9 @@ if('user_register' === $task)
     }
     if(!empty($password) && !$common->checkPassword($password)){
       $error['less_password'] = 1;
+    }
+    if(!empty($email) && !empty($re_email) && $email != $re_email){
+            $error['email_not_match'] = 1;
     }
     if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
 		   $error['invalid_email'] = 1;
