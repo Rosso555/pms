@@ -698,6 +698,380 @@ if('test_question_patient' === $task)
   exit;
 }
 
+//Task: Test Question
+if('test_question_psychologist' === $task)
+{
+  //Check & Clean String
+  $tpsy_id = $common->clean_string($_GET['id']);
+  $tid  = $common->clean_string($_GET['tid']);
+  $resultTestPsychologist = $common->find('test_psychologist', $condition = ['id' => $tpsy_id, 'test_id' => $tid, 'psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'one');
+
+  if(empty($resultTestPsychologist))
+  {
+    header('Location:'.$psychologist_file.'?task=page_not_found');
+    exit;
+  }
+  if(!empty($resultTestPsychologist) && $resultTestPsychologist['status'] == 2)
+  {
+    header('Location:'.$patient_file.'?task=test_completed&tid='.$resultTestPsychologist['test_id']);
+    exit;
+  }
+  //Get Test Group By test_id
+  $resultTestGroup = listTestGroupByTestId($tid);
+
+  if(empty($_SESSION['tgroupid'])) $_SESSION['tgroupid'] = array();
+  $error = array();
+  if($_POST)
+  {
+    //Check & Clean String
+    $tpsy_id         = $common->clean_string($_GET['id']);
+    $tid          = $common->clean_string($_GET['tid']);
+    $t_groupid    = $common->clean_string($_POST['test_group_id']);
+    $content      = $common->clean_string_array($_POST['content']);
+    $is_email     = $common->clean_string_array($_POST['is_email']);
+    $answer_id    = $common->clean_string_array($_POST['answer_id']);
+    $is_required  = $common->clean_string_array($_POST['is_required']);
+    $testque_id   = $common->clean_string_array($_POST['tq_id']);
+
+    if(!empty($is_required))
+    {
+      foreach ($is_required as $key => $value) {
+        if($value > 0) $error[] = 1;
+      }
+    }
+
+    if(count($error) == 0)
+    {
+      //Condition has test group, Save test_question_id is NULL, When skip by jump_to
+      if(empty($answer_id) && COUNT($resultTestGroup) > 0)
+      {
+        //Get test_tmp By id
+        $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $tid, 'test_psychologist_id' => $tpsy_id], $type = 'one');
+        $resultTestTmpQue = $common->find('test_tmp_question', $condition = ['test_tmp_id' => $resultTestTmp['id'], 'test_group_id' => $t_groupid], $type = 'all');
+        if(!empty($resultTestTmpQue))
+        {
+          foreach ($resultTestTmpQue as $k => $va) {
+            //Delete: test_tmp_question
+            $common->delete('test_tmp_question', $field = ['id' => $va['id']]);
+          }
+        }
+        if(!empty($resultTestTmp))
+        {
+          $common->save('test_tmp_question', $field =['test_tmp_id' => $resultTestTmp['id'], 'test_group_id' => $t_groupid, 'status' => 2]);
+        }
+      }
+
+      //Condition has test group
+      if(!empty($answer_id) && COUNT($resultTestGroup) > 0)
+      {
+        //Get test_tmp By id
+        $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $tid, 'test_psychologist_id' => $tpsy_id], $type = 'one');
+
+        if(!empty($resultTestTmp))
+        {
+          $resultTestTmpQue = $common->find('test_tmp_question', $condition = ['test_tmp_id' => $resultTestTmp['id'], 'test_group_id' => $t_groupid], $type = 'all');
+          if(!empty($resultTestTmpQue))
+          {
+            foreach ($resultTestTmpQue as $k => $va) {
+              //Delete: test_tmp_question
+              $common->delete('test_tmp_question', $field = ['id' => $va['id']]);
+            }
+          }
+          $test_tmp_id = $resultTestTmp['id'];
+        } else {
+          $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $tid, 'test_psychologist_id' => $tpsy_id]);
+        }
+
+        foreach ($answer_id as $key => $value)
+        {
+          if($content[$key] == 'NULL') {
+            $r_content = NULL;
+          } else {
+            $r_content = $content[$key];
+          }
+          if($value == 'NULL') {
+            $r_answer_id = NULL;
+          } else {
+            $r_answer_id = $value;
+          }
+          if(!empty($test_tmp_id))
+          {
+            $result = $common->save('test_tmp_question', $field =['test_tmp_id' => $test_tmp_id, 'test_question_id' => $testque_id[$key], 'answer_id' => $r_answer_id, 'content' => $r_content, 'test_group_id' => $t_groupid, 'status' => 2]);
+          }//End check $responseid
+        }
+      }//End: Condition has test group
+
+      //Get Test Group By Tmp Question
+      $resultTestGroupTmpQue = getListTestGroupByTmpQuestion($tid, $tpsy_id, $status = 1, $fetch_type = 'all', $slimit = '');
+      //Condition test group for assign value to Result
+      if(COUNT($resultTestGroupTmpQue) === 0 && COUNT($resultTestGroup) > 0)
+      {
+        //Get test_tmp By id
+        $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $tid, 'test_psychologist_id' => $tpsy_id], $type = 'one');
+        $resultTestTmpQue = $common->find('test_tmp_question', $condition = ['test_tmp_id' => $resultTestTmp['id']], $type = 'all');
+        //Save Data to table response
+        $responseid = $common->save('response', $field = ['unique_id' => time(), 'test_id' => $tid, 'test_psychologist_id' => $tpsy_id]);
+        $subscribers = array();
+        foreach ($resultTestTmpQue as $key => $va)
+        {
+          $resultTestQues = getTestQuestionByTestQuesID($tid, $va['test_question_id'], $lang);
+          if($resultTestQues['is_email'] == 1)
+          {
+            $is_email = 1;
+            $subscribers[] = array('email' => $va['content']);
+          } else {
+            $is_email = 0;
+          }
+          if(!empty($responseid))
+          {
+            $common->save('response_answer', $field = ['response_id' => $responseid,
+                                                       'test_question_id' => $va['test_question_id'],
+                                                       'answer_id'  => $va['answer_id'],
+                                                       'content'    => $va['content'],
+                                                       'is_email'   => $is_email]);
+          }//End check $responseid
+        }
+        $common->update('test_psychologist', $field = ['status' => 2, 'pat_working_by' => NULL, 'completed_date' => date("Y-m-d")], $condition = ['id' => $tpsy_id, 'psychologist_id' => $_SESSION['is_psychologist_login_id'], 'test_id' => $tid]);
+        //Delete: test_tmp & test_tmp_question
+        $common->delete('test_tmp', $field = ['id' => $resultTestTmp['id']]);
+        $common->delete('test_tmp_question', $field = ['test_tmp_id' => $resultTestTmp['id']]);
+        if(!empty($subscribers))
+        {
+          exec($path_exec.'/submitmail_by_test.php '.$responseid.' '.$tid.' > /dev/null &');
+        }
+        header('Location:'.$psychologist_file.'?task=result_psychologist&tid='.$tid);
+        exit;
+      }
+      //Condition test no group
+      if(!empty($answer_id) && COUNT($resultTestGroup) == 0)
+      {
+        //Save Data to table response
+        $responseid = $common->save('response', $field = ['unique_id' => time(), 'test_id' => $tid, 'test_psychologist_id' => $tpsy_id]);
+
+        foreach ($answer_id as $key => $value)
+        {
+          if($content[$key] == 'NULL') {
+            $r_content = NULL;
+          } else {
+            $r_content = $content[$key];
+          }
+          if($value == 'NULL') {
+            $r_answer_id = NULL;
+          } else {
+            $r_answer_id = $value;
+          }
+          if($is_email[$key] == 1)
+          {
+            $subscribers[] = array('email' => $content[$key]);
+          }
+
+          if(!empty($responseid))
+          {
+            $common->save('response_answer', $field = ['response_id' => $responseid,
+                                                       'test_question_id' => $testque_id[$key],
+                                                       'answer_id'  => $r_answer_id,
+                                                       'content'    => $r_content,
+                                                       'is_email'   => $is_email[$key]]);
+          }//End check $responseid
+        }
+
+        $common->update('test_psychologist', $field = ['status' => 2, 'pat_working_by' => NULL, 'completed_date' => date("Y-m-d")], $condition = ['id' => $tpsy_id, 'psychologist_id' => $_SESSION['is_psychologist_login_id'], 'test_id' => $tid]);
+        //Get test_tmp By id
+        $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $tid, 'test_psychologist_id' => $tpsy_id], $type = 'one');
+        //Delete: test_tmp & test_tmp_question
+        $common->delete('test_tmp', $field = ['id' => $resultTestTmp['id']]);
+        $common->delete('test_tmp_question', $field = ['test_tmp_id' => $resultTestTmp['id']]);
+
+        if(!empty($subscribers))
+        {
+          exec($path_exec.'/submitmail_by_test.php '.$responseid.' '.$tid.' > /dev/null &');
+        }
+        //Clear sesson
+        unset($_SESSION['tgroupid']);
+        header('Location:'.$psychologist_file.'?task=result_psychologist&tid='.$tid);
+        exit;
+      }//End Condition test no group
+
+    } else {
+      //Condition has submit error
+      $newResultSubmitError = array();
+      foreach ($answer_id as $key => $value)
+      {
+        //Get Test Question By Id
+        $resultTestQues = getTestQuestionByTestQuesID($tid, $testque_id[$key], $lang);
+        //Get answer
+        $reAnswer = $common->find('answer', $condition = ['id' => $value], $type = 'one');
+        //Assign value to array
+        $newResultSubmitError[] = array('tqid' => $testque_id[$key], 'answer_id' => $value, 'content' => $content[$key], 'type' => $resultTestQues['type'], 'jump_to' => $reAnswer['jump_to']);
+      }
+    }
+  }//End POST
+
+  //Get Test Group By Tmp Question
+  $resultTestGroupTmpQue = getListTestGroupByTmpQuestion($tid, $tpsy_id, $status = 1, $fetch_type = 'all', $slimit = '');
+  if(COUNT($resultTestGroup) > 0)
+  {
+    if(!empty($resultTestGroupTmpQue))
+    {
+      foreach ($resultTestGroupTmpQue as $k => $va) {
+        $test_group_id = $va['id'];
+        $result = listTestGroupQuestion($va['id'], $tid, $lang);
+        $getTestByID = getTestGroupById($va['id'], $lang);
+        break;
+      }
+    }
+
+  } else {
+    if(!empty($tid))
+    {
+      //List All Test Question No Group
+      $result = ListTestQuestion($tid, $lang);
+      $getTestByID = $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one');
+    }
+  }
+
+  //For Jumping To
+  $resultsJumpTo = getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang);
+
+  $newResultJumpTo = array();
+  if(!empty($resultsJumpTo['jump_to']))
+  {
+    foreach ($resultsJumpTo['jump_to'] as $k => $va)
+    {
+      foreach ($resultsJumpTo['question'] as $key => $value)
+      {
+        if($key > $va['key'])
+        {
+          if($value['test_question_id'] !== $va['jump_to'])
+          {
+            $newResultJumpTo[$va['jump_to'].'_'.$va['test_question_id']][] = $value['test_question_id'];
+          }else {
+            break;
+          }
+        }
+      } //End foreach $resultsJumpTo
+    }//End foreach $resultsJumpTo['jump_to']
+  }
+
+  if(empty($result) && COUNT($result) === 0 && empty($getTestByID))
+  {
+    header('Location:'.$psychologist_file.'?task=page_not_found');
+    exit;
+  }
+
+  $sumStep = COUNT($resultTestGroup) - COUNT(getListTestGroupByTmpQuestion($tid, $tpsy_id, $status = 2, $fetch_type = 'all', $slimit = ''));
+
+  if(!empty($error))
+  {
+    $smarty_appform->assign('testTmpQuestion', $newResultSubmitError);
+  } else {
+    $smarty_appform->assign('testTmpQuestion', getTestTmpQuestion($tpsy_id, $tid));
+  }
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('ResultJumpTo', json_encode($newResultJumpTo));
+  $smarty_appform->assign('totalAnswer', $total_data);
+  $smarty_appform->assign('resultQueIdJumpTo', $resultQueIdJumpTo);
+  $smarty_appform->assign('getTestById', $getTestByID);
+  $smarty_appform->assign('result', $result);
+  $smarty_appform->assign('test_group_id', $test_group_id);
+  $smarty_appform->assign('testGroupIDTmpQue', getListTestGroupByTmpQuestion($tid, $tpsy_id, $status = 2, $fetch_type = 'one', $slimit = 1)); //For get "Test_Group_Id" Back Step
+  //Check Step
+  $smarty_appform->assign('resultTestGroupTmpQue', COUNT(getListTestGroupByTmpQuestion($tid, $tpsy_id, $status = 2, $fetch_type = 'all', $slimit = ''))); //For Check Show Button Next Or Finish
+  $smarty_appform->assign('testQueGroup', COUNT($resultTestGroup));
+  $smarty_appform->assign('resultStep', $sumStep);
+  $smarty_appform->display('psychologist/test_question_responsive_psychologist.tpl');
+  exit;
+}
+
+//Task: test save draft
+if('test_save_draft' === $task)
+{
+  if($_POST)
+  {
+    $test_id        = $common->clean_string($_POST['test_id']);
+    $test_group_id  = $common->clean_string($_POST['test_group_id']);
+    $test_psy_id    = $common->clean_string($_POST['test_psy_id']);
+    $test_que_data  = json_decode($_POST['test_que_data']);
+
+    if(!empty($test_group_id))
+    {
+      $r_test_group_id = $test_group_id;
+      //Get test_tmp By id
+      $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $test_id, 'test_psychologist_id' => $test_psy_id], $type = 'one');
+
+      if(!empty($resultTestTmp))
+      {
+        $resultTestTmpQue = $common->find('test_tmp_question', $condition = ['test_tmp_id' => $resultTestTmp['id'], 'test_group_id' => $test_group_id], $type = 'all');
+        if(!empty($resultTestTmpQue))
+        {
+          foreach ($resultTestTmpQue as $k => $va) {
+            //Delete: test_tmp_question
+            $common->delete('test_tmp_question', $field = ['id' => $va['id']]);
+          }
+        }
+        $test_tmp_id = $resultTestTmp['id'];
+      } else {
+        $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $test_id, 'test_psychologist_id' => $test_psy_id]);
+      }
+
+      if(!empty($test_que_data))
+      {
+        foreach ($test_que_data as $v)
+        {
+          if($v->answer_id === 'NULL')
+          {
+            $answer_id = NULL;
+          } else {
+            $answer_id = $v->answer_id;
+          }
+          if($v->content === 'NULL')
+          {
+            $content = NULL;
+          } else {
+            $content = $v->content;
+          }
+          $result = $common->save('test_tmp_question', $field =['test_tmp_id' => $test_tmp_id, 'test_question_id' => $v->test_que_id, 'answer_id' => $answer_id, 'content' => $content, 'test_group_id' => $r_test_group_id, 'status' => 1]);
+        }
+        $resultValue = true;
+      }
+
+    } else {
+      $r_test_group_id = NULL;
+      //Get test_tmp By id
+      $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $test_id, 'test_psychologist_id' => $test_psy_id], $type = 'one');
+      //Delete: test_tmp & test_tmp_question
+      $common->delete('test_tmp', $field = ['id' => $resultTestTmp['id']]);
+      $common->delete('test_tmp_question', $field = ['test_tmp_id' => $resultTestTmp['id']]);
+      $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $test_id, 'test_psychologist_id' => $test_psy_id]);
+
+      if(!empty($test_que_data))
+      {
+        foreach ($test_que_data as $v)
+        {
+          if($v->answer_id === 'NULL')
+          {
+            $answer_id = NULL;
+          } else {
+            $answer_id = $v->answer_id;
+          }
+          if($v->content === 'NULL')
+          {
+            $content = NULL;
+          } else {
+            $content = $v->content;
+          }
+          $result = $common->save('test_tmp_question', $field =['test_tmp_id' => $test_tmp_id, 'test_question_id' => $v->test_que_id, 'answer_id' => $answer_id, 'content' => $content, 'test_group_id' => $r_test_group_id]);
+        }
+        $resultValue = true;
+      }//End foreach
+    }
+
+
+  }
+  header('Content-type: application/json');
+  echo json_encode($resultValue);
+  exit;
+}
 if('test_psychologist' === $task)
 {
   $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';

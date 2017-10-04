@@ -688,7 +688,7 @@ function getListTestPsychologist($psy_id, $tid, $cid, $status)
 
     if(!empty($condition)) $where .= ' WHERE '.$condition;
 
-    $sql =' SELECT tps.*, psy.username, t.category_id, t.title, c.name AS catName,
+    $sql =' SELECT tps.*, psy.username, t.category_id, t.title, t.description, c.name AS catName,
               (SELECT COUNT(*) FROM `test_psychologist` tps INNER JOIN psychologist psy ON psy.id = tps.psychologist_id INNER JOIN test t ON t.id = tps.test_id INNER JOIN category c ON c.id = t.category_id '.$where.') AS total_count
             FROM `test_psychologist` tps
               INNER JOIN psychologist psy ON psy.id = tps.psychologist_id
@@ -1283,6 +1283,36 @@ function getCheckTestPatientByPsyChologist($psy_id, $pat_id, $test_id, $tpat_id)
   return $result;
 }
 /**
+ * getCheckTestPsyChologist
+ * @param  int $psy_id is psychologist_id
+ * @param  int $pat_id is patient_id
+ * @param  int $test_id is test_id
+ * @param  int $tpat_id is test_patient_id
+ * @return array or boolean
+ */
+ function getCheckTestByPsyChologist($psy_id, $test_id, $tpsy_id)
+ {
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    $sql =' SELECT tpsy.* FROM `psychologist` psy INNER JOIN test_psychologist tpsy ON tpsy.psychologist_id = psy.id WHERE psy.id = :psychologist_id AND tpsy.test_id = :test_id AND tpsy.id = :test_psychologist_id ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':psychologist_id', (int)$psy_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_psychologist_id', (int)$tpsy_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch();
+
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getCheckTestPatientByPsyChologist'.$e->getMessage();
+  }
+  return $result;
+ }
+
+/**
  * getTestTmpQuestion
  * @param  int $tpat_id is test_patient_id
  * @param  int $test_id
@@ -1465,10 +1495,10 @@ function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $s
     $sql= ' SELECT tg.* FROM test_group tg
               LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id
               LEFT JOIN test_tmp_question ttmq ON ttmq.test_group_id = tg.id AND ttmq.test_tmp_id = tmp.id
-            WHERE tg.test_id = :test_id AND tmp.test_patient_id = :tpid '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
+            WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-    $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    // $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
     $query->execute();
 
     if($fetch_type === 'one')
