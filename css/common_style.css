@@ -5,7 +5,7 @@
   padding: 9px 30px;
   position: relative;
   padding-top: 15px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   color: azure;
   padding-bottom: 15px;
   border-radius: 3px;
@@ -82,4 +82,14 @@
 
 .small-90 {
   font-size: 90%;
+}
+
+.alert_required
+{
+  padding: 10px;
+  border: 1px solid #8c2001;
+  border-radius: 3px;
+  background: rgba(140, 32, 1, 0.89);
+  color: #fff;
+  margin-bottom: 10px;
 }

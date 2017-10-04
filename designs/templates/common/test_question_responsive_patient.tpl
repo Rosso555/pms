@@ -20,7 +20,7 @@
   <h4 class="text-center">{$getTestById.title} {if $resultStep eq 1} ({if $multiLang.text_final_step}{$multiLang.text_final_step}{else}No Translate (Key Lang: text_final_step){/if}) {/if}</h4>
   <p class="text-center">{$getTestById.description}</p>
 </div>
-{if $error}<div class="alert alert-warning" role="alert">{if $multiLang.text_error_check_all_required}{$multiLang.text_error_check_all_required}{else}No Translate (Key Lang: text_error_check_all_required){/if}</div>{/if}
+{if $error}<div class="alert_required">* {if $multiLang.text_error_check_all_required}{$multiLang.text_error_check_all_required}{else}No Translate (Key Lang: text_error_check_all_required){/if}</div>{/if}
 <div class="inbox-test sansserif" style="margin-bottom: 20px;">
   <form class="form" action="{$index_file}?task=test_question&amp;tid={$smarty.get.tid}&amp;id={$smarty.get.id}" method="post">
     <input type="hidden" id="test_group_id" name="test_group_id" value="{$test_group_id|escape}">

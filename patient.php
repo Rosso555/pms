@@ -67,18 +67,14 @@ if('test_question' === $task)
 
   $resultTestPatient = $common->find('test_patient', $condition = ['id' => $tpid, 'test_id' => $tid, 'patient_id' => $_SESSION['is_patient_login_id']], $type = 'one');
 
-  if(empty($resultTestPatient)){
+  if(empty($resultTestPatient))
+  {
     header('Location:'.$patient_file.'?task=page_not_found');
     exit;
   }
   if(!empty($resultTestPatient) && $resultTestPatient['status'] == 2)
   {
     header('Location:'.$patient_file.'?task=test_completed&tid='.$resultTestPatient['test_id']);
-    exit;
-  }
-
-  if(!empty($_SESSION['testid'])){
-    header('Location:'.$patient_file);
     exit;
   }
   //Get Test Group By test_id
@@ -125,6 +121,7 @@ if('test_question' === $task)
           $common->save('test_tmp_question', $field =['test_tmp_id' => $resultTestTmp['id'], 'test_group_id' => $t_groupid, 'status' => 2]);
         }
       }
+
       //Condition has test group
       if(!empty($answer_id) && COUNT($resultTestGroup) > 0)
       {
@@ -258,9 +255,17 @@ if('test_question' === $task)
 
     } else {
       //Condition has submit error
-
+      $newResultSubmitError = array();
+      foreach ($answer_id as $key => $value)
+      {
+        //Get Test Question By Id
+        $resultTestQues = getTestQuestionByTestQuesID($tid, $testque_id[$key], $lang);
+        //Get answer
+        $reAnswer = $common->find('answer', $condition = ['id' => $value], $type = 'one');
+        //Assign value to array
+        $newResultSubmitError[] = array('tqid' => $testque_id[$key], 'answer_id' => $value, 'content' => $content[$key], 'type' => $resultTestQues['type'], 'jump_to' => $reAnswer['jump_to']);
+      }
     }
-
   }//End POST
 
   //Get Test Group By Tmp Question
@@ -309,16 +314,22 @@ if('test_question' === $task)
     }//End foreach $resultsJumpTo['jump_to']
   }
 
-  if(empty($result) && COUNT($result) === 0 && empty($getTestByID)){
+  if(empty($result) && COUNT($result) === 0 && empty($getTestByID))
+  {
     header('Location:'.$patient_file.'?task=page_not_found');
     exit;
   }
 
   $sumStep = COUNT($resultTestGroup) - COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''));
 
+  if(!empty($error))
+  {
+    $smarty_appform->assign('testTmpQuestion', $newResultSubmitError);
+  } else {
+    $smarty_appform->assign('testTmpQuestion', getTestTmpQuestion($tpid, $tid));
+  }
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('ResultJumpTo', json_encode($newResultJumpTo));
-  $smarty_appform->assign('testTmpQuestion', getTestTmpQuestion($tpid, $tid));
   $smarty_appform->assign('totalAnswer', $total_data);
   $smarty_appform->assign('resultQueIdJumpTo', $resultQueIdJumpTo);
   $smarty_appform->assign('getTestById', $getTestByID);
