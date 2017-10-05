@@ -57,7 +57,16 @@ if('test_completed' === $task)
   $smarty_appform->display('common/test_completed.tpl');
   exit;
 }
-
+//Task:Test Response
+if ('test_response' === $task) {
+  $cate = !empty($_GET['category']) ? $_GET['category'] : '';
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $test_response_result = get_test_response($kwd, $cate, $_SESSION['is_patient_login_id']);
+  // var_dump($test_response_result);exit;
+  $smarty_appform->assign('response_result', $test_response_result);
+  $smarty_appform->display('patient/test_response.tpl');
+  exit;
+}
 //Task: Test Question
 if('test_question' === $task)
 {
@@ -67,16 +76,17 @@ if('test_question' === $task)
 
   $resultTestPatient = $common->find('test_patient', $condition = ['id' => $tpid, 'test_id' => $tid, 'patient_id' => $_SESSION['is_patient_login_id']], $type = 'one');
 
+  if($resultTestPatient && $resultTestPatient['status'] == 2)
+  {
+    header('Location:'.$patient_file.'?task=test_completed&tid='.$resultTestPatient['test_id']);
+    exit;
+  }
   if(empty($resultTestPatient))
   {
     header('Location:'.$patient_file.'?task=page_not_found');
     exit;
   }
-  if(!empty($resultTestPatient) && $resultTestPatient['status'] == 2)
-  {
-    header('Location:'.$patient_file.'?task=test_completed&tid='.$resultTestPatient['test_id']);
-    exit;
-  }
+
   //Get Test Group By test_id
   $resultTestGroup = listTestGroupByTestId($tid);
 
