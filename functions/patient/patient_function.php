@@ -26,7 +26,7 @@ function getCheckTestTmpQuestion($t_tmpid, $tqid, $type)
 }
 /**
 *@author: Mr. Viech Sross
-*@param
+*@param $kwd, $cate, $patient_id
 *@return Array or boolean
 *function get response answer for patient
 */
@@ -60,6 +60,53 @@ function get_test_response($kwd, $cate, $patient_id)
         } catch (Exception $e) {
                 $result = false;
                 if($debug)  echo 'Errors: get_test_response'.$e->getMessage();
+        }
+        return $result;
+}
+/**
+*@author: Mr. Viech Sross
+*@param $patient_id
+*@return Array or boolean
+*function get psychologist by patient for sent email
+*/
+function get_psychologist_by_patient($patient_id)
+{
+        global $debug, $connected;
+        $result = true;
+        try {
+                $join = " INNER JOIN psychologist AS psy ON psy.id = pat.psychologist_id WHERE pat.id = :patient_id ";
+                $sql  = " SELECT pat.*,psy.username AS psy_username, psy.email AS psy_email FROM patient AS pat ".$join." ";
+                $stmt = $connected->prepare($sql);
+                $stmt->bindValue(':patient_id', (int)$patient_id, PDO::PARAM_INT);
+                $stmt->execute();
+                return $stmt->fetch();
+        } catch (Exception $e) {
+                $result = false;
+                if($debug)  echo 'Errors: get_psychologist_by_patient'.$e->getMessage();
+        }
+        return $result;
+}
+/**
+*@author: Mr. Viech Sross
+*@param $patient_id
+*@return Array or boolean
+*function get last response id WHERE patient login ID
+*/
+function get_last_response_id($patient_id)
+{
+        global $debug, $connected;
+        $result = true;
+        try {
+                $sql = " SELECT res.*, res.test_patient_id AS tpid, tp.test_id AS tid FROM response AS res
+                         INNER JOIN test_patient AS tp ON tp.id = res.test_patient_id
+                         WHERE tp.patient_id = :patient_id ORDER BY res.id DESC LIMIT 1 ";
+                $stmt = $connected->prepare($sql);
+                $stmt->bindValue(':patient_id', (int)$patient_id, PDO::PARAM_INT);
+                $stmt->execute();
+                return $stmt->fetch();
+        } catch (Exception $e) {
+                $result = false;
+                if($debug)  echo 'Errors: get_last_response_id'.$e->getMessage();
         }
         return $result;
 }

@@ -46,7 +46,7 @@ if(empty($_SESSION['is_patient_login_id']))
 //Task: page not found
 if('page_not_found' === $task)
 {
-  $smarty_appform->display('common/page_error_404.tpl');
+  $smarty_appfoirm->display('common/page_error_404.tpl');
   exit;
 }
 
@@ -210,6 +210,8 @@ if('test_question' === $task)
         {
           exec($path_exec.'/submitmail_by_test.php '.$responseid.' '.$tid.' > /dev/null &');
         }
+        $patient_login_id = $_SESSION['is_patient_login_id'];
+        exec($path_exec.'/send_mail.php '.$patient_login_id.' > /dev/null &');
         header('Location:'.$patient_file.'?task=result_patient&tid='.$tid);
         exit;
       }
@@ -257,6 +259,8 @@ if('test_question' === $task)
         {
           exec($path_exec.'/submitmail_by_test.php '.$responseid.' '.$tid.' > /dev/null &');
         }
+        $patient_login_id = $_SESSION['is_patient_login_id'];
+        exec($path_exec.'/send_mail.php '.$patient_login_id.' > /dev/null &');
         //Clear sesson
         unset($_SESSION['tgroupid']);
         header('Location:'.$patient_file.'?task=result_patient&tid='.$tid);
@@ -331,7 +335,7 @@ if('test_question' === $task)
   }
 
   $sumStep = COUNT($resultTestGroup) - COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''));
-  echo COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''));
+  // echo COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''));
   if(!empty($error))
   {
     $smarty_appform->assign('testTmpQuestion', $newResultSubmitError);
