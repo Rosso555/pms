@@ -671,15 +671,15 @@ function getListTestPsychologist($psy_id, $tid, $cid, $status)
 
     if(!empty($psy_id)){
       if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' tps.psychologist_id = :psy_id ';
+      $condition .= ' tpsy.psychologist_id = :psy_id ';
     }
     if(!empty($tid)){
       if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' tps.test_id = :testid ';
+      $condition .= ' tpsy.test_id = :testid ';
     }
     if(!empty($status)){
       if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' tps.status = :status ';
+      $condition .= ' tpsy.status = :status ';
     }
     if(!empty($cid)){
       if(!empty($condition)) $condition .= ' AND ';
@@ -687,14 +687,15 @@ function getListTestPsychologist($psy_id, $tid, $cid, $status)
     }
 
     if(!empty($condition)) $where .= ' WHERE '.$condition;
-
-    $sql =' SELECT tps.*, psy.username, t.category_id, t.title, t.description, c.name AS catName,
-              (SELECT COUNT(*) FROM `test_psychologist` tps INNER JOIN psychologist psy ON psy.id = tps.psychologist_id INNER JOIN test t ON t.id = tps.test_id INNER JOIN category c ON c.id = t.category_id '.$where.') AS total_count
-            FROM `test_psychologist` tps
-              INNER JOIN psychologist psy ON psy.id = tps.psychologist_id
-              INNER JOIN test t ON t.id = tps.test_id
-              INNER JOIN category c ON c.id = t.category_id '.$where.' ORDER BY tps.psychologist_id LIMIT :offset, :limit ';
-
+ // ttmp.status AS test_tmp_status,
+    $sql =' SELECT tpsy.*, psy.username, t.category_id, t.title, t.description, c.name AS catName, ttmp.status AS test_tmp_status,
+              (SELECT COUNT(*) FROM `test_psychologist` tpsy INNER JOIN psychologist psy ON psy.id = tpsy.psychologist_id INNER JOIN test t ON t.id = tpsy.test_id INNER JOIN category c ON c.id = t.category_id '.$where.') AS total_count
+            FROM `test_psychologist` tpsy
+              INNER JOIN psychologist psy ON psy.id = tpsy.psychologist_id
+              INNER JOIN test t ON t.id = tpsy.test_id
+              LEFT JOIN test_tmp ttmp ON ttmp.test_psychologist_id = tpsy.id
+              INNER JOIN category c ON c.id = t.category_id'.$where.' ORDER BY tpsy.psychologist_id LIMIT :offset, :limit ';
+  // LEFT JOIN test_tmp ttmp ON ttmp.test_psychologist_id = tpsy.id
     $stmt = $connected->prepare($sql);
 
     if(!empty($tid))    $stmt->bindValue(':testid', $tid, PDO::PARAM_INT);
@@ -804,6 +805,96 @@ function getListTestPatient($pat_id, $psy_id, $tid, $status, $tmpstus, $f_date, 
   }
   return $result;
 }
+/**
+ * getListTestPsychologist
+ * @param  int $pat_id is patient_id
+ * @param  int $tid is test_id
+ * @param  int $status
+ * @param  int $tmpstus is test_tmp of status
+ * @param  int $f_date is from date
+ * @param  int $t_date is to date
+ * @param  string $lang is language
+ * @return array or bool
+ */
+// function getListTestPsychologist($pat_id, $psy_id, $tid, $status, $tmpstus, $f_date, $t_date, $lang)
+// {
+//   global $debug, $connected, $limit, $offset, $total_data;
+//   $result = true;
+//   try{
+//     $condition = $where = '';
+//
+//     if(!empty($pat_id)) {
+//       $condition .= ' AND tpt.patient_id = :pat_id ';
+//     }
+//     if(!empty($psy_id)) {
+//       $condition .= ' AND pt.psychologist_id = :psy_id ';
+//     }
+//     if(!empty($tid)) {
+//       $condition .= ' AND tpt.test_id = :testid ';
+//     }
+//     if(!empty($status)) {
+//       $condition .= ' AND tpt.status = :status ';
+//     }
+//     if(!empty($tmpstus)) {
+//       //if eqaul 1 is pending
+//       if($tmpstus == 1) {
+//         $condition .= ' AND ttmp.status = :tmpstus ';
+//       }
+//       //if eqaul 2 is commpleted
+//       if($tmpstus == 2) {
+//         $condition .= ' AND ttmp.status = :tmpstus ';
+//       }
+//       //if eqaul 3 is new assign
+//       if($tmpstus == 3) {
+//         $condition .= ' AND ttmp.status IS NULL ';
+//       }
+//     }
+//     if(!empty($f_date) && empty($t_date)) {
+//       $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") >= :f_date ';
+//     }
+//     if(empty($f_date) && !empty($t_date)) {
+//       $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") <= :t_date ';
+//     }
+//     if(!empty($f_date) && !empty($t_date)) {
+//       $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") BETWEEN :f_date AND :t_date ';
+//     }
+//
+//     $sql =' SELECT tpsy.*, psy.username, t.category_id, t.title, t.descripsyion, c.name AS catName, ttmp.status AS test_tmp_status,
+//               (SELECT COUNT(*) FROM `test_psychologist` tpsy INNER JOIN psychologist psy ON psy.id = tpsy.psychologist_id INNER JOIN test t ON t.id = tpsy.test_id
+//               INNER JOIN category c ON c.id = t.category_id LEFT JOIN test_tmp ttmp ON ttmp.test_psychologist_id = tpsy.id WHERE t.lang = :lang '.$condition.') AS total_count
+//             FROM `test_patient` tpsy
+//               INNER JOIN psychologist psy ON psy.id = tpsy.psychologist_id
+//               INNER JOIN test t ON t.id = tpsy.test_id
+//               INNER JOIN category c ON c.id = t.category_id
+//               LEFT JOIN test_tmp ttmp ON ttmp.test_psychologist_id = tpsy.id WHERE t.lang = :lang '.$condition.' ORDER BY tpsy.created_at DESC LIMIT :offset, :limit ';
+//
+//     $stmt = $connected->prepare($sql);
+//
+//     if(!empty($tid))    $stmt->bindValue(':testid', $tid, PDO::PARAM_INT);
+//     if(!empty($pat_id)) $stmt->bindValue(':pat_id', $pat_id, PDO::PARAM_INT);
+//     if(!empty($psy_id)) $stmt->bindValue(':psy_id', $psy_id, PDO::PARAM_INT);
+//     if(!empty($status)) $stmt->bindValue(':status', $status, PDO::PARAM_INT);
+//     if(!empty($f_date)) $stmt->bindValue(':f_date', $f_date, PDO::PARAM_STR);
+//     if(!empty($t_date)) $stmt->bindValue(':t_date', $t_date, PDO::PARAM_STR);
+//     if(!empty($tmpstus))
+//     {
+//       if($tmpstus == 1 || $tmpstus = 2) $stmt->bindValue(':tmpstus', $tmpstus, PDO::PARAM_INT);
+//     }
+//     $stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
+//     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+//     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+//     $stmt->execute();
+//     $rows = $stmt->fetchAll();
+//     if (count($rows) > 0) $total_data = $rows[0]['total_count'];
+//     return $rows;
+//
+//   } catch (Exception $e) {
+//     $result = false;
+//     if($debug)  echo 'Errors: getListTestPatient'.$e->getMessage();
+//   }
+//   return $result;
+// }
+
 /**
  * listTestGroupByTestId
  * @param  int $id is test_id
@@ -1344,6 +1435,37 @@ function getTestTmpQuestion($tpat_id, $test_id)
   return $result;
 }
 /**
+ * getTestTmpQuestionPsy
+ * @param  int $tpat_id is test_psychologist_id
+ * @param  int $test_id
+ * @return array or boolean
+ */
+function getTestTmpQuestionPsy($tpsy_id, $test_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    $sql =' SELECT ttq.*, q.type, q.is_email, tq.id AS tqid, a.jump_to FROM `test_tmp` ttmp
+              INNER JOIN test_tmp_question ttq ON ttq.test_tmp_id = ttmp.id
+              INNER JOIN test_question tq ON tq.id = ttq.test_question_id
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN answer a ON a.id = ttq.answer_id
+            WHERE ttmp.test_psychologist_id = :test_psychologist_id AND ttmp.test_id = :test_id ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_psychologist_id', (int)$tpsy_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+
+    return $rows;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getTestTmpQuestion'.$e->getMessage();
+  }
+  return $result;
+}
+/**
  * getListQuestionByViewOrderGroupNonGroupJumpTo
  * @param  int $tid is test_id
  * @param  string $lang is language
@@ -1472,15 +1594,15 @@ function getJumpToTestQuestionById($tqid)
  * @param  int $slimit for setLimit
  * @return array or boolean
  */
-function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $slimit)
+function getListTestGroupByTmpQuestion($test_id, $tpsy_id, $status, $fetch_type, $slimit)
 {
   global $debug, $connected, $offset, $limit;
   $result = true;
   try{
-    $sql1= ' SELECT * FROM `test_tmp` WHERE test_id = :test_id AND test_patient_id = :tpid ';
+    $sql1= ' SELECT * FROM `test_tmp` WHERE test_id = :test_id AND test_psychologist_id = :tpsy_id ';
     $query1 = $connected->prepare($sql1);
     $query1->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-    $query1->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    $query1->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
     $query1->execute();
     $row = $query1->fetch();
 
@@ -1532,6 +1654,66 @@ function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $s
 
   return $result;
 }
+// function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $slimit)
+// {
+//   global $debug, $connected, $offset, $limit;
+//   $result = true;
+//   try{
+//     $sql1= ' SELECT * FROM `test_tmp` WHERE test_id = :test_id AND test_patient_id = :tpid ';
+//     $query1 = $connected->prepare($sql1);
+//     $query1->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+//     $query1->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+//     $query1->execute();
+//     $row = $query1->fetch();
+//
+//     if(!empty($row['id']))
+//     {
+//       $condition .= ' AND tmp.id = :tmp_id ';
+//     }
+//
+//     if($status === 1)
+//     {
+//       $condition .= ' AND (ttmq.id IS NULL OR ttmq.status = 1) ';
+//       $orderBy .= ' ORDER BY tg.view_order ASC ';
+//     }
+//     if($status === 2 && !empty($row['id']))
+//     {
+//       $condition .= ' AND ttmq.status = 2 ';
+//       $orderBy .= ' ORDER BY tg.view_order DESC ';
+//     }
+//     if($status === 2 && empty($row['id']))
+//     {
+//       $condition .= ' AND tmp.id IS NULL ';
+//     }
+//     if(!empty($slimit))
+//     {
+//       $setLimit .= ' LIMIT 1';
+//     }
+//
+//
+//     $sql= ' SELECT tg.* FROM test_group tg
+//               LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id
+//               LEFT JOIN test_tmp_question ttmq ON ttmq.test_group_id = tg.id AND ttmq.test_tmp_id = tmp.id
+//             WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
+//
+//     $query = $connected->prepare($sql);
+//     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+//     if(!empty($row['id'])) $query->bindValue(':tmp_id', (int)$row['id'], PDO::PARAM_INT);
+//     $query->execute();
+//
+//     if($fetch_type === 'one')
+//     {
+//       return $query->fetch();
+//     } else {
+//       return $query->fetchAll();
+//     }
+//   } catch (Exception $e) {
+//     $result = false;
+//     if($debug)  echo 'Errors: getListTestGroupByTmpQuestion'.$e->getMessage();
+//   }
+//
+//   return $result;
+// }
 /**
  * getResponseAnswerByTestPatient
  * @param  int $test_id

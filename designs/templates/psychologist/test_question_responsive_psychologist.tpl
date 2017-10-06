@@ -22,7 +22,7 @@
 </div>
 {if $error}<div class="alert_required">* {if $multiLang.text_error_check_all_required}{$multiLang.text_error_check_all_required}{else}No Translate (Key Lang: text_error_check_all_required){/if}</div>{/if}
 <div class="inbox-test sansserif" style="margin-bottom: 20px;">
-  <form class="form" action="{$index_file}?task=test_question&amp;tid={$smarty.get.tid}&amp;id={$smarty.get.id}" method="post">
+  <form class="form" action="{$index_file}?task=test_question_psychologist&amp;tid={$smarty.get.tid}&amp;id={$smarty.get.id}" method="post">
     <input type="hidden" id="test_group_id" name="test_group_id" value="{$test_group_id|escape}">
   {if $result|@COUNT gt 0}
     {foreach item = v from=$result key=id name=first_foo}
@@ -204,7 +204,7 @@
            <b>({$data.username|escape} ~ {$data.title|escape})</b>?</p>
       </div>
       <div class="modal-footer">
-        <a href="{$psychologist_file}?task=test_patient&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</i></a>
+        <a href="{$psychologist_file}?task=test_psychologist&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</i></a>
         <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
       </div>
     </div>
