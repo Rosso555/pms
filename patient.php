@@ -331,7 +331,7 @@ if('test_question' === $task)
   }
 
   $sumStep = COUNT($resultTestGroup) - COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''));
-
+  echo COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''));
   if(!empty($error))
   {
     $smarty_appform->assign('testTmpQuestion', $newResultSubmitError);

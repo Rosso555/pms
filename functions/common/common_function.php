@@ -1477,12 +1477,24 @@ function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $s
   global $debug, $connected, $offset, $limit;
   $result = true;
   try{
+    $sql1= ' SELECT * FROM `test_tmp` WHERE test_id = :test_id AND test_patient_id = :tpid ';
+    $query1 = $connected->prepare($sql1);
+    $query1->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query1->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    $query1->execute();
+    $row = $query1->fetch();
+
+    if(!empty($row['id']))
+    {
+      $condition .= ' AND tmp.id = :tmp_id ';
+    }
+
     if($status === 1)
     {
       $condition .= ' AND (ttmq.id IS NULL OR ttmq.status = 1) ';
       $orderBy .= ' ORDER BY tg.view_order ASC ';
     }
-    if($status === 2)
+    if($status === 2 && !empty($row['id']))
     {
       $condition .= ' AND ttmq.status = 2 ';
       $orderBy .= ' ORDER BY tg.view_order DESC ';
@@ -1492,13 +1504,15 @@ function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $s
       $setLimit .= ' LIMIT 1';
     }
 
+
     $sql= ' SELECT tg.* FROM test_group tg
               LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id
               LEFT JOIN test_tmp_question ttmq ON ttmq.test_group_id = tg.id AND ttmq.test_tmp_id = tmp.id
             WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
+    
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-    // $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    if(!empty($row['id'])) $query->bindValue(':tmp_id', (int)$row['id'], PDO::PARAM_INT);
     $query->execute();
 
     if($fetch_type === 'one')
