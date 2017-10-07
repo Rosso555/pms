@@ -132,7 +132,16 @@
               <td><a href="{$admin_file}?task=test&amp;catid={$data.category_id}">{$data.category_name}</a></td>
               <td>{$data.title}</td>
               <td>{$data.graph_title}</td>
-              <td>{$data.description}</td>
+              <td>
+                {$sumChar = $data.description|count_characters:true - 180}
+                {$data.description|mb_substr:0:180}
+                {if $data.description|count_characters:true gt 180}
+                <span class="collapse" id="collapseMore{$data.id}">
+                    {$data.description|mb_substr:180:$sumChar}
+                </span>
+                <a onclick="read_more({$data.id});" id="read_more{$data.id}" data-toggle="collapse" href="#collapseMore{$data.id}" aria-expanded="false" aria-controls="collapseMore{$data.id}"><i class="fa fa-plus-circle" aria-hidden="true"></i> More...</a>
+                {/if}
+              </td>
               <td>
                 {if $data.status eq 1}
                 <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#status_{$data.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate(Key Lang: text_click_change_status){/if}">
@@ -173,62 +182,67 @@
                     </div>
                   </div>
                   <!-- Modal -->
-                </td>
-                <td>
-                  <a href="{$admin_file}?task=test&amp;action=edit&amp;catid={$smarty.get.catid}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang: button_edit){/if}" style="margin-bottom: 3px;"><i class="fa fa-edit"></i></a>
-                  <!-- Trigger the modal with a button -->
-                  <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$data.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}" style="margin-bottom: 3px;"><i class="fa fa-trash-o"></i></button>
-                  <!-- Modal -->
-                  <div class="modal fade" id="myModal_{$data.id}" role="dialog">
-                    <div class="modal-dialog">
-                      <!-- Modal content-->
-                      <div class="panel panel-primary modal-content">
-                        <div class="panel-heading modal-header">
-                          <button type="button" class="close" data-dismiss="modal">&times;</button>
-                          <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate(Key Lang: text_confirmation){/if}</h4>
+              </td>
+              <td>
+                <a href="{$admin_file}?task=test&amp;action=edit&amp;catid={$smarty.get.catid}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang: button_edit){/if}" style="margin-bottom: 3px;"><i class="fa fa-edit"></i></a>
+                <!-- Trigger the modal with a button -->
+                <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$data.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}" style="margin-bottom: 3px;"><i class="fa fa-trash-o"></i></button>
+                <!-- Modal -->
+                <div class="modal fade" id="myModal_{$data.id}" role="dialog">
+                  <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="panel panel-primary modal-content">
+                      <div class="panel-heading modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate(Key Lang: text_confirmation){/if}</h4>
+                      </div>
+                      <div class="modal-body">
+                        <p>
+                          {if $multiLang.text_delete_test}{$multiLang.text_delete_test}{else}No Translate(Key Lang: text_delete_test){/if}
+                          <b>({$data.title|escape})</b>.</p>
                         </div>
-                        <div class="modal-body">
-                          <p>
-                            {if $multiLang.text_delete_test}{$multiLang.text_delete_test}{else}No Translate(Key Lang: text_delete_test){/if}
-                            <b>({$data.title|escape})</b>.</p>
-                          </div>
-                          <div class="modal-footer">
-                            <a href="{$admin_file}?task=test&amp;action=delete&amp;catid={$smarty.get.catid}&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"></i> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</a>
-                            <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
-                          </div>
+                        <div class="modal-footer">
+                          <a href="{$admin_file}?task=test&amp;action=delete&amp;catid={$smarty.get.catid}&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"></i> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</a>
+                          <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
                         </div>
                       </div>
                     </div>
-                    <!-- Modal -->
-                    <!-- <a href="{$admin_file}?task=result&amp;tid={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_result}{$multiLang.button_add_result}{else}No Translate(Key Lang: button_add_result){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=test_topic&amp;tid={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_topic}{$multiLang.button_add_test_topic}{else}No Translate (Key Lang: button_add_test_topic){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=test_topic_analysis&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_analysis_topic_less_big}{$multiLang.button_add_test_analysis_topic_less_big}{else}No Translate(Key Lang: button_add_test_analysis_topic_less_big){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=test_topic_answer&amp;tid={$data.id}" class="btn btn-primary btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_topic_answer_calculate}{$multiLang.button_add_test_topic_answer_calculate}{else}No Translate(Key Lang: button_add_test_topic_answer_calculate){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=group_answer_question&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_group_answer_question}{$multiLang.button_add_group_answer_question}{else}No Translate(Key Lang: button_add_group_answer_question){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=response&amp;tid={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_respone_result}{$multiLang.button_respone_result}{else}No Translate (Key Lang: button_respone_result){/if}" style="margin-bottom: 3px;"><i class="fa fa-folder-open" aria-hidden="true"></i></a> -->
-
-                    <a href="{$admin_file}?task=result&amp;tid={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_result}{$multiLang.button_add_result}{else}No Translate(Key Lang: button_add_result){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=new_result&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_new_result}{$multiLang.button_add_new_result}{else}No Translate(Key Lang: button_add_new_result){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=test_topic&amp;tid={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_topic}{$multiLang.button_add_test_topic}{else}No Translate (Key Lang: button_add_test_topic){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=test_topic_analysis&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_analysis_topic_less_big}{$multiLang.button_add_test_analysis_topic_less_big}{else}No Translate(Key Lang: button_add_test_analysis_topic_less_big){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=test_topic_answer&amp;tid={$data.id}" class="btn btn-primary btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_topic_answer_calculate}{$multiLang.button_add_test_topic_answer_calculate}{else}No Translate(Key Lang: button_add_test_topic_answer_calculate){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=group_answer_question&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_group_answer_question}{$multiLang.button_add_group_answer_question}{else}No Translate(Key Lang: button_add_group_answer_question){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=test_question_view_order&amp;tid={$data.id}" class="btn btn-primary btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_question_view_order}{$multiLang.button_add_test_question_view_order}{else}No Translate(Key Lang: button_add_test_question_view_order){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-                    <a href="{$admin_file}?task=response&amp;tid={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_respone_result}{$multiLang.button_respone_result}{else}No Translate (Key Lang: button_respone_result){/if}" style="margin-bottom: 3px;"><i class="fa fa-folder-open" aria-hidden="true"></i></a>
-
-                  </td>
-                </tr>
-                {/foreach}
-              </tbody>
-              {else}
-              <tr>
-                <td colspan="7"><h4 style="text-align:center">{if $multiLang.text_there_are_no_record}{$multiLang.text_there_are_no_record}{else}No Translate (Key Lang: text_there_are_no_record){/if}</h4></td>
-              </tr>
-              {/if}
-            </table>
-            {if $smarty.get.catid || $smarty.get.tid}<a href="{$admin_file}?task=test" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate (Key Lang: text_back){/if}</a>{/if}
-          </div><!--table-responsive  -->
-          {include file="common/paginate.tpl"}
-        </div><!--end panel-body  -->
-      </div><!--end panel panel-primary  -->
-      {/block}
+                  </div>
+                  <!-- Modal -->
+                  <a href="{$admin_file}?task=result&amp;tid={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_result}{$multiLang.button_add_result}{else}No Translate(Key Lang: button_add_result){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+                  <a href="{$admin_file}?task=new_result&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_new_result}{$multiLang.button_add_new_result}{else}No Translate(Key Lang: button_add_new_result){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+                  <a href="{$admin_file}?task=test_topic&amp;tid={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_topic}{$multiLang.button_add_test_topic}{else}No Translate (Key Lang: button_add_test_topic){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+                  <a href="{$admin_file}?task=test_topic_analysis&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_analysis_topic_less_big}{$multiLang.button_add_test_analysis_topic_less_big}{else}No Translate(Key Lang: button_add_test_analysis_topic_less_big){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+                  <a href="{$admin_file}?task=test_topic_answer&amp;tid={$data.id}" class="btn btn-primary btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_topic_answer_calculate}{$multiLang.button_add_test_topic_answer_calculate}{else}No Translate(Key Lang: button_add_test_topic_answer_calculate){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+                  <a href="{$admin_file}?task=group_answer_question&amp;tid={$data.id}" class="btn btn-warning btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_group_answer_question}{$multiLang.button_add_group_answer_question}{else}No Translate(Key Lang: button_add_group_answer_question){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+                  <a href="{$admin_file}?task=test_question_view_order&amp;tid={$data.id}" class="btn btn-primary btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_test_question_view_order}{$multiLang.button_add_test_question_view_order}{else}No Translate(Key Lang: button_add_test_question_view_order){/if}" style="margin-bottom: 3px;"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+                  <a href="{$admin_file}?task=response&amp;tid={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_respone_result}{$multiLang.button_respone_result}{else}No Translate (Key Lang: button_respone_result){/if}" style="margin-bottom: 3px;"><i class="fa fa-folder-open" aria-hidden="true"></i></a>
+                </td>
+            </tr>
+            {/foreach}
+          </tbody>
+          {else}
+          <tr>
+            <td colspan="7"><h4 style="text-align:center">{if $multiLang.text_there_are_no_record}{$multiLang.text_there_are_no_record}{else}No Translate (Key Lang: text_there_are_no_record){/if}</h4></td>
+          </tr>
+          {/if}
+        </table>
+        {if $smarty.get.catid || $smarty.get.tid}<a href="{$admin_file}?task=test" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate (Key Lang: text_back){/if}</a>{/if}
+      </div><!--table-responsive  -->
+    {include file="common/paginate.tpl"}
+  </div><!--end panel-body  -->
+</div><!--end panel panel-primary  -->
+{/block}
+{block name="javascript"}
+<script>
+function read_more(id)
+{
+  if($('#read_more'+id).attr('aria-expanded') === 'true')
+  {
+    $('#read_more'+id).html('<i class="fa fa-plus-circle" aria-hidden="true"></i> More...');
+  } else {
+    $('#read_more'+id).html('<i class="fa fa-minus-circle" aria-hidden="true"></i> Less');
+  }
+}
+</script>
+{/block}

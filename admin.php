@@ -1799,12 +1799,12 @@ if('jump_to' === $task)
   }
 
   $results = getListQuestionByViewOrderGroupNonGroupJumpTo($_GET['tid'], $lang);
-
+  var_dump($results);
   $currentViewOrder = 0;
   foreach ($results as $k => $va) {
     if($va['test_question_id'] === $_GET['tqid']) $currentViewOrder = $k;
   }
-
+var_dump($currentViewOrder);
   // $smarty_appform->assign('listTestQuestion', getListTestQuestion('', $_GET['tid'], '', '', $lang, $slimit = ''));
   $smarty_appform->assign('listTestQuestion', $results);
   $smarty_appform->assign('answer', $common->find('answer', $condition = ['id' => $_GET['ans_id']], $type = 'one'));

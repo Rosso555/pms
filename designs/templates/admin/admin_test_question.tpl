@@ -207,7 +207,7 @@
                 </div>
               </div>
               <!-- Modal -->
-              <a href="{$admin_file}?task=answer&amp;tid={$data.test_id}&amp;qid={$data.question_id}&amp;tqid={$data.id}&amp;next={$smarty.get.next}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_answer}{$multiLang.button_add_answer}{else}No Translate(Key Lang: button_add_answer){/if}"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+              <a href="{$admin_file}?task=answer&amp;tid={$data.test_id}&amp;qid={$data.question_id}&amp;tqid={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_answer}{$multiLang.button_add_answer}{else}No Translate(Key Lang: button_add_answer){/if}"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
               <button type="button" class="btn btn-warning btn-xs" onclick="copytest_question({$data.id});" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_copy_test_question}{$multiLang.button_copy_test_question}{else}No Translate(Key Lang:button_copy_test_question){/if}">
                 <i class="fa fa-clone fa-fw"></i>
               </button>

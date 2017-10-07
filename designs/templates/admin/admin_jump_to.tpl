@@ -44,7 +44,6 @@
               </div>
             </div>
           </div>
-
           <div class="row">
             <div class="col-md-12">
               <div class="form-group">
@@ -54,8 +53,6 @@
                   <button type="submit" name="butsubmit" class="btn btn-info" {if $answer.jump_to}disabled{/if}><i class="fa fa-floppy-o"></i> {if $multiLang.button_save}{$multiLang.button_save}{else}No Translate(Key Lang: button_save){/if}</button>
                 {/if}
                 <a id="btnBack" href="javascript:history.back()" class="btn btn-warning"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
-
-                <!-- <a class="btn btn-warning" href="{$admin_file}?task=answer&amp;tid={$smarty.get.tid}&amp;qid={$smarty.get.qid}&amp;tqid={$smarty.get.tqid}"><i class="fa fa-step-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a> -->
               </div>
             </div>
           </div>
