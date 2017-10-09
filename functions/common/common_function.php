@@ -1057,7 +1057,7 @@ function getTestQuestionViewOrder($test_id)
               LEFT JOIN group_answer ga ON ga.test_id = :test_id AND ga.test_question_id = tq.id
               LEFT JOIN test_question_view_order tqvo ON tqvo.test_id = :test_id AND tqvo.test_question_id = tq.id
               LEFT JOIN test_group_question tgq ON tgq.test_question_id = tq.id
-            WHERE tq.test_id = :test_id AND ga.test_question_id IS NULL OR ga.flag = 1 ';
+            WHERE tq.test_id = :test_id AND ga.test_question_id IS NULL OR ga.flag = 1 ORDER BY (tqvo.view_order IS NULL), tqvo.view_order ASC ';
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
     $query->execute();
@@ -1373,6 +1373,38 @@ function getCheckTestPatientByPsyChologist($psy_id, $pat_id, $test_id, $tpat_id)
   }
   return $result;
 }
+
+/**
+ * getCheckTestPatientByPsyChologist
+ * @param  int $psy_id is psychologist_id
+ * @param  int $psy_id is psychologist_id
+ * @param  int $test_id is test_id
+ * @param  int $tpsy_id is test_psychologist_id
+ * @return array or boolean
+ */
+function getCheckTestPsyChologistByPsyChologist($psy_id, $test_id, $tpsy_id)
+{
+  echo "Psychologist id: ".$psy_id."Test id : ".$test_id."Test Psychologist id : ". $tpsy_id;
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    $sql =' SELECT tpsy.* FROM `psychologist` psy INNER JOIN test_psychologist tpsy ON tpsy.psychologist_id = psy.id WHERE psy.id = :psychologist_id AND tpsy.test_id = :test_id AND tpsy.id = :test_psychologist_id ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':psychologist_id', (int)$psy_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_psychologist_id', (int)$tpsy_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch();
+
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getCheckTestPsyChologistByPsyChologist'.$e->getMessage();
+  }
+  return $result;
+}
+
 /**
  * getCheckTestPsyChologist
  * @param  int $psy_id is psychologist_id
@@ -1588,13 +1620,13 @@ function getJumpToTestQuestionById($tqid)
 /**
  * getListTestGroupByTmpQuestion
  * @param  int $test_id
- * @param  int $tpid is test_patient_id
+ * @param  int $tpsy_id is test_psychologist_id
  * @param  int $status
  * @param  string $fetch_type for get data "one or all"
  * @param  int $slimit for setLimit
  * @return array or boolean
  */
-function getListTestGroupByTmpQuestion($test_id, $tpsy_id, $status, $fetch_type, $slimit)
+function getListTestGroupByTmpQuestionPsy($test_id, $tpsy_id, $status, $fetch_type, $slimit)
 {
   global $debug, $connected, $offset, $limit;
   $result = true;
@@ -1654,66 +1686,75 @@ function getListTestGroupByTmpQuestion($test_id, $tpsy_id, $status, $fetch_type,
 
   return $result;
 }
-// function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $slimit)
-// {
-//   global $debug, $connected, $offset, $limit;
-//   $result = true;
-//   try{
-//     $sql1= ' SELECT * FROM `test_tmp` WHERE test_id = :test_id AND test_patient_id = :tpid ';
-//     $query1 = $connected->prepare($sql1);
-//     $query1->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-//     $query1->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
-//     $query1->execute();
-//     $row = $query1->fetch();
-//
-//     if(!empty($row['id']))
-//     {
-//       $condition .= ' AND tmp.id = :tmp_id ';
-//     }
-//
-//     if($status === 1)
-//     {
-//       $condition .= ' AND (ttmq.id IS NULL OR ttmq.status = 1) ';
-//       $orderBy .= ' ORDER BY tg.view_order ASC ';
-//     }
-//     if($status === 2 && !empty($row['id']))
-//     {
-//       $condition .= ' AND ttmq.status = 2 ';
-//       $orderBy .= ' ORDER BY tg.view_order DESC ';
-//     }
-//     if($status === 2 && empty($row['id']))
-//     {
-//       $condition .= ' AND tmp.id IS NULL ';
-//     }
-//     if(!empty($slimit))
-//     {
-//       $setLimit .= ' LIMIT 1';
-//     }
-//
-//
-//     $sql= ' SELECT tg.* FROM test_group tg
-//               LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id
-//               LEFT JOIN test_tmp_question ttmq ON ttmq.test_group_id = tg.id AND ttmq.test_tmp_id = tmp.id
-//             WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
-//
-//     $query = $connected->prepare($sql);
-//     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-//     if(!empty($row['id'])) $query->bindValue(':tmp_id', (int)$row['id'], PDO::PARAM_INT);
-//     $query->execute();
-//
-//     if($fetch_type === 'one')
-//     {
-//       return $query->fetch();
-//     } else {
-//       return $query->fetchAll();
-//     }
-//   } catch (Exception $e) {
-//     $result = false;
-//     if($debug)  echo 'Errors: getListTestGroupByTmpQuestion'.$e->getMessage();
-//   }
-//
-//   return $result;
-// }
+/**
+ * getListTestGroupByTmpQuestion
+ * @param  int $test_id
+ * @param  int $tpid is test_patient_id
+ * @param  int $status
+ * @param  string $fetch_type for get data "one or all"
+ * @param  int $slimit for setLimit
+ * @return array or boolean
+ */
+function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $slimit)
+{
+  global $debug, $connected, $offset, $limit;
+  $result = true;
+  try{
+    $sql1= ' SELECT * FROM `test_tmp` WHERE test_id = :test_id AND test_patient_id = :tpid ';
+    $query1 = $connected->prepare($sql1);
+    $query1->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query1->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    $query1->execute();
+    $row = $query1->fetch();
+
+    if(!empty($row['id']))
+    {
+      $condition .= ' AND tmp.id = :tmp_id ';
+    }
+
+    if($status === 1)
+    {
+      $condition .= ' AND (ttmq.id IS NULL OR ttmq.status = 1) ';
+      $orderBy .= ' ORDER BY tg.view_order ASC ';
+    }
+    if($status === 2 && !empty($row['id']))
+    {
+      $condition .= ' AND ttmq.status = 2 ';
+      $orderBy .= ' ORDER BY tg.view_order DESC ';
+    }
+    if($status === 2 && empty($row['id']))
+    {
+      $condition .= ' AND tmp.id IS NULL ';
+    }
+    if(!empty($slimit))
+    {
+      $setLimit .= ' LIMIT 1';
+    }
+
+
+    $sql= ' SELECT tg.* FROM test_group tg
+              LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id
+              LEFT JOIN test_tmp_question ttmq ON ttmq.test_group_id = tg.id AND ttmq.test_tmp_id = tmp.id
+            WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    if(!empty($row['id'])) $query->bindValue(':tmp_id', (int)$row['id'], PDO::PARAM_INT);
+    $query->execute();
+
+    if($fetch_type === 'one')
+    {
+      return $query->fetch();
+    } else {
+      return $query->fetchAll();
+    }
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestGroupByTmpQuestion'.$e->getMessage();
+  }
+
+  return $result;
+}
 /**
  * getResponseAnswerByTestPatient
  * @param  int $test_id
@@ -1774,6 +1815,70 @@ function getResponseAnswerByTestPatient($test_id, $tpid)
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: getResponseAnswerByTestPatient'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * getResponseAnswerByTestPatient
+ * @param  int $test_id
+ * @param  int $tpsy_id is test_psychologist_id
+ * @return array or boolean
+ */
+function getResponseAnswerByTestPsychologist($test_id, $tpsy_id)
+{
+  global $debug, $connected, $offset, $limit;
+  $result = true;
+  try{
+    $sql =' SELECT ra.content, ra.answer_id, ans.jump_to, ans.title AS ans_title, q.type, q.title AS que_title, q.description, q.hide_title, ra.test_question_id AS tqid, tq.is_required
+            FROM `response` r
+              INNER JOIN response_answer ra ON ra.response_id = r.id
+              INNER JOIN test_question tq ON tq.id = ra.test_question_id
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN answer ans ON ans.id = ra.answer_id
+            WHERE r.test_id = :test_id AND r.test_psychologist_id = :tpsy_id GROUP BY ra.test_question_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+
+    $newResult = array();
+    foreach ($rows as $k => $va) {
+      if($va['type'] == 4)
+      {
+        $sql1 =' SELECT ans.title AS ans_title
+                FROM `response` r
+                  INNER JOIN response_answer ra ON ra.response_id = r.id
+                  INNER JOIN test_question tq ON tq.id = ra.test_question_id
+                  INNER JOIN question q ON q.id = tq.question_id
+                  LEFT JOIN answer ans ON ans.id = ra.answer_id
+                WHERE r.test_id = :test_id AND r.test_psychologist_id = :tpsy_id AND ra.test_question_id = :tqid ';
+        $query1 = $connected->prepare($sql1);
+        $query1->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+        $query1->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
+        $query1->bindValue(':tqid', (int)$va['tqid'], PDO::PARAM_INT);
+        $query1->execute();
+        $rows1 = $query1->fetchAll();
+      }
+
+      $newResult[] = array('content'      => $va['content'],
+                           'answer_id'    => $va['answer_id'],
+                           'jump_to'      => $va['jump_to'],
+                           'ans_title'    => $va['ans_title'],
+                           'type'         => $va['type'],
+                           'que_title'    => $va['que_title'],
+                           'description'  => $va['description'],
+                           'hide_title'   => $va['hide_title'],
+                           'tqid'         => $va['tqid'],
+                           'is_required'  => $va['is_required'],
+                           'result_answer' => $rows1);
+    }
+
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getResponseAnswerByTestPsychologist'.$e->getMessage();
   }
 
   return $result;
@@ -1911,6 +2016,104 @@ function getMessageResultTopic($tpid, $test_id, $lang)
   }
   return $result;
 }
+function getMessageResultTopicPsy($tpsy_id, $test_id, $lang)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+
+    //Query test_question_topic_hide by test_id
+    $sql_data2 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC LIMIT 0, 1';
+    $query4 = $connected->prepare($sql_data2);
+    $query4->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query4->execute();
+    $rowsTopic = $query4->fetch();
+
+    $sql= ' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
+              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+            FROM `response` rs
+              INNER JOIN response_answer rsa ON rsa.response_id = rs.id
+              INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
+              INNER JOIN answer_topic atp ON atp.answer_id = ans.id
+              INNER JOIN topic t ON t.id = atp.topic_id
+              LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
+              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
+            WHERE rs.test_psychologist_id = :tpsy_id AND t.lang = :lang GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $query->execute();
+    $result = $query->fetchAll();
+    if(!empty($result) && COUNT($result) > 0) {
+      foreach ($result as $key => $value) {
+        $result1 = getResultTopicByAmount($value['test_id'], $value['topic_id'], $value['amount']);
+        if(!empty($result1['message'])) {
+          $newResult[] = array('result_id'=> $result1['id'], 'topic_id' => $result1['topic_id'], 'topic_title' => $value['topic_title'], 'amount' => $value['amount'], 'message' => $result1['message']);
+        }
+      }
+    }
+
+    if(!empty($newResult) && !empty($rowsTopic)){
+      foreach ($newResult as $key => $va) {
+        // Check if has test topic hide
+        if($rowsTopic['topic_id'] == $va['topic_id'])
+        {
+          $newResultRe[] = array('result_id'=> $va['result_id'], 'topic_id' => $va['topic_id'], 'topic_title' => $va['topic_title'], 'amount' => $va['amount'], 'message' => $va['message']);
+        }
+      }
+
+      //Query test_question_topic_hide
+      $sql5 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC ';
+      $query5 = $connected->prepare($sql5);
+      $query5->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+      $query5->execute();
+      $rTopicHide = $query5->fetchAll();
+
+      foreach ($rTopicHide as $key => $va) {
+        $result = getResultAnswerTopic($tpsy_id, $test_id, '', $va['topic_id']);
+        //Get check hide/show
+        $testQueHideShow = getTestQuesHideShow($test_id, $va['topic_id'], $result['amount']);
+
+        if(!empty($testQueHideShow)) {
+          $resultAnsTopic_if = getResultAnswerTopic($tpsy_id, $test_id, '', $testQueHideShow['if_topic_id']);
+
+          $rGetResultTopicByAmount = getResultTopicByAmount($result['test_id'], $testQueHideShow['if_topic_id'], $resultAnsTopic_if['amount']);
+          $newResultRe[] = array('result_id'=> $rGetResultTopicByAmount['id'], 'topic_id' => $rGetResultTopicByAmount['topic_id'], 'topic_title' => $resultAnsTopic_if['topic_title'], 'amount' => $resultAnsTopic_if['amount'], 'message' => $rGetResultTopicByAmount['message']);
+        }
+      }
+
+    }else {
+      $newResultRe = $newResult;
+    }
+
+      if(!empty($newResultRe)){
+        foreach ($newResultRe as $key => $va) {
+          //Get Result condition
+          $sql3 ='SELECT rt.message, t.id AS test_id, tp.name AS topic_name, tp.id AS topic_id, rt.view_order
+                  FROM `result_condition` rc
+                    INNER JOIN result rt ON rt.id = rc.show_result_id
+                    INNER JOIN test t ON t.id = rt.test_id
+                    INNER JOIN topic tp ON tp.id = rt.topic_id
+                  WHERE rc.result_id = :result_id GROUP BY rc.id ORDER BY rt.view_order ASC ';
+          $stmt3 = $connected->prepare($sql3);
+          $stmt3->bindValue(':result_id', (int)$va['result_id'], PDO::PARAM_INT);
+          $stmt3->execute();
+          $row3 = $stmt3->fetchAll();
+          $newResultTest[] = array('topic_title' => $va['topic_title'], 'amount' => $va['amount'], 'message' => $va['message'], 're_condition' => $row3);
+        }
+      }
+
+    return $newResultTest;
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getMessageResultTopic'.$e->getMessage();
+  }
+  return $result;
+}
+
 /**
  * getResultTopicByAmount
  * @param  int $test_id
@@ -1985,6 +2188,54 @@ function getResultAnswerTopic($tpid, $test_id, $if_topic_id, $topic_id)
 
   return $result;
 }
+/**
+ * getResultAnswerTopic
+ * @param  int $tpsy_id is test_psychologist_id
+ * @param  int $test_id is test_id
+ * @param  int $if_topic_id is if_topic_id
+ * @return array or boolean
+ */
+function getResultAnswerTopicPsy($tpsy_id, $test_id, $if_topic_id, $topic_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    if(!empty($if_topic_id)) $where .= ' AND atp.topic_id = :if_topic_id ';
+    if(!empty($topic_id)) $where .= ' AND atp.topic_id = :topic_id ';
+
+    $sql =' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
+              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+            FROM `response` rs
+              INNER JOIN response_answer rsa ON rsa.response_id = rs.id
+              INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
+              INNER JOIN answer_topic atp ON atp.answer_id = ans.id
+              INNER JOIN topic t ON t.id = atp.topic_id
+              LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
+              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
+            WHERE rs.test_psychologist_id = :tpsy_id '.$where.' GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
+
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    if(!empty($topic_id)) $stmt->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
+    if(!empty($if_topic_id)) $stmt->bindValue(':if_topic_id', (int)$if_topic_id, PDO::PARAM_INT);
+    $stmt->execute();
+    if(!empty($if_topic_id) || !empty($topic_id)){
+      $rows = $stmt->fetch();
+    }else {
+      $rows = $stmt->fetchAll();
+    }
+
+    return $rows;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getResultAnswerTopic'.$e->getMessage();
+  }
+
+  return $result;
+}
+
 /**
  * getTestQuesHideShow
  * @param  int $test_id
