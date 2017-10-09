@@ -2353,3 +2353,41 @@ function getViewCondtionTestQuestion($nrid)
   }
   return $result;
 }
+/**
+ * checkDeleteTest
+ * @param  string $id is test_id
+ * @return array or boolean
+ */
+function checkDeleteTest($id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql1= ' SELECT COUNT(*) AS total_count, t.title AS test_title FROM `result` r INNER JOIN test t ON t.id = r.test_id WHERE r.test_id = :id';
+    $query1 = $connected->prepare($sql1);
+    $query1->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query1->execute();
+    $row1 = $query1->fetch();
+
+    $sql2= ' SELECT COUNT(*) AS total_response FROM `response` WHERE test_id = :id';
+    $query2 = $connected->prepare($sql2);
+    $query2->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query2->execute();
+    $row2 = $query2->fetch();
+
+    $sql3= ' SELECT COUNT(*) total_count FROM `apitransaction` WHERE test_id = :id';
+    $query3 = $connected->prepare($sql3);
+    $query3->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query3->execute();
+    $row3 = $query3->fetch();
+
+    $sum_total = $row1['total_count'] + $row2['total_response'] + $row3['total_count'];
+
+    return array('test_title' => $row1['test_title'], 'total_response' => $row2['total_response'], 'total_count' => $sum_total);
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkDeleteTest'.$e->getMessage();
+  }
+  return $result;
+}

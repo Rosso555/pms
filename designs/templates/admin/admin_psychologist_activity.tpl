@@ -15,7 +15,7 @@
         <div class="row">
           <div class="col-md-12">
             <form class="form-inline" action="{$admin_file}?task=patient" method="get">
-              <input type="hidden" name="task" value="patient">
+              <input type="hidden" name="task" value="psychologist_activity">
               <div class="form-group select2_search_inline" style="margin-bottom:5px;">
                 <select class="form-control select2_search" name="psy_id" style="width:100%;">
                   <option value="">---Select Psychologist---</option>
