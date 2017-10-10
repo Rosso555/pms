@@ -1,6 +1,7 @@
 <?php
 //start session
 session_start();
+
 //require configuration file
 require_once(dirname(__FILE__).'/setting/setup.php');
 require_once(dirname(__FILE__).'/setting/common_setting.php');
@@ -4120,11 +4121,11 @@ if('ajax' === $task)
 //task report staff activity_log
 if('psychologist_activity' === $task)
 {
-  // $staff_id   = !empty($_GET['sfid']) ?       $_GET['sfid'] : '';
-  // $fdate      = !empty($_GET['fdate']) ?      $_GET['fdate'] : '';
-  // $tdate      = !empty($_GET['tdate']) ?      $_GET['tdate'] : '';
+  $psy_id = !empty($_GET['psy_id']) ? $_GET['psy_id'] : '';
+  $gender = !empty($_GET['gender']) ? $_GET['gender'] : '';
+  $kwd    = !empty($_GET['kwd']) ?    $_GET['kwd'] : '';
 
-  $resultPsyActivity = psychologist_activity();
+  $resultPsyActivity = psychologist_activity($kwd, $psy_id, $gender);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
   $smarty_appform->assign('resultPsyActivity', $resultPsyActivity);

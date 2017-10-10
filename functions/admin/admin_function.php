@@ -2391,3 +2391,59 @@ function checkDeleteTest($id)
   }
   return $result;
 }
+/**
+* Search Report Activity log
+* @param  int $staff_id is staff_id
+* @param  string $act_log_fdate is activity_log date
+* @param  string $act_log_tdate is activity_log date
+* @param  int $slimit is slimit for assign to limit
+* @return array or boolean
+*/
+function psychologist_activity($kwd, $psy_id, $gender)
+{
+ global $debug, $connected, $total_data, $limit, $offset;
+ $result = true;
+ if(!empty($slimit)) $limit = $slimit;
+
+ try {
+   $condition = '';
+   if(!empty($kwd))
+   {
+     if(!empty($condition)) $condition .= ' AND ';
+     $condition .= ' alog.content LIKE :kwd OR psy.username LIKE :kwd OR psy.address LIKE :kwd OR psy.job LIKE :kwd OR psy.email LIKE :kwd ';
+   }
+   if(!empty($psy_id))
+   {
+     if(!empty($condition)) $condition .= ' AND ';
+     $condition .= ' alog.psychologist_id = :psy_id ';
+   }
+   if(!empty($gender))
+   {
+     if(!empty($condition)) $condition .= ' AND ';
+     $condition .= ' psy.gender = :gender ';
+   }
+
+   if(!empty($condition)) $where .= ' WHERE '.$condition;
+
+   $sql = 'SELECT alog.content, alog.created_at AS activity_date, psy.*, (SELECT COUNT(*) FROM `activity_log` alog
+             INNER JOIN psychologist psy ON psy.id = alog.psychologist_id '.$where.' ) AS total FROM `activity_log` alog
+             INNER JOIN psychologist psy ON psy.id = alog.psychologist_id '.$where.' ORDER BY alog.id DESC LIMIT :offset, :limit ';
+   $stmt = $connected->prepare($sql);
+   $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+   $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+
+   if(!empty($kwd))     $stmt->bindValue(':kwd', '%'.$kwd.'%', PDO::PARAM_STR);
+   if(!empty($psy_id))  $stmt->bindValue(':psy_id', $psy_id, PDO::PARAM_INT);
+   if(!empty($gender))  $stmt->bindValue(':gender', $gender, PDO::PARAM_INT);
+
+   $stmt->execute();
+   $rows = $stmt->fetchAll();
+   if(count($rows) > 0) $total_data = $rows[0]['total'];
+
+   return $rows;
+ } catch (Exception $e) {
+   $result = false;
+   if($debug)  echo 'Errors: psychologist_activity '.$e->getMessage();
+ }
+ return $result;
+}

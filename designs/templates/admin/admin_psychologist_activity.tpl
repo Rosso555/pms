@@ -28,7 +28,7 @@
                 <select class="form-control select2_search" name="gender" style="width:100%;">
                   <option value="">---Select Gender---</option>
                   <option value="1" {if $smarty.get.gender eq 1}selected{/if}>Male</option>
-                  <option value="2" {if $smarty.get.gender eq 3}selected{/if}>Female</option>
+                  <option value="2" {if $smarty.get.gender eq 2}selected{/if}>Female</option>
                 </select>
               </div>
               <div class="form-group" style="margin-bottom:5px;">
@@ -57,7 +57,7 @@
           <tr>
             <td>{$v.username}</td>
             <td>{$v.content}</td>
-            <td>{$v.created_at}</td>
+            <td>{$v.activity_date}</td>
           </tr>
           {/foreach}
         {else}
