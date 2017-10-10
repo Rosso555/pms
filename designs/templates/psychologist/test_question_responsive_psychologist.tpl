@@ -55,6 +55,7 @@
               {if $va.answer}
               {foreach item=ans from=$va.answer name=foo}
                 <td>
+                  {$ans.jump_to}
                 {if $va.type eq 3}
                   <label for="radio{$ans.id}_{$va.id}" class="radio-inline" style="margin-bottom: 10px;">
                     {if $smarty.foreach.foo.first}

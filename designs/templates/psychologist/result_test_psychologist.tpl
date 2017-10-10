@@ -25,14 +25,12 @@
     {else}
     <i class="fa fa-ban" aria-hidden="true" data-toggle1="tooltip" data-placement="top" title="Doesn't Complete."></i>
     {/if}
-    PATIENT: {$patient.username}
+    PSYCHOLOGIST: {$psychologist.username}
   </p>
 </div>
 <div class="inbox-test sansserif" style="margin-bottom: 20px;">
   {if $reponseAnswerByTestPsyt|@COUNT gt 0}
-    <hr>
     <h2>{if $multiLang.text_result_of_quick}{$multiLang.text_result_of_quick}{else}No Translate (Key Lang: text_result_of_quick){/if}</h2>
-    </hr>
     {if $messageResultTopic|@COUNT gt 0}
     <table class="tbl_result">
       {foreach from=$messageResultTopic item=v name=getfirst}
@@ -80,25 +78,13 @@
   {/if}
   <br><br>
   <center>
-    <a id="btnBack" href="{$admin_file}?task=test" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
+    <a href="{$admin_file}?task=test_psychologist" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
   </center>
   <br><br>
 </div>
 {/block}
 {block name="javascript"}
-<script>
-  //Get previous url
-  var urlBack =  document.referrer;
-  var url = '';
-  if(urlBack !== '') url = getUrlPrevious(urlBack);
-  if(url.task === 'test_psychologist') localStorage.setItem('urlTest',urlBack);
-  //Get session url
-  var getUrlBack = localStorage.getItem('urlTest');
-  if(getUrlBack !== null){
-    $("#btnBack").attr("href", getUrlBack);
-  }
-  //End previous url
-</script>
+
 <script>
 {if $listTopicDiagram|@count gt 0 and $drawingPointLine|@count gt 0}
   var canvas = document.getElementById("myCanvas");

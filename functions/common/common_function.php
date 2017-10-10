@@ -1384,7 +1384,6 @@ function getCheckTestPatientByPsyChologist($psy_id, $pat_id, $test_id, $tpat_id)
  */
 function getCheckTestPsyChologistByPsyChologist($psy_id, $test_id, $tpsy_id)
 {
-  echo "Psychologist id: ".$psy_id."Test id : ".$test_id."Test Psychologist id : ". $tpsy_id;
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
@@ -1884,40 +1883,6 @@ function getResponseAnswerByTestPsychologist($test_id, $tpsy_id)
   return $result;
 }
 
-/**
-* Search Report Activity log
-* @author Mr. Hong Syden
-* @param  int $staff_id is staff_id
-* @param  string $act_log_fdate is activity_log date
-* @param  string $act_log_tdate is activity_log date
-* @param  int $slimit is slimit for assign to limit
-* @return array or boolean
-*/
-function psychologist_activity()
-{
- global $debug, $connected, $total_data, $limit, $offset;
- $result = true;
- if(!empty($slimit)) $limit = $slimit;
-
- try {
-   $sql = 'SELECT alog.content, alog.created_at, psy.*, (SELECT COUNT(*) FROM `activity_log` alog
-             INNER JOIN psychologist psy ON psy.id = alog.psychologist_id ) AS total FROM `activity_log` alog
-             INNER JOIN psychologist psy ON psy.id = alog.psychologist_id
-           LIMIT :offset, :limit ';
-   $stmt = $connected->prepare($sql);
-   $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-   $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-   $stmt->execute();
-   $rows = $stmt->fetchAll();
-   if(count($rows) > 0) $total_data = $rows[0]['total'];
-
-   return $rows;
- } catch (Exception $e) {
-   $result = false;
-   if($debug)  echo 'Errors: psychologist_activity '.$e->getMessage();
- }
- return $result;
-}
 
 function getMessageResultTopic($tpid, $test_id, $lang)
 {
@@ -2420,6 +2385,78 @@ function getListTopicDiagram($tpid, $test_id, $xleft, $xtop)
 
   return $result;
 }
+/**
+ * getListTopicDiagram for list data in diagram
+ * @param  int $xleft is number of margin left
+ * @param  int $xtop is number of margin top
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function getListTopicDiagramPsy($tpsy, $test_id, $xleft, $xtop)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sum = $xtop;
+    $resultTopic = getResultAnswerTopic($tpsy, $test_id, '', '');
+
+    //Query test_question_topic_hide by test_id
+    $sql_data2 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC LIMIT 0, 1';
+    $query2 = $connected->prepare($sql_data2);
+    $query2->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query2->execute();
+    $rowsTopic = $query2->fetch();
+
+    if(!empty($resultTopic) && COUNT($resultTopic) > 0)
+    {
+      foreach ($resultTopic as $key => $value) {
+        //Get test topic answer calculate average score
+        $averageScore = getTestTopicAnswerValueCalculate($value['test_id'], $value['topic_id'], $value['amount']);
+        // Check if has test topic hide
+        if(!empty($averageScore) && !empty($result) && $rowsTopic['topic_id'] == $value['topic_id'])
+        {
+          $newResult[] = array('test_id' => $value['test_id'], 'topic_id' => $value['topic_id'], 'topic_title' => $value['topic_title'], 'amount' => $averageScore, 'margin_left' => $xleft, 'margin_top' => $sum);
+          $sum += 50;
+        }
+        if(!empty($averageScore) && empty($rowsTopic['topic_id'])) {
+          $newResult[] = array('test_id' => $value['test_id'], 'topic_id' => $value['topic_id'], 'topic_title' => $value['topic_title'], 'amount' => $averageScore, 'margin_left' => $xleft, 'margin_top' => $sum);
+          $sum += 50;
+        }
+      }
+      //Query test_question_topic_hide
+      $sql5 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC ';
+      $query5 = $connected->prepare($sql5);
+      $query5->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+      $query5->execute();
+      $rTopicHide = $query5->fetchAll();
+
+      foreach ($rTopicHide as $key => $va) {
+        $result = getResultAnswerTopic($tpsy, $test_id, '', $va['topic_id']);
+        //Get check hide/show
+        $testQueHideShow = getTestQuesHideShow($test_id, $va['topic_id'], $result['amount']);
+        // check $testQueHideShow, if it has
+        if(!empty($testQueHideShow)){
+          $topic_id = $va['if_topic_id'];
+          $resultAnsTopic_if = getResultAnswerTopic($tpsy, $test_id, '', $testQueHideShow['if_topic_id']);
+          //Get test topic answer calculate average score
+          $averageScore = getTestTopicAnswerValueCalculate($resultAnsTopic_if['test_id'], $resultAnsTopic_if['topic_id'], $resultAnsTopic_if['amount']);
+          if(!empty($averageScore)){
+            $newResult[] = array('test_id' => $resultAnsTopic_if['test_id'], 'topic_id' => $resultAnsTopic_if['topic_id'], 'topic_title' => $resultAnsTopic_if['topic_title'], 'amount' => $averageScore, 'margin_left' => $xleft, 'margin_top' => $sum);
+            $sum += 50;
+          }
+        }// end check $testQueHideShow, if it has
+      }//end fetch $rTopicHide
+    }
+
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTopicDiagram'.$e->getMessage();
+  }
+
+  return $result;
+}
+
 /**
  * calWidthHeightDiagramSecond
  * @param  int $countTopic is count topic data

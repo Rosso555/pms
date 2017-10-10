@@ -74,9 +74,7 @@
       {/if}
     {/foreach}
     </div>
-    <hr>
     <h2>{if $multiLang.text_result_of_quick}{$multiLang.text_result_of_quick}{else}No Translate (Key Lang: text_result_of_quick){/if}</h2>
-    </hr>
     {if $messageResultTopic|@COUNT gt 0}
     <table class="tbl_result">
       {foreach from=$messageResultTopic item=v name=getfirst}
