@@ -25,16 +25,14 @@ $tid = $get_last_response_id['tid'];
 //Send email
 $body = 'Dear '.$username.'
 
-There is patient has test questions completed.
+There is patient has test completed.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 To view the patient, please click the link below for detail:
 
 '.$site_url.$psychologist_file.'?task=result_test_patient&tid='.$tid.'&pat_id='.$patient_login_id.'&id='.$tpid.'
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Thank you for test.
+Thanks you for test.
 
 Best Regard,
 '.$mail_signature;
