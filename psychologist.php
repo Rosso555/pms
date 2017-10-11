@@ -141,7 +141,7 @@ if('patient' === $task)
     }
   }
 
-  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $kwd = !empty($_GET['kwd']) ? $common->clean_string($_GET['kwd']) : '';
   $gender = !empty($_GET['gender']) ? $_GET['gender'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
   $result = listPatient($kwd, $_SESSION['is_psycho_login_id'], $gender, $status);
@@ -235,9 +235,11 @@ if('test_patient' === $task)
 if('test_question_psychologist' === $task)
 {
   //Check & Clean String
+  $psy_id = $common->clean_string($_GET['psy_id']);
+
   $tpsy_id = $common->clean_string($_GET['id']);
   $tid  = $common->clean_string($_GET['tid']);
-  $resultTestPsychologist = $common->find('test_psychologist', $condition = ['id' => $tpsy_id, 'test_id' => $tid, 'psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'one');
+  $resultTestPsychologist = $common->find('test_psychologist', $condition = ['id' => $tpsy_id, 'test_id' => $tid, 'psychologist_id' => $psy_id], $type = 'one');
 
   if(empty($resultTestPsychologist))
   {
@@ -374,7 +376,7 @@ if('test_question_psychologist' === $task)
         {
           exec($path_exec.'/submitmail_by_test.php '.$responseid.' '.$tid.' > /dev/null &');
         }
-        header('Location:'.$psychologist_file.'?task=result_test_psychologist&tid='.$tid.'&id='.$tpsy_id);
+        header('Location:'.$psychologist_file.'?task=result_test_psychologist&tid='.$tid.'&psy_id='.$psy_id.'&id='.$tpsy_id);
         exit;
       }
       //Condition test no group
@@ -423,7 +425,7 @@ if('test_question_psychologist' === $task)
         }
         //Clear sesson
         unset($_SESSION['tgroupid']);
-        header('Location:'.$psychologist_file.'?task=result_test_psychologist&tid='.$tid.'&id='.$tpsy_id);
+        header('Location:'.$psychologist_file.'?task=result_test_psychologist&tid='.$tid.'&psy_id='.$psy_id.'&id='.$tpsy_id);
         exit;
       }//End Condition test no group
 
@@ -613,7 +615,7 @@ if('back_step' === $task && !empty($_GET['tid']))
   $tpsy_id = $common->clean_string($_GET['id']);
   $tgid = $common->clean_string($_GET['tgid']);
   $tid  = $common->clean_string($_GET['tid']);
-  //Get Test Patient
+  //Get Test Psychologist
   $resultTestPsychologist = $common->find('test_psychologist', $condition = ['id' => $tpsy_id, 'test_id' => $tid, 'psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'one');
 
   if(empty($resultTestPsychologist)){
@@ -660,9 +662,9 @@ if('test_psychologist' === $task)
 if('result_test_psychologist' === $task)
 {
     //Check & Clean String
-    $tpsy_id = $common->clean_string($_GET['id']);
-    $tid  = $common->clean_string($_GET['tid']);
-    $psy_id = $common->clean_string($_GET['psy_id']);
+    $tpsy_id  = $common->clean_string($_GET['id']);
+    $tid      = $common->clean_string($_GET['tid']);
+    $psy_id   = $common->clean_string($_GET['psy_id']);
     $sumTotal = 0; $sumAssignWeight = 0; $sumDefault = 0; $diagram_width = 820;
     $space_height = 50; $margin_left = 450; $space_row_col = 50;
     $moveTo_left  = $margin_left + 90;
@@ -675,18 +677,19 @@ if('result_test_psychologist' === $task)
     }
 
     //Get Result Answer Topic
-    $getResultTopic = getResultAnswerTopicPsy($tpsy_id, $tid, '', '');
+    $getResultTopic = getResultAnswerTopic('', $tpsy_id, $tid, '', '');
+    // var_dump($getResultTopic);
     //Get List Topic in diagram second
     $resultTopicDiagramSecond = getListTopicDiagramSecond($getResultTopic, 10, 240, $lang);
     //Get List Topic Analysis
     $resultTopicAnalysis= listTopicAnalysisDiagram($margin_left + 25, 203, $space_row_col, $tid);
     //Get List Topic in diagram first
-    $resultTopicDiagram = getListTopicDiagramPsy($tpsy_id, $tid,10, 140);
+    $resultTopicDiagram = getListTopicDiagram('', $tpsy_id, $tid,10, 140);
     //Calculate width and height on canvas2
     $resultWidthHeightSecond = calWidthHeightDiagramSecond(COUNT($resultTopicDiagramSecond), COUNT($resultTopicAnalysis), $space_height + 160, $margin_left, $space_result_topic = 150);
     //Drawing Line Result Diagram Second
     $resultDrawingLineResultDiagramSecond = drawingPointLineResultDiagramSecond($resultTopicDiagramSecond, $resultTopicAnalysis, $margin_left + 25, $margin_top = 235, $resultWidthHeightSecond['width'] - 145);
-
+    // var_dump(listXlineDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height + 60));
     //Assign value to diagram first
     $smarty_appform->assign('listXlineDiagram', listXlineDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height + 60));//Horizontal Line
     $smarty_appform->assign('listXdiagramCenter', listXlineDiagramCenter(COUNT($resultTopicDiagram), $diagram_width - 70, $space_height + 85, $margin_left));//List Diagram Horizontal line center
@@ -694,12 +697,13 @@ if('result_test_psychologist' === $task)
     $smarty_appform->assign('listNumberMinMax', listNumberMinMax($margin_left, $margin_top = 90));//List Text Number Min & Max
     $smarty_appform->assign('listTextMinMax', listTextMinMax($margin_left, $margin_top = 75));//List Text Min & Max
     $smarty_appform->assign('listBackgroudColor', listBackgroundColorDiagram($margin_left, 110, 50));//List backgroud diagram
-    $smarty_appform->assign('drawingPointLine', drawingPointLineResult($resultTopicDiagram, $margin_left - 100, $margin_top = 135, $_GET['id']));//Drawing point line
+    $smarty_appform->assign('drawingPointLine', drawingPointLineResult($resultTopicDiagram, $margin_left - 100, $margin_top = 135, $tid));//Drawing point line
     $smarty_appform->assign('listYLineDiagram', listYLineDiagram($margin_left, 50 + 50));//Vertical Line
     $smarty_appform->assign('listYLineDiagramCenter', listYLineDiagramCenter($margin_left, 50 + 50));//Vertical Line center
     $smarty_appform->assign('listSmallYLineDiagram', listSmall_YlineDiagram($margin_left, 90));//Vertical small Line
     $smarty_appform->assign('listTopicDiagram', $resultTopicDiagram);
     //end
+
     //Assign value to diagram second
     $smarty_appform->assign('reponseAnswerByTestPsyt', getResponseAnswerByTestPsychologist($tid, $tpsy_id));
     $smarty_appform->assign('getWidthHeightSecond', $resultWidthHeightSecond);
@@ -714,7 +718,7 @@ if('result_test_psychologist' === $task)
     //end
 
     // var_dump(getMessageResultTopic($tpsy_id, $tid, $lang));
-    $smarty_appform->assign('messageResultTopic', getMessageResultTopicPsy($tpsy_id, $tid, $lang));
+    $smarty_appform->assign('messageResultTopic', getMessageResultTopic('', $tpsy_id, $tid, $lang));
     $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = ['id' => $_SESSION['is_psycho_login_id']], $type = 'one'));
     $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
     $smarty_appform->display('psychologist/result_test_psychologist.tpl');
@@ -739,13 +743,14 @@ if('result_test_patient' === $task)
   }
 
   //Get Result Answer Topic
-  $getResultTopic = getResultAnswerTopic($tpid, $tid, '', '');
+  $getResultTopic = getResultAnswerTopic($tpid, '', $tid, '', '');
   //Get List Topic in diagram second
   $resultTopicDiagramSecond = getListTopicDiagramSecond($getResultTopic, 10, 240, $lang);
   //Get List Topic Analysis
   $resultTopicAnalysis= listTopicAnalysisDiagram($margin_left + 25, 203, $space_row_col, $tid);
   //Get List Topic in diagram first
-  $resultTopicDiagram = getListTopicDiagram($tpid, $tid,10, 140);
+  $resultTopicDiagram = getListTopicDiagram($tpid, '', $tid,10, 140);
+
   //Calculate width and height on canvas2
   $resultWidthHeightSecond = calWidthHeightDiagramSecond(COUNT($resultTopicDiagramSecond), COUNT($resultTopicAnalysis), $space_height + 160, $margin_left, $space_result_topic = 150);
   //Drawing Line Result Diagram Second
@@ -758,7 +763,7 @@ if('result_test_patient' === $task)
   $smarty_appform->assign('listNumberMinMax', listNumberMinMax($margin_left, $margin_top = 90));//List Text Number Min & Max
   $smarty_appform->assign('listTextMinMax', listTextMinMax($margin_left, $margin_top = 75));//List Text Min & Max
   $smarty_appform->assign('listBackgroudColor', listBackgroundColorDiagram($margin_left, 110, 50));//List backgroud diagram
-  $smarty_appform->assign('drawingPointLine', drawingPointLineResult($resultTopicDiagram, $margin_left - 100, $margin_top = 135, $_GET['id']));//Drawing point line
+  $smarty_appform->assign('drawingPointLine', drawingPointLineResult($resultTopicDiagram, $margin_left - 100, $margin_top = 135, $tid));//Drawing point line
   $smarty_appform->assign('listYLineDiagram', listYLineDiagram($margin_left, 50 + 50));//Vertical Line
   $smarty_appform->assign('listYLineDiagramCenter', listYLineDiagramCenter($margin_left, 50 + 50));//Vertical Line center
   $smarty_appform->assign('listSmallYLineDiagram', listSmall_YlineDiagram($margin_left, 90));//Vertical small Line
@@ -779,7 +784,7 @@ if('result_test_patient' === $task)
 
   // var_dump(getMessageResultTopic($tpid, $tid, $lang));
 
-  $smarty_appform->assign('messageResultTopic', getMessageResultTopic($tpid, $tid, $lang));
+  $smarty_appform->assign('messageResultTopic', getMessageResultTopic($tpid, '', $tid, $lang));
   $smarty_appform->assign('reponseAnswerByTestPat', getResponseAnswerByTestPatient($tid, $tpid));
   $smarty_appform->assign('patient', $common->find('patient', $condition = ['id' => $pat_id,'psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'one'));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));

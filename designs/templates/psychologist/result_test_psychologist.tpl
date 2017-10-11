@@ -140,7 +140,7 @@
   {/foreach}
 
   // fetch line Horizontal
-  aawww{foreach from=$listXlineDiagram item=v}
+  {foreach from=$listXlineDiagram item=v}
   ctx.beginPath();
   ctx.lineWidth = 1;
   ctx.moveTo(0,{$v.xmargin_top});
@@ -151,14 +151,14 @@
   {/foreach}
 
   //fetch text number min & max
-  wwwww{foreach from=$listNumberMinMax item=v}
+  {foreach from=$listNumberMinMax item=v}
   ctx.font = "14px Arial";
   ctx.textAlign = "center";
   ctx.fillText("{$v.text_number}", {$v.margin_left}, {$v.margin_top});
   {/foreach}
 
   //fetch text above min & max number
-  qqqqq{foreach from=$listTextMinMax item=d}
+  {foreach from=$listTextMinMax item=d}
   ctx.font = "13px Arial";
   ctx.textAlign = "center";
   ctx.fillText("{$d.text_header}", {$d.margin_left}, {$d.margin_top});

@@ -32,7 +32,7 @@
               </select>
             </div>
             <div class="form-group col-md-4" style="margin-bottom:5px;">
-              <input type="text" class="form-control" placeholder="Enter name" name="kwd">
+              <input type="text" class="form-control" placeholder="Enter name" name="kwd" value="{$smarty.get.kwd}">
               <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
             </div>
           </form>

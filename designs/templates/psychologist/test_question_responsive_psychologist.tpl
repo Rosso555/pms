@@ -22,7 +22,7 @@
 </div>
 {if $error}<div class="alert_required">* {if $multiLang.text_error_check_all_required}{$multiLang.text_error_check_all_required}{else}No Translate (Key Lang: text_error_check_all_required){/if}</div>{/if}
 <div class="inbox-test sansserif" style="margin-bottom: 20px;">
-  <form class="form" action="{$index_file}?task=test_question_psychologist&amp;tid={$smarty.get.tid}&amp;id={$smarty.get.id}" method="post">
+  <form class="form" action="{$index_file}?task=test_question_psychologist&amp;tid={$smarty.get.tid}&amp;psy_id={$smarty.get.psy_id}&amp;id={$smarty.get.id}" method="post">
     <input type="hidden" id="test_group_id" name="test_group_id" value="{$test_group_id|escape}">
   {if $result|@COUNT gt 0}
     {foreach item = v from=$result key=id name=first_foo}

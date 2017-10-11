@@ -1884,7 +1884,7 @@ function getResponseAnswerByTestPsychologist($test_id, $tpsy_id)
 }
 
 
-function getMessageResultTopic($tpid, $test_id, $lang)
+function getMessageResultTopic($tpid, $tpsy_id, $test_id, $lang)
 {
   global $debug, $connected;
   $result = true;
@@ -1897,6 +1897,13 @@ function getMessageResultTopic($tpid, $test_id, $lang)
     $query4->execute();
     $rowsTopic = $query4->fetch();
 
+    if(!empty($tpid)) {
+      $condition .= ' AND rs.test_patient_id = :tpid ';
+    }
+    if(!empty($tpsy_id)) {
+      $condition .= ' AND rs.test_psychologist_id = :tpsy_id ';
+    }
+
     $sql= ' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
               ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
             FROM `response` rs
@@ -1906,10 +1913,12 @@ function getMessageResultTopic($tpid, $test_id, $lang)
               INNER JOIN topic t ON t.id = atp.topic_id
               LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
               LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
-            WHERE rs.test_patient_id = :tpid AND t.lang = :lang GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
+            WHERE t.lang = :lang '.$condition.' GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
 
     $query = $connected->prepare($sql);
-    $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    if(!empty($tpid)) $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    if(!empty($tpsy_id)) $query->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
+
     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
     $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
     $query->execute();
@@ -1940,12 +1949,12 @@ function getMessageResultTopic($tpid, $test_id, $lang)
       $rTopicHide = $query5->fetchAll();
 
       foreach ($rTopicHide as $key => $va) {
-        $result = getResultAnswerTopic($tpid, $test_id, '', $va['topic_id']);
+        $result = getResultAnswerTopic($tpid, $tpsy_id, $test_id, '', $va['topic_id']);
         //Get check hide/show
         $testQueHideShow = getTestQuesHideShow($test_id, $va['topic_id'], $result['amount']);
 
         if(!empty($testQueHideShow)) {
-          $resultAnsTopic_if = getResultAnswerTopic($tpid, $test_id, '', $testQueHideShow['if_topic_id']);
+          $resultAnsTopic_if = getResultAnswerTopic($tpid, $tpsy_id, $test_id, '', $testQueHideShow['if_topic_id']);
 
           $rGetResultTopicByAmount = getResultTopicByAmount($result['test_id'], $testQueHideShow['if_topic_id'], $resultAnsTopic_if['amount']);
           $newResultRe[] = array('result_id'=> $rGetResultTopicByAmount['id'], 'topic_id' => $rGetResultTopicByAmount['topic_id'], 'topic_title' => $resultAnsTopic_if['topic_title'], 'amount' => $resultAnsTopic_if['amount'], 'message' => $rGetResultTopicByAmount['message']);
@@ -1981,104 +1990,6 @@ function getMessageResultTopic($tpid, $test_id, $lang)
   }
   return $result;
 }
-function getMessageResultTopicPsy($tpsy_id, $test_id, $lang)
-{
-  global $debug, $connected;
-  $result = true;
-  try{
-
-    //Query test_question_topic_hide by test_id
-    $sql_data2 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC LIMIT 0, 1';
-    $query4 = $connected->prepare($sql_data2);
-    $query4->bindValue(':test_id', $test_id, PDO::PARAM_INT);
-    $query4->execute();
-    $rowsTopic = $query4->fetch();
-
-    $sql= ' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
-              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
-            FROM `response` rs
-              INNER JOIN response_answer rsa ON rsa.response_id = rs.id
-              INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
-              INNER JOIN answer_topic atp ON atp.answer_id = ans.id
-              INNER JOIN topic t ON t.id = atp.topic_id
-              LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
-              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
-            WHERE rs.test_psychologist_id = :tpsy_id AND t.lang = :lang GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
-
-    $query = $connected->prepare($sql);
-    $query->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
-    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
-    $query->execute();
-    $result = $query->fetchAll();
-    if(!empty($result) && COUNT($result) > 0) {
-      foreach ($result as $key => $value) {
-        $result1 = getResultTopicByAmount($value['test_id'], $value['topic_id'], $value['amount']);
-        if(!empty($result1['message'])) {
-          $newResult[] = array('result_id'=> $result1['id'], 'topic_id' => $result1['topic_id'], 'topic_title' => $value['topic_title'], 'amount' => $value['amount'], 'message' => $result1['message']);
-        }
-      }
-    }
-
-    if(!empty($newResult) && !empty($rowsTopic)){
-      foreach ($newResult as $key => $va) {
-        // Check if has test topic hide
-        if($rowsTopic['topic_id'] == $va['topic_id'])
-        {
-          $newResultRe[] = array('result_id'=> $va['result_id'], 'topic_id' => $va['topic_id'], 'topic_title' => $va['topic_title'], 'amount' => $va['amount'], 'message' => $va['message']);
-        }
-      }
-
-      //Query test_question_topic_hide
-      $sql5 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC ';
-      $query5 = $connected->prepare($sql5);
-      $query5->bindValue(':test_id', $test_id, PDO::PARAM_INT);
-      $query5->execute();
-      $rTopicHide = $query5->fetchAll();
-
-      foreach ($rTopicHide as $key => $va) {
-        $result = getResultAnswerTopic($tpsy_id, $test_id, '', $va['topic_id']);
-        //Get check hide/show
-        $testQueHideShow = getTestQuesHideShow($test_id, $va['topic_id'], $result['amount']);
-
-        if(!empty($testQueHideShow)) {
-          $resultAnsTopic_if = getResultAnswerTopic($tpsy_id, $test_id, '', $testQueHideShow['if_topic_id']);
-
-          $rGetResultTopicByAmount = getResultTopicByAmount($result['test_id'], $testQueHideShow['if_topic_id'], $resultAnsTopic_if['amount']);
-          $newResultRe[] = array('result_id'=> $rGetResultTopicByAmount['id'], 'topic_id' => $rGetResultTopicByAmount['topic_id'], 'topic_title' => $resultAnsTopic_if['topic_title'], 'amount' => $resultAnsTopic_if['amount'], 'message' => $rGetResultTopicByAmount['message']);
-        }
-      }
-
-    }else {
-      $newResultRe = $newResult;
-    }
-
-      if(!empty($newResultRe)){
-        foreach ($newResultRe as $key => $va) {
-          //Get Result condition
-          $sql3 ='SELECT rt.message, t.id AS test_id, tp.name AS topic_name, tp.id AS topic_id, rt.view_order
-                  FROM `result_condition` rc
-                    INNER JOIN result rt ON rt.id = rc.show_result_id
-                    INNER JOIN test t ON t.id = rt.test_id
-                    INNER JOIN topic tp ON tp.id = rt.topic_id
-                  WHERE rc.result_id = :result_id GROUP BY rc.id ORDER BY rt.view_order ASC ';
-          $stmt3 = $connected->prepare($sql3);
-          $stmt3->bindValue(':result_id', (int)$va['result_id'], PDO::PARAM_INT);
-          $stmt3->execute();
-          $row3 = $stmt3->fetchAll();
-          $newResultTest[] = array('topic_title' => $va['topic_title'], 'amount' => $va['amount'], 'message' => $va['message'], 're_condition' => $row3);
-        }
-      }
-
-    return $newResultTest;
-
-  } catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: getMessageResultTopic'.$e->getMessage();
-  }
-  return $result;
-}
-
 /**
  * getResultTopicByAmount
  * @param  int $test_id
@@ -2109,65 +2020,34 @@ function getResultTopicByAmount($test_id, $topic_id, $amount)
 /**
  * getResultAnswerTopic
  * @param  int $tpid is test_patient_id
- * @param  int $test_id is test_id
- * @param  int $if_topic_id is if_topic_id
- * @return array or boolean
- */
-function getResultAnswerTopic($tpid, $test_id, $if_topic_id, $topic_id)
-{
-  global $debug, $connected, $limit, $offset, $total_data;
-  $result = true;
-  try{
-
-    if(!empty($if_topic_id)) $where .= ' AND atp.topic_id = :if_topic_id ';
-    if(!empty($topic_id)) $where .= ' AND atp.topic_id = :topic_id ';
-
-    $sql =' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
-              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
-            FROM `response` rs
-              INNER JOIN response_answer rsa ON rsa.response_id = rs.id
-              INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
-              INNER JOIN answer_topic atp ON atp.answer_id = ans.id
-              INNER JOIN topic t ON t.id = atp.topic_id
-              LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
-              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
-            WHERE rs.test_patient_id = :tpid '.$where.' GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
-
-    $stmt = $connected->prepare($sql);
-    $stmt->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
-    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-    if(!empty($topic_id)) $stmt->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
-    if(!empty($if_topic_id)) $stmt->bindValue(':if_topic_id', (int)$if_topic_id, PDO::PARAM_INT);
-    $stmt->execute();
-    if(!empty($if_topic_id) || !empty($topic_id)){
-      $rows = $stmt->fetch();
-    }else {
-      $rows = $stmt->fetchAll();
-    }
-
-    return $rows;
-  } catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: getResultAnswerTopic'.$e->getMessage();
-  }
-
-  return $result;
-}
-/**
- * getResultAnswerTopic
  * @param  int $tpsy_id is test_psychologist_id
  * @param  int $test_id is test_id
  * @param  int $if_topic_id is if_topic_id
  * @return array or boolean
  */
-function getResultAnswerTopicPsy($tpsy_id, $test_id, $if_topic_id, $topic_id)
+function getResultAnswerTopic($tpid, $tpsy_id, $test_id, $if_topic_id, $topic_id)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
 
-    if(!empty($if_topic_id)) $where .= ' AND atp.topic_id = :if_topic_id ';
-    if(!empty($topic_id)) $where .= ' AND atp.topic_id = :topic_id ';
+    if(!empty($if_topic_id)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' atp.topic_id = :if_topic_id ';
+    }
+    if(!empty($topic_id)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' atp.topic_id = :topic_id ';
+    }
+    if(!empty($tpid)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' rs.test_patient_id = :tpid ';
+    }
+    if(!empty($tpsy_id)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' rs.test_psychologist_id = :tpsy_id ';
+    }
+    if(!empty($condition)) $where .= ' WHERE '.$condition;
 
     $sql =' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, rst.view_order, t.name AS topic_title, tqth.if_topic_id,
               ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
@@ -2177,11 +2057,11 @@ function getResultAnswerTopicPsy($tpsy_id, $test_id, $if_topic_id, $topic_id)
               INNER JOIN answer_topic atp ON atp.answer_id = ans.id
               INNER JOIN topic t ON t.id = atp.topic_id
               LEFT JOIN (SELECT r.topic_id, r.view_order FROM result r WHERE r.test_id = :test_id GROUP BY r.topic_id) rst ON rst.topic_id = atp.topic_id
-              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id
-            WHERE rs.test_psychologist_id = :tpsy_id '.$where.' GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
+              LEFT JOIN test_question_topic_hide tqth ON tqth.test_id = rs.test_id AND tqth.topic_id = t.id '.$where.' GROUP BY atp.topic_id ORDER BY rst.view_order ASC ';
 
     $stmt = $connected->prepare($sql);
-    $stmt->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
+    if(!empty($tpid)) $stmt->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
+    if(!empty($tpsy_id)) $stmt->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
     $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
     if(!empty($topic_id)) $stmt->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
     if(!empty($if_topic_id)) $stmt->bindValue(':if_topic_id', (int)$if_topic_id, PDO::PARAM_INT);
@@ -2200,7 +2080,6 @@ function getResultAnswerTopicPsy($tpsy_id, $test_id, $if_topic_id, $topic_id)
 
   return $result;
 }
-
 /**
  * getTestQuesHideShow
  * @param  int $test_id
@@ -2321,13 +2200,13 @@ function listTopicAnalysisDiagram($margin_left, $margin_top, $space_row_col, $te
  * @param  string $lang is language
  * @return array or boolean
  */
-function getListTopicDiagram($tpid, $test_id, $xleft, $xtop)
+function getListTopicDiagram($tpid, $tpsy_id, $test_id, $xleft, $xtop)
 {
   global $debug, $connected;
   $result = true;
   try{
     $sum = $xtop;
-    $resultTopic = getResultAnswerTopic($tpid, $test_id, '', '');
+    $resultTopic = getResultAnswerTopic($tpid, $tpsy_id, $test_id, '', '');
 
     //Query test_question_topic_hide by test_id
     $sql_data2 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC LIMIT 0, 1';
@@ -2360,13 +2239,13 @@ function getListTopicDiagram($tpid, $test_id, $xleft, $xtop)
       $rTopicHide = $query5->fetchAll();
 
       foreach ($rTopicHide as $key => $va) {
-        $result = getResultAnswerTopic($tpid, $test_id, '', $va['topic_id']);
+        $result = getResultAnswerTopic($tpid, $tpsy_id, $test_id, '', $va['topic_id']);
         //Get check hide/show
         $testQueHideShow = getTestQuesHideShow($test_id, $va['topic_id'], $result['amount']);
         // check $testQueHideShow, if it has
         if(!empty($testQueHideShow)){
           $topic_id = $va['if_topic_id'];
-          $resultAnsTopic_if = getResultAnswerTopic($tpid, $test_id, '', $testQueHideShow['if_topic_id']);
+          $resultAnsTopic_if = getResultAnswerTopic($tpid, $tpsy_id, $test_id, '', $testQueHideShow['if_topic_id']);
           //Get test topic answer calculate average score
           $averageScore = getTestTopicAnswerValueCalculate($resultAnsTopic_if['test_id'], $resultAnsTopic_if['topic_id'], $resultAnsTopic_if['amount']);
           if(!empty($averageScore)){
@@ -2385,78 +2264,6 @@ function getListTopicDiagram($tpid, $test_id, $xleft, $xtop)
 
   return $result;
 }
-/**
- * getListTopicDiagram for list data in diagram
- * @param  int $xleft is number of margin left
- * @param  int $xtop is number of margin top
- * @param  string $lang is language
- * @return array or boolean
- */
-function getListTopicDiagramPsy($tpsy, $test_id, $xleft, $xtop)
-{
-  global $debug, $connected;
-  $result = true;
-  try{
-    $sum = $xtop;
-    $resultTopic = getResultAnswerTopic($tpsy, $test_id, '', '');
-
-    //Query test_question_topic_hide by test_id
-    $sql_data2 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC LIMIT 0, 1';
-    $query2 = $connected->prepare($sql_data2);
-    $query2->bindValue(':test_id', $test_id, PDO::PARAM_INT);
-    $query2->execute();
-    $rowsTopic = $query2->fetch();
-
-    if(!empty($resultTopic) && COUNT($resultTopic) > 0)
-    {
-      foreach ($resultTopic as $key => $value) {
-        //Get test topic answer calculate average score
-        $averageScore = getTestTopicAnswerValueCalculate($value['test_id'], $value['topic_id'], $value['amount']);
-        // Check if has test topic hide
-        if(!empty($averageScore) && !empty($result) && $rowsTopic['topic_id'] == $value['topic_id'])
-        {
-          $newResult[] = array('test_id' => $value['test_id'], 'topic_id' => $value['topic_id'], 'topic_title' => $value['topic_title'], 'amount' => $averageScore, 'margin_left' => $xleft, 'margin_top' => $sum);
-          $sum += 50;
-        }
-        if(!empty($averageScore) && empty($rowsTopic['topic_id'])) {
-          $newResult[] = array('test_id' => $value['test_id'], 'topic_id' => $value['topic_id'], 'topic_title' => $value['topic_title'], 'amount' => $averageScore, 'margin_left' => $xleft, 'margin_top' => $sum);
-          $sum += 50;
-        }
-      }
-      //Query test_question_topic_hide
-      $sql5 = ' SELECT * FROM `test_question_topic_hide` WHERE test_id = :test_id ORDER BY id ASC ';
-      $query5 = $connected->prepare($sql5);
-      $query5->bindValue(':test_id', $test_id, PDO::PARAM_INT);
-      $query5->execute();
-      $rTopicHide = $query5->fetchAll();
-
-      foreach ($rTopicHide as $key => $va) {
-        $result = getResultAnswerTopic($tpsy, $test_id, '', $va['topic_id']);
-        //Get check hide/show
-        $testQueHideShow = getTestQuesHideShow($test_id, $va['topic_id'], $result['amount']);
-        // check $testQueHideShow, if it has
-        if(!empty($testQueHideShow)){
-          $topic_id = $va['if_topic_id'];
-          $resultAnsTopic_if = getResultAnswerTopic($tpsy, $test_id, '', $testQueHideShow['if_topic_id']);
-          //Get test topic answer calculate average score
-          $averageScore = getTestTopicAnswerValueCalculate($resultAnsTopic_if['test_id'], $resultAnsTopic_if['topic_id'], $resultAnsTopic_if['amount']);
-          if(!empty($averageScore)){
-            $newResult[] = array('test_id' => $resultAnsTopic_if['test_id'], 'topic_id' => $resultAnsTopic_if['topic_id'], 'topic_title' => $resultAnsTopic_if['topic_title'], 'amount' => $averageScore, 'margin_left' => $xleft, 'margin_top' => $sum);
-            $sum += 50;
-          }
-        }// end check $testQueHideShow, if it has
-      }//end fetch $rTopicHide
-    }
-
-    return $newResult;
-  } catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: getListTopicDiagram'.$e->getMessage();
-  }
-
-  return $result;
-}
-
 /**
  * calWidthHeightDiagramSecond
  * @param  int $countTopic is count topic data
