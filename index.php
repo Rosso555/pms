@@ -33,6 +33,8 @@ if('user_register' === $task)
   if($_POST){
     //get value from form
     $username    = $common->clean_string($_POST['username']);
+    $gender      = $common->clean_string($_POST['gender']);
+    $age         = $common->clean_string($_POST['age']);
     $password    = $common->clean_string($_POST['password']);
     $re_password = $common->clean_string($_POST['re_password']);
     $email       = $common->clean_string($_POST['email']);
@@ -44,6 +46,9 @@ if('user_register' === $task)
     $_SESSION['user_register'] = $_POST;
     //form validation
     if(empty($username))  $error['username']  = 1;
+    if(empty($gender) || !is_numeric($gender) || $gender > 3) $error['gender']  = 1;
+    if(empty($age)) $error['empty_age']  = 1;
+    if(!is_numeric($age) == TRUE) $error['is_string_age']  = 1;
     if(empty($password))  $error['password']  = 1;
     if(empty($re_password))  $error['re_password']  = 1;
     if(empty($email))     $error['email']  = 1;
@@ -76,6 +81,8 @@ if('user_register' === $task)
                                                         'email'   => $email,
                                                         'job'     => $job,
                                                         'address' => $address,
+                                                        'gender'  => $gender,
+                                                        'age'     => $age,
                                                         'secretkey' => $secretkey]);
     //Send email
     $body = 'Dear '.$username.'

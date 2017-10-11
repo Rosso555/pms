@@ -34,6 +34,29 @@
 
               <input type="text" class="form-control" id="user" name="username" value="{$smarty.session.user_register.username}">
             </div>
+            <div class="row">
+                    <div class="col-md-6">
+                            <div class="form-group" id="error_gender">
+                                    <label for="gender"><span style="color:red;">*</span> Gender:</label>
+                                    <span style="color:red" id="txt_error_gender">{if $error.gender}Please select gender !!!{/if}</span>
+                                    <select class="form-control" name="gender" id="gender">
+                                            <option value="1">Male</option>
+                                            <option value="2">Female</option>
+                                            <option value="3">Other</option>
+                                    </select>
+                            </div>
+
+                    </div>
+                    <div class="col-md-6">
+                            <div class="form-group" id="error_age">
+                                    <label for="gender"><span style="color:red;">*</span> Age:</label>
+                                    <span style="color:red" id="txt_error_age">{if $error.empty_age}Please enter age !!!{elseif $error.is_string_age}Please enter number !!!{/if}</span>
+                                    <input type="text" name="age" class="form-control" value="{$smarty.session.user_register.age}" id="age">
+                            </div>
+
+                    </div>
+
+            </div>
             <div class="form-group" id="error_pwd">
               <label for="pwd"><span style="color:red">*</span> Password:</label>
               <span style="color:red" id="txt_error_pwd">{if $error.password}Please enter password !!!{/if} {if $error.not_match_password}Your password do not match. Please try again.{/if} {if $error.less_password}Your password less than 8 or not with number and letter.{/if}</span>
@@ -142,6 +165,8 @@ function checkEmail(){
 }
 $("form").submit(function( event ) {
   var user    = $("#user").val();
+  var gender  = $("#gender").val();
+  var age     = $("#age").val();
   var pwd     = $("#pwd").val();
   var re_pwd  = $("#re_pwd").val();
   var email   = $("#email").val();
@@ -155,6 +180,22 @@ $("form").submit(function( event ) {
   }else {
     $("#error_user").attr("class", "form-group has-success");
     $("#txt_error_user").text("");
+  }
+
+  if(gender == ''){
+    $("#error_gender").attr("class", "form-group has-error");
+    $("#txt_error_gender").text("Please select gender !!!");
+  }else {
+    $("#error_gender").attr("class", "form-group has-success");
+    $("#txt_error_gender").text("");
+  }
+
+  if(age == ''){
+    $("#error_age").attr("class", "form-group has-error");
+    $("#txt_error_age").text("Please enter age !!!");
+  }else {
+    $("#error_age").attr("class", "form-group has-success");
+    $("#txt_error_age").text("");
   }
 
   if(pwd == ''){
