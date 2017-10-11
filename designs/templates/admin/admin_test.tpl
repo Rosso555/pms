@@ -10,7 +10,7 @@
 {if $smarty.cookies.checkTest}
 <div class="alert alert-danger">
   <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-  Sorry! you cannot delete "<strong>{$smarty.cookies.checkTest}</strong>" because it has been used.
+  Sorry! you cannot delete "<strong>{$smarty.cookies.checkTest}</strong>", because it has been used{if $smarty.cookies.checkResponse} in survey{/if}. You want to permanently delete. <a href="{$admin_file}?task=test&amp;action=delete_permanently&amp;catid={$smarty.get.catid}&amp;tid={$smarty.get.tid}&amp;kwd={$smarty.get.kwd}&amp;id={$smarty.cookies.test_id}" class="btn btn-danger btn-xs">Yes, Delete it.</a>
 </div>
 {/if}
 <div class="panel panel-primary">

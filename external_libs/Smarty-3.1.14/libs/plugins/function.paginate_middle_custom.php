@@ -26,22 +26,24 @@
  * @version 1.6-dev
  */
 
-function smarty_function_paginate_middle($params, &$smarty) {
+function smarty_function_paginate_middle_custom($params, &$smarty) {
 
     $_id = 'default';
     $_prefix = '[';
     $_suffix = ']';
     $_link_prefix = '';
     $_link_suffix = '';
+    $_active_link_prefix = '';
+    $_active_link_suffix = '';
     $_page_limit = null;
     $_attrs = array();
 
     if (!class_exists('SmartyPaginate')) {
-        $smarty->trigger_error("paginate_middle: missing SmartyPaginate class");
+        $smarty->trigger_error("paginate_middle_custom: missing SmartyPaginate class");
         return;
     }
     if (!isset($_SESSION['SmartyPaginate'])) {
-        $smarty->trigger_error("paginate_middle: SmartyPaginate is not initialized, use connect() first");
+        $smarty->trigger_error("paginate_middle_custom: SmartyPaginate is not initialized, use connect() first");
         return;
     }
 
@@ -49,7 +51,7 @@ function smarty_function_paginate_middle($params, &$smarty) {
         switch($_key) {
             case 'id':
                 if (!SmartyPaginate::isConnected($_val)) {
-                    $smarty->trigger_error("paginate_middle: unknown id '$_val'");
+                    $smarty->trigger_error("paginate_middle_custom: unknown id '$_val'");
                     return;
                 }
                 $_id = $_val;
@@ -66,6 +68,12 @@ function smarty_function_paginate_middle($params, &$smarty) {
             case 'link_suffix':
                 $_link_suffix = $_val;
                 break;
+            case 'active_link_prefix':
+                $_active_link_prefix = $_val;
+                break;
+            case 'active_link_suffix':
+                $_active_link_suffix = $_val;
+                break;
             case 'page_limit';
                 $_page_limit = $_val;
                 break;
@@ -78,7 +86,7 @@ function smarty_function_paginate_middle($params, &$smarty) {
     }
 
     if (!isset($_SESSION['SmartyPaginate'][$_id]['item_total'])) {
-        $smarty->trigger_error("paginate_middle: total was not set");
+        $smarty->trigger_error("paginate_middle_custom: total was not set");
         return;
     }
 
@@ -123,9 +131,13 @@ function smarty_function_paginate_middle($params, &$smarty) {
             $_this_url = $_url;
             $_this_url .= (strpos($_url, '?') === false) ? '?' : '&';
             $_this_url .= SmartyPaginate::getUrlVar($_id) . '=' . $_item;
-            $_ret .= $_link_prefix . '<a href="' . str_replace('&', '&amp;', $_this_url) . '"' . $_attrs . '>' . $_text . '</a>&nbsp;' . $_link_suffix;
+            $_ret .= $_link_prefix . '<a href="' . str_replace('&', '&amp;', $_this_url) . '"' . $_attrs . '>' . $_text . '</a>' . $_link_suffix;
         } else {
-            $_ret .= $_link_prefix . $_text . $_link_suffix;
+            if(isset($_active_link_prefix) && isset($_active_link_suffix)) {
+              $_ret .= $_active_link_prefix . $_text . $_active_link_suffix;
+            } else {
+              $_ret .= $_link_prefix . $_text . $_link_suffix;
+            }
         }
         $_item += $_limit;
         $_page++;
@@ -133,7 +145,7 @@ function smarty_function_paginate_middle($params, &$smarty) {
         if(isset($_page_limit) && $_display_pages == $_page_limit)
             break;
     }
-    
+
     return $_ret;
 
 }

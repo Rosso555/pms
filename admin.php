@@ -1832,6 +1832,7 @@ if('test' === $task)
       $desc     = $common->clean_string($_POST['description']);
       $category = $common->clean_string($_POST['category']);
       $id       = $common->clean_string($_POST['id']);
+      $catid    = $common->clean_string($_GET['catid']);
       //add value to session to use in template
       $_SESSION['test'] = $_POST;
 
@@ -1847,7 +1848,7 @@ if('test' === $task)
         unset($_SESSION['test']);
         //Redirect
         if($_GET['catid']){
-          header('location: '.$admin_file.'?task=test&catid='.$_GET['catid']);
+          header('location: '.$admin_file.'?task=test&catid='.$catid);
         }else {
           header('location: '.$admin_file.'?task=test');
         }
@@ -1867,6 +1868,7 @@ if('test' === $task)
       $desc     = $common->clean_string($_POST['description']);
       $category = $common->clean_string($_POST['category']);
       $id       = $common->clean_string($_POST['id']);
+      $catid    = $common->clean_string($_GET['catid']);
       //add value to session to use in template
       $_SESSION['test'] = $_POST;
 
@@ -1881,29 +1883,32 @@ if('test' === $task)
         //unset session
         unset($_SESSION['test']);
         //Redirect
-        if($_GET['catid']){
-          header('location: '.$admin_file.'?task=test&catid='.$_GET['catid']);
+        if($catid){
+          header('location: '.$admin_file.'?task=test&catid='.$catid);
         }else {
           header('location: '.$admin_file.'?task=test');
         }
         exit;
       }
     }
-    $smarty_appform->assign('getTestByID', $common->find('test', $condition = ['id' => $_GET['id']], $type = 'one'));
-    $smarty_appform->assign('getTestTopicByID', $common->find('test_topic_analysis', $condition = ['test_id' => $_GET['id']], $type = 'all'));
+    $smarty_appform->assign('getTestByID', $common->find('test', $condition = ['id' => $id], $type = 'one'));
+    $smarty_appform->assign('getTestTopicByID', $common->find('test_topic_analysis', $condition = ['test_id' => $id], $type = 'all'));
   }//End action edit
 
   if('change_status' === $action && $_GET['id'])
   {
+    $tid    = $common->clean_string($_GET['id']);
+    $catid  = $common->clean_string($_GET['catid']);
+
     if(!empty($_GET['status'] == 1))
     {
-      $common->update('test', $field = ['status' => 2], $condition = ['id' => $_GET['id']]);
+      $common->update('test', $field = ['status' => 2], $condition = ['id' => $tid]);
     }elseif (!empty($_GET['status'] == 2)) {
-      $common->update('test', $field = ['status' => 1], $condition = ['id' => $_GET['id']]);
+      $common->update('test', $field = ['status' => 1], $condition = ['id' => $tid]);
     }
     //Redirect
     if($_GET['catid']){
-      header('location: '.$admin_file.'?task=test&catid='.$_GET['catid']);
+      header('location: '.$admin_file.'?task=test&catid='.$catid);
     }else {
       header('location: '.$admin_file.'?task=test');
     }
@@ -1913,25 +1918,123 @@ if('test' === $task)
   //action delete test
   if('delete' === $action && !empty($_GET['id']))
   {
-    $result = checkDeleteTest($_GET['id']);
-    if('0' === $result['total_count'])
+    $tid    = $common->clean_string($_GET['id']);
+    $catid  = $common->clean_string($_GET['catid']);
+    $kwd    = $common->clean_string($_GET['kwd']);
+    $next   = $common->clean_string($_GET['next']);
+
+    $result = checkDeleteTest($tid);
+
+    if(0 === $result['total_count'])
     {
-      $common->delete('test', $field = ['id' => $_GET['id'], 'lang' => $lang]);
-      $common->delete('test_topic_analysis', $field = ['test_id' => $_GET['id']]);
+      $common->delete('test', $field = ['id' => $tid, 'lang' => $lang]);
+      $common->delete('test_topic_analysis', $field = ['test_id' => $tid]);
     }else {
       setcookie('checkTest', $result['test_title'], time() + 10);
+      setcookie('checkResponse', $result['total_response'], time() + 10);
+      setcookie('test_id', $tid, time() + 10);
     }
     if($_GET['catid']){
-      header('location: '.$admin_file.'?task=test&catid='.$_GET['catid']);
+      header('location: '.$admin_file.'?task=test&catid='.$catid.'&tid='.$tid.'&kwd='.$kwd.'&next='.$next);
     }else {
       header('location: '.$admin_file.'?task=test');
     }
     exit;
   }
 
-  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
-  $catid = !empty($_GET['catid']) ? $_GET['catid'] : '';
-  $testid = !empty($_GET['tid']) ? $_GET['tid'] : '';
+  //action delete permanently test
+  if('delete_permanently' === $action && !empty($_GET['id']))
+  {
+    $tid    = $common->clean_string($_GET['id']);
+    $catid  = $common->clean_string($_GET['catid']);
+    $kwd    = $common->clean_string($_GET['kwd']);
+    $next   = $common->clean_string($_GET['next']);
+
+    //delete test group and test group question
+    $rTestGroup = $common->find('test_group', $condition = ['test_id' => $tid], $type = 'all');
+    if(!empty($rTestGroup)) {
+      foreach ($rTestGroup as $key => $value) {
+        $common->delete('test_group_question', $field = ['test_group_id' => $value['id']]);
+      }
+      $common->delete('test_group', $field = ['test_id' => $tid]);
+    }
+    //delete result and result condition
+    $rResult = $common->find('result', $condition = ['test_id' => $tid], $type = 'all');
+    if(!empty($rResult)) {
+      foreach ($rResult as $key => $value) {
+        $common->delete('result_condition', $field = ['result_id' => $value['id']]);
+      }
+      $common->delete('result', $field = ['test_id' => $tid]);
+    }
+
+    //delete response and response answer
+    $rResponse = $common->find('response', $condition = ['test_id' => $tid], $type = 'all');
+    if(!empty($rResponse)) {
+      foreach ($rResponse as $key => $value) {
+        $common->delete('response_answer', $field = ['response_id' => $value['id']]);
+      }
+      $common->delete('response', $field = ['test_id' => $tid]);
+    }
+
+    //delete apitransaction and mailerlite_group
+    $rApitransaction = $common->find('apitransaction', $condition = ['test_id' => $tid], $type = 'all');
+    if(!empty($rApitransaction)) {
+      foreach ($rApitransaction as $key => $value) {
+        $common->delete('mailerlite_group', $field = ['transaction_id' => $value['id']]);
+      }
+      $common->delete('apitransaction', $field = ['test_id' => $tid]);
+    }
+
+    //delete test_question, answer_id and answer_topic
+    $rTestQues = $common->find('test_question', $condition = ['test_id' => $tid], $type = 'all');
+    if(!empty($rTestQues)) {
+      foreach ($rTestQues as $key => $value) {
+        //Get answer by test question_id
+        $rAnswer = $common->find('answer', $condition = ['test_question_id' => $value['id']], $type = 'all');
+        if(!empty($rAnswer)){
+          foreach ($rAnswer as $k => $va) {
+            $common->delete('answer_topic', $field = ['answer_id' => $va['id']]);
+          }
+        }
+        $common->delete('answer', $field = ['test_question_id' => $value['id']]);
+      }//End fetch $rTestQues
+    }
+
+    //delete test_tmp and test_tmp_question
+    $rTestTmp = $common->find('test_tmp', $condition = ['test_id' => $tid], $type = 'all');
+    if(!empty($rTestTmp)) {
+      foreach ($rTestTmp as $key => $value) {
+        $common->delete('test_tmp_question', $field = ['test_tmp_id' => $value['id']]);
+      }
+      $common->delete('test_tmp', $field = ['test_id' => $tid]);
+    }
+
+    $common->delete('group_answer', $field = ['test_id' => $tid]);
+    $common->delete('test_question_topic', $field = ['test_id' => $tid]);
+    $common->delete('test_question_topic_hide', $field = ['test_id' => $tid]);
+    $common->delete('test_topic_analysis', $field = ['test_id' => $tid]);
+    $common->delete('test_topic_answer', $field = ['test_id' => $tid]);
+    $common->delete('test_patient', $field = ['test_id' => $tid]);
+    $common->delete('test_psychologist', $field = ['test_id' => $tid]);
+
+    $common->delete('test_question', $field = ['test_id' => $tid]);
+    $common->delete('test', $field = ['id' => $tid, 'lang' => $lang]);
+
+    setcookie('checkTest', $result['test_title'], time() - 10);
+    setcookie('checkResponse', $result['total_response'], time() - 10);
+    setcookie('test_id', $tid, time() - 10);
+
+    if($_GET['catid']){
+      header('location: '.$admin_file.'?task=test&catid='.$catid.'&tid='.$tid.'&kwd='.$kwd.'&next='.$next);
+    }else {
+      header('location: '.$admin_file.'?task=test');
+    }
+    exit;
+  }
+
+  $kwd = !empty($_GET['kwd']) ?     $common->clean_string($_GET['kwd']) : '';
+  $catid = !empty($_GET['catid']) ? $common->clean_string($_GET['catid']) : '';
+  $testid = !empty($_GET['tid']) ?  $common->clean_string($_GET['tid']) : '';
   $listTest = listTest($kwd, $catid, $testid, $lang);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;

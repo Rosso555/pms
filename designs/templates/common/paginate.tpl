@@ -14,9 +14,10 @@
       <li>{paginate_prev text="<i class='fa fa-chevron-left' aria-hidden='true'></i>" data-toggle1="tooltip" data-placement="top" title="Previous Page"}</li>
       <!--
       #active_link_prefix && #active_link_suffix
-      Custom in "external_libs\Smarty-3.1.14\libs\plugins\function.paginate_middle.php"
+      Custom in "external_libs\Smarty-3.1.14\libs\plugins\function.paginate_middle_custom.php"
+      We add such as: "active_link_prefix, active_link_suffix"
       -->
-      {paginate_middle page_limit="10" format="page" prefix="" suffix="" link_prefix="<li>" link_suffix="</li>" active_link_prefix="<li class='active'><a>" active_link_suffix="</li></a>"}
+      {paginate_middle_custom page_limit="10" format="page" prefix="" suffix="" link_prefix="<li>" link_suffix="</li>" active_link_prefix="<li class='active'><a>" active_link_suffix="</li></a>"}
 
       <li>{paginate_next text="<i class='fa fa-chevron-right' aria-hidden='true'></i>" data-toggle1="tooltip" data-placement="top" title="Next Page"}</li>
 
@@ -33,25 +34,6 @@
       {$paginate.total}/{$paginate.page_total} Pages
     </div>
     {/if}
-
-  <!-- {paginate_prev text="Previous"}&nbsp;
-
-  {if $paginate.total gt $paginate.limit}
-    &nbsp;&nbsp;{paginate_first text="First page"}&nbsp;
-  {/if}
-
-  {if $paginate.total gt $paginate.limit}
-    {paginate_middle page_limit="10" prefix="&nbsp;" suffix="&nbsp;j" format="page"}
-  {/if}
-
-  {if $paginate.total gt $paginate.limit}
-    &nbsp;{paginate_last text="Last page"}
-  {/if}
-  &nbsp;&nbsp;{paginate_next text="Next"}&nbsp;
-
-  {if $paginate.total gt $paginate.limit}
-    [{$paginate.total}/{$paginate.page_total} pages]
-  {/if} -->
 
   </div>
 </div>
