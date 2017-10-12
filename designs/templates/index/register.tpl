@@ -59,7 +59,7 @@
             </div>
             <div class="form-group" id="error_pwd">
               <label for="pwd"><span style="color:red">*</span> Password:</label>
-              <span style="color:red" id="txt_error_pwd">{if $error.password}Please enter password !!!{/if} {if $error.not_match_password}Your password do not match. Please try again.{/if} {if $error.less_password}Your password less than 8 or not with number and letter.{/if}</span>
+              <span style="color:red" id="txt_error_pwd">{if $error.password}Please enter password !!!{/if} {if $error.not_match_password}Your password does not match. Please try again.{/if} {if $error.less_password}Your password less than 8 or not with number and letter.{/if}</span>
 
               <input type="password" class="form-control" id="pwd" name="password" onkeyup="checkPassword('pwd');" value="{$smarty.session.user_register.password}">
               <span style="color:red">More than 8 characters with number and letter</span>
@@ -78,19 +78,19 @@
             </div>
             <div class="form-group" id="error_re_email">
               <label for="email"><span style="color:red">*</span> Re-Email:</label>
-              <span style="color:red" id="txt_error_re_email">{if $error.re_email}Please enter re-email !!!{/if} {if $error.email_not_match}Your email does not match !!!{/if} {if $error.exist_email}Your email is existed !!!{/if}</span>
+              <span style="color:red" id="txt_error_re_email">{if $error.re_email}Please enter re-email !!!{/if} {if $error.email_not_match}Your email does not match !!!{/if}</span>
 
               <input type="email" class="form-control" id="re_email" name="re_email" placeholder="example@domain.com" value="{$smarty.session.user_register.re_email}" onchange="checkEmail();">
             </div>
             <div class="form-group" id="error_job">
               <label for="job"><span style="color:red">*</span> Job:</label>
-              <span style="color:red" id="txt_error_job">{if $error.job}Your email is job !!!{/if}</span>
+              <span style="color:red" id="txt_error_job">{if $error.job}Please enter job !!!{/if}</span>
 
               <input type="text" class="form-control" id="job" name="job" value="{$smarty.session.user_register.job}">
             </div>
             <div class="form-group" id="error_address">
               <label for="address"><span style="color:red">*</span> Address:</label>
-              <span style="color:red" id="txt_error_address">{if $error.address}Your email is address !!!{/if}</span>
+              <span style="color:red" id="txt_error_address">{if $error.address}Please enter address !!!{/if}</span>
 
               <textarea class="form-control" rows="4" id="address" name="address">{$smarty.session.user_register.address}</textarea>
             </div>
@@ -124,7 +124,7 @@
 
       if(pwd != '' && re_pwd != '' && pwd != re_pwd){
         $("#error_re_pwd").attr("class", "form-group has-error");
-        $("#txt_error_re_pwd").text("Your password do not match. Please try again.");
+        $("#txt_error_re_pwd").text("Your password does not match. Please try again.");
       }else {
 
         if(re_pwd == ''){
@@ -152,7 +152,7 @@ function checkEmail(){
         }
         if (email != '' && re_email != '' && email != re_email) {
                 $("#error_re_email").attr("class", "form-group has-error");
-                $("#txt_error_re_email").text("Your email do not match. Please try again.");
+                $("#txt_error_re_email").text("Your email does not match. Please try again.");
         }else {
                 if(re_email == ''){
                   $("#error_re_email").attr("class", "form-group has-error");
@@ -245,17 +245,41 @@ $("form").submit(function( event ) {
     $("#txt_error_address").text("");
   }
 
-  if(user != '' && pwd != '' && re_pwd != '' && email != '' && job != '' && address !=''){
+  if(user != '' && pwd != '' && re_pwd != '' && email != '' && re_email != '' && job != '' && address !='' && pwd == re_pwd && email == re_email){
 
     if(pwd != re_pwd){
       $("#error_re_pwd").attr("class", "form-group has-error");
-      $("#txt_error_re_pwd").text("Your password do not match. Please try again.");
+      $("#txt_error_re_pwd").text("Your password does not match. Please try again.");
     }else {
       $("#error_re_pwd").attr("class", "form-group");
       $("#txt_error_re_pwd").text("");
-      //if ture is submit
-      return;
     }
+    //check email
+    if(email != re_email){
+      $("#error_re_email").attr("class", "form-group has-error");
+      $("#txt_error_re_email").text("Your email does not match. Please try again.");
+    }else {
+      $("#error_re_email").attr("class", "form-group");
+      $("#txt_error_re_email").text("");
+    }
+     //if ture is submit
+    return;
+  }else {
+          if(pwd != re_pwd){
+            $("#error_re_pwd").attr("class", "form-group has-error");
+            $("#txt_error_re_pwd").text("Your password does not match. Please try again.");
+          }else {
+            $("#error_re_pwd").attr("class", "form-group");
+            $("#txt_error_re_pwd").text("");
+          }
+          //check email
+          if(email != re_email){
+            $("#error_re_email").attr("class", "form-group has-error");
+            $("#txt_error_re_email").text("Your email does not match. Please try again.");
+          }else {
+            $("#error_re_email").attr("class", "form-group");
+            $("#txt_error_re_email").text("");
+          }
 
   }
 
