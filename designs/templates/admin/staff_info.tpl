@@ -132,7 +132,7 @@
             <td valign="top">{$v.phone}</td>
             <td>{if $v.status eq 1}
               <button type="button" class="btn btn-success btn-xs" {if $v.staff_role_id|@count eq 1 and $v.staff_role_id eq 1}disabled{/if} data-toggle="modal" data-target="#myModal_{$v.id}" data-toggle1="tooltip" data-placement="top" title="{if $v.staff_role_id|@count eq 1 and $v.staff_role_id eq 1}Can not change status, Because this Super Admin.{else}{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate (Key Lang:text_click_change_status){/if}{/if}">
-                <i class="fa fa-circle" aria-hidden="true"></i>{if $multiLang.text_show_Active}{$multiLang.text_show_Active}{else}No Translate (Key Lang:text_show_Active){/if}
+                <i class="fa fa-circle" aria-hidden="true"></i> {if $multiLang.text_show_Active}{$multiLang.text_show_Active}{else}No Translate (Key Lang:text_show_Active){/if}
               </button>
               {elseif $v.status eq 2}
               <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$v.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.text_click_change_status}{$multiLang.text_click_change_status}{else}No Translate (Key Lang:text_click_change_status){/if}">
@@ -161,7 +161,11 @@
                 <!-- Modal -->
               </td>
               <td class="text-center" valign="top">
+                {if $v.staff_role_id eq 1 and $smarty.session.is_super_admin neq 1}
+                <button class= "btn btn-info btn-xs" disabled data-toggle1="tooltip" data-placement="top" title="Can not View, Because this Super Admin."><i class="fa fa-eye"></i></button>
+                {else}
                 <button href="#View_Profile_{$v.id}" class= "btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_view_pro}{$multiLang.button_view_pro}{else}No Translate (Key Lang:button_view_pro){/if}" data-toggle= "modal"><i class="fa fa-eye"></i></button>
+                {/if}
                 <!-- Modal -->
                 <div class="modal fade" id="View_Profile_{$v.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                   <div class="modal-dialog" role="document">
@@ -196,7 +200,11 @@
                       </div>
                     </div>
                   </div>
+                  {if $v.staff_role_id eq 1 and $smarty.session.is_super_admin neq 1}
+                  <a class="btn btn-success btn-xs" disabled data-toggle1="tooltip" data-placement="top" title="Can not edit, Because this Super Admin."><i class="fa fa-edit"></i></a>
+                  {else}
                   <a href="{$admin_file}?task=staff_info&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
+                  {/if}
                 </td>
               </tr>
               {/foreach}

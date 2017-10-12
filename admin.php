@@ -36,7 +36,7 @@ if(!empty($_GET['deflang']))
   exit;
 }
 //task: login
-if('login' === $task){
+if('login' === $task) {
   $error = array();
   if($_POST)
   {
