@@ -33,6 +33,8 @@
             </div>
             <div class="form-group col-md-4" style="margin-bottom:5px;">
               <input type="text" class="form-control" placeholder="Enter name" name="kwd" value="{$smarty.get.kwd}">
+            </div>
+            <div class="form-group col-md-4" style="margin-bottom:5px;">
               <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
             </div>
           </form>
@@ -41,7 +43,7 @@
           {if $editPatient.id}
           <form action="{$psychologist_file}?task=patient&amp;action=edit&amp;id={$editPatient.id}" method="post">
           {else}
-          <form action="{$psychologist_file}?task=patient" method="post">
+          <form action="{$psychologist_file}?task=patient&amp;action=add" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">

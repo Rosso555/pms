@@ -22,7 +22,7 @@
 </div>
 {if $error}<div class="alert_required">* {if $multiLang.text_error_check_all_required}{$multiLang.text_error_check_all_required}{else}No Translate (Key Lang: text_error_check_all_required){/if}</div>{/if}
 <div class="inbox-test sansserif" style="margin-bottom: 20px;">
-  <form class="form" action="{$index_file}?task=test_question_psychologist&amp;tid={$smarty.get.tid}&amp;psy_id={$smarty.get.psy_id}&amp;id={$smarty.get.id}" method="post">
+  <form class="form" action="{$index_file}?task=test_question_psychologist&amp;action=add&amp;tid={$smarty.get.tid}&amp;psy_id={$smarty.get.psy_id}&amp;id={$smarty.get.id}" method="post">
     <input type="hidden" id="test_group_id" name="test_group_id" value="{$test_group_id|escape}">
   {if $result|@COUNT gt 0}
     {foreach item = v from=$result key=id name=first_foo}
@@ -175,7 +175,7 @@
       <div class="form-group text-center">
         {if $testQueGroup gt 0}
           {if $resultTestGroupTmpQue gt 0}
-          <a href="{$index_file}?task=back_step&amp;tid={$smarty.get.tid}&amp;tgid={$testGroupIDTmpQue.id}&amp;id={$smarty.get.id}" class="btn btn-warning"> <i class="fa fa-step-backward" aria-hidden="true"></i> {if $multiLang.button_back_step}{$multiLang.button_back_step}{else}No Translate (Key Lang: button_back_step){/if}</a>
+          <a href="{$index_file}?task=back_step&amp;tid={$smarty.get.tid}&amp;tgid={$testGroupIDTmpQue.id}&amp;psy_id={$smarty.get.psy_id}&amp;id={$smarty.get.id}" class="btn btn-warning"> <i class="fa fa-step-backward" aria-hidden="true"></i> {if $multiLang.button_back_step}{$multiLang.button_back_step}{else}No Translate (Key Lang: button_back_step){/if}</a>
           {/if}
           {if $resultStep eq 1}
           <button type="submit" class="btn btn-success"> {if $multiLang.button_show_my_score}{$multiLang.button_show_my_score}{else}No Translate (Key Lang: button_show_my_score){/if} </button>

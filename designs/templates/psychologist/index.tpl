@@ -27,6 +27,18 @@
             </select>
           </div>
           <div class="form-group" style="margin-bottom:5px;">
+						<div class="input-group">
+							<input id="f_date" class="form-control" type="text" placeholder="From Date" name="f_date" value="{$smarty.get.f_date}">
+              <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+						</div>
+					</div>
+          <div class="form-group" style="margin-bottom:5px;">
+						<div class="input-group">
+							<input id="t_date" class="form-control" type="text" placeholder="To Date" name="t_date" value="{$smarty.get.t_date}">
+              <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+						</div>
+					</div>
+          <div class="form-group" style="margin-bottom:5px;">
             <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
           </div>
         </form>
@@ -69,50 +81,15 @@
     </div>
     {/if}
     <br>
-
-    <!-- <div class="table-responsive">
-      <table class="table table-striped">
-        <thead>
-          <tr bgcolor="#eeeeee">
-            <th>{if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if}</th>
-            <th>{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</th>
-            <th>{if $multiLang.text_status}{$multiLang.text_status}{else}No Translate(Key Lang: text_status){/if}</th>
-            <th width="100">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate(Key Lang: text_action){/if}</th>
-          </tr>
-        </thead>
-        {if $testPatient|@count gt 0}
-        <tbody>
-        {foreach from = $testPatient item = data key=k}
-          <tr>
-            <td>{$data.username}</td>
-            <td>{$data.title}</td>
-            <td>
-              {if $data.status eq 1}
-              <button type="button" class="btn btn-danger btn-xs">
-                <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Pendding...
-              </button>
-              {else}
-              <button type="button" class="btn btn-success btn-xs">
-                <i class="fa fa-check-circle"></i> Completed
-              </button>
-              {/if}
-            </td>
-            <td>
-              <a href="{$psychologist_file}?task=test_question&amp;tid={$data.test_id}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top"
-              title="{if $multiLang.button_view}{$multiLang.button_view}{else}No Translate(Key Lang: button_view){/if}"><i class="fa fa-eye"></i></a>
-            </td>
-          </tr>
-        {/foreach}
-        </tbody>
-        {else}
-        <tr>
-          <td colspan="4"><h4 style="text-align:center">{if $multiLang.text_there_are_no_record}{$multiLang.text_there_are_no_record}{else}No Translate (Key Lang: text_there_are_no_record){/if}</h4></td>
-        </tr>
-        {/if}
-      </table>
-    </div> -->
-    <!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->
+{/block}
+{block name="javascript"}
+<script>
+  $(document).ready(function(){
+    $('#f_date').datetimepicker({ locale: 'en', format: 'YYYY-MM-DD'});
+    $('#t_date').datetimepicker({ locale: 'en', format: 'YYYY-MM-DD'});
+  });
+</script>
 {/block}
