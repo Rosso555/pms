@@ -4,7 +4,7 @@ date_default_timezone_set('Asia/Phnom_Penh');
 //Database setting
 define('DB_HOSTNAME', 'db.e-khmer.com');
 define('DB_USER', 'scusersbdd');
-define('DB_PASSWORD', '23#ded2f4d32dS');
+define('DB_PASSWORD', '23#dAAaSAsVsSdf4df32dS');
 define('DB_DATABASE_NAME', 'pmsekdb');
 
 //User role
