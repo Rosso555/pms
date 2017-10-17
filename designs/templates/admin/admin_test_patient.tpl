@@ -56,6 +56,20 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
+                  <label for="title"><span style="color: red">*</span> {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if}:</label>
+                  {if $error.psy_id}
+                    <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if}</span>
+                  {/if}
+                  <select class="form-control select2" name="pat_id" style="width:100%" onchange="getTestCompletedPsy(this)">
+                    <option value="">--- {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if} ---</option>
+                    {foreach from=$patient item=data}
+                    <option value="{$data.id}" {if $smarty.session.test_patient.pat_id}{if $smarty.session.test_patient.pat_id eq $data.id}selected{/if}{else}{if $getTestPat.patient_id eq $data.id}selected{/if}{/if}>{$data.username}</option>
+                    {/foreach}
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
                   <label for="title"><span style="color: red">*</span> {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}:</label>
                   {if $error.testid}
                     <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</span>
@@ -63,20 +77,6 @@
                   <select class="form-control select2_test_psy" {if $getTestPat.id} name="test" {else} name="test[]" multiple="multiple" {/if} style="width:100%">
                     {foreach from=$test item=data}
                     <option value="{$data.id}" {if $smarty.session.test_patient.test}{if $smarty.session.test_patient.test eq $data.id}selected{/if}{else}{if $getTestPat.test_id eq $data.id}selected{/if}{/if}>{$data.title}</option>
-                    {/foreach}
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="title"><span style="color: red">*</span> {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if}:</label>
-                  {if $error.psy_id}
-                    <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if}</span>
-                  {/if}
-                  <select class="form-control select2" name="pat_id" style="width:100%">
-                    <option value="">--- {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if} ---</option>
-                    {foreach from=$patient item=data}
-                    <option value="{$data.id}" {if $smarty.session.test_patient.pat_id}{if $smarty.session.test_patient.pat_id eq $data.id}selected{/if}{else}{if $getTestPat.patient_id eq $data.id}selected{/if}{/if}>{$data.username}</option>
                     {/foreach}
                   </select>
                 </div>
@@ -168,4 +168,42 @@
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->
+{/block}
+{block name="javascript"}
+<script>
+  function getTestCompletedPsy(sel)
+  {
+    $(".loader").show();
+
+    $.ajax({
+      type: "GET",
+      url: "{$admin_file}?task=test_patient&action=test_completed_psy&psy_id="+sel.value,
+      success: function(data) {
+        var dataHTML = "";
+        if(data.length > 0)
+        {
+          for (var i = 0; i < data.length; i++) {
+            dataHTML += "<option value='"+data[i].id+"'>"+data[i].title+"</option>";
+          }
+          $("#test_pat").html(dataHTML);
+        }else {
+          dataHTML += "<option value=''>No Data</option>";
+          $("#test_pat").html(dataHTML);
+        }
+        if(data == false)
+        {
+          window.location.replace('{$admin_file}?task=perror');
+        }
+        //hide Loading gif
+        $(".loader").hide();
+      },
+      error: function(){
+        //Show error here
+        alert("Cannot load data. Please try again later.");
+        location.reload();
+      }
+    });//End Ajax
+
+  }
+</script>
 {/block}

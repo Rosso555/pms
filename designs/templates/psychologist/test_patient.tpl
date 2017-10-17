@@ -51,7 +51,7 @@
           {if $getTestPat.id}
           <form action="{$psychologist_file}?task=test_patient&amp;action=edit&amp;id={$getTestPat.id}" method="post">
           {else}
-          <form action="{$psychologist_file}?task=test_patient" method="post">
+          <form action="{$psychologist_file}?task=test_patient&amp;action=add" method="post">
           {/if}
             <div class="row">
               <div class="col-md-6">
@@ -125,7 +125,7 @@
             <td>
               <a href="{$psychologist_file}?task=result_test_patient&amp;tid={$data.test_id}&amp;pat_id={$data.patient_id}&amp;id={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="View"><i class="fa fa-eye" aria-hidden="true"></i></a>
 
-              <a {if $data.status eq 1}href="{$psychologist_file}?task=test_patient&amp;action=edit&amp;id={$data.id}"{/if} class="btn btn-success btn-xs" {if $data.status eq 2}disabled{/if} data-toggle1="tooltip" data-placement="top"
+              <a {if $data.status eq 1}href="{$psychologist_file}?task=test_patient&amp;action=edit&amp;tid={$data.test_id}&amp;pat_id={$data.patient_id}&amp;id={$data.id}"{/if} class="btn btn-success btn-xs" {if $data.status eq 2}disabled{/if} data-toggle1="tooltip" data-placement="top"
               title="{if $data.status eq 1}{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang: button_edit){/if}{else}{if $multiLang.button_can_not_edit}{$multiLang.button_can_not_edit}{else}No Translate(Key Lang: button_can_not_edit){/if}{/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->
               <button type="button" class="btn btn-danger btn-xs" {if $data.status eq 2}disabled{/if} data-toggle="modal" data-target="#myModal_{$data.id}" data-toggle1="tooltip" data-placement="top"
@@ -145,7 +145,7 @@
                          <b>({$data.username|escape} ~ {$data.title|escape})</b>?</p>
                     </div>
                     <div class="modal-footer">
-                      <a href="{$psychologist_file}?task=test_patient&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</i></a>
+                      <a href="{$psychologist_file}?task=test_patient&amp;action=delete&amp;tid={$data.test_id}&amp;pat_id={$data.patient_id}&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</i></a>
                       <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
                     </div>
                   </div>

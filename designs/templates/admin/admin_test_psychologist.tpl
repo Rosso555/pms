@@ -56,19 +56,6 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="title"><span style="color: red">*</span> {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}:</label>
-                  {if $error.testid}
-                    <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</span>
-                  {/if}
-                  <select class="form-control select2_test_psy" {if $getTestPsy.id} name="test" {else} name="test[]" multiple="multiple" {/if} style="width:100%">
-                    {foreach from=$test item=data}
-                    <option value="{$data.id}" {if $getTestPsy.test_id}{if $getTestPsy.test_id eq $data.id}selected{/if}{else}{foreach from=$smarty.session.test_psy.test item=v}{if $v eq $data.id}selected{/if}{/foreach}{/if}>{$data.title}</option>
-                    {/foreach}
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
                   <label for="title"><span style="color: red">*</span> {if $multiLang.text_psychologist}{$multiLang.text_psychologist}{else}No Translate(Key Lang: text_psychologist){/if}:</label>
                   {if $error.psy_id}
                     <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_psychologist}{$multiLang.text_psychologist}{else}No Translate(Key Lang: text_psychologist){/if}</span>
@@ -77,6 +64,19 @@
                     <option value="">--- {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_psychologist}{$multiLang.text_psychologist}{else}No Translate(Key Lang: text_psychologist){/if} ---</option>
                     {foreach from=$psychologist item=data}
                     <option value="{$data.id}" {if $smarty.session.test_psy.psy_id}{if $smarty.session.test_psy.psy_id eq $data.id}selected{/if}{else}{if $getTestPsy.psychologist_id eq $data.id}selected{/if}{/if}>{$data.username}</option>
+                    {/foreach}
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="title"><span style="color: red">*</span> {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}:</label>
+                  {if $error.testid}
+                    <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</span>
+                  {/if}
+                  <select class="form-control select2_test_psy" {if $getTestPsy.id} name="test" {else} name="test[]" multiple="multiple" {/if} style="width:100%">
+                    {foreach from=$test item=data}
+                    <option value="{$data.id}" {if $getTestPsy.test_id}{if $getTestPsy.test_id eq $data.id}selected{/if}{else}{foreach from=$smarty.session.test_psy.test item=v}{if $v eq $data.id}selected{/if}{/foreach}{/if}>{$data.title}</option>
                     {/foreach}
                   </select>
                 </div>

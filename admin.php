@@ -1334,29 +1334,36 @@ if('test_question' === $task)
   //action delete
   if('delete' === $action && !empty($_GET['id']))
   {
-    $result = checkDeleteTestQuestion($_GET['id'], $_GET['tid']);
+    $tqid = $common->clean_string($_GET['id']);
+    $tid  = $common->clean_string($_GET['tid']);
+    $kwd  = $common->clean_string($_GET['kwd']);
+    $next = $common->clean_string($_GET['next']);
+
+    $result = checkDeleteTestQuestion($tqid, $tid);
     if('0' === $result['total_count'])
     {
-      $rTestQues = $common->find('answer', $condition = ['test_question_id' => $_GET['id']], $type = 'all');
+      $rTestQues = $common->find('answer', $condition = ['test_question_id' => $tqid], $type = 'all');
       if(!empty($rTestQues)){
         foreach ($rTestQues as $key => $value) {
           $common->delete('answer_topic', $field = ['answer_id' => $value['id']]);
         }
       }
-      $common->delete('answer', $field = ['test_question_id' => $_GET['id']]);
-      $common->delete('test_question', $field = ['id' => $_GET['id']]);
-      $common->delete('test_group_question', $field = ['test_question_id' => $_GET['id']]);
-      $common->delete('group_answer', $field = ['test_question_id' => $_GET['id']]);
-      $common->delete('test_question_topic', $field = ['test_question_id' => $_GET['id']]);
+      $common->delete('answer', $field = ['test_question_id' => $tqid]);
+      $common->delete('test_question', $field = ['id' => $tqid]);
+      $common->delete('test_group_question', $field = ['test_question_id' => $tqid]);
+      $common->delete('group_answer', $field = ['test_question_id' => $tqid]);
+      $common->delete('test_question_topic', $field = ['test_question_id' => $tqid]);
+      $common->delete('test_question_view_order', $field = ['test_question_id' => $tqid]);
+      $common->delete('test_question_condition', $field = ['test_question_id' => $tqid]);
+      $common->delete('test_tmp_question', $field = ['test_question_id' => $tqid]);
     }else {
-      setcookie('test_que_id', $_GET['id'], time() + 10);
+      setcookie('test_que_id', $tqid, time() + 10);
       setcookie('checkTestQues_Qtitle', $result['que_title'], time() + 10);
       setcookie('checkTestQues_Ttitle', $result['test_title'], time() + 10);
-
     }
     //Redirect
-    if($_GET['kwd'] || $_GET['tid'] || $_GET['next']){
-      header('location: '.$admin_file.'?task=test_question&tid='.$_GET['tid'].'&kwd='.$_GET['kwd'].'&next='.$_GET['next']);
+    if($kwd || $tid || $next){
+      header('location: '.$admin_file.'?task=test_question&tid='.$tid.'&kwd='.$kwd.'&next='.$next);
     }else {
       header('location: '.$admin_file.'?task=test_question');
     }
@@ -1366,29 +1373,37 @@ if('test_question' === $task)
   //action delete permanently
   if('delete_permanently' === $action && !empty($_GET['id']))
   {
+    $tqid = $common->clean_string($_GET['id']);
+    $tid  = $common->clean_string($_GET['tid']);
+    $kwd  = $common->clean_string($_GET['kwd']);
+    $next = $common->clean_string($_GET['next']);
+
     //Get response answer
-    $rResponseAns = $common->find('response_answer', $condition = ['test_question_id' => $_GET['id']], $type = 'all');
+    $rResponseAns = $common->find('response_answer', $condition = ['test_question_id' => $tqid], $type = 'all');
     //Get Answer
-    $rTestQues = $common->find('answer', $condition = ['test_question_id' => $_GET['id']], $type = 'all');
+    $rTestQues = $common->find('answer', $condition = ['test_question_id' => $tqid], $type = 'all');
     if(!empty($rTestQues)){
       foreach ($rTestQues as $key => $value) {
         $common->delete('answer_topic', $field = ['answer_id' => $value['id']]);
       }
     }
-    $common->delete('answer', $field = ['test_question_id' => $_GET['id']]);
-    $common->delete('test_question', $field = ['id' => $_GET['id']]);
-    $common->delete('test_group_question', $field = ['test_question_id' => $_GET['id']]);
-    $common->delete('group_answer', $field = ['test_question_id' => $_GET['id']]);
-    $common->delete('test_question_topic', $field = ['test_question_id' => $_GET['id']]);
-    $common->delete('response_answer', $field = ['test_question_id' => $_GET['id']]);
+    $common->delete('answer', $field = ['test_question_id' => $tqid]);
+    $common->delete('test_question', $field = ['id' => $tqid]);
+    $common->delete('test_group_question', $field = ['test_question_id' => $tqid]);
+    $common->delete('group_answer', $field = ['test_question_id' => $tqid]);
+    $common->delete('test_question_topic', $field = ['test_question_id' => $tqid]);
+    $common->delete('test_question_view_order', $field = ['test_question_id' => $tqid]);
+    $common->delete('test_question_condition', $field = ['test_question_id' => $tqid]);
+    $common->delete('test_tmp_question', $field = ['test_question_id' => $tqid]);
+    $common->delete('response_answer', $field = ['test_question_id' => $tqid]);
 
-    setcookie('test_que_id', $_GET['id'], time() - 10);
+    setcookie('test_que_id', $tqid, time() - 10);
     setcookie('checkTestQues_Qtitle', $result['que_title'], time() - 10);
     setcookie('checkTestQues_Ttitle', $result['test_title'], time() - 10);
 
     //Redirect
-    if($_GET['kwd'] || $_GET['tid'] || $_GET['next']) {
-      header('location: '.$admin_file.'?task=test_question&tid='.$_GET['tid'].'&kwd='.$_GET['kwd'].'&next='.$_GET['next']);
+    if($kwd || $tid || $next) {
+      header('location: '.$admin_file.'?task=test_question&tid='.$tid.'&kwd='.$kwd.'&next='.$next);
     } else {
       header('location: '.$admin_file.'?task=test_question');
     }
@@ -1398,7 +1413,8 @@ if('test_question' === $task)
   //action list_answer
   if('list_answer' === $action)
   {
-    $results = $common->find('answer', $condition = ['test_question_id' => $_GET['tqid']], $type = 'all');
+    $tqid = $common->clean_string($_GET['tqid']);
+    $results = $common->find('answer', $condition = ['test_question_id' => $tqid], $type = 'all');
     header('Content-type: application/json');
     echo json_encode($results);
     exit;
@@ -3880,7 +3896,7 @@ if('test_psychologist' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('testPsychologist', $results);
-  $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang], $type = 'all'));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang, 'status' => 2], $type = 'all'));
   $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = null, $type = 'all'));
   $smarty_appform->display('admin/admin_test_psychologist.tpl');
   exit;
@@ -3961,6 +3977,15 @@ if('test_patient' === $task)
     exit;
   }
 
+  if('test_completed_psy' === $action)
+  {
+    $psy_id = $common->clean_string($_GET['psy_id']);
+    $results = getListTestPsychologistCompleted($psy_id, $lang);
+    header('Content-type: application/json');
+    echo json_encode($results);
+    exit;
+  }
+
   $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
   $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
@@ -3972,7 +3997,7 @@ if('test_patient' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('testPatient', $results);
-  $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang], $type = 'all'));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang, 'status' => 2], $type = 'all'));
   $smarty_appform->assign('patient', $common->find('patient', $condition = null, $type = 'all'));
   $smarty_appform->display('admin/admin_test_patient.tpl');
   exit;

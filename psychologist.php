@@ -27,7 +27,7 @@ $smarty_appform->assign('getLanguage', $common->find('language', $condition = nu
 $smarty_appform->assign('multiLang', getMultilang($lang));
 
 //task: logout by clear session
-if('logout' === $task){
+if('logout' === $task) {
   $act_data = ['psychologist_id' => $_SESSION['is_psycho_login_id'], 'content' => 'LOGOUT'];
   @$common->save('activity_log', $act_data);
   unset($_SESSION['is_psycho_login_id']);
@@ -36,12 +36,12 @@ if('logout' === $task){
 }
 
 //redirect if no session
-if(empty($_SESSION['is_psycho_login_id'])){
+if(empty($_SESSION['is_psycho_login_id'])) {
   header('Location:'.$index_file.'?task=login');
   exit;
 }
 //Task: page not found
-if('page_not_found' === $task){
+if('page_not_found' === $task) {
   $smarty_appform->display('common/page_error_404.tpl');
   exit;
 }
@@ -50,75 +50,71 @@ if('page_not_found' === $task){
 if('patient' === $task)
 {
   $error = array();
-  if ('add' === $action) {
-    if($_POST){
-    //get value from form
-    $id     = $common->clean_string($_POST['id']);
-    $username = $common->clean_string($_POST['username']);
-    $email  = $common->clean_string($_POST['email']);
-    $phone  = $common->clean_string($_POST['phone']);
-    $gender = $common->clean_string($_POST['gender']);
-    $age    = $common->clean_string($_POST['age']);
-    $password = $common->clean_string($_POST['password']);
-    //add value to session to use in template
-    $_SESSION['patient'] = $_POST;
-    //form validation
-    if(empty($username))  $error['username']  = 1;
-    if(empty($email))   $error['email']   = 1;
-    if(empty($phone))   $error['phone']   = 1;
-    if(empty($gender))  $error['gender']  = 1;
-    if(empty($age))     $error['age']     = 1;
-    if(empty($password))  $error['password']  = 1;
-    if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
-		   $error['invalid_email'] = 1;
-		}
-    if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
-      $result = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
-      if($result['email'] !== $email && check_patient_email($email) > 0){
-        $error['exist_email'] = 1;
+  if ('add' === $action)
+  {
+    if($_POST)
+    {
+      //get value from form
+      $id     = $common->clean_string($_POST['id']);
+      $username = $common->clean_string($_POST['username']);
+      $email  = $common->clean_string($_POST['email']);
+      $phone  = $common->clean_string($_POST['phone']);
+      $gender = $common->clean_string($_POST['gender']);
+      $age    = $common->clean_string($_POST['age']);
+      $password = $common->clean_string($_POST['password']);
+      //add value to session to use in template
+      $_SESSION['patient'] = $_POST;
+      //form validation
+      if(empty($username))  $error['username']  = 1;
+      if(empty($email))   $error['email']   = 1;
+      if(empty($phone))   $error['phone']   = 1;
+      if(empty($gender))  $error['gender']  = 1;
+      if(empty($age))     $error['age']     = 1;
+      if(empty($password))  $error['password']  = 1;
+      if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
+  		   $error['invalid_email'] = 1;
+  		}
+      if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $result = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
+        if($result['email'] !== $email && check_patient_email($email) > 0){
+          $error['exist_email'] = 1;
+        }
+      }
+      //Save
+      if(empty($id) && COUNT($error) === 0) {
+        $common->save('patient', $field =['psychologist_id' => $_SESSION['is_psycho_login_id'],
+                                          'username'=> $username,
+                                          'email'   => $email,
+                                          'phone'   => $phone,
+                                          'gender'  => $gender,
+                                          'age'     => $age,
+                                          'password'=> $password]);
+        //unset session
+        unset($_SESSION['patient']);
+        //Redirect
+        header('location: '.$psychologist_file.'?task=patient');
+        exit;
       }
     }
-    //Save
-    if(empty($id) && COUNT($error) === 0){
-      $common->save('patient', $field =['psychologist_id' => $_SESSION['is_psycho_login_id'],
-                                        'username'=> $username,
-                                        'email'   => $email,
-                                        'phone'   => $phone,
-                                        'gender'  => $gender,
-                                        'age'     => $age,
-                                        'password'=> $password]);
-    //unset session
-    unset($_SESSION['patient']);
-    //Redirect
-    header('location: '.$psychologist_file.'?task=patient');
-    exit;
-    }
-    //Update
-    if(!empty($id) && COUNT($error) === 0){
-      $common->update('patient', $field= ['username' => $username,
-                                          'email'    => $email,
-                                          'phone'    => $phone,
-                                          'gender'   => $gender,
-                                          'age'      => $age,
-                                          'password' => $password],
-                                 $condition = ['id' => $_GET['id'], 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
-    //unset session
-    unset($_SESSION['patient']);
-    //Redirect
-    header('location: '.$psychologist_file.'?task=patient');
-    exit;
-    }
-  }
   }
   //Change staus patient
   if('change_status' === $action && !empty($_GET['id']))
   {
     $id = $common->clean_string($_GET['id']);
-    if(!empty($_GET['status'] == 1))
+    //Get Patient: and check patient's psychologist
+    $resutlGetPatientById = getPatientByID($id, $_SESSION['is_psycho_login_id']);
+
+    if(!empty($resutlGetPatientById) && COUNT($resutlGetPatientById) > 0)
     {
-      $common->update('patient', $field = ['status' => 2], $condition = ['id' => $id, 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
-    }elseif (!empty($_GET['status'] == 2)) {
-      $common->update('patient', $field = ['status' => 1], $condition = ['id' => $id, 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+      if(!empty($_GET['status'] == 1))
+      {
+        $common->update('patient', $field = ['status' => 2], $condition = ['id' => $id, 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+      } elseif (!empty($_GET['status'] == 2)) {
+        $common->update('patient', $field = ['status' => 1], $condition = ['id' => $id, 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+      }
+    } else {
+      header('location:'.$psychologist_file.'?task=page_not_found');
+      exit;
     }
     header('location:'.$psychologist_file.'?task=patient');
     exit;
@@ -127,8 +123,17 @@ if('patient' === $task)
   if('delete' === $action && !empty($_GET['id']))
   {
     $id = $common->clean_string($_GET['id']);
-    $deleted_at = date("Y-m-d");
-    $common->update('patient', $field = ['deleted_at' => $deleted_at], $condition = ['id' => $id, 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+    //Get Patient: and check patient's psychologist
+    $resutlGetPatientById = getPatientByID($id, $_SESSION['is_psycho_login_id']);
+
+    if(!empty($resutlGetPatientById) && COUNT($resutlGetPatientById) > 0)
+    {
+      $deleted_at = date("Y-m-d");
+      $common->update('patient', $field = ['deleted_at' => $deleted_at], $condition = ['id' => $id, 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+    } else {
+      header('location:'.$psychologist_file.'?task=page_not_found');
+      exit;
+    }
     header('location:'.$psychologist_file.'?task=patient');
     exit;
   }
@@ -136,19 +141,58 @@ if('patient' === $task)
   if('edit' === $action && !empty($_GET['id']))
   {
     $id = $common->clean_string($_GET['id']);
-    $result= $common->find('patient', $condition = ['id' => $id], $type = 'one');
-    if(empty($result)){
-      header('Location:'.$psychologist_file.'?task=page_not_found');
-      exit;
-    }
+    //Get Patient: and check patient's psychologist
     $resutlGetPatientById = getPatientByID($id, $_SESSION['is_psycho_login_id']);
-
-    if(!empty($resutlGetPatientById) && COUNT($resutlGetPatientById) > 0){
-      $smarty_appform->assign('editPatient', $resutlGetPatientById);
-    }else {
+    if(empty($resutlGetPatientById)) {
       header('location:'.$psychologist_file.'?task=page_not_found');
       exit;
     }
+
+    if($_POST)
+    {
+      //get value from form
+      $id     = $common->clean_string($_POST['id']);
+      $username = $common->clean_string($_POST['username']);
+      $email  = $common->clean_string($_POST['email']);
+      $phone  = $common->clean_string($_POST['phone']);
+      $gender = $common->clean_string($_POST['gender']);
+      $age    = $common->clean_string($_POST['age']);
+      $password = $common->clean_string($_POST['password']);
+      //add value to session to use in template
+      $_SESSION['patient'] = $_POST;
+      //form validation
+      if(empty($username))  $error['username']  = 1;
+      if(empty($email))   $error['email']   = 1;
+      if(empty($phone))   $error['phone']   = 1;
+      if(empty($gender))  $error['gender']  = 1;
+      if(empty($age))     $error['age']     = 1;
+      if(empty($password))  $error['password']  = 1;
+      if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
+  		   $error['invalid_email'] = 1;
+  		}
+      if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $result = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
+        if($result['email'] !== $email && check_patient_email($email) > 0){
+          $error['exist_email'] = 1;
+        }
+      }
+      //Update
+      if(!empty($id) && COUNT($error) === 0){
+        $common->update('patient', $field= ['username' => $username,
+                                            'email'    => $email,
+                                            'phone'    => $phone,
+                                            'gender'   => $gender,
+                                            'age'      => $age,
+                                            'password' => $password],
+                                   $condition = ['id' => $_GET['id'], 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
+        //unset session
+        unset($_SESSION['patient']);
+        //Redirect
+        header('location: '.$psychologist_file.'?task=patient');
+        exit;
+      }
+    }
+    $smarty_appform->assign('editPatient', $resutlGetPatientById);
   }
 
   $kwd = !empty($_GET['kwd']) ? $common->clean_string($_GET['kwd']) : '';
@@ -164,84 +208,115 @@ if('patient' === $task)
   exit;
 }
 
-//Task: Test Patient
+//Task: Test Patient for assig test to patient
 if('test_patient' === $task)
 {
   //Clear session
   if(empty($_POST)) unset($_SESSION['test_patient']);
 
   $error = array();
-  if($_POST)
+  if('add' === $action)
   {
-    //get value from form
-    if(!empty($_POST['id'])){
-      $testid   = $common->clean_string($_POST['test']);
-    }else {
-      $testid   = $common->clean_string_array($_POST['test']);
-    }
-    $pat_tid  = $common->clean_string($_POST['pat_id']);
-    $id       = $common->clean_string($_POST['id']);
-
-    //add value to session to use in template
-    $_SESSION['test_psy'] = $_POST;
-    //form validation
-    if(empty($testid))  $error['testid']  = 1;
-    if(empty($pat_tid))  $error['psy_id']  = 1;
-
-    //Add test group
-    if(0 === count($error) && empty($id))
+    if($_POST)
     {
-      foreach ($testid as $key => $va) {
-        $common->save('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $va]);
+      //get value from form
+      if(!empty($_POST['id'])) {
+        $testid   = $common->clean_string($_POST['test']);
+      } else {
+        $testid   = $common->clean_string_array($_POST['test']);
       }
-      //unset session
-      unset($_SESSION['test_patient']);
-      //Redirect
-      header('location: '.$psychologist_file.'?task=test_patient');
-      exit;
-    }
-    //update test group
-    if(0 === count($error) && !empty($id))
-    {
-      $common->update('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $testid], $condition = ['id' => $id]);
-      //unset session
-      unset($_SESSION['test_patient']);
-      //Redirect
-      header('location: '.$psychologist_file.'?task=test_patient');
-      exit;
+      $pat_tid  = $common->clean_string($_POST['pat_id']);
+      $id       = $common->clean_string($_POST['id']);
+
+      //add value to session to use in template
+      $_SESSION['test_psy'] = $_POST;
+      //form validation
+      if(empty($testid))  $error['testid']  = 1;
+      if(empty($pat_tid))  $error['psy_id']  = 1;
+
+      //Add test group
+      if(0 === count($error) && empty($id))
+      {
+        foreach ($testid as $key => $va) {
+          $common->save('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $va]);
+        }
+        //unset session
+        unset($_SESSION['test_patient']);
+        //Redirect
+        header('location: '.$psychologist_file.'?task=test_patient');
+        exit;
+      }
     }
   }
+
   //Delete: test psychologist
   if('delete' === $action && !empty($_GET['id']))
   {
-    $id = $common->clean_string($_GET['id']);
-    $resultTestPatient= $common->find('test_patient', $condition = ['id' => $id], $type = 'one');
-    if(empty($resultTestPatient)){
+    $tpid = $common->clean_string($_GET['id']);
+    $tid  = $common->clean_string($_GET['tid']);
+    $pat_id = $common->clean_string($_GET['pat_id']);
+
+    $resultTestPsychologist = getCheckTestPatientByPsyChologist($_SESSION['is_psycho_login_id'], $pat_id, $tid, $tpid);
+    if(empty($resultTestPsychologist)) {
       header('Location:'.$psychologist_file.'?task=page_not_found');
       exit;
     }
-    $common->delete('test_patient', $field = ['id' => $id]);
+    $common->delete('test_patient', $field = ['id' => $tpid]);
     header('location: '.$psychologist_file.'?task=test_patient');
     exit;
   }
   //get edit apitransaction
   if('edit' === $action && !empty($_GET['id']))
   {
-    $id = $common->clean_string($_GET['id']);
-    $resultTestPatient= $common->find('test_patient', $condition = ['id' => $id], $type = 'one');
-    if(empty($resultTestPatient)){
+    $tpid = $common->clean_string($_GET['id']);
+    $tid  = $common->clean_string($_GET['tid']);
+    $pat_id = $common->clean_string($_GET['pat_id']);
+
+    $resultTestPsychologist = getCheckTestPatientByPsyChologist($_SESSION['is_psycho_login_id'], $pat_id, $tid, $tpid);
+
+    if(empty($resultTestPsychologist)) {
       header('Location:'.$psychologist_file.'?task=page_not_found');
       exit;
     }
-    $id = $common->clean_string($_GET['id']);
-    $smarty_appform->assign('getTestPat', $common->find('test_patient', $condition = ['id' => $id], $type = 'one'));
+    if($_POST)
+    {
+      //get value from form
+      if(!empty($_POST['id'])) {
+        $testid   = $common->clean_string($_POST['test']);
+      } else {
+        $testid   = $common->clean_string_array($_POST['test']);
+      }
+      $pat_tid  = $common->clean_string($_POST['pat_id']);
+      $id       = $common->clean_string($_POST['id']);
+
+      //add value to session to use in template
+      $_SESSION['test_psy'] = $_POST;
+      //form validation
+      if(empty($testid))  $error['testid']  = 1;
+      if(empty($pat_tid))  $error['psy_id']  = 1;
+
+      //update test group
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('test_patient', $field = ['patient_id' => $pat_tid, 'test_id' => $testid], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['test_patient']);
+        //Redirect
+        header('location: '.$psychologist_file.'?task=test_patient');
+        exit;
+      }
+    }
+    $smarty_appform->assign('getTestPat', $common->find('test_patient', $condition = ['id' => $tpid], $type = 'one'));
   }
 
-  $tid    = !empty($_GET['tid']) ? $common->clean_string($_GET['tid']) : '';
-  $pat_id = !empty($_GET['pat_id']) ? $common->clean_string($_GET['pat_id']) : '';
-  $status = !empty($_GET['status']) ? $common->clean_string($_GET['status']) : '';
+  if(empty($action))
+  {
+    $s_tid    = !empty($_GET['tid']) ? $common->clean_string($_GET['tid']) : '';
+    $s_pat_id = !empty($_GET['pat_id']) ? $common->clean_string($_GET['pat_id']) : '';
+    $status = !empty($_GET['status']) ? $common->clean_string($_GET['status']) : '';
+  }
 
-  $results = getListTestPatient($pat_id, $_SESSION['is_psycho_login_id'], $tid, $status, '', '', '', $lang);
+  $results = getListTestPatient($s_pat_id, $_SESSION['is_psycho_login_id'], $s_tid, $status, '', '', '', $lang);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -260,8 +335,8 @@ if('test_question_psychologist' === $task)
   //Check & Clean String
   $psy_id = $common->clean_string($_GET['psy_id']);
 
-  $tpsy_id = $common->clean_string($_GET['id']);
-  $tid  = $common->clean_string($_GET['tid']);
+  $tpsy_id  = $common->clean_string($_GET['id']);
+  $tid      = $common->clean_string($_GET['tid']);
   $resultTestPsychologist = $common->find('test_psychologist', $condition = ['id' => $tpsy_id, 'test_id' => $tid, 'psychologist_id' => $psy_id], $type = 'one');
 
   if(empty($resultTestPsychologist))

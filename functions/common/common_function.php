@@ -1654,7 +1654,7 @@ function getListTestGroupByTmpQuestionPsy($test_id, $tpsy_id, $status, $fetch_ty
     }
     if($status === 2 && empty($row['id']))
     {
-      $condition .= ' AND tmp.id IS NULL ';
+      $condition .= ' AND ttmq.test_tmp_id IS NOT NULL AND tmp.id IS NULL  ';
     }
     if(!empty($slimit))
     {
@@ -1723,7 +1723,7 @@ function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $s
     }
     if($status === 2 && empty($row['id']))
     {
-      $condition .= ' AND tmp.id IS NULL ';
+      $condition .= ' AND ttmq.test_tmp_id IS NOT NULL AND tmp.id IS NULL ';
     }
     if(!empty($slimit))
     {
@@ -2642,13 +2642,42 @@ function getListTestQuesCondition($nrid, $group_by, $slimit)
     $query->execute();
     $rows = $query->fetchAll();
     if (count($rows) > 0) $total_data = $rows[0]['total'];
+
     return $rows;
   }
   catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: getListTestQuesCondition'.$e->getMessage();
   }
+
   return $result;
 }
+/**
+ * getListTestPsychologistCompleted description
+ * @param  int $psy_id is psychologist_id
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function getListTestPsychologistCompleted($psy_id, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql ='   SELECT t.* FROM `test_psychologist` tpg INNER JOIN test t ON t.id = tpg.test_id WHERE tpg.psychologist_id = :psy_id AND tpg.status = 2 AND t.lang = :lang GROUP BY t.id ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':psy_id', (int)$psy_id, PDO::PARAM_INT);
+    $stmt->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $stmt->execute();
+    $row = $stmt->fetchAll();
+
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestPsychologistCompleted'.$e->getMessage();
+  }
+
+  return $result;
+}
+
 
 ?>

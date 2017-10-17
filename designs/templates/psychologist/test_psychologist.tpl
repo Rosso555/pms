@@ -2,7 +2,7 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$psychologist_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_home}{$multiLang.text_home}{else}No Translate(Key Lang: text_home){/if}</li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_test_psychologist}{$multiLang.text_test_psychologist}{else}No Translate(Key Lang: text_test_psychologist){/if}</li>
 </ul>
 <div class="panel panel-primary">
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if} {if $multiLang.text_list}{$multiLang.text_list}{else}No Translate(Key Lang: text_list){/if}</h4></div>

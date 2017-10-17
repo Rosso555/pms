@@ -184,7 +184,7 @@
             <td><span class="badge">{$data.count_answer}</span></td>
             <td>{$data.view_order}</td>
             <td>
-              <a href="{$admin_file}?task=test_question&amp;action=edit&amp;tid={$smarty.get.tid}&amp;kwd={$smarty.get.kwd}&amp;id={$data.id}&amp;next={$smarty.get.next}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
+              <a href="{$admin_file}?task=test_question&amp;action=edit{if $smarty.get.tid}&amp;tid={$smarty.get.tid}{/if}&amp;kwd={$smarty.get.kwd}&amp;id={$data.id}&amp;next={$smarty.get.next}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->
               <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$data.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang:button_delete){/if}"><i class="fa fa-trash-o"></i></button>
               <!-- Modal -->
@@ -197,10 +197,10 @@
                       <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate(Key Lang:text_confirmation){/if}</h4>
                     </div>
                     <div class="modal-body">
-                      <p>{if $multiLang.text_delete_test_question_confirmation}{$multiLang.text_delete_test_question_confirmation}{else}No Translate(Key Lang:text_delete_test_question_confirmation){/if}<b>({$data.q_title|escape})</b>?</p>
+                      <p>{if $multiLang.text_delete_test_question_confirmation}{$multiLang.text_delete_test_question_confirmation}{else}No Translate(Key Lang:text_delete_test_question_confirmation){/if} <b>({$data.q_title|escape})</b>?</p>
                     </div>
                     <div class="modal-footer">
-                      <a href="{$admin_file}?task=test_question&amp;action=delete&amp;tid={$data.test_id}&amp;kwd={$smarty.get.kwd}&amp;id={$data.id}&amp;next={$smarty.get.next}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</i></a>
+                      <a href="{$admin_file}?task=test_question&amp;action=delete{if $smarty.get.tid}&amp;tid={$data.test_id}{/if}&amp;kwd={$smarty.get.kwd}&amp;id={$data.id}&amp;next={$smarty.get.next}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</i></a>
                       <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</i></button>
                     </div>
                   </div>

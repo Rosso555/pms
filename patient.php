@@ -53,12 +53,16 @@ if('page_not_found' === $task)
 //Task: test_completed
 if('test_completed' === $task)
 {
-  $smarty_appform->assign('getTestById', $common->find('test', $condition = ['id' => $_GET['tid'], 'lang' => $lang], $type = 'one'));
+  //Check & Clean String
+  $tid = $common->clean_string($_GET['tid']);
+  $smarty_appform->assign('getTestById', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
   $smarty_appform->display('common/test_completed.tpl');
   exit;
 }
+
 //Task:Test Response
-if ('test_response' === $task) {
+if ('test_response' === $task)
+{
   $cate = !empty($_GET['category']) ? $_GET['category'] : '';
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $test_response_result = get_test_response($kwd, $cate, $_SESSION['is_patient_login_id']);
@@ -67,6 +71,7 @@ if ('test_response' === $task) {
   $smarty_appform->display('patient/test_response.tpl');
   exit;
 }
+
 //Task: Test Question
 if('test_question' === $task)
 {
@@ -335,7 +340,7 @@ if('test_question' === $task)
   }
 
   $sumStep = COUNT($resultTestGroup) - COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''));
-  // echo COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''));
+
   if(!empty($error))
   {
     $smarty_appform->assign('testTmpQuestion', $newResultSubmitError);
@@ -379,13 +384,7 @@ if('back_step' === $task && !empty($_GET['tid']))
   //Get test_tmp By id
   $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $tid, 'test_patient_id' => $tpid], $type = 'one');
   $resultTestTmpQue = $common->find('test_tmp_question', $condition = ['test_tmp_id' => $resultTestTmp['id'], 'test_group_id' => $tgid], $type = 'all');
-  // if(!empty($resultTestTmpQue))
-  // {
-  //   foreach ($resultTestTmpQue as $k => $va) {
-  //     //Delete: test_tmp_question
-  //     $common->delete('test_tmp_question', $field = ['id' => $va['id']]);
-  //   }
-  // }
+
   $common->update('test_tmp_question', $field = ['status' => 1], $condition = ['test_tmp_id' => $resultTestTmp['id'], 'test_group_id' => $tgid]);
   header('Location:'.$patient_file.'?task=test_question&tid='.$tid.'&id='.$tpid);
   exit;
