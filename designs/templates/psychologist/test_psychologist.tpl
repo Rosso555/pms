@@ -12,7 +12,7 @@
         <form class="form-inline" role="form" action="{$psychologist_file}" method="GET" style="padding: 1px 0px 12px 1px;">
           <input type="hidden" name="task" value="test_psychologist">
           <div class="form-group select2_search_inline" style="margin-bottom:5px;">
-            <select class="form-control select2" name="cid">
+            <select class="form-control select2_search" name="cid">
               <option value="">---Select Category---</option>
               {foreach from=$category item=v}
               <option value="{$v.id}" {if $smarty.get.cid eq $v.id}selected{/if}>{$v.name}</option>
@@ -20,7 +20,7 @@
             </select>
           </div>
           <div class="form-group select2_search_inline" style="margin-bottom:5px;">
-            <select class="form-control select2" name="tid">
+            <select class="form-control select2_search" name="tid">
               <option value="">---Select Test---</option>
               {foreach from=$test item=v}
               <option value="{$v.id}" {if $smarty.get.tid eq $v.id}selected{/if}>{$v.title}</option>
@@ -28,7 +28,7 @@
             </select>
           </div>
           <div class="form-group select2_search_inline" style="margin-bottom:5px;">
-            <select class="form-control select2" name="status">
+            <select class="form-control select2_search" name="status">
               <option value="">--- Select Status ---</option>
               <option value="1" {if $smarty.get.status eq 1}selected{/if}>Pendding...</option>
               <option value="2" {if $smarty.get.status eq 2}selected{/if}>Completed</option>

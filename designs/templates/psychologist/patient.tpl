@@ -9,36 +9,35 @@
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
-        <div class="row">
-          <form class="form-inline">
-            <input type="hidden" name="task" value="patient">
-            <div class="form-group col-md-2" style="margin-bottom:5px;">
-              <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
-                <i class="fa fa-plus-circle"></i> Add Patient
-              </button>
-            </div>
-            <div class="form-group col-md-3" style="margin-bottom:5px;">
-              <select class="form-control select2" name="gender" style="width:100%">
-                <option value="">--- Select Gender ---</option>
-                <option value="1" {if $smarty.get.gender eq 1}selected{/if}>Male</option>
-                <option value="2" {if $smarty.get.gender eq 3}selected{/if}>Female</option>
-              </select>
-            </div>
-            <div class="form-group col-md-3" style="margin-bottom:5px;">
-              <select class="form-control select2" name="status" style="width:100%">
-                <option value="">--- Select Status ---</option>
-                <option value="1" {if $smarty.get.status eq 1}selected{/if}>Active</option>
-                <option value="2" {if $smarty.get.status eq 2}selected{/if}>Stop</option>
-              </select>
-            </div>
-            <div class="form-group col-md-4" style="margin-bottom:5px;">
-              <input type="text" class="form-control" placeholder="Enter name" name="kwd" value="{$smarty.get.kwd}">
-            </div>
-            <div class="form-group col-md-4" style="margin-bottom:5px;">
-              <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
-            </div>
-          </form>
-        </div>
+        <form class="form-inline">
+          <input type="hidden" name="task" value="patient">
+          <div class="form-group" style="margin-bottom:5px;">
+            <button class="btn btn-primary collapsed" type="button" data-toggle="collapse" data-target="#demo" aria-expanded="false" aria-controls="collapseExample">
+              <i class="fa fa-plus-circle"></i> Add Patient
+            </button>
+          </div>
+          &nbsp;&nbsp;&nbsp;
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2_search" name="gender" style="width:100%">
+              <option value="">--- Select Gender ---</option>
+              <option value="1" {if $smarty.get.gender eq 1}selected{/if}>Male</option>
+              <option value="2" {if $smarty.get.gender eq 3}selected{/if}>Female</option>
+            </select>
+          </div>
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2_search" name="status" style="width:100%">
+              <option value="">--- Select Status ---</option>
+              <option value="1" {if $smarty.get.status eq 1}selected{/if}>Active</option>
+              <option value="2" {if $smarty.get.status eq 2}selected{/if}>Stop</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:5px;">
+            <input type="text" class="form-control" placeholder="Enter name" name="kwd" value="{$smarty.get.kwd}">
+          </div>
+          <div class="form-group" style="margin-bottom:5px;">
+            <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
+          </div>
+        </form>
         <div id="demo" class="collapse {if $error OR $editPatient.id}in{/if}">
           {if $editPatient.id}
           <form action="{$psychologist_file}?task=patient&amp;action=edit&amp;id={$editPatient.id}" method="post">

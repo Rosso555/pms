@@ -334,7 +334,6 @@ if('test_question_psychologist' === $task)
 {
   //Check & Clean String
   $psy_id = $common->clean_string($_GET['psy_id']);
-
   $tpsy_id  = $common->clean_string($_GET['id']);
   $tid      = $common->clean_string($_GET['tid']);
   $resultTestPsychologist = $common->find('test_psychologist', $condition = ['id' => $tpsy_id, 'test_id' => $tid, 'psychologist_id' => $psy_id], $type = 'one');
@@ -524,7 +523,7 @@ if('test_question_psychologist' === $task)
           }
           //Clear sesson
           unset($_SESSION['tgroupid']);
-          header('Location:'.$psychologist_file.'?task=result_test_psychologist&tid='.$tid.'&psy_id='.$psy_id.'&id='.$tpsy_id);
+          header('Location:'.$psychologist_file.'?task=result_test_psychologist&tid='.$tid.'&psy_id='.$psy_id.'&rsid='.$responseid.'&id='.$tpsy_id);
           exit;
         }//End Condition test no group
 
@@ -545,6 +544,7 @@ if('test_question_psychologist' === $task)
   }
   //Get Test Group By Tmp Question
   $resultTestGroupTmpQue = getListTestGroupByTmpQuestionPsy($tid, $tpsy_id, $status = 1, $fetch_type = 'all', $slimit = '');
+
   if(COUNT($resultTestGroup) > 0)
   {
     if(!empty($resultTestGroupTmpQue))

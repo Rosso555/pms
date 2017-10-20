@@ -1661,14 +1661,14 @@ function getListTestGroupByTmpQuestionPsy($test_id, $tpsy_id, $status, $fetch_ty
       $setLimit .= ' LIMIT 1';
     }
 
-
     $sql= ' SELECT tg.* FROM test_group tg
-              LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id
+              LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id AND tmp.test_psychologist_id = :tpsy_id
               LEFT JOIN test_tmp_question ttmq ON ttmq.test_group_id = tg.id AND ttmq.test_tmp_id = tmp.id
             WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
 
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
     if(!empty($row['id'])) $query->bindValue(':tmp_id', (int)$row['id'], PDO::PARAM_INT);
     $query->execute();
 
@@ -1730,14 +1730,14 @@ function getListTestGroupByTmpQuestion($test_id, $tpid, $status, $fetch_type, $s
       $setLimit .= ' LIMIT 1';
     }
 
-
     $sql= ' SELECT tg.* FROM test_group tg
-              LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id
+              LEFT JOIN test_tmp tmp ON tmp.test_id = tg.test_id AND tmp.test_patient_id = :tpid
               LEFT JOIN test_tmp_question ttmq ON ttmq.test_group_id = tg.id AND ttmq.test_tmp_id = tmp.id
             WHERE tg.test_id = :test_id '.$condition.' GROUP BY tg.id '.$orderBy.$setLimit;
 
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':tpid', (int)$tpid, PDO::PARAM_INT);
     if(!empty($row['id'])) $query->bindValue(':tmp_id', (int)$row['id'], PDO::PARAM_INT);
     $query->execute();
 
