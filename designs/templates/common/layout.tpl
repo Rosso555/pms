@@ -92,7 +92,7 @@ $(document).ready(function(){
 		});
 
 		//Run function when browser resizes
-		$(window).resize( resizeBrowser );
+		$(window).resize( resizeBrowser, resizeBrowserBoxTest );
 
 		function resizeBrowser(){
 			var width = window.innerWidth;
@@ -104,7 +104,21 @@ $(document).ready(function(){
 				$('.select2_search_inline > .select2_search, .select2_search_inline > .select2-container').attr('style', 'width: 220px;');
 			}
 		}
-		//Run function after finished loading
+		
+    function resizeBrowserBoxTest() {
+      $('.body-test-body').removeAttr("style");
+      var boxTestCenter = document.getElementsByClassName("body-test-body");
+      var sumHight = 0;
+      for (var i = 0; i < boxTestCenter.length; i++) {
+        if(boxTestCenter[i].offsetHeight > sumHight) {
+          sumHight = boxTestCenter[i].offsetHeight;
+        }
+      }
+      $('.body-test-body').css({ 'height': sumHight+'px' });
+    }
+
+    //Run function after finished loading
+    resizeBrowserBoxTest();
 		resizeBrowser();
 
 });

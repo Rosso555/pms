@@ -46,19 +46,21 @@
       {foreach from=$listTestPsychologist item=data key=k}
       <div class="col-md-6 col-sm-12">
         <div class="body-test">
-          <h3 class="margin-clear"> {$data.title|escape}</h3>
-          <p class="small-90">
-            <i class="fa fa-tag" aria-hidden="true"></i> {$data.catName|escape} &nbsp;/&nbsp;
-            <i class="fa fa-calendar" aria-hidden="true"></i> {$data.created_at|date_format:"%B %e, %Y"} &nbsp;/&nbsp;
-            {* <i class="fa fa-user" aria-hidden="true"></i> <a href="{$psychologist_file}?pat_id={$data.patient_id}">{$data.username}</a> &nbsp;/&nbsp; *}
-            {if $data.test_tmp_status}
-            <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span>
-            {else}
-            <span class="label label-info"><i class="fa fa-file-text" aria-hidden="true"></i> New Assign</span>
-            {/if}
-            <!-- <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span> -->
-          </p>
-          <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
+          <div class="body-test-body">
+            <h3 class="margin-clear"> {$data.title|escape}</h3>
+            <p class="small-90">
+              <i class="fa fa-tag" aria-hidden="true"></i> {$data.catName|escape} &nbsp;/&nbsp;
+              <i class="fa fa-calendar" aria-hidden="true"></i> {$data.created_at|date_format:"%B %e, %Y"} &nbsp;/&nbsp;
+              {* <i class="fa fa-user" aria-hidden="true"></i> <a href="{$psychologist_file}?pat_id={$data.patient_id}">{$data.username}</a> &nbsp;/&nbsp; *}
+              {if $data.test_tmp_status}
+              <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span>
+              {else}
+              <span class="label label-info"><i class="fa fa-file-text" aria-hidden="true"></i> New Assign</span>
+              {/if}
+              <!-- <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span> -->
+            </p>
+            <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
+          </div>
           <div class="body-test-footer">
             <a href="{$psychologist_file}?task=test_question_psychologist&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
               {if $data.test_tmp_status}Continue Test{else}Start Test{/if} &nbsp;&nbsp;<i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
@@ -78,73 +80,6 @@
     </div>
     {/if}
     <br>
-
-    {* <div class="table-responsive">
-      <table class="table table-striped">
-        <thead>
-          <tr bgcolor="#eeeeee">
-            <th>{if $multiLang.text_category}{$multiLang.text_category}{else}No Translate(Key Lang: text_category){/if}</th>
-            <th>{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</th>
-            <th>{if $multiLang.text_status}{$multiLang.text_status}{else}No Translate(Key Lang: text_status){/if}</th>
-            <th width="100">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate(Key Lang: text_action){/if}</th>
-          </tr>
-        </thead>
-        {if $listTestPsychologist|@count gt 0}
-        <tbody>
-        {foreach from = $listTestPsychologist item = data key=k}
-          <tr>
-            <td>{$data.catName}</td>
-            <td>{$data.title}</td>
-            <td>
-              {if $data.status eq 1}
-              <span class="label label-warning">
-                <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Pendding...
-              </span>
-              {else}
-              <span class="label label-info">
-                <i class="fa fa-check-circle"></i> Completed
-              </span>
-              {/if}
-            </td>
-            <td>
-              <a href="{$psychologist_file}?task=test_question&amp;tid={$data.test_id}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top"
-              title="{if $multiLang.button_view}{$multiLang.button_view}{else}No Translate(Key Lang: button_view){/if}"><i class="fa fa-eye"></i></a>
-              <!-- Trigger the modal with a button -->
-              <button type="button" class="btn btn-danger btn-xs" {if $data.status eq 2}disabled{/if} data-toggle="modal" data-target="#myModal_{$data.id}" data-toggle1="tooltip" data-placement="top"
-              title="{if $data.status eq 1}{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}{else}{if $multiLang.button_can_not_delete}{$multiLang.button_can_not_delete}{else}No Translate(Key Lang: button_can_not_delete){/if}{/if}"><i class="fa fa-trash-o"></i></button>
-              <!-- Modal -->
-              <div class="modal fade" id="myModal_{$data.id}" role="dialog">
-                <div class="modal-dialog">
-                  <!-- Modal content-->
-                  <div class="panel panel-primary modal-content">
-                    <div class="panel-heading modal-header">
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate(Key Lang: text_confirmation){/if}</h4>
-                    </div>
-                    <div class="modal-body">
-                      <p>
-                        {if $multiLang.text_confirm_delete}{$multiLang.text_confirm_delete}{else}No Translate(Key Lang: text_confirm_delete){/if}
-                         <b>({$data.username|escape} ~ {$data.title|escape})</b>?</p>
-                    </div>
-                    <div class="modal-footer">
-                      <a href="{$psychologist_file}?task=test_psychologist&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</i></a>
-                      <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- Modal -->
-            </td>
-          </tr>
-        {/foreach}
-        </tbody>
-        {else}
-        <tr>
-          <td colspan="4"><h4 style="text-align:center">{if $multiLang.text_there_are_no_record}{$multiLang.text_there_are_no_record}{else}No Translate (Key Lang: text_there_are_no_record){/if}</h4></td>
-        </tr>
-        {/if}
-      </table>
-    </div><!--table-responsive  --> *}
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->

@@ -54,6 +54,10 @@
   color: #00897b;
 }
 
+.body-test-body {
+  border: 1px solid #fafafa;
+}
+
 .body-test-footer .btn {
   background-image: none;
   border-color: #00897b;
