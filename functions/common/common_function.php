@@ -370,6 +370,41 @@ function listCategory($kwd, $lang)
   return $result;
 }
 /**
+ * listVillage
+ * @param  string $kwd is keyword
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function listVillage($kwd, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+    if(!empty($kwd))
+    {
+      $condition .= ' AND name LIKE :kwd ';
+    }
+
+    $sql = ' SELECT *, (SELECT COUNT(*) FROM `village` WHERE lang = :lang '.$condition.') AS total FROM `village` WHERE lang = :lang '.$condition.' ORDER BY id DESC LIMIT :offset, :limit ';
+    $query = $connected->prepare($sql);
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'. $kwd .'%', PDO::PARAM_STR);
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: listVillage'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
  * checkDeleteCategory
  * @param  int $id is category_id
  * @return array or boolean
@@ -387,6 +422,27 @@ function checkDeleteCategory($id)
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: checkDeleteCategory'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * checkDeleteVillage
+ * @param  int $id is village_id
+ * @return array or boolean
+ */
+function checkDeleteVillage($id)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count, v.name FROM `psychologist` psy INNER JOIN village v ON v.id = psy.village_id WHERE psy.village_id = :id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':id', (int)$id, PDO::PARAM_INT);
+    $query->execute();
+    return $query->fetch();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: checkDeleteVillage'.$e->getMessage();
   }
   return $result;
 }

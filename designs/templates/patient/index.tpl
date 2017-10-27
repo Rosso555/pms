@@ -5,19 +5,11 @@
   <li class="active">{if $multiLang.text_home}{$multiLang.text_home}{else}No Translate(Key Lang: text_home){/if}</li>
 </ul>
 <div class="panel panel-primary">
-  <div class="panel-heading"><h3 class="panel-title">Welcome! {$smarty.session.is_patient_username}</h3></div>
+  <div class="panel-heading"><h3 class="panel-title">{if $smarty.get.task eq 'test_uncompleted'}Test Uncompleted!{else}Welcome! {$smarty.session.is_patient_username}{/if}</h3></div>
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
         <form class="form-inline" role="form" action="{$psychologist_file}" method="GET">
-          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
-            <select class="form-control select2_search" name="stus" style="width:100%;">
-              <option value="">---Select Status---</option>
-              <!-- assign value 3 is new assign test to patient -->
-              <option value="3" {if $smarty.get.stus eq 3}selected{/if}>New</option>
-              <option value="1" {if $smarty.get.stus eq 1}selected{/if}>Not Completed</option>
-            </select>
-          </div>
           <div class="form-group" style="margin-bottom:5px;">
 						<div class="input-group">
 							<input id="f_date" class="form-control" type="text" placeholder="From Date" name="f_date" value="{$smarty.get.f_date}">

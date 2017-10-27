@@ -5,7 +5,7 @@
   <li class="active">{if $multiLang.text_home}{$multiLang.text_home}{else}No Translate(Key Lang: text_home){/if}</li>
 </ul>
 <div class="panel panel-primary">
-  <div class="panel-heading"><h4 class="panel-title">Test Patient Not Complete</h4></div>
+  <div class="panel-heading"><h4 class="panel-title">Test patient doesn't completed.</h4></div>
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">

@@ -376,6 +376,88 @@ if('category' === $task)
   $smarty_appform->display('admin/category.tpl');
   exit;
 }
+//task category
+if('town_village' === $task)
+{
+  if(empty($_POST)) unset($_SESSION['category']);
+
+  $error = array();
+  //action add
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      //get value from form
+      $name = $common->clean_string($_POST['name']);
+      //add value to session to use in template
+      $_SESSION['town_village'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //Add test
+      if(0 === count($error))
+      {
+        $common->save('village', $field = ['name' => $name, 'lang' => $lang]);
+        //unset session
+        unset($_SESSION['town_village']);
+        //Redirect
+        header('location: '.$admin_file.'?task=town_village');
+        exit;
+      }
+    }
+  }
+
+  //action edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $name = $common->clean_string($_POST['name']);
+      $id   = $common->clean_string($_POST['id']);
+      //add value to session to use in template
+      $_SESSION['town_village'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //update test
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('village', $field = ['name' => $name, 'lang' => $lang], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['town_village']);
+        //Redirect
+        header('location: '.$admin_file.'?task=town_village');
+        exit;
+      }
+    }
+    $smarty_appform->assign('getVillageByID', $common->find('village', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  //action delete category
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $result = checkDeleteVillage($_GET['id']);
+    
+    if('0' === $result['total_count'])
+    {
+      $common->delete('village', $field = ['id' => $_GET['id']]);
+    }else {
+      setcookie('checkVillage', $result['name'], time() + 5);
+    }
+    header('location: '.$admin_file.'?task=town_village');
+    exit;
+  }
+
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $result = listVillage($kwd, $lang);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('listVillage', $result);
+  $smarty_appform->display('admin/admin_town_village.tpl');
+  exit;
+}
 //task permission
 if('staff_permission' === $task)
 {
@@ -4245,7 +4327,6 @@ if('ajax' === $task)
     exit;
   }
 }
-
 //task report staff activity_log
 if('psychologist_activity' === $task)
 {

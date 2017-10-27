@@ -28,6 +28,8 @@ $smarty_appform->assign('getLanguage', $common->find('language', $condition = nu
 //Change language on template
 $smarty_appform->assign('multiLang', getMultilang($lang));
 
+$reListTestPatUncompleted = getListTestPatient($_SESSION['is_patient_login_id'], '', $tid, $status = 1, $tmpstus = 1, $f_date, $t_date, $lang);
+$smarty_appform->assign('unCompleted', COUNT($reListTestPatUncompleted));
 //task: logout by clear session
 if('logout' === $task)
 {
@@ -491,11 +493,28 @@ if('test_save_draft' === $task)
   exit;
 }
 
-$tmpstus= !empty($_GET['stus']) ? $_GET['stus'] : '';
+if('test_uncompleted' === $task)
+{
+  // $tmpstus= !empty($_GET['stus']) ? $_GET['stus'] : '3';
+  $f_date = !empty($_GET['f_date']) ? $_GET['f_date'] : '';
+  $t_date = !empty($_GET['t_date']) ? $_GET['t_date'] : '';
+
+  $results = getListTestPatient($_SESSION['is_patient_login_id'], '', $tid, $status = 1, $tmpstus = 1, $f_date, $t_date, $lang);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('testPatient', $results);
+  $smarty_appform->display('patient/index.tpl');
+  exit;
+}
+
+// $tmpstus= !empty($_GET['stus']) ? $_GET['stus'] : '3';
 $f_date = !empty($_GET['f_date']) ? $_GET['f_date'] : '';
 $t_date = !empty($_GET['t_date']) ? $_GET['t_date'] : '';
 
-$results = getListTestPatient($_SESSION['is_patient_login_id'], '', $tid, $status = 1, $tmpstus, $f_date, $t_date, $lang);
+$results = getListTestPatient($_SESSION['is_patient_login_id'], '', $tid, $status = 1, $tmpstus = 3, $f_date, $t_date, $lang);
 
 (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
 SmartyPaginate::assign($smarty_appform);
