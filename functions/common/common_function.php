@@ -2735,5 +2735,46 @@ function getListTestPsychologistCompleted($psy_id, $lang)
   return $result;
 }
 
+function getPsychologistByIdCodePwd($psy_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql =' SELECT psy.*, CONCAT(SUBSTRING(psy.last_name, 1, 4),"",SUBSTRING(v.name, 1, 3)) as code_pwd FROM `psychologist` psy
+              INNER JOIN village v ON v.id = psy.village_id
+            WHERE psy.id = :psy_id ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':psy_id', (int)$psy_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch();
+
+    return $row;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getPsychologistByIdCodePwd'.$e->getMessage();
+  }
+
+  return $result;
+}
+
+function check_code_pwd($pwd)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql =' SELECT COUNT(*) AS total_count FROM `patient` WHERE password = :pwd ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':pwd', (string)$pwd, PDO::PARAM_STR);
+    $stmt->execute();
+    $row = $stmt->fetch();
+
+    return $row['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: check_code_pwd'.$e->getMessage();
+  }
+
+  return $result;
+}
 
 ?>

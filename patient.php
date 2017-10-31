@@ -28,7 +28,7 @@ $smarty_appform->assign('getLanguage', $common->find('language', $condition = nu
 //Change language on template
 $smarty_appform->assign('multiLang', getMultilang($lang));
 
-$reListTestPatUncompleted = getListTestPatient($_SESSION['is_patient_login_id'], '', $tid, $status = 1, $tmpstus = 1, $f_date, $t_date, $lang);
+$reListTestPatUncompleted = getListTestPatient($_SESSION['is_patient_login_id'], '', $tid = '', $status = 1, $tmpstus = 1, $f_date, $t_date, $lang);
 $smarty_appform->assign('unCompleted', COUNT($reListTestPatUncompleted));
 //task: logout by clear session
 if('logout' === $task)
@@ -485,11 +485,11 @@ if('test_save_draft' === $task)
         $resultValue = true;
       }//End foreach
     }
-
-
+   $reListTestPatUncompleted = getListTestPatient($_SESSION['is_patient_login_id'], '', $tid = '', $status = 1, $tmpstus = 1, $f_date, $t_date, $lang);
   }
+
   header('Content-type: application/json');
-  echo json_encode($resultValue);
+  echo json_encode(array('status' => $resultValue, 'unCompleted' => COUNT($reListTestPatUncompleted)));
   exit;
 }
 

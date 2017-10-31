@@ -438,7 +438,7 @@ if('town_village' === $task)
   if('delete' === $action && !empty($_GET['id']))
   {
     $result = checkDeleteVillage($_GET['id']);
-    
+
     if('0' === $result['total_count'])
     {
       $common->delete('village', $field = ['id' => $_GET['id']]);
@@ -931,6 +931,7 @@ if('patient' === $task)
       $gender = $common->clean_string($_POST['gender']);
       $age    = $common->clean_string($_POST['age']);
       $password = $common->clean_string($_POST['password']);
+
       //add value to session to use in template
       $_SESSION['patient'] = $_POST;
       //form validation
@@ -1037,6 +1038,16 @@ if('patient' === $task)
     $deleted_at = date("Y-m-d");
     $common->update('patient', $field = ['deleted_at' => $deleted_at], $condition = ['id' => $_GET['id']]);
     header('location:'.$admin_file.'?task=patient');
+    exit;
+  }
+
+  if('get_code_pwd' === $action)
+  {
+    $psy_id = $common->clean_string($_GET['psy_id']);
+
+    $results = getPsychologistByIdCodePwd($psy_id);
+    header('Content-type: application/json');
+    echo json_encode($results);
     exit;
   }
 
@@ -4130,7 +4141,8 @@ if('copy_test_question' === $task)
 // Task copy_test_answer "Copy Test, Answer, Answer Topic to other question"
 if('copy_test_answer' === $task)
 {
-  if($_POST){
+  if($_POST)
+  {
     $test_id      = $_POST['tid'];
     $test_que_id  = $_POST['tqid'];
     $question_id  = $_POST['question_id'];

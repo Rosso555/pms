@@ -54,9 +54,14 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="pwd"><span style="color:red">*</span> Password:</label>
+                  <label for="pwd"><span style="color:red">*</span> Password: {$error.pwd_existed}</label>
+                  <span style="color:red">Please enter one letter and 6 number.</span>
                   {if $error.password}<span style="color:red">Please enter password!</span>{/if}
-                  <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
+                  {if $error.pwd_existed}<span style="color:red">Password is existed!</span>{/if}
+                  <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-key" aria-hidden="true"></i> : <span id="code_pwd">{$psyCodePwd.code_pwd}</span></div>
+                    <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
+                  </div>
                 </div>
               </div>
             </div>

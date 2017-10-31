@@ -63,7 +63,7 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="email"><span style="color:red">*</span> Psychologist:</label>
-                    <select class="form-control select2" name="psy_id" style="width:100%;">
+                    <select class="form-control select2" name="psy_id" style="width:100%;" onchange="getCodePwd(this)">
                       <option value="">---Select Psychologist---</option>
                       {foreach from=$listPsychologist item=v}
                       <option value="{$v.id}" {if $editPatient.psychologist_id}{if $editPatient.psychologist_id eq $v.id}selected{/if}{else}{if $smarty.get.psy_id eq $v.id}selected{/if}{/if}>{$v.username}</option>
@@ -84,7 +84,10 @@
                   <div class="form-group">
                     <label for="pwd"><span style="color:red">*</span> Password:</label>
                     {if $error.password}<span style="color:red">Please enter password!</span>{/if}
-                    <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
+                    <div class="input-group">
+                      <div class="input-group-addon"><i class="fa fa-key" aria-hidden="true"></i> : <span id="code_pwd"></span></div>
+                      <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -242,7 +245,34 @@
         </table>
         {include file="common/paginate.tpl"}
       </div><!--table-responsive  -->
-    </div><!--End panel-heading-->
-  </div><!--End panel panel-primary-->
+  </div><!--End panel-heading-->
+</div><!--End panel panel-primary-->
 
-  {/block}
+{/block}
+
+{block name="javascript"}
+<script>
+  function getCodePwd(sel)
+  {
+    $.ajax({
+      type: "GET",
+      url: "{$admin_file}?task=patient&action=get_code_pwd&psy_id="+sel.value,
+      dataType:'json',
+      success: function(data) {
+        console.log(data);
+        if(data == false)
+        {
+          $('#code_pwd').text('');
+        } else {
+          $('#code_pwd').text(data.code_pwd);
+        }
+      },
+      error: function(){
+        //Show error here
+        alert("Cannot get data. Please try again later.");
+        location.reload();
+      }
+    });//End Ajax
+  }
+</script>
+{/block}

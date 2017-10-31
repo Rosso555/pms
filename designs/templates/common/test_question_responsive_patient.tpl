@@ -344,16 +344,17 @@ function save_draft()
       data: paramdata,
       success: function(data){
         var dataHTML = "";
-        if(data == true)
+        if(data.status == true)
         {
           //hide Loading gif
           $(".loader").hide();
         }
+        $("#unCompleted").text(data.unCompleted);
       },
       error: function(){
         //Show error here
         alert("Cannot save data. Please try again later.");
-        // location.reload();
+        location.reload();
       }
     });//End Ajax
   } else {
