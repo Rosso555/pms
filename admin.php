@@ -376,7 +376,7 @@ if('category' === $task)
   $smarty_appform->display('admin/category.tpl');
   exit;
 }
-//task category
+//task: town_village
 if('town_village' === $task)
 {
   if(empty($_POST)) unset($_SESSION['category']);

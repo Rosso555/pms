@@ -254,6 +254,8 @@
 <script>
   function getCodePwd(sel)
   {
+    //show Loading gif
+    $(".loader").show();
     $.ajax({
       type: "GET",
       url: "{$admin_file}?task=patient&action=get_code_pwd&psy_id="+sel.value,
@@ -266,6 +268,8 @@
         } else {
           $('#code_pwd').text(data.code_pwd);
         }
+        //hide Loading gif
+        $(".loader").hide();
       },
       error: function(){
         //Show error here

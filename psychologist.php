@@ -36,16 +36,17 @@ if('logout' === $task) {
 }
 
 //redirect if no session
-if(empty($_SESSION['is_psycho_login_id'])) {
+if(empty($_SESSION['is_psycho_login_id']))
+{
   header('Location:'.$index_file.'?task=login');
   exit;
 }
 //Task: page not found
-if('page_not_found' === $task) {
+if('page_not_found' === $task)
+{
   $smarty_appform->display('common/page_error_404.tpl');
   exit;
 }
-
 //Task: patient
 if('patient' === $task)
 {
@@ -224,7 +225,6 @@ if('patient' === $task)
   $smarty_appform->display('psychologist/patient.tpl');
   exit;
 }
-
 //Task: Test Patient for assig test to patient
 if('test_patient' === $task)
 {
@@ -345,7 +345,6 @@ if('test_patient' === $task)
   $smarty_appform->display('psychologist/test_patient.tpl');
   exit;
 }
-
 //Task: Test Question
 if('test_question_psychologist' === $task)
 {
@@ -636,7 +635,6 @@ if('test_question_psychologist' === $task)
   $smarty_appform->display('psychologist/test_question_responsive_psychologist.tpl');
   exit;
 }
-
 //Task: test save draft
 if('test_save_draft' === $task)
 {
@@ -752,7 +750,7 @@ if('back_step' === $task && !empty($_GET['tid']))
   header('Location:'.$psychologist_file.'?task=test_question_psychologist&tid='.$tid.'&psy_id='.$psy_id.'&id='.$tpsy_id);
   exit;
 }
-
+//Task: test_psychologist
 if('test_psychologist' === $task)
 {
   $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
@@ -769,7 +767,7 @@ if('test_psychologist' === $task)
   $smarty_appform->display('psychologist/test_psychologist.tpl');
   exit;
 }
-//Task Result psychologist
+//Task: Result psychologist
 if('result_test_psychologist' === $task)
 {
     //Check & Clean String
@@ -835,6 +833,7 @@ if('result_test_psychologist' === $task)
     $smarty_appform->display('psychologist/result_test_psychologist.tpl');
     exit;
 }
+//Task: result_test_patient
 if('result_test_patient' === $task)
 {
   //Check & Clean String
@@ -1169,6 +1168,89 @@ if('test_question_patient' === $task)
   $smarty_appform->display('common/test_question_responsive_patient.tpl');
   exit;
 }
+//task: town_village
+if('town_village' === $task)
+{
+  if(empty($_POST)) unset($_SESSION['category']);
+
+  $error = array();
+  //action add
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      //get value from form
+      $name = $common->clean_string($_POST['name']);
+      //add value to session to use in template
+      $_SESSION['town_village'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //Add test
+      if(0 === count($error))
+      {
+        $common->save('village', $field = ['name' => $name, 'lang' => $lang]);
+        //unset session
+        unset($_SESSION['town_village']);
+        //Redirect
+        header('location: '.$psychologist_file.'?task=town_village');
+        exit;
+      }
+    }
+  }
+
+  //action edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $name = $common->clean_string($_POST['name']);
+      $id   = $common->clean_string($_POST['id']);
+      //add value to session to use in template
+      $_SESSION['town_village'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //update test
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('village', $field = ['name' => $name, 'lang' => $lang], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['town_village']);
+        //Redirect
+        header('location: '.$psychologist_file.'?task=town_village');
+        exit;
+      }
+    }
+    $smarty_appform->assign('getVillageByID', $common->find('village', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  //action delete category
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $result = checkDeleteVillage($_GET['id']);
+
+    if('0' === $result['total_count'])
+    {
+      $common->delete('village', $field = ['id' => $_GET['id']]);
+    }else {
+      setcookie('checkVillage', $result['name'], time() + 5);
+    }
+    header('location: '.$psychologist_file.'?task=town_village');
+    exit;
+  }
+
+  $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
+  $result = listVillage($kwd, $lang);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('listVillage', $result);
+  $smarty_appform->display('psychologist/town_village.tpl');
+  exit;
+}
+
 $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
 $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
 
