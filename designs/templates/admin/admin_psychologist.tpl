@@ -53,18 +53,57 @@
             <form action="{$admin_file}?task=psychologist&amp;action=add" method="post">
               {/if}
               <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <div class="form-group">
-                    <label for="username"><span style="color:red">*</span> Name:</label>
-                    {if $error.username}<span style="color:red">Please enter username!</span>{/if}
-                    <input type="text" class="form-control" id="username" placeholder="Enter name" name="username" value="{if $editPsychologist.username}{$editPsychologist.username}{else}{$smarty.session.psychologist.username}{/if}">
+                    <label for="first_name"><span style="color:red">*</span> First Name:</label>
+                    {if $error.first_name}<span style="color:red">Please enter first name!</span>{/if}
+                    <input type="text" class="form-control" id="first_name" placeholder="Enter first name" name="first_name" value="{if $editPsychologist.first_name}{$editPsychologist.first_name}{else}{$smarty.session.psychologist.first_name}{/if}">
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="last_name"><span style="color:red">*</span> Last Name:</label>
+                    {if $error.last_name}<span style="color:red">Please enter last name!</span>{/if}
+                    <input type="text" class="form-control" id="last_name" placeholder="Enter last name" name="last_name" value="{if $editPsychologist.last_name}{$editPsychologist.last_name}{else}{$smarty.session.psychologist.last_name}{/if}">
+                  </div>
+                </div>
+                <div class="col-md-4">
                   <div class="form-group">
                     <label for="pwd"><span style="color:red">*</span> Password:</label>
                     {if $error.password}<span style="color:red">Please enter password!</span>{/if}
                     <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPsychologist.password}{$editPsychologist.password}{else}{$smarty.session.psychologist.password}{/if}">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="village"><span style="color:red">*</span> Village:</label>
+                    {if $error.village}<span style="color:red">Please enter village!</span>{/if}
+                    <select class="form-control" name="village" id="village">
+                      <option value="">---Select---</option>
+                      {foreach from=$village item=v}
+                      <option value="{$v.id}" {if $editPsychologist.village_id}{if $editPsychologist.village_id eq $v.id}selected{/if}{else}{if $smarty.session.psychologist.village eq $v.id}selected{/if}{/if}>{$v.name}</option>
+                      {/foreach}
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="gender"><span style="color:red;">*</span> Gender:</label>
+                    {if $error.gender}<span style="color:red">Please select gender!</span>{/if}
+                    <select class="form-control" name="gender" id="gender">
+                      <option value="1">Male</option>
+                      <option value="2">Female</option>
+                      <option value="3">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="age"><span style="color:red;">*</span> Age:</label>
+                    {if $error.age}<span style="color:red">Please enter age!</span>{/if}
+                    <input type="text" name="age" class="form-control" value="{if $editPsychologist.age}{$editPsychologist.age}{else}{$smarty.session.psychologist.age}{/if}" id="age">
                   </div>
                 </div>
               </div>
@@ -118,7 +157,8 @@
         <table class="table table-striped">
           <thead>
             <tr bgcolor="#eeeeee">
-              <th>Psychologist</th>
+              <th>{if $multiLang.text_first_name}{$multiLang.text_first_name}{else}No Translate (Key Lang:text_first_name){/if}</th>
+              <th>{if $multiLang.text_last_name}{$multiLang.text_last_name}{else}No Translate (Key Lang:text_last_name){/if}</th>
               <th>Email</th>
               <th>Password</th>
               <th>Status</th>
@@ -129,7 +169,8 @@
             {if $listPsychologistData|@count gt 0}
             {foreach from=$listPsychologistData item=v}
             <tr>
-              <td>{$v.username}</td>
+              <td>{$v.first_name}</td>
+              <td>{$v.last_name}</td>
               <td>{$v.email}</td>
               <td>{$v.password}</td>
               <td>
@@ -180,30 +221,39 @@
                       </div>
                       <div class="modal-body">
                         <dl class="dl-horizontal">
-                          <dt>{if $multiLang.text_title_name}{$multiLang.text_title_name}{else}No Translate (Key Lang:text_title_name){/if}:</dt>
-                          <dd class="text-left">{$v.username}</dd>
+                          <dt>{if $multiLang.text_first_name}{$multiLang.text_first_name}{else}No Translate (Key Lang:text_first_name){/if}:</dt>
+                          <dd class="text-left">{$v.first_name}</dd>
+
+                          <dt>{if $multiLang.text_last_name}{$multiLang.text_last_name}{else}No Translate (Key Lang:text_last_name){/if}:</dt>
+                          <dd class="text-left">{$v.last_name}</dd>
+
+                          <dt>{if $multiLang.text_gender}{$multiLang.text_gender}{else}No Translate (Key Lang:text_gender){/if}:</dt>
+                          <dd class="text-left">{if $v.gender eq 1}Male{elseif $v.gender eq 2}Female{else}Other{/if}</dd>
+
+                          <dt>{if $multiLang.text_age}{$multiLang.text_age}{else}No Translate (Key Lang:text_age){/if}:</dt>
+                          <dd class="text-left">{$v.age}</dd>
 
                           <dt>{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}:</dt>
                           <dd class="text-left">{$v.password}</dd>
 
                           <dt>{if $multiLang.text_email}{$multiLang.text_email}{else}No Translate (Key Lang:text_email){/if}:<dt>
-                            <dd class="text-left">{$v.email}</dd>
+                          <dd class="text-left">{$v.email}</dd>
 
-                            <dt>{if $multiLang.text_job}{$multiLang.text_job}{else}No Translate (Key Lang:text_job){/if}:</dt>
-                            <dd class="text-left">{$v.job}</dd>
+                          <dt>{if $multiLang.text_job}{$multiLang.text_job}{else}No Translate (Key Lang:text_job){/if}:</dt>
+                          <dd class="text-left">{$v.job}</dd>
 
-                            <dt>{if $multiLang.text_address}{$multiLang.text_address}{else}No Translate (Key Lang:text_address){/if}:</dt>
-                            <dd class="text-left">{$v.address}</dd>
-                          </dl>
-                        </div>
-                        <div class="modal-footer">
-                          <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success"><i class="fa fa-edit"></i> {if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}</a>
-                          <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times-circle" aria-hidden="true"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
-                        </div>
+                          <dt>{if $multiLang.text_address}{$multiLang.text_address}{else}No Translate (Key Lang:text_address){/if}:</dt>
+                          <dd class="text-left">{$v.address}</dd>
+                        </dl>
+                      </div>
+                      <div class="modal-footer">
+                        <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success"><i class="fa fa-edit"></i> {if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}</a>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times-circle" aria-hidden="true"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
                       </div>
                     </div>
                   </div>
-                  <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
+                </div>
+                <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
                 </td>
               </tr>
               {/foreach}

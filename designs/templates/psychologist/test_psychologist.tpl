@@ -30,7 +30,7 @@
           <div class="form-group select2_search_inline" style="margin-bottom:5px;">
             <select class="form-control select2_search" name="status">
               <option value="">--- Select Status ---</option>
-              <option value="1" {if $smarty.get.status eq 1}selected{/if}>Pendding...</option>
+              <option value="1" {if $smarty.get.status eq 1}selected{/if}>New & Pendding...</option>
               <option value="2" {if $smarty.get.status eq 2}selected{/if}>Completed</option>
             </select>
           </div>
@@ -51,11 +51,14 @@
             <p class="small-90">
               <i class="fa fa-tag" aria-hidden="true"></i> {$data.catName|escape} &nbsp;/&nbsp;
               <i class="fa fa-calendar" aria-hidden="true"></i> {$data.created_at|date_format:"%B %e, %Y"} &nbsp;/&nbsp;
-              {* <i class="fa fa-user" aria-hidden="true"></i> <a href="{$psychologist_file}?pat_id={$data.patient_id}">{$data.username}</a> &nbsp;/&nbsp; *}
-              {if $data.test_tmp_status}
-              <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span>
+              {if $data.status eq 1}
+                {if $data.test_tmp_status}
+                <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span>
+                {else}
+                <span class="label label-info"><i class="fa fa-file-text" aria-hidden="true"></i> New Assign</span>
+                {/if}
               {else}
-              <span class="label label-info"><i class="fa fa-file-text" aria-hidden="true"></i> New Assign</span>
+                <span class="label label-success"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Completed</span>
               {/if}
               <!-- <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span> -->
             </p>

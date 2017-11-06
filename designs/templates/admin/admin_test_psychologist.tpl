@@ -24,7 +24,7 @@
             <select class="form-control select2_search" name="psy_id" style="width:100%;">
               <option value="">---Select Psychologist---</option>
               {foreach from=$psychologist item=v}
-              <option value="{$v.id}" {if $smarty.get.psy_id eq $v.id}selected{/if}>{$v.username}</option>
+              <option value="{$v.id}" {if $smarty.get.psy_id eq $v.id}selected{/if}>{$v.first_name} {$v.last_name}</option>
               {/foreach}
             </select>
           </div>
@@ -63,7 +63,7 @@
                   <select class="form-control select2" name="psy_id" style="width:100%">
                     <option value="">--- {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_psychologist}{$multiLang.text_psychologist}{else}No Translate(Key Lang: text_psychologist){/if} ---</option>
                     {foreach from=$psychologist item=data}
-                    <option value="{$data.id}" {if $smarty.session.test_psy.psy_id}{if $smarty.session.test_psy.psy_id eq $data.id}selected{/if}{else}{if $getTestPsy.psychologist_id eq $data.id}selected{/if}{/if}>{$data.username}</option>
+                    <option value="{$data.id}" {if $smarty.session.test_psy.psy_id}{if $smarty.session.test_psy.psy_id eq $data.id}selected{/if}{else}{if $getTestPsy.psychologist_id eq $data.id}selected{/if}{/if}>{$data.first_name} {$data.last_name}</option>
                     {/foreach}
                   </select>
                 </div>
@@ -113,7 +113,7 @@
         <tbody>
         {foreach from = $testPsychologist item = data key=k}
           <tr>
-            <td>{$data.username}</td>
+            <td>{$data.first_name}</td>
             <td>{$data.title}</td>
             <td>
               {if $data.status eq 1}

@@ -743,15 +743,15 @@ function getListTestPsychologist($psy_id, $tid, $cid, $status)
     }
 
     if(!empty($condition)) $where .= ' WHERE '.$condition;
- // ttmp.status AS test_tmp_status,
-    $sql =' SELECT tpsy.*, psy.username, t.category_id, t.title, t.description, c.name AS catName, ttmp.status AS test_tmp_status,
+
+    $sql =' SELECT tpsy.*, psy.username, psy.first_name, psy.last_name, t.category_id, t.title, t.description, c.name AS catName, ttmp.status AS test_tmp_status,
               (SELECT COUNT(*) FROM `test_psychologist` tpsy INNER JOIN psychologist psy ON psy.id = tpsy.psychologist_id INNER JOIN test t ON t.id = tpsy.test_id INNER JOIN category c ON c.id = t.category_id '.$where.') AS total_count
             FROM `test_psychologist` tpsy
               INNER JOIN psychologist psy ON psy.id = tpsy.psychologist_id
               INNER JOIN test t ON t.id = tpsy.test_id
               LEFT JOIN test_tmp ttmp ON ttmp.test_psychologist_id = tpsy.id
               INNER JOIN category c ON c.id = t.category_id'.$where.' ORDER BY tpsy.psychologist_id LIMIT :offset, :limit ';
-  // LEFT JOIN test_tmp ttmp ON ttmp.test_psychologist_id = tpsy.id
+
     $stmt = $connected->prepare($sql);
 
     if(!empty($tid))    $stmt->bindValue(':testid', $tid, PDO::PARAM_INT);
@@ -1988,7 +1988,7 @@ function getMessageResultTopic($tpid, $tpsy_id, $test_id, $lang)
       }
     }
 
-    if(!empty($newResult) && !empty($rowsTopic)){
+    if(!empty($newResult) && !empty($rowsTopic)) {
       foreach ($newResult as $key => $va) {
         // Check if has test topic hide
         if($rowsTopic['topic_id'] == $va['topic_id'])
@@ -2020,23 +2020,25 @@ function getMessageResultTopic($tpid, $tpsy_id, $test_id, $lang)
     }else {
       $newResultRe = $newResult;
     }
-
-      if(!empty($newResultRe)){
-        foreach ($newResultRe as $key => $va) {
-          //Get Result condition
-          $sql3 ='SELECT rt.message, t.id AS test_id, tp.name AS topic_name, tp.id AS topic_id, rt.view_order
-                  FROM `result_condition` rc
-                    INNER JOIN result rt ON rt.id = rc.show_result_id
-                    INNER JOIN test t ON t.id = rt.test_id
-                    INNER JOIN topic tp ON tp.id = rt.topic_id
-                  WHERE rc.result_id = :result_id GROUP BY rc.id ORDER BY rt.view_order ASC ';
-          $stmt3 = $connected->prepare($sql3);
-          $stmt3->bindValue(':result_id', (int)$va['result_id'], PDO::PARAM_INT);
-          $stmt3->execute();
-          $row3 = $stmt3->fetchAll();
+    if(!empty($newResultRe))
+    {
+      foreach ($newResultRe as $key => $va) {
+        //Get Result condition
+        $sql3 ='SELECT rt.message, t.id AS test_id, tp.name AS topic_name, tp.id AS topic_id, rt.view_order
+                FROM `result_condition` rc
+                  INNER JOIN result rt ON rt.id = rc.show_result_id
+                  INNER JOIN test t ON t.id = rt.test_id
+                  INNER JOIN topic tp ON tp.id = rt.topic_id
+                WHERE rc.result_id = :result_id GROUP BY rc.id ORDER BY rt.view_order ASC ';
+        $stmt3 = $connected->prepare($sql3);
+        $stmt3->bindValue(':result_id', (int)$va['result_id'], PDO::PARAM_INT);
+        $stmt3->execute();
+        $row3 = $stmt3->fetchAll();
+        if(!empty($va['result_id'])) {
           $newResultTest[] = array('topic_title' => $va['topic_title'], 'amount' => $va['amount'], 'message' => $va['message'], 're_condition' => $row3);
         }
       }
+    }
 
     return $newResultTest;
 
