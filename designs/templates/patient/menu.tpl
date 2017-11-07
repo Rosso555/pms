@@ -14,7 +14,7 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <li><a href="{$patient_file}?task=test_uncompleted"><i class="fa fa-question-circle" aria-hidden="true"></i> Uncompleted <span class="badge" style="background-color: #fff; color: #278ed2;" id="unCompleted">{$unCompleted}</span></a></li>
-        <li><a href="{$patient_file}?task=test_response"><i class="fa fa-recycle" aria-hidden="true"></i> Test Response</a></li>
+        <!-- <li><a href="{$patient_file}?task=test_response"><i class="fa fa-recycle" aria-hidden="true"></i> Test Response</a></li> -->
       </ul>
 
       <ul class="nav navbar-nav navbar-right">

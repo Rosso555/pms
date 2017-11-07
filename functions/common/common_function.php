@@ -2737,12 +2737,12 @@ function getListTestPsychologistCompleted($psy_id, $lang)
   return $result;
 }
 
-function getPsychologistByIdCodePwd($psy_id)
+function getPsychologistByIdCodePat($psy_id)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
-    $sql =' SELECT psy.*, CONCAT(SUBSTRING(psy.last_name, 1, 4),"",SUBSTRING(v.name, 1, 3)) as code_pwd FROM `psychologist` psy
+    $sql =' SELECT psy.*, CONCAT(SUBSTRING(psy.last_name, 1, 4),"",SUBSTRING(v.name, 1, 3)) as code_pat FROM `psychologist` psy
               INNER JOIN village v ON v.id = psy.village_id
             WHERE psy.id = :psy_id ';
     $stmt = $connected->prepare($sql);
@@ -2753,27 +2753,27 @@ function getPsychologistByIdCodePwd($psy_id)
     return $row;
   } catch (Exception $e) {
     $result = false;
-    if($debug)  echo 'Errors: getPsychologistByIdCodePwd'.$e->getMessage();
+    if($debug)  echo 'Errors: getPsychologistByIdCodePat'.$e->getMessage();
   }
 
   return $result;
 }
 
-function check_code_pwd($pwd)
+function check_code_pat($code)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
-    $sql =' SELECT COUNT(*) AS total_count FROM `patient` WHERE password = :pwd ';
+    $sql =' SELECT COUNT(*) AS total_count FROM `patient` WHERE code = :code ';
     $stmt = $connected->prepare($sql);
-    $stmt->bindValue(':pwd', (string)$pwd, PDO::PARAM_STR);
+    $stmt->bindValue(':code', (string)$code, PDO::PARAM_STR);
     $stmt->execute();
     $row = $stmt->fetch();
 
     return $row['total_count'];
   } catch (Exception $e) {
     $result = false;
-    if($debug)  echo 'Errors: check_code_pwd'.$e->getMessage();
+    if($debug)  echo 'Errors: check_code_pat'.$e->getMessage();
   }
 
   return $result;

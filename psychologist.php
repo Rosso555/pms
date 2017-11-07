@@ -65,19 +65,22 @@ if('patient' === $task)
       $phone  = $common->clean_string($_POST['phone']);
       $gender = $common->clean_string($_POST['gender']);
       $age    = $common->clean_string($_POST['age']);
+      $code   = $common->clean_string($_POST['code']);
       $password = $common->clean_string($_POST['password']);
-      $re_code_pwd = getPsychologistByIdCodePwd($_SESSION['is_psycho_login_id']);
-      $r_password = $re_code_pwd['code_pwd'].$password;
+
+      $re_code_pat = getPsychologistByIdCodePat($_SESSION['is_psycho_login_id']);
+      $r_code = $re_code_pat['code_pat'].$code;
 
       //add value to session to use in template
       $_SESSION['patient'] = $_POST;
       //form validation
-      if(empty($username))  $error['username']  = 1;
-      if(empty($email))   $error['email']   = 1;
-      if(empty($phone))   $error['phone']   = 1;
+      if(empty($username))$error['username']  = 1;
+      if(empty($email))   $error['email'] = 1;
+      if(empty($phone))   $error['phone'] = 1;
       if(empty($gender))  $error['gender']  = 1;
-      if(empty($age))     $error['age']     = 1;
-      if(empty($password))  $error['password']  = 1;
+      if(empty($age))     $error['age'] = 1;
+      if(empty($code))    $error['code']  = 1;
+      if(empty($password))$error['password']  = 1;
       if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
   		   $error['invalid_email'] = 1;
   		}
@@ -87,7 +90,7 @@ if('patient' === $task)
           $error['exist_email'] = 1;
         }
       }
-      if(check_code_pwd($r_password) > 0) $error['pwd_existed']  = 1;
+      if(check_code_pat($r_code) > 0) $error['code_existed']  = 1;
 
       //Save
       if(empty($id) && COUNT($error) === 0)
@@ -98,7 +101,8 @@ if('patient' === $task)
                                           'phone'   => $phone,
                                           'gender'  => $gender,
                                           'age'     => $age,
-                                          'password'=> $r_password]);
+                                          'password'=> $password,
+                                          'code'    => $r_code]);
         //unset session
         unset($_SESSION['patient']);
         //Redirect
@@ -167,19 +171,21 @@ if('patient' === $task)
       $phone  = $common->clean_string($_POST['phone']);
       $gender = $common->clean_string($_POST['gender']);
       $age    = $common->clean_string($_POST['age']);
+      $code   = $common->clean_string($_POST['code']);
       $password = $common->clean_string($_POST['password']);
-      $re_code_pwd = getPsychologistByIdCodePwd($_SESSION['is_psycho_login_id']);
-      $r_password = $re_code_pwd['code_pwd'].$password;
+      $re_code_pat = getPsychologistByIdCodePat($_SESSION['is_psycho_login_id']);
+      $r_code = $re_code_pat['code_pat'].$code;
 
       //add value to session to use in template
       $_SESSION['patient'] = $_POST;
       //form validation
-      if(empty($username))  $error['username']  = 1;
+      if(empty($username))$error['username']  = 1;
       if(empty($email))   $error['email']   = 1;
       if(empty($phone))   $error['phone']   = 1;
       if(empty($gender))  $error['gender']  = 1;
       if(empty($age))     $error['age']     = 1;
-      if(empty($password))  $error['password']  = 1;
+      if(empty($code))    $error['code']  = 1;
+      if(empty($password))$error['password']  = 1;
       if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
   		   $error['invalid_email'] = 1;
   		}
@@ -189,8 +195,8 @@ if('patient' === $task)
           $error['exist_email'] = 1;
         }
       }
-      $resultPat = $common->find('psychologist', $condition = ['id' => $id], $type = 'one');
-      if($resultPat['password'] !== $r_password && check_code_pwd($r_password) > 0) $error['pwd_existed']  = 1;
+      $resultPat = $common->find('patient', $condition = ['id' => $id], $type = 'one');
+      if($resultPat['code'] !== $r_code && check_code_pat($r_code) > 0) $error['code_existed']  = 1;
 
       //Update
       if(!empty($id) && COUNT($error) === 0)
@@ -200,7 +206,8 @@ if('patient' === $task)
                                             'phone'    => $phone,
                                             'gender'   => $gender,
                                             'age'      => $age,
-                                            'password' => $r_password],
+                                            'password' => $password,
+                                            'code'     => $r_code],
                                    $condition = ['id' => $id, 'psychologist_id' => $_SESSION['is_psycho_login_id']]);
         //unset session
         unset($_SESSION['patient']);
@@ -221,7 +228,7 @@ if('patient' === $task)
   SmartyPaginate::assign($smarty_appform);
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listPatient', $result);
-  $smarty_appform->assign('psyCodePwd', getPsychologistByIdCodePwd($_SESSION['is_psycho_login_id']));
+  $smarty_appform->assign('psyCodePat', getPsychologistByIdCodePat($_SESSION['is_psycho_login_id']));
   $smarty_appform->display('psychologist/patient.tpl');
   exit;
 }

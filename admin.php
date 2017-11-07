@@ -933,7 +933,10 @@ if('patient' === $task)
       $phone  = $common->clean_string($_POST['phone']);
       $gender = $common->clean_string($_POST['gender']);
       $age    = $common->clean_string($_POST['age']);
+      $code   = $common->clean_string($_POST['code']);
       $password = $common->clean_string($_POST['password']);
+      $re_code_pat = getPsychologistByIdCodePat($psy_id);
+      $r_code = $re_code_pat['code_pat'].$code;
 
       //add value to session to use in template
       $_SESSION['patient'] = $_POST;
@@ -943,7 +946,8 @@ if('patient' === $task)
       if(empty($phone))   $error['phone']   = 1;
       if(empty($gender))  $error['gender']  = 1;
       if(empty($age))     $error['age']     = 1;
-      if(empty($password))  $error['password']  = 1;
+      if(empty($code))    $error['code']  = 1;
+      if(empty($password))$error['password']  = 1;
       if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
         $error['invalid_email'] = 1;
       }
@@ -953,21 +957,26 @@ if('patient' === $task)
           $error['exist_email'] = 1;
         }
       }
+      if(check_code_pat($r_code) > 0) $error['code_existed']  = 1;
+
       //Save
       if(empty($id) && COUNT($error) === 0){
         $common->save('patient', $field =['psychologist_id' => $psy_id,
-        'username'=> $username,
-        'email'   => $email,
-        'phone'   => $phone,
-        'gender'  => $gender,
-        'age'     => $age,
-        'password'=> $password]);
+                                          'username'=> $username,
+                                          'email'   => $email,
+                                          'phone'   => $phone,
+                                          'gender'  => $gender,
+                                          'age'     => $age,
+                                          'password'=> $password,
+                                          'code'    => $r_code]);
         //unset session
         unset($_SESSION['patient']);
         //Redirect
         header('location: '.$admin_file.'?task=patient');
         exit;
       }
+      //if submit error.
+      $smarty_appform->assign('psyCodePat', getPsychologistByIdCodePat($_SESSION['patient']['psy_id']));
     }
   }//End action add
 
@@ -984,16 +993,20 @@ if('patient' === $task)
       $phone  = $common->clean_string($_POST['phone']);
       $gender = $common->clean_string($_POST['gender']);
       $age    = $common->clean_string($_POST['age']);
+      $code   = $common->clean_string($_POST['code']);
       $password = $common->clean_string($_POST['password']);
+      $re_code_pat = getPsychologistByIdCodePat($psy_id);
+      $r_code = $re_code_pat['code_pat'].$code;
       //add value to session to use in template
       $_SESSION['patient'] = $_POST;
       //form validation
-      if(empty($username))  $error['username']  = 1;
+      if(empty($username))$error['username']  = 1;
       if(empty($email))   $error['email']   = 1;
       if(empty($phone))   $error['phone']   = 1;
       if(empty($gender))  $error['gender']  = 1;
       if(empty($age))     $error['age']     = 1;
-      if(empty($password))  $error['password']  = 1;
+      if(empty($code))    $error['code']  = 1;
+      if(empty($password))$error['password']  = 1;
       if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
         $error['invalid_email'] = 1;
       }
@@ -1006,12 +1019,13 @@ if('patient' === $task)
       //Update
       if(!empty($id) && COUNT($error) === 0){
         $common->update('patient', $field= ['psychologist_id' => $psy_id,
-        'username' => $username,
-        'email'    => $email,
-        'phone'    => $phone,
-        'gender'   => $gender,
-        'age'      => $age,
-        'password' => $password], $condition = ['id' => $_GET['id']]);
+                                            'username' => $username,
+                                            'email'    => $email,
+                                            'phone'    => $phone,
+                                            'gender'   => $gender,
+                                            'age'      => $age,
+                                            'password' => $password,
+                                            'code'     => $r_code], $condition = ['id' => $_GET['id']]);
         //unset session
         unset($_SESSION['patient']);
         //Redirect
@@ -1019,7 +1033,9 @@ if('patient' === $task)
         exit;
       }
     }
-    $smarty_appform->assign('editPatient', $common->find('patient', $condition = ['id' => $_GET['id']], $type='one'));
+    $resultPat = $common->find('patient', $condition = ['id' => $_GET['id']], $type='one');
+    $smarty_appform->assign('psyCodePat', getPsychologistByIdCodePat($resultPat['psychologist_id']));
+    $smarty_appform->assign('editPatient', $resultPat);
   }
 
   //Change staus patient
@@ -1048,7 +1064,7 @@ if('patient' === $task)
   {
     $psy_id = $common->clean_string($_GET['psy_id']);
 
-    $results = getPsychologistByIdCodePwd($psy_id);
+    $results = getPsychologistByIdCodePat($psy_id);
     header('Content-type: application/json');
     echo json_encode($results);
     exit;

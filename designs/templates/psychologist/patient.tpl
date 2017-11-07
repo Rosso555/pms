@@ -45,23 +45,30 @@
           <form action="{$psychologist_file}?task=patient&amp;action=add" method="post">
           {/if}
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label for="username"><span style="color:red">*</span> Name:</label>
                   {if $error.username}<span style="color:red">Please enter username!</span>{/if}
                   <input type="text" class="form-control" id="username" placeholder="Enter name" name="username" value="{if $editPatient.username}{$editPatient.username}{else}{$smarty.session.patient.username}{/if}">
                 </div>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group">
-                  <label for="pwd"><span style="color:red">*</span> Password: {$error.pwd_existed}</label>
-                  <span style="color:red">Please enter one letter and 6 number.</span>
+                  <label for="pwd"><span style="color:red">*</span> Password:</label>
                   {if $error.password}<span style="color:red">Please enter password!</span>{/if}
-                  {if $error.pwd_existed}<span style="color:red">Password is existed!</span>{/if}
+                  <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group" style="margin-bottom: 0px;">
+                  <label for="code"><span style="color:red">*</span> Code:</label>
+                  {if $error.code}<span style="color:red">Please enter code!</span>{/if}
+                  {if $error.code_existed}<span style="color:red">Code is existed!</span>{/if}
                   <div class="input-group">
-                    <div class="input-group-addon"><i class="fa fa-key" aria-hidden="true"></i> : <span id="code_pwd">{$psyCodePwd.code_pwd}</span></div>
-                    <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
+                    <div class="input-group-addon"><span id="code_pwd">{$psyCodePat.code_pat}</span></div>
+                    <input type="text" class="form-control" id="code" placeholder="Enter code" name="code" maxlength="7" value="{if $editPatient.code}{$editPatient.code|replace:$psyCodePat.code_pat:''}{else}{$smarty.session.patient.code}{/if}">
                   </div>
+                  <span style="color:red">Please enter code one letter and 6 number.</span>
                 </div>
               </div>
             </div>
@@ -127,6 +134,7 @@
             <th>Name</th>
             <th>Email</th>
             <th>Password</th>
+            <th>Code</th>
             <th>Phone</th>
             <th>Gender</th>
             <th>Age</th>
@@ -141,6 +149,7 @@
             <td>{$v.username}</td>
             <td>{$v.email}</td>
             <td>{$v.password}</td>
+            <td>{$v.code}</td>
             <td>{$v.phone}</td>
             <td>{if $v.gender eq 1}Male{else}Female{/if}</td>
             <td>{$v.age}</td>
@@ -190,7 +199,7 @@
                       <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h4>
                     </div>
                     <div class="modal-body">
-                      <p>{if $multiLang.text_confirm_delete}{$multiLang.text_confirm_delete}{else}No Translate (Key Lang:text_confirm_delete){/if} {$v.name}?</p>
+                      <p>{if $multiLang.text_confirm_delete}{$multiLang.text_confirm_delete}{else}No Translate (Key Lang:text_confirm_delete){/if} {$v.username}?</p>
                     </div>
                     <div class="modal-footer">
                       <a href="{$psychologist_file}?task=patient&amp;action=delete&amp;id={$v.id}" class="btn btn-danger btn-md"><i class="fa fa-check-circle-o"></i> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</a>

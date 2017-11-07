@@ -26,7 +26,7 @@
                 <select class="form-control select2_search" name="psy_id" style="width:100%;">
                   <option value="">---Select Psychologist---</option>
                   {foreach from=$listPsychologist item=v}
-                  <option value="{$v.id}" {if $smarty.get.psy_id eq $v.id}selected{/if}>{$v.username}</option>
+                  <option value="{$v.id}" {if $smarty.get.psy_id eq $v.id}selected{/if}>{$v.first_name} {$v.last_name}</option>
                   {/foreach}
                 </select>
               </div>
@@ -66,7 +66,7 @@
                     <select class="form-control select2" name="psy_id" style="width:100%;" onchange="getCodePwd(this)">
                       <option value="">---Select Psychologist---</option>
                       {foreach from=$listPsychologist item=v}
-                      <option value="{$v.id}" {if $editPatient.psychologist_id}{if $editPatient.psychologist_id eq $v.id}selected{/if}{else}{if $smarty.get.psy_id eq $v.id}selected{/if}{/if}>{$v.username}</option>
+                      <option value="{$v.id}" {if $editPatient.psychologist_id}{if $editPatient.psychologist_id eq $v.id}selected{/if}{else}{if $smarty.session.patient.psy_id eq $v.id}selected{/if}{/if}>{$v.first_name} {$v.last_name}</option>
                       {/foreach}
                     </select>
                   </div>
@@ -84,12 +84,23 @@
                   <div class="form-group">
                     <label for="pwd"><span style="color:red">*</span> Password:</label>
                     {if $error.password}<span style="color:red">Please enter password!</span>{/if}
-                    <div class="input-group">
-                      <div class="input-group-addon"><i class="fa fa-key" aria-hidden="true"></i> : <span id="code_pwd"></span></div>
-                      <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
-                    </div>
+                    <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
                   </div>
                 </div>
+                <div class="col-md-6">
+                  <div class="form-group" style="margin-bottom: 5px;">
+                    <label for="code"><span style="color:red">*</span> Code:</label>
+                    {if $error.code}<span style="color:red">Please enter code!</span>{/if}
+                    {if $error.code_existed}<span style="color:red">Code is existed!</span>{/if}
+                    <div class="input-group">
+                      <div class="input-group-addon"><i class="fa fa-lock" aria-hidden="true"></i> <span id="code_pat">{if $error OR $editPatient.id}: {$psyCodePat.code_pat}{/if}</span></div>
+                      <input type="text" class="form-control" id="code" placeholder="Enter code" name="code" maxlength="7" value="{if $editPatient.code}{$editPatient.code|replace:$psyCodePat.code_pat:''}{else}{$smarty.session.patient.code}{/if}">
+                    </div>
+                    <span style="color:red">Please enter code one letter and 6 number.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="email"><span style="color:red">*</span> Email:</label>
@@ -99,8 +110,6 @@
                     <input type="email" class="form-control" id="email" placeholder="example@domain.com" name="email" value="{if $editPatient.email}{$editPatient.email}{else}{$smarty.session.patient.email}{/if}">
                   </div>
                 </div>
-              </div>
-              <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="phone"><span style="color:red">*</span> Phone:</label>
@@ -108,6 +117,8 @@
                     <input type="text" class="form-control" id="phone" placeholder="Enter phone" name="phone" value="{if $editPatient.phone}{$editPatient.phone}{else}{$smarty.session.patient.phone}{/if}" onkeyup="NumAndTwoDecimals(event, this);">
                   </div>
                 </div>
+              </div>
+              <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="email"><span style="color:red">*</span> Gender:</label>
@@ -118,8 +129,6 @@
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="age"><span style="color:red">*</span> Age:</label>
@@ -154,6 +163,7 @@
               <th>Patient</th>
               <th>Email</th>
               <th>Password</th>
+              <th>Code</th>
               <th>Phone</th>
               <th>Gender</th>
               <th>Age</th>
@@ -165,10 +175,11 @@
             {if $listPatient|@count gt 0}
             {foreach from=$listPatient item=v}
             <tr>
-              <td>{$v.psy_name}</td>
+              <td>{$v.first_name} {$v.last_name}</td>
               <td>{$v.username}</td>
               <td>{$v.email}</td>
               <td>{$v.password}</td>
+              <td>{$v.code}</td>
               <td>{$v.phone}</td>
               <td>{if $v.gender eq 1}Male{else}Female{/if}</td>
               <td>{$v.age}</td>
@@ -264,9 +275,9 @@
         console.log(data);
         if(data == false)
         {
-          $('#code_pwd').text('');
+          $('#code_pat').text('');
         } else {
-          $('#code_pwd').text(data.code_pwd);
+          $('#code_pat').text(': '+data.code_pat);
         }
         //hide Loading gif
         $(".loader").hide();

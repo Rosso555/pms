@@ -406,7 +406,7 @@ function listPatientAdmin($kwd, $psychologist_id, $gender, $status){
 
     if(!empty($condition)) $where .= ' WHERE '.$condition;
 
-    $sql = ' SELECT p.*, psy.username AS psy_name, (SELECT COUNT(*) FROM `patient` p INNER JOIN psychologist psy ON psy.id = p.psychologist_id '.$where.') AS total
+    $sql = ' SELECT p.*, psy.username AS psy_name, psy.first_name, psy.last_name, (SELECT COUNT(*) FROM `patient` p INNER JOIN psychologist psy ON psy.id = p.psychologist_id '.$where.') AS total
              FROM `patient` p
               INNER JOIN psychologist psy ON psy.id = p.psychologist_id '.$where.' ORDER BY id DESC LIMIT :offset, :limit ';
 
