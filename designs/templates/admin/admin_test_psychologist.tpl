@@ -117,16 +117,48 @@
             <td>{$data.title}</td>
             <td>
               {if $data.status eq 1}
-              <button type="button" class="btn btn-danger btn-xs">
-                <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Pendding...
-              </button>
+              <span class="label label-warning"><i class="fa fa-stop-circle-o" aria-hidden="true"></i> Pendding...</span>
               {else}
-              <button type="button" class="btn btn-success btn-xs">
-                <i class="fa fa-check-circle"></i> Completed
-              </button>
+              <span class="label label-info"><i class="fa fa-check-circle"></i> Completed</span>
               {/if}
             </td>
             <td>
+              <!-- Trigger the modal with a button -->
+              <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mySend_{$data.id}" data-toggle1="tooltip" data-placement="top"
+              title="Send mail to psychologist!"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+              <!-- Modal -->
+              <div class="modal fade" id="mySend_{$data.id}" role="dialog">
+                <div class="modal-dialog">
+                  <!-- Modal content-->
+                  <div class="panel panel-primary modal-content">
+                    <div class="panel-heading modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="panel-title modal-title">Send Mail</h4>
+                    </div>
+                    <div class="modal-body">
+                      <form action="#">
+                        <div class="form-group">
+                          <label for="name"><span style="color: red">*</span> Your name:</label>
+                          <input type="text" class="form-control" id="name" placeholder="Enter name" name="name">
+                        </div>
+                        <div class="form-group">
+                          <label for="sub"><span style="color: red">*</span> Subject:</label>
+                          <input type="text" class="form-control" id="sub" placeholder="Enter subject" name="subject">
+                        </div>
+                        <div class="form-group">
+                          <label for="comment">Message:</label>
+                          <textarea class="form-control" rows="5" id="comment"></textarea>
+                        </div>
+                      </form>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-info btn-md"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send</i></Button>
+                      <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Modal -->
               <a {if $data.status eq 1}href="{$admin_file}?task=test_psychologist&amp;action=edit&amp;id={$data.id}"{/if} class="btn btn-success btn-xs" {if $data.status eq 2}disabled{/if} data-toggle1="tooltip" data-placement="top"
               title="{if $data.status eq 1}{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang: button_edit){/if}{else}{if $multiLang.button_can_not_edit}{$multiLang.button_can_not_edit}{else}No Translate(Key Lang: button_can_not_edit){/if}{/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->
@@ -144,7 +176,7 @@
                     <div class="modal-body">
                       <p>
                         {if $multiLang.text_confirm_delete}{$multiLang.text_confirm_delete}{else}No Translate(Key Lang: text_confirm_delete){/if}
-                         <b>({$data.username|escape} ~ {$data.title|escape})</b>?</p>
+                         <b>({$data.first_name|escape} {$data.last_name|escape} ~ {$data.title|escape})</b>?</p>
                     </div>
                     <div class="modal-footer">
                       <a href="{$admin_file}?task=test_psychologist&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate(Key Lang: button_delete){/if}</i></a>
