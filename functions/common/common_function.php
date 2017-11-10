@@ -2736,7 +2736,11 @@ function getListTestPsychologistCompleted($psy_id, $lang)
 
   return $result;
 }
-
+/**
+ * getPsychologistByIdCodePat
+ * @param  int $psy_id is psychologist_id
+ * @return array or boolean
+ */
 function getPsychologistByIdCodePat($psy_id)
 {
   global $debug, $connected, $limit, $offset, $total_data;
@@ -2758,7 +2762,11 @@ function getPsychologistByIdCodePat($psy_id)
 
   return $result;
 }
-
+/**
+ * check_code_pat
+ * @param  string $code
+ * @return boolean
+ */
 function check_code_pat($code)
 {
   global $debug, $connected, $limit, $offset, $total_data;
@@ -2774,6 +2782,196 @@ function check_code_pat($code)
   } catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: check_code_pat'.$e->getMessage();
+  }
+
+  return $result;
+}
+
+function getResponseByPatientId($pat_id, $tid, $f_date, $t_date)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+    if(!empty($tid)) $condition .= ' AND r.test_id = :tid ';
+
+    if(!empty($f_date) && empty($t_date)) {
+      $condition .= ' AND DATE_FORMAT(r.created_at , "%Y-%m-%d") >= :f_date ';
+    }
+    if(empty($f_date) && !empty($t_date)) {
+      $condition .= ' AND DATE_FORMAT(r.created_at , "%Y-%m-%d") <= :t_date ';
+    }
+    if(!empty($f_date) && !empty($t_date)) {
+      $condition .= ' AND DATE_FORMAT(r.created_at , "%Y-%m-%d") BETWEEN :f_date AND :t_date ';
+    }
+
+    $sql =' SELECT r.*, p.username, t.title AS test_title,
+              (SELECT COUNT(*) FROM `response` r
+              INNER JOIN test t ON t.id = r.test_id
+              INNER JOIN test_patient tp ON tp.id = r.test_patient_id
+              INNER JOIN patient p ON p.id = tp.patient_id
+            WHERE tp.patient_id = :pat_id) AS total
+            FROM `response` r
+            INNER JOIN test t ON t.id = r.test_id
+              INNER JOIN test_patient tp ON tp.id = r.test_patient_id
+              INNER JOIN patient p ON p.id = tp.patient_id
+            WHERE tp.patient_id = :pat_id '.$condition.' LIMIT :offset, :limit';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':pat_id', (int)$pat_id, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+    if(!empty($tid)) $stmt->bindValue(':tid', (int)$tid, PDO::PARAM_INT);
+    if(!empty($f_date)) $stmt->bindValue(':f_date', (string)$f_date, PDO::PARAM_STR);
+    if(!empty($t_date)) $stmt->bindValue(':t_date', (string)$t_date, PDO::PARAM_STR);
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+
+    return $rows;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getResponseByPatientId'.$e->getMessage();
+  }
+
+  return $result;
+}
+function getListResponseTopicByPatient($pat_id, $tid, $f_date, $t_date)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+
+    $result = getResponseByPatientId($pat_id, $tid, $f_date, $t_date);
+
+    foreach ($result as $key => $value) {
+      $sql =' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, t.name AS topic_title,
+                ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+              FROM `response` rs
+                INNER JOIN response_answer rsa ON rsa.response_id = rs.id
+                INNER JOIN answer ans ON ans.id = rsa.answer_id AND ans.calculate = 0
+                INNER JOIN answer_topic atp ON atp.answer_id = ans.id
+                INNER JOIN topic t ON t.id = atp.topic_id
+               WHERE rs.id = :rid GROUP BY atp.topic_id, rs.id ORDER BY rs.id DESC ';
+
+      $query = $connected->prepare($sql);
+      $query->bindValue(':rid', (int)$value['id'], PDO::PARAM_INT);
+      $query->execute();
+      $rows = $query->fetchAll();
+      $newResult[] = array('id' => $value['id'],
+                           'unique_id'  => $value['unique_id'],
+                           'test_id'    => $value['test_id'],
+                           'test_title' => $value['test_title'],
+                           'created_at' => $value['created_at'],
+                           'pat_name'   => $value['username'],
+                           'topic_result' => $rows);
+    }
+
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListResponseTopicByPatient'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListResponseAnswer
+ * @param  int $rid is response_id
+ * @return array or boolean
+ */
+function getListResponseAnswer($rid)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql =' SELECT ra.*, tq.question_id, q.title AS que_title, ans.*, ra.id,
+              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+            FROM `response_answer` ra
+              INNER JOIN test_question tq ON tq.id = ra.test_question_id
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN answer_topic atp ON atp.answer_id = ra.answer_id
+              LEFT JOIN answer ans ON ans.id = ra.answer_id
+            WHERE ra.response_id = :rid GROUP BY ra.id ';
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':rid', (int)$rid, PDO::PARAM_INT);
+
+    $query->execute();
+    return $query->fetchAll();
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListResponseAnswer'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListResponseAnswerByTopic
+ * @param  int $rid is response_id
+ * @return array or boolean
+ */
+function getListResponseAnswerByTopic($rid)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $result = getListResponseAnswer($rid);
+
+    foreach ($result as $key => $value) {
+      $sql =' SELECT t.name, ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
+              FROM `response_answer` ra
+                INNER JOIN test_question tq ON tq.id = ra.test_question_id
+                INNER JOIN question q ON q.id = tq.question_id
+                LEFT JOIN answer_topic atp ON atp.answer_id = ra.answer_id
+                LEFT JOIN answer ans ON ans.id = ra.answer_id
+                LEFT JOIN topic t ON t.id = atp.topic_id
+              WHERE ra.response_id = :rid AND ra.id = :rans_id  GROUP BY atp.topic_id ORDER BY atp.topic_id ASC ';
+
+      $query = $connected->prepare($sql);
+      $query->bindValue(':rid', (int)$rid, PDO::PARAM_INT);
+      $query->bindValue(':rans_id', (int)$value['id'], PDO::PARAM_INT);
+      $query->execute();
+      $rows = $query->fetchAll();
+      $newResult[] = array('id'         => $value['id'],
+                           'content'    => $value['content'],
+                           'is_email'   => $value['is_email'],
+                           'que_title'  => $value['que_title'],
+                           'title'      => $value['title'],
+                           'calculate'  => $value['calculate'],
+                           'topic_value' => $rows);
+    }
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListResponseAnswer'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getReponseById
+ * @param  int $rid response_id
+ * @return array or boolean
+ */
+function getReponseById($rid)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $sql =' SELECT r.*, t.title AS test_title, p.username AS pat_name, psy.first_name, psy.last_name
+            FROM `response` r
+            INNER JOIN test t ON t.id = r.test_id
+              LEFT JOIN test_patient tp ON tp.id = r.test_patient_id
+              LEFT JOIN test_psychologist tps ON tps.id = r.test_psychologist_id
+              LEFT JOIN patient p ON p.id = tp.patient_id
+              LEFT JOIN psychologist psy ON psy.id = tps.psychologist_id
+            WHERE r.id = :rid ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':rid', (int)$rid, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetch();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getReponseById'.$e->getMessage();
   }
 
   return $result;

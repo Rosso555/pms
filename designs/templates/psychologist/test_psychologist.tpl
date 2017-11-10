@@ -38,8 +38,8 @@
             <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
           </div>
         </form>
-      </div>
-    </div><!--panel panel-body-->
+      </div><!--panel panel-body-->
+    </div><!--panel panel-default-->
 
     {if $listTestPsychologist|@count gt 0}
     <div class="row">

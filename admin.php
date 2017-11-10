@@ -3873,8 +3873,11 @@ if('response' === $task)
       exit;
     }
   }
+  $pat_id = !empty($_GET['pat_id']) ? $common->clean_string($_GET['pat_id']) : '';
+  $psy_id = !empty($_GET['psy_id']) ? $common->clean_string($_GET['psy_id']) : '';
+  $tid = !empty($_GET['tid']) ? $common->clean_string($_GET['tid']) : '';
 
-  $result = getListResponseByTopic($_GET['tid'], $slimit = 10);
+  $result = getListResponseByTopic($tid, $pat_id, $psy_id, $slimit = 10);
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -3887,13 +3890,15 @@ if('response' === $task)
 //Task: Response Answer
 if('response_answer' === $task)
 {
-  // $result = getListResponseAnswer($_GET['rid']);
-  $result = getListResponseAnswerByTopic($_GET['rid']);
+  $rid = !empty($_GET['rid']) ? $common->clean_string($_GET['rid']) : '';
+
+  $result = getListResponseAnswerByTopic($rid);
+
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
 
   $smarty_appform->assign('listResponseAnswer', $result);
-  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
+  $smarty_appform->assign('reponseById', getReponseById($rid));
   $smarty_appform->display('admin/admin_response_answer.tpl');
   exit;
 }
@@ -4015,13 +4020,11 @@ if('test_psychologist' === $task)
     if($_POST)
     {
       $send_psy_id = $common->clean_string($_POST['send_psy_id']);
-      $name   = $common->clean_string($_POST['name']);
       $subject= $common->clean_string($_POST['subject']);
       $body   = $common->clean_string($_POST['message']);
 
       if(empty($send_psy_id)) $error['send_psy_id'] = 1;
-      if(empty($name))   $error['name'] = 1;
-      if(empty($subject))$error['subject'] = 1;
+      if(empty($subject))     $error['subject'] = 1;
 
       if(COUNT($error) === 0)
       {
@@ -4029,7 +4032,7 @@ if('test_psychologist' === $task)
 
         $message = Swift_Message::newInstance()
                 ->setSubject($subject)
-                ->setFrom(array('noreply@e-khmer.com' => $name))
+                ->setFrom(array('noreply@e-khmer.com' => 'Admin PMS'))
                 ->setTo(array($resultPsy['email'] => $resultPsy['first_name']))
                 ->setBody($body);
 

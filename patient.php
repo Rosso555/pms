@@ -200,7 +200,7 @@ if('test_question' === $task)
           } else {
             $is_email = 0;
           }
-          if(!empty($responseid))
+          if(!empty($responseid) && !empty($va['test_question_id']))
           {
             $common->save('response_answer', $field = ['response_id' => $responseid,
                                                        'test_question_id' => $va['test_question_id'],

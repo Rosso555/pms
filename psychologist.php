@@ -1257,7 +1257,38 @@ if('town_village' === $task)
   $smarty_appform->display('psychologist/town_village.tpl');
   exit;
 }
+//task: reponse_result
+if('response_result' === $task)
+{
+  $pat_id = !empty($_GET['pat_id']) ? $common->clean_string($_GET['pat_id']) : '';
+  $tid    = !empty($_GET['tid']) ? $common->clean_string($_GET['tid']) : '';
+  $f_date = !empty($_GET['f_date']) ? $common->clean_string($_GET['f_date']) : '';
+  $t_date = !empty($_GET['t_date']) ? $common->clean_string($_GET['t_date']) : '';
 
+  $results = getListResponseTopicByPatient($pat_id, $tid, $f_date, $t_date);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('responseTopicByPat', $results);
+  $smarty_appform->assign('patient', $common->find('patient', $condition = ['id' => $pat_id], $type = 'one'));
+  $smarty_appform->display('psychologist/response_result_patient.tpl');
+  exit;
+}
+//Task: Response Answer
+if('response_answer' === $task)
+{
+  $rid = !empty($_GET['rid']) ? $common->clean_string($_GET['rid']) : '';
+
+  $result = getListResponseAnswerByTopic($rid);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('listResponseAnswer', $result);
+  $smarty_appform->assign('reponseById', getReponseById($rid));
+  $smarty_appform->display('psychologist/response_answer.tpl');
+  exit;
+}
 $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
 $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
 

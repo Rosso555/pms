@@ -189,6 +189,7 @@
                 <!-- Modal -->
             </td>
             <td>
+              <a href="{$psychologist_file}?task=response_result&amp;pat_id={$v.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="View Response Result"><i class="fa fa-folder-open" aria-hidden="true"></i></a>
               <a href="{$psychologist_file}?task=patient&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
               <button href="#myModal_{$v.id}" class= "btn btn-danger btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}" data-toggle= "modal"><i class="fa fa-trash-o"></i></button>
               <div class="modal fade" id="myModal_{$v.id}" role="dialog">

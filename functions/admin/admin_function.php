@@ -1709,16 +1709,18 @@ function is_view_order_exist($test_id, $test_que_id)
 /**
  * getListResponseByTopic
  * @param  int $test_id
+ * @param  int $pat_id is patient_id
+ * @param  int $psy_id is psychologist_id
  * @param  int $slimit for setLimit
  * @return array or boolean
  */
-function getListResponseByTopic($test_id, $slimit)
+function getListResponseByTopic($test_id, $pat_id, $psy_id, $slimit)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
 
-    $result = getListResponse($test_id, $slimit);
+    $result = getListResponse($test_id, $pat_id, $psy_id, $slimit);
 
     foreach ($result as $key => $value) {
       $sql =' SELECT rs.*, rsa.answer_id AS res_answer_id, atp.*, t.name AS topic_title,
@@ -1734,7 +1736,15 @@ function getListResponseByTopic($test_id, $slimit)
       $query->bindValue(':rid', (int)$value['id'], PDO::PARAM_INT);
       $query->execute();
       $rows = $query->fetchAll();
-      $newResult[] = array('id' => $value['id'], 'unique_id' => $value['unique_id'], 'created_at' => $value['created_at'], 'topic_result' => $rows);
+      $newResult[] = array('id' => $value['id'],
+                           'unique_id'  => $value['unique_id'],
+                           'patient_id' => $value['patient_id'],
+                           'psychologist_id'  => $value['psychologist_id'],
+                           'created_at' => $value['created_at'],
+                           'pat_name'   => $value['pat_name'],
+                           'first_name' => $value['first_name'],
+                           'last_name'  => $value['last_name'],
+                           'topic_result' => $rows);
     }
 
     return $newResult;
@@ -1750,24 +1760,41 @@ function getListResponseByTopic($test_id, $slimit)
  * @param  int $slimit for set limit
  * @return array or boolean
  */
-function getListResponse($test_id, $slimit)
+function getListResponse($test_id, $pat_id, $psy_id, $slimit)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
-
+    $condition = '';
     if(!empty($slimit)) $limit = $slimit;
+    if(!empty($pat_id)) $condition .= ' AND tp.patient_id = :pat_id ';
+    if(!empty($psy_id)) $condition .= ' AND tps.psychologist_id = :psy_id ';
     if(!empty($slimit)) $setLimit = ' LIMIT :offset, :limit ';
 
-    $sql =' SELECT *, (SELECT COUNT(*) FROM `response` WHERE test_id = :test_id) AS total FROM `response` WHERE test_id = :test_id ORDER BY created_at DESC '.$setLimit;
+    // $sql =' SELECT *, (SELECT COUNT(*) FROM `response` WHERE test_id = :test_id) AS total FROM `response` WHERE test_id = :test_id ORDER BY created_at DESC '.$setLimit;
+    $sql =' SELECT r.*, p.username AS pat_name, psy.first_name, psy.last_name, tp.patient_id, tps.psychologist_id,
+              (SELECT COUNT(*) FROM `response` r
+                LEFT JOIN test_patient tp ON tp.id = r.test_patient_id
+                LEFT JOIN test_psychologist tps ON tps.id = r.test_psychologist_id
+                LEFT JOIN patient p ON p.id = tp.patient_id
+                LEFT JOIN psychologist psy ON psy.id = tps.psychologist_id
+              WHERE r.test_id = :test_id) AS total
+            FROM `response` r
+              LEFT JOIN test_patient tp ON tp.id = r.test_patient_id
+              LEFT JOIN test_psychologist tps ON tps.id = r.test_psychologist_id
+              LEFT JOIN patient p ON p.id = tp.patient_id
+              LEFT JOIN psychologist psy ON psy.id = tps.psychologist_id
+            WHERE r.test_id = :test_id '.$condition.' ORDER BY r.created_at DESC '.$setLimit;
 
     $query = $connected->prepare($sql);
     $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
 
-    if(!empty($slimit)){
+    if(!empty($slimit)) {
       $query->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
       $query->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
     }
+    if(!empty($pat_id)) $query->bindValue(':pat_id', (int)$pat_id, PDO::PARAM_INT);
+    if(!empty($psy_id)) $query->bindValue(':psy_id', (int)$psy_id, PDO::PARAM_INT);
 
     $query->execute();
     $row = $query->fetchAll();
@@ -1779,88 +1806,16 @@ function getListResponse($test_id, $slimit)
   }
   return $result;
 }
-/**
- * getListResponseAnswerByTopic
- * @param  int $rid is response_id
- * @return array or boolean
- */
-function getListResponseAnswerByTopic($rid)
-{
-  global $debug, $connected, $limit, $offset, $total_data;
-  $result = true;
-  try{
-    $result = getListResponseAnswer($rid);
 
-    foreach ($result as $key => $value) {
-      $sql =' SELECT t.name, ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
-              FROM `response_answer` ra
-                INNER JOIN test_question tq ON tq.id = ra.test_question_id
-                INNER JOIN question q ON q.id = tq.question_id
-                LEFT JOIN answer_topic atp ON atp.answer_id = ra.answer_id
-                LEFT JOIN answer ans ON ans.id = ra.answer_id
-                LEFT JOIN topic t ON t.id = atp.topic_id
-              WHERE ra.response_id = :rid AND ra.id = :rans_id  GROUP BY atp.topic_id ORDER BY atp.topic_id ASC ';
-
-      $query = $connected->prepare($sql);
-      $query->bindValue(':rid', (int)$rid, PDO::PARAM_INT);
-      $query->bindValue(':rans_id', (int)$value['id'], PDO::PARAM_INT);
-      $query->execute();
-      $rows = $query->fetchAll();
-      $newResult[] = array('id'         => $value['id'],
-                           'content'    => $value['content'],
-                           'is_email'   => $value['is_email'],
-                           'que_title'  => $value['que_title'],
-                           'title'      => $value['title'],
-                           'calculate'  => $value['calculate'],
-                           'topic_value' => $rows);
-    }
-    return $newResult;
-  } catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: getListResponseAnswer'.$e->getMessage();
-  }
-  return $result;
-}
-/**
- * getListResponseAnswer
- * @param  int $rid is response_id
- * @return array or boolean
- */
-function getListResponseAnswer($rid)
-{
-  global $debug, $connected, $limit, $offset, $total_data;
-  $result = true;
-  try{
-    $sql =' SELECT ra.*, tq.question_id, q.title AS que_title, ans.*, ra.id,
-              ROUND(SUM(IF(atp.assign_value = 0, atp.default_value, atp.assign_value * atp.weight_value)), 2) as amount
-            FROM `response_answer` ra
-              INNER JOIN test_question tq ON tq.id = ra.test_question_id
-              INNER JOIN question q ON q.id = tq.question_id
-              LEFT JOIN answer_topic atp ON atp.answer_id = ra.answer_id
-              LEFT JOIN answer ans ON ans.id = ra.answer_id
-            WHERE ra.response_id = :rid GROUP BY ra.id ';
-
-    $query = $connected->prepare($sql);
-    $query->bindValue(':rid', (int)$rid, PDO::PARAM_INT);
-
-    $query->execute();
-    return $query->fetchAll();
-
-  } catch (Exception $e) {
-    $result = false;
-    if($debug)  echo 'Errors: getListResponseAnswer'.$e->getMessage();
-  }
-  return $result;
-}
 /**
  * getResponseAnswerCSVdownload
  * @param  int $test_id is test_id
  * @return array or boolean
  */
-function getResponseAnswerCSVdownload($test_id){
-
+function getResponseAnswerCSVdownload($test_id)
+{
   global $total_data;
-  $resultListResponse = getListResponse($test_id, '');
+  $resultListResponse = getListResponse($test_id, '', '', '');
   if(!empty($resultListResponse)){
     foreach ($resultListResponse as $key => $value) {
       $newResult[] = array('id' => $value['id'], 'score' => $value['score']);

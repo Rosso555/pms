@@ -1,9 +1,9 @@
 {extends file="common/layout.tpl"}
 {block name="main"}
 <ul class="breadcrumb">
-  <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li><a id="bCrumbTest" href="{$admin_file}?task=test">{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</a></li>
-  <li><a id="bCrumbResponse" href="{$admin_file}?task=response&amp;tid={$smarty.get.tid}">{if $multiLang.text_response_result}{$multiLang.text_response_result}{else}No Translate(Key Lang: text_response_result){/if}</a></li>
+  <li><a href="{$psychologist_file}"><i class="fa fa-fw fa-home"></i></a></li>
+  <li><a id="bCrumbTest" href="{$psychologist_file}?task=test">{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if}</a></li>
+  <li><a id="bCrumbResponse" href="{$psychologist_file}?task=response&amp;tid={$smarty.get.tid}">{if $multiLang.text_response_result}{$multiLang.text_response_result}{else}No Translate(Key Lang: text_response_result){/if}</a></li>
   <li class="active">{if $multiLang.text_response_answer}{$multiLang.text_response_answer}{else}No Translate(Key Lang: text_response_answer){/if}</li>
 </ul>
 <div class="panel panel-primary">
@@ -76,11 +76,11 @@
   var urlBack =  document.referrer;
   var url = '';
   if(urlBack !== '') url = getUrlPrevious(urlBack);
-  if(url.task === 'response') localStorage.setItem('urlResponse',urlBack);
+  if(url.task === 'response_result') localStorage.setItem('urlResponse',urlBack);
   //Get session url
   var getUrlBack = localStorage.getItem('urlResponse');
   var getUrlBackTest = localStorage.getItem('urlTest');
-  if(getUrlBack !== null){
+  if(getUrlBack !== null) {
     $("#btnBack").attr("href", getUrlBack);
     $("#bCrumbResponse").attr("href", getUrlBack);
   }

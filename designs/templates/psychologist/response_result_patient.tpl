@@ -13,32 +13,47 @@
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_response_result}{$multiLang.text_response_result}{else}No Translate(Key Lang: text_response_result){/if}</h4></div>
   <div class="panel-body">
     <div class="box_title">
-      <div class="row">
-        <div class="col-md-10">
-          <b>{if $multiLang.text_test_title}{$multiLang.text_test_title}{else}No Translate(Key Lang: text_test_title){/if}:</b> {$test.title}
-        </div>
-        <div class="col-md-2">
-          <button type="button" class="btn btn-primary pull-right" onclick="export_csv();">{if $multiLang.text_export_csv}{$multiLang.text_export_csv}{else}No Translate(Key Lang: text_export_csv){/if}</button>
-        </div>
-      </div>
+      <b>Patient:</b> {$patient.username}
     </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <form class="form-inline" role="form" action="{$psychologist_file}?task=response_result" method="GET" style="padding: 1px 0px 12px 1px;">
+          <input type="hidden" name="task" value="response_result">
+          <input type="hidden" name="pat_id" value="{$smarty.get.pat_id}">
+          <div class="form-group" style="margin-bottom:5px;">
+            <div class="input-group">
+              <input id="f_date" class="form-control" type="text" placeholder="From Date" name="f_date" value="{$smarty.get.f_date}">
+              <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:5px;">
+            <div class="input-group">
+              <input id="t_date" class="form-control" type="text" placeholder="To Date" name="t_date" value="{$smarty.get.t_date}">
+              <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:5px;">
+            <button type="submit" class="btn btn-info"><i class="fa fa-search"></i> {if $multiLang.button_search}{$multiLang.button_search}{else}No Translate (Key Lang:button_search){/if}</button>
+          </div>
+        </form>
+      </div><!--panel panel-body-->
+    </div><!--panel panel-default-->
+
     <div class="table-responsive">
       <table class="table table-striped">
         <thead>
           <tr bgcolor="#eeeeee">
-          <th>Psychologist</th>
-          <th>Patient</th>
+          <th>Test</th>
           <th>{if $multiLang.text_date}{$multiLang.text_date}{else}No Translate(Key Lang: text_date){/if}</th>
           <th>{if $multiLang.text_topic}{$multiLang.text_topic}{else}No Translate(Key Lang: text_topic){/if}</th>
           <th width="130">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate(Key Lang: text_action){/if}</th>
           </tr>
         </thead>
-        {if $listResponse|@count gt 0}
+        {if $responseTopicByPat|@count gt 0}
         <tbody>
-        {foreach from = $listResponse item = data key=k}
+        {foreach from = $responseTopicByPat item = data key=k}
           <tr>
-            <td>{if $data.first_name}<a href="{$admin_file}?task=response&amp;tid={$smarty.get.tid}&amp;psy_id={$data.psychologist_id}">{$data.first_name} {$data.last_name}</a>{else}~{/if}</td>
-            <td>{if $data.pat_name}<a href="{$admin_file}?task=response&amp;tid={$smarty.get.tid}&amp;pat_id={$data.patient_id}">{$data.pat_name}</a>{else}~{/if}</td>
+            <td><a href="{$admin_file}?task=reponse_result&amp;pat_id={$smarty.get.pat_id}&amp;tid={$data.test_id}">{$data.test_title}</a></td>
             <td>{$data.created_at}</td>
             <td>
               <table>
@@ -63,9 +78,8 @@
         </tr>
         {/if}
       </table>
-      <br>
       <a id="btnBack" href="javascript:history.back()" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
-      {if $smarty.get.pat_id OR $smarty.get.psy_id}<a href="{$admin_file}?task=response&amp;tid={$smarty.get.tid}" class="btn btn-danger btn-sm"><i class="fa fa-refresh" aria-hidden="true"></i> Clear Search</a>{/if}
+      {if $smarty.get.f_date OR $smarty.get.t_date OR $smarty.get.tid}<a href="{$admin_file}?task=reponse_result&amp;pat_id={$smarty.get.pat_id}" class="btn btn-danger btn-sm"><i class="fa fa-refresh" aria-hidden="true"></i> Clear Search</a>{/if}
     </div><!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
@@ -77,7 +91,7 @@
   var urlBack =  document.referrer;
   var url = '';
   if(urlBack !== '') url = getUrlPrevious(urlBack);
-  if(url.task === 'test') localStorage.setItem('urlTest',urlBack);
+  if(url.task === 'patient') localStorage.setItem('urlTest',urlBack);
   //Get session url
   var getUrlBack = localStorage.getItem('urlTest');
   if(getUrlBack !== null){
@@ -86,27 +100,11 @@
   }
   //End previous url
 
-  function export_csv(){
-    //Show Loading gif
-    $(".loader").show();
-    $.ajax({
-      type: "POST",
-      url: "{$admin_file}?task=response&action=export&tid={$smarty.get.tid}",
-      data: { "tid":  {$smarty.get.tid} },
-      success: function(data){
-        // alert(data);
-        if(data){
-          $('#txtSuccess').attr("style", "display: inherit;");
-        }
-        //Show Loading gif
-        $(".loader").hide();
-      },
-      error: function(){
-       //Show error here
-       alert("Cannot show detail. Please try again later.");
-       location.reload();
-      }
-    });//End Ajax
-  }
+  $(document).ready(function(){
+    $('#f_date').datetimepicker({ locale: 'en', format: 'YYYY-MM-DD'});
+    $('#t_date').datetimepicker({ locale: 'en', format: 'YYYY-MM-DD'});
+  });
+
 </script>
+
 {/block}

@@ -138,11 +138,6 @@
                     <form id="send_mail" action="{$admin_file}?task=test_psychologist&amp;action=send_mail" method="post">
                       <input type="hidden" name="send_psy_id" value="{$data.psychologist_id}">
                       <div class="modal-body">
-                        <div class="form-group" id="error_name">
-                          <label for="name"><span style="color: red">*</span> Your name: </label>
-                          <span style="color:red" id="txt_error_name"></span>
-                          <input type="text" class="form-control" id="name" placeholder="Enter name" name="name">
-                        </div>
                         <div class="form-group" id="error_subject">
                           <label for="subject"><span style="color: red">*</span> Subject:</label>
                           <span style="color:red" id="txt_error_subject"></span>
@@ -208,16 +203,7 @@
 <script>
 $("#send_mail").submit(function( event )
 {
-  var name  = $("#name").val();
   var subject  = $("#subject").val();
-
-  if(name == ''){
-    $("#error_name").attr("class", "form-group has-error");
-    $("#txt_error_name").text("Please enter your name !");
-  }else {
-    $("#error_name").attr("class", "form-group has-success");
-    $("#txt_error_name").text("");
-  }
 
   if(subject == ''){
     $("#error_subject").attr("class", "form-group has-error");
@@ -227,11 +213,8 @@ $("#send_mail").submit(function( event )
     $("#txt_error_subject").text("");
   }
 
-  if(name != '' && subject != '')
-  {
-     //if ture is submit
-    return;
-  }
+  //if ture is submit
+  if(subject != '') return;
 
   event.preventDefault();
 });
