@@ -135,26 +135,29 @@
                       <button type="button" class="close" data-dismiss="modal">&times;</button>
                       <h4 class="panel-title modal-title">Send Mail</h4>
                     </div>
-                    <div class="modal-body">
-                      <form action="#">
-                        <div class="form-group">
-                          <label for="name"><span style="color: red">*</span> Your name:</label>
+                    <form id="send_mail" action="{$admin_file}?task=test_psychologist&amp;action=send_mail" method="post">
+                      <input type="hidden" name="send_psy_id" value="{$data.psychologist_id}">
+                      <div class="modal-body">
+                        <div class="form-group" id="error_name">
+                          <label for="name"><span style="color: red">*</span> Your name: </label>
+                          <span style="color:red" id="txt_error_name"></span>
                           <input type="text" class="form-control" id="name" placeholder="Enter name" name="name">
                         </div>
-                        <div class="form-group">
-                          <label for="sub"><span style="color: red">*</span> Subject:</label>
-                          <input type="text" class="form-control" id="sub" placeholder="Enter subject" name="subject">
+                        <div class="form-group" id="error_subject">
+                          <label for="subject"><span style="color: red">*</span> Subject:</label>
+                          <span style="color:red" id="txt_error_subject"></span>
+                          <input type="text" class="form-control" id="subject" placeholder="Enter subject" name="subject">
                         </div>
                         <div class="form-group">
                           <label for="comment">Message:</label>
-                          <textarea class="form-control" rows="5" id="comment"></textarea>
+                          <textarea class="form-control" rows="5" id="comment" name="message"></textarea>
                         </div>
-                      </form>
-                    </div>
-                    <div class="modal-footer">
-                      <button class="btn btn-info btn-md"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send</i></Button>
-                      <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
-                    </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="submit" class="btn btn-info btn-md"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send</i></Button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
+                      </div>
+                    </form>
                   </div>
                 </div>
               </div>
@@ -200,4 +203,38 @@
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->
+{/block}
+{block name="javascript"}
+<script>
+$("#send_mail").submit(function( event )
+{
+  var name  = $("#name").val();
+  var subject  = $("#subject").val();
+
+  if(name == ''){
+    $("#error_name").attr("class", "form-group has-error");
+    $("#txt_error_name").text("Please enter your name !");
+  }else {
+    $("#error_name").attr("class", "form-group has-success");
+    $("#txt_error_name").text("");
+  }
+
+  if(subject == ''){
+    $("#error_subject").attr("class", "form-group has-error");
+    $("#txt_error_subject").text("Please enter subject !");
+  }else {
+    $("#error_subject").attr("class", "form-group has-success");
+    $("#txt_error_subject").text("");
+  }
+
+  if(name != '' && subject != '')
+  {
+     //if ture is submit
+    return;
+  }
+
+  event.preventDefault();
+});
+
+</script>
 {/block}

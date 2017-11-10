@@ -4009,6 +4009,38 @@ if('test_psychologist' === $task)
     exit;
   }
 
+  if('send_mail' === $action)
+  {
+    $error = array();
+    if($_POST)
+    {
+      $send_psy_id = $common->clean_string($_POST['send_psy_id']);
+      $name   = $common->clean_string($_POST['name']);
+      $subject= $common->clean_string($_POST['subject']);
+      $body   = $common->clean_string($_POST['message']);
+
+      if(empty($send_psy_id)) $error['send_psy_id'] = 1;
+      if(empty($name))   $error['name'] = 1;
+      if(empty($subject))$error['subject'] = 1;
+
+      if(COUNT($error) === 0)
+      {
+        $resultPsy = $common->find('psychologist', $condition = ['id' => $send_psy_id], $type = 'one');
+
+        $message = Swift_Message::newInstance()
+                ->setSubject($subject)
+                ->setFrom(array('noreply@e-khmer.com' => $name))
+                ->setTo(array($resultPsy['email'] => $resultPsy['first_name']))
+                ->setBody($body);
+
+        $result = $mailer->send($message);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_psychologist');
+        exit;
+      }
+    }
+  }
+
   $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
   $cid    = !empty($_GET['cid']) ? $_GET['cid'] : '';
   $psy_id = !empty($_GET['psy_id']) ? $_GET['psy_id'] : '';
