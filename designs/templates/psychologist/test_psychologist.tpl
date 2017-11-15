@@ -65,9 +65,50 @@
             <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
           </div>
           <div class="body-test-footer">
-            <a href="{$psychologist_file}?task=test_question_psychologist&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
+            {if $data.status eq 1}
+            <a id="btn-test-footer" href="{$psychologist_file}?task=test_question_psychologist&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
               {if $data.test_tmp_status}Continue Test{else}Start Test{/if} &nbsp;&nbsp;<i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
             </a>
+            {else}
+            <div class="row">
+              <div class="col-md-6">
+                <a id="btn-test-footer" href="{$psychologist_file}?task=result_test_psychologist&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
+                  Check Result &nbsp;&nbsp;<i class="fa fa-registered" aria-hidden="true"></i>
+                </a>
+              </div>
+              <div class="col-md-6">
+                {if $data.assign_to eq 2}
+                <button id="btn-test-footer" type="button" class="btn btn-default btn-sm btn-block"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Assign (Completed)</button>
+                {else}
+                <!-- Trigger the modal with a button -->
+                <button id="btn-test-footer" type="button" class="btn btn-default btn-sm btn-block" data-toggle="modal" data-target="#myModalAssign_{$data.id}"><i class="fa fa-share-square-o" aria-hidden="true"></i> Assign to admin</button>
+                {/if}
+                <!-- Modal -->
+                <div class="modal fade" id="myModalAssign_{$data.id}" role="dialog">
+                  <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="panel panel-primary modal-content">
+                      <div class="panel-heading modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="panel-title modal-title" style="text-align: left;">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate(Key Lang: text_confirmation){/if}</h4>
+                      </div>
+                      <div class="modal-body" style="text-align: left;">
+                        <p>Are you sure you want assign this test to admin?</p>
+                      </div>
+                      <div class="modal-footer">
+                        <a href="{$psychologist_file}?task=result_test_psychologist&amp;action=update_assign&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;">
+                          <i class="fa fa-check-circle-o" aria-hidden="true"></i> Sure
+                        </a>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Modal -->
+
+              </div>
+            </div>
+            {/if}
           </div>
         </div>
       </div>

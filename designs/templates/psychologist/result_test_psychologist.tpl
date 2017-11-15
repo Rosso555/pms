@@ -25,11 +25,56 @@
     {else}
     <i class="fa fa-ban" aria-hidden="true" data-toggle1="tooltip" data-placement="top" title="Doesn't Complete."></i>
     {/if}
-    PSYCHOLOGIST: {$psychologist.username}
+    PSYCHOLOGIST: {$psychologist.first_name} {$psychologist.last_name}
   </p>
 </div>
 <div class="inbox-test sansserif" style="margin-bottom: 20px;">
   {if $reponseAnswerByTestPsyt|@COUNT gt 0}
+    <div class="row">
+    {foreach from=$reponseAnswerByTestPsyt item=v}
+      {if $v.type eq 3 OR $v.type eq 4}
+        <div class="col-md-6 col-sm-12 col-xs-12">
+          <p>{if $v.is_required eq 1}<span style="color:red;">*</span>{/if} <b>{$v.que_title}</b></p>
+          <p style="margin-left: 16px;">{$v.description}</p>
+
+          {if $v.type eq 3}
+          <label for="radio" class="radio-inline" style="margin-bottom: 10px; margin-left: 16px;">
+            <input style="margin-top: -4px;" type="radio" value="{$v.answer_id}" checked="checked" readonly="readonly">
+            <span style="line-height: 1.2;">{$v.ans_title}</span>
+          </label>
+          {elseif $v.type eq 4}
+            {foreach from=$v.result_answer item=ans}
+            <label class="checkbox-inline" style="margin-bottom: 10px; margin-left: 16px;">
+              <input style="margin-top: -4px;" type="checkbox" name="answer" value="{$v.answer_id}" checked="checked" readonly="readonly">
+              <span style="line-height: 1.2;">{$ans.ans_title}</span>
+            </label>
+            {/foreach}
+          {/if}
+          <hr>
+        </div>
+      {/if}
+    {/foreach}
+
+    {foreach from=$reponseAnswerByTestPsyt item=v}
+      {if $v.type eq 1 OR $v.type eq 2}
+      <div class="col-md-12 col-sm-12 col-xs-12">
+        <!-- text free input -->
+        <p>{if $v.is_required eq 1}<span style="color:red;">*</span>{/if} <b>{$v.que_title}</b></p>
+        <p style="margin-left: 16px;">{$v.description}</p>
+        {if $v.type eq 1}
+        <p style="margin-left: 16px;">
+          <input type="text"class="form-control" value="{$v.content}" readonly="readonly">
+        </p>
+        {elseif $v.type eq 2}
+        <p style="margin-left: 16px;">
+          <textarea class="form-control"rows="3" readonly="readonly">{$v.content}</textarea>
+        </p><!-- end text free input -->
+        {/if}
+      </div>
+      {/if}
+    {/foreach}
+    </div>
+
     <h2>{if $multiLang.text_result_of_quick}{$multiLang.text_result_of_quick}{else}No Translate (Key Lang: text_result_of_quick){/if}</h2>
     {if $messageResultTopic|@COUNT gt 0}
     <table class="tbl_result">
@@ -79,6 +124,34 @@
   <br><br>
   <center>
     <a href="{$admin_file}?task=test_psychologist" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
+
+    {if $test_psychologist.assign_to eq 2}
+    <button type="button" class="btn btn-info btn-sm"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Assign to admin (Completed)</button>
+    {else}
+    <!-- Trigger the modal with a button -->
+    <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#myModalAssign"><i class="fa fa-share-square-o" aria-hidden="true"></i> Assign to admin</button>
+    {/if}
+    <!-- Modal -->
+    <div class="modal fade" id="myModalAssign" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="panel panel-primary modal-content">
+          <div class="panel-heading modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="panel-title modal-title" style="text-align: left;">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate(Key Lang: text_confirmation){/if}</h4>
+          </div>
+          <div class="modal-body" style="text-align: left;">
+            <p>Are you sure you want assign this test to admin?</p>
+          </div>
+          <div class="modal-footer">
+            <a href="{$psychologist_file}?task=result_test_psychologist&amp;action=update_assign&amp;tid={$smarty.get.tid}&amp;psy_id={$smarty.get.psy_id}&amp;id={$smarty.get.id}" class="btn btn-danger btn-md" style="color: white;">
+              <i class="fa fa-check-circle-o" aria-hidden="true"></i> Sure</a>
+            <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal -->
   </center>
   <br><br>
 </div>

@@ -47,7 +47,7 @@
             <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
           </div>
           <div class="body-test-footer">
-            <a href="{$patient_file}?task=test_question&amp;tid={$data.test_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
+            <a id="btn-test-footer" href="{$patient_file}?task=test_question&amp;tid={$data.test_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
               {if $data.test_tmp_status}Continue Test{else}Start Test{/if} &nbsp;&nbsp;<i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
             </a>
           </div>

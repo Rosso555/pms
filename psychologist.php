@@ -27,7 +27,8 @@ $smarty_appform->assign('getLanguage', $common->find('language', $condition = nu
 $smarty_appform->assign('multiLang', getMultilang($lang));
 
 //task: logout by clear session
-if('logout' === $task) {
+if('logout' === $task) 
+{
   $act_data = ['psychologist_id' => $_SESSION['is_psycho_login_id'], 'content' => 'LOGOUT'];
   @$common->save('activity_log', $act_data);
   unset($_SESSION['is_psycho_login_id']);
@@ -740,7 +741,8 @@ if('back_step' === $task && !empty($_GET['tid']))
   //Get Test Psychologist
   $resultTestPsychologist = $common->find('test_psychologist', $condition = ['id' => $tpsy_id, 'test_id' => $tid, 'psychologist_id' => $_SESSION['is_psycho_login_id']], $type = 'one');
 
-  if(empty($resultTestPsychologist)){
+  if(empty($resultTestPsychologist))
+  {
     header('Location:'.$psychologist_file.'?task=page_not_found');
     exit;
   }
@@ -777,68 +779,80 @@ if('test_psychologist' === $task)
 //Task: Result psychologist
 if('result_test_psychologist' === $task)
 {
+  if('update_assign' === $action)
+  {
     //Check & Clean String
     $tpsy_id  = $common->clean_string($_GET['id']);
     $tid      = $common->clean_string($_GET['tid']);
     $psy_id   = $common->clean_string($_GET['psy_id']);
-    $sumTotal = 0; $sumAssignWeight = 0; $sumDefault = 0; $diagram_width = 820;
-    $space_height = 50; $margin_left = 450; $space_row_col = 50;
-    $moveTo_left  = $margin_left + 90;
-    $moveTo_top   = 60;
 
-    $resultTestPsychologist = getCheckTestPsyChologistByPsyChologist($_SESSION['is_psycho_login_id'], $tid, $tpsy_id);
-    if(empty($resultTestPsychologist)) {
-      header('Location:'.$psychologist_file.'?task=page_not_found');
-      exit;
-    }
-
-    //Get Result Answer Topic
-    $getResultTopic = getResultAnswerTopic('', $tpsy_id, $tid, '', '');
-    // var_dump($getResultTopic);
-    //Get List Topic in diagram second
-    $resultTopicDiagramSecond = getListTopicDiagramSecond($getResultTopic, 10, 240, $lang);
-    //Get List Topic Analysis
-    $resultTopicAnalysis= listTopicAnalysisDiagram($margin_left + 25, 203, $space_row_col, $tid);
-    //Get List Topic in diagram first
-    $resultTopicDiagram = getListTopicDiagram('', $tpsy_id, $tid,10, 140);
-    //Calculate width and height on canvas2
-    $resultWidthHeightSecond = calWidthHeightDiagramSecond(COUNT($resultTopicDiagramSecond), COUNT($resultTopicAnalysis), $space_height + 160, $margin_left, $space_result_topic = 150);
-    //Drawing Line Result Diagram Second
-    $resultDrawingLineResultDiagramSecond = drawingPointLineResultDiagramSecond($resultTopicDiagramSecond, $resultTopicAnalysis, $margin_left + 25, $margin_top = 235, $resultWidthHeightSecond['width'] - 145);
-
-    //Assign value to diagram first
-    $smarty_appform->assign('listXlineDiagram', listXlineDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height + 60));//Horizontal Line
-    $smarty_appform->assign('listXdiagramCenter', listXlineDiagramCenter(COUNT($resultTopicDiagram), $diagram_width - 70, $space_height + 85, $margin_left));//List Diagram Horizontal line center
-    $smarty_appform->assign('getWidthHeight', calWidthHeightDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height));//Calculate width and Height on canvas
-    $smarty_appform->assign('listNumberMinMax', listNumberMinMax($margin_left, $margin_top = 90));//List Text Number Min & Max
-    $smarty_appform->assign('listTextMinMax', listTextMinMax($margin_left, $margin_top = 75));//List Text Min & Max
-    $smarty_appform->assign('listBackgroudColor', listBackgroundColorDiagram($margin_left, 110, 50));//List backgroud diagram
-    $smarty_appform->assign('drawingPointLine', drawingPointLineResult($resultTopicDiagram, $margin_left - 100, $margin_top = 135, $tid));//Drawing point line
-    $smarty_appform->assign('listYLineDiagram', listYLineDiagram($margin_left, 50 + 50));//Vertical Line
-    $smarty_appform->assign('listYLineDiagramCenter', listYLineDiagramCenter($margin_left, 50 + 50));//Vertical Line center
-    $smarty_appform->assign('listSmallYLineDiagram', listSmall_YlineDiagram($margin_left, 90));//Vertical small Line
-    $smarty_appform->assign('listTopicDiagram', $resultTopicDiagram);
-    //end
-
-    //Assign value to diagram second
-    $smarty_appform->assign('reponseAnswerByTestPsyt', getResponseAnswerByTestPsychologist($tid, $tpsy_id));
-    $smarty_appform->assign('getWidthHeightSecond', $resultWidthHeightSecond);
-    $smarty_appform->assign('listTopicDiagramSecond', $resultTopicDiagramSecond);
-    $smarty_appform->assign('listTopicAnalysis', $resultTopicAnalysis);
-    $smarty_appform->assign('drawingLineResultDiagramSecond', $resultDrawingLineResultDiagramSecond);
-    $smarty_appform->assign('listBackgroudColorSecond', listBackgroundColorDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160, $space_row_col));//List background color Diagram Second
-    $smarty_appform->assign('listXlineDiagramSecond', listXlineDiagram(COUNT($resultTopicDiagramSecond), $resultWidthHeightSecond['width'], $space_height + 160));//Horizontal line
-    $smarty_appform->assign('listXlineDiagramSecondCenter', listXlineDiagramCenter(COUNT($resultTopicDiagramSecond), $resultWidthHeightSecond['width'] - 150, $space_height + 185, $margin_left)); //List Diagram Second Horizontal line center
-    $smarty_appform->assign('listRotateLineDiagramSecond', listRotateLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160, $moveTo_left, $moveTo_top, $space_row_col));//List Rotate Line Diagram Second
-    $smarty_appform->assign('listYLineDiagramSecond', listYLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160));//Vertical Line
-    //end
-
-    // var_dump(getMessageResultTopic('', $tpsy_id, $tid, $lang));
-    $smarty_appform->assign('messageResultTopic', getMessageResultTopic('', $tpsy_id, $tid, $lang));
-    $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = ['id' => $_SESSION['is_psycho_login_id']], $type = 'one'));
-    $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
-    $smarty_appform->display('psychologist/result_test_psychologist.tpl');
+    $common->update('test_psychologist', $field = ['assign_to' => 2], $condition = ['psychologist_id' => $_SESSION['is_psycho_login_id'], 'id' => $tpsy_id]);
+    header('Location:'.$psychologist_file.'?task=result_test_psychologist&tid='.$tid.'&psy_id='.$psy_id.'&id='.$tpsy_id);
     exit;
+  }
+
+  //Check & Clean String
+  $tpsy_id  = $common->clean_string($_GET['id']);
+  $tid      = $common->clean_string($_GET['tid']);
+  $psy_id   = $common->clean_string($_GET['psy_id']);
+  $sumTotal = 0; $sumAssignWeight = 0; $sumDefault = 0; $diagram_width = 820;
+  $space_height = 50; $margin_left = 450; $space_row_col = 50;
+  $moveTo_left  = $margin_left + 90;
+  $moveTo_top   = 60;
+
+  $resultTestPsychologist = getCheckTestPsyChologistByPsyChologist($_SESSION['is_psycho_login_id'], $tid, $tpsy_id);
+  if(empty($resultTestPsychologist)) {
+    header('Location:'.$psychologist_file.'?task=page_not_found');
+    exit;
+  }
+
+  //Get Result Answer Topic
+  $getResultTopic = getResultAnswerTopic('', $tpsy_id, $tid, '', '');
+  // var_dump($getResultTopic);
+  //Get List Topic in diagram second
+  $resultTopicDiagramSecond = getListTopicDiagramSecond($getResultTopic, 10, 240, $lang);
+  //Get List Topic Analysis
+  $resultTopicAnalysis= listTopicAnalysisDiagram($margin_left + 25, 203, $space_row_col, $tid);
+  //Get List Topic in diagram first
+  $resultTopicDiagram = getListTopicDiagram('', $tpsy_id, $tid,10, 140);
+  //Calculate width and height on canvas2
+  $resultWidthHeightSecond = calWidthHeightDiagramSecond(COUNT($resultTopicDiagramSecond), COUNT($resultTopicAnalysis), $space_height + 160, $margin_left, $space_result_topic = 150);
+  //Drawing Line Result Diagram Second
+  $resultDrawingLineResultDiagramSecond = drawingPointLineResultDiagramSecond($resultTopicDiagramSecond, $resultTopicAnalysis, $margin_left + 25, $margin_top = 235, $resultWidthHeightSecond['width'] - 145);
+
+  //Assign value to diagram first
+  $smarty_appform->assign('listXlineDiagram', listXlineDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height + 60));//Horizontal Line
+  $smarty_appform->assign('listXdiagramCenter', listXlineDiagramCenter(COUNT($resultTopicDiagram), $diagram_width - 70, $space_height + 85, $margin_left));//List Diagram Horizontal line center
+  $smarty_appform->assign('getWidthHeight', calWidthHeightDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height));//Calculate width and Height on canvas
+  $smarty_appform->assign('listNumberMinMax', listNumberMinMax($margin_left, $margin_top = 90));//List Text Number Min & Max
+  $smarty_appform->assign('listTextMinMax', listTextMinMax($margin_left, $margin_top = 75));//List Text Min & Max
+  $smarty_appform->assign('listBackgroudColor', listBackgroundColorDiagram($margin_left, 110, 50));//List backgroud diagram
+  $smarty_appform->assign('drawingPointLine', drawingPointLineResult($resultTopicDiagram, $margin_left - 100, $margin_top = 135, $tid));//Drawing point line
+  $smarty_appform->assign('listYLineDiagram', listYLineDiagram($margin_left, 50 + 50));//Vertical Line
+  $smarty_appform->assign('listYLineDiagramCenter', listYLineDiagramCenter($margin_left, 50 + 50));//Vertical Line center
+  $smarty_appform->assign('listSmallYLineDiagram', listSmall_YlineDiagram($margin_left, 90));//Vertical small Line
+  $smarty_appform->assign('listTopicDiagram', $resultTopicDiagram);
+  //end
+
+  //Assign value to diagram second
+  $smarty_appform->assign('getWidthHeightSecond', $resultWidthHeightSecond);
+  $smarty_appform->assign('listTopicDiagramSecond', $resultTopicDiagramSecond);
+  $smarty_appform->assign('listTopicAnalysis', $resultTopicAnalysis);
+  $smarty_appform->assign('drawingLineResultDiagramSecond', $resultDrawingLineResultDiagramSecond);
+  $smarty_appform->assign('listBackgroudColorSecond', listBackgroundColorDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160, $space_row_col));//List background color Diagram Second
+  $smarty_appform->assign('listXlineDiagramSecond', listXlineDiagram(COUNT($resultTopicDiagramSecond), $resultWidthHeightSecond['width'], $space_height + 160));//Horizontal line
+  $smarty_appform->assign('listXlineDiagramSecondCenter', listXlineDiagramCenter(COUNT($resultTopicDiagramSecond), $resultWidthHeightSecond['width'] - 150, $space_height + 185, $margin_left)); //List Diagram Second Horizontal line center
+  $smarty_appform->assign('listRotateLineDiagramSecond', listRotateLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160, $moveTo_left, $moveTo_top, $space_row_col));//List Rotate Line Diagram Second
+  $smarty_appform->assign('listYLineDiagramSecond', listYLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160));//Vertical Line
+  //end
+
+  $smarty_appform->assign('reponseAnswerByTestPsyt', getResponseAnswerByTestPsychologist($tid, $tpsy_id));
+  $smarty_appform->assign('messageResultTopic', getMessageResultTopic('', $tpsy_id, $tid, $lang));
+  $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = ['id' => $_SESSION['is_psycho_login_id']], $type = 'one'));
+  $smarty_appform->assign('test_psychologist', $common->find('test_psychologist', $condition = ['psychologist_id' => $_SESSION['is_psycho_login_id'], 'id' => $tpsy_id], $type = 'one'));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
+  $smarty_appform->display('psychologist/result_test_psychologist.tpl');
+  exit;
 }
 //Task: result_test_patient
 if('result_test_patient' === $task)
