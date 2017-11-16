@@ -27,7 +27,7 @@ $smarty_appform->assign('getLanguage', $common->find('language', $condition = nu
 $smarty_appform->assign('multiLang', getMultilang($lang));
 
 //task: logout by clear session
-if('logout' === $task) 
+if('logout' === $task)
 {
   $act_data = ['psychologist_id' => $_SESSION['is_psycho_login_id'], 'content' => 'LOGOUT'];
   @$common->save('activity_log', $act_data);
@@ -766,7 +766,7 @@ if('test_psychologist' === $task)
   $cid    = !empty($_GET['cid']) ? $_GET['cid'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '1';
 
-  $results = getListTestPsychologist($_SESSION['is_psycho_login_id'], $tid, $cid, $status);
+  $results = getListTestPsychologist($_SESSION['is_psycho_login_id'], $tid, $cid, $status, $assign_to = '');
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
 
@@ -785,9 +785,17 @@ if('result_test_psychologist' === $task)
     $tpsy_id  = $common->clean_string($_GET['id']);
     $tid      = $common->clean_string($_GET['tid']);
     $psy_id   = $common->clean_string($_GET['psy_id']);
+    $status   = $common->clean_string($_GET['status']);
+    $cid      = $common->clean_string($_GET['cid']);
 
     $common->update('test_psychologist', $field = ['assign_to' => 2], $condition = ['psychologist_id' => $_SESSION['is_psycho_login_id'], 'id' => $tpsy_id]);
-    header('Location:'.$psychologist_file.'?task=result_test_psychologist&tid='.$tid.'&psy_id='.$psy_id.'&id='.$tpsy_id);
+
+    if(!empty($status))
+    {
+      header('Location:'.$psychologist_file.'?task=test_psychologist&cid='.$cid.'&tid='.$tid.'&status='.$status);
+    } else {
+      header('Location:'.$psychologist_file.'?task=result_test_psychologist&tid='.$tid.'&psy_id='.$psy_id.'&id='.$tpsy_id);
+    }
     exit;
   }
 

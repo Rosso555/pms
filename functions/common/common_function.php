@@ -451,7 +451,8 @@ function checkDeleteVillage($id)
  * @param  string $email is email address
  * @return boolean
  */
-function check_psychologist_email($email){
+function check_psychologist_email($email)
+{
   global $debug, $connected, $total_data;
   $result = true;
   try{
@@ -474,7 +475,8 @@ function check_psychologist_email($email){
  * @param  string $email is email address
  * @return boolean
  */
-function check_patient_email($email){
+function check_patient_email($email)
+{
   global $debug, $connected, $total_data;
   $result = true;
   try{
@@ -498,7 +500,8 @@ function check_patient_email($email){
  * @param  string $email
  * @return array or boolean
  */
-function getDataByUserRole($user_role, $email){
+function getDataByUserRole($user_role, $email)
+{
   global $debug, $connected, $total_data;
   $result = true;
   try{
@@ -525,7 +528,8 @@ function getDataByUserRole($user_role, $email){
  * @param  string $secretkey
  * @return array or boolean
  */
-function checkSecretkeyPsychologist($psy_id, $secretkey){
+function checkSecretkeyPsychologist($psy_id, $secretkey)
+{
   global $debug, $connected, $total_data;
   $result = true;
   try{
@@ -550,7 +554,8 @@ function checkSecretkeyPsychologist($psy_id, $secretkey){
  * @param  string $secretkey
  * @return array or boolean
  */
-function checkSecretkeyPatient($p_id, $secretkey){
+function checkSecretkeyPatient($p_id, $secretkey)
+{
   global $debug, $connected, $total_data;
   $result = true;
   try{
@@ -574,7 +579,8 @@ function checkSecretkeyPatient($p_id, $secretkey){
  * @param  string $kwd is keyword
  * @return array or boolean
  */
-function listPatient($kwd, $psychologist_id, $gender, $status){
+function listPatient($kwd, $psychologist_id, $gender, $status)
+{
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
@@ -624,7 +630,8 @@ function listPatient($kwd, $psychologist_id, $gender, $status){
  * @param  int $psychologist_id is psychologist_id
  * @return array or boolean
  */
-function getPatientByID($id, $psychologist_id){
+function getPatientByID($id, $psychologist_id)
+{
   global $debug, $connected, $total_data;
   $result = true;
   try{
@@ -718,7 +725,7 @@ function listTopicAnalysis($kwd, $lang)
  * @param  string $status
  * @return array or boolean
  */
-function getListTestPsychologist($psy_id, $tid, $cid, $status)
+function getListTestPsychologist($psy_id, $tid, $cid, $status, $assign_to)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
@@ -736,6 +743,10 @@ function getListTestPsychologist($psy_id, $tid, $cid, $status)
     if(!empty($status)){
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' tpsy.status = :status ';
+    }
+    if(!empty($assign_to)){
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' tpsy.assign_to = :assign_to ';
     }
     if(!empty($cid)){
       if(!empty($condition)) $condition .= ' AND ';
@@ -758,6 +769,7 @@ function getListTestPsychologist($psy_id, $tid, $cid, $status)
     if(!empty($cid))    $stmt->bindValue(':cat_id', $cid, PDO::PARAM_INT);
     if(!empty($psy_id)) $stmt->bindValue(':psy_id', $psy_id, PDO::PARAM_INT);
     if(!empty($status)) $stmt->bindValue(':status', $status, PDO::PARAM_INT);
+    if(!empty($assign_to)) $stmt->bindValue(':assign_to', $assign_to, PDO::PARAM_INT);
 
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -861,96 +873,6 @@ function getListTestPatient($pat_id, $psy_id, $tid, $status, $tmpstus, $f_date, 
   }
   return $result;
 }
-/**
- * getListTestPsychologist
- * @param  int $pat_id is patient_id
- * @param  int $tid is test_id
- * @param  int $status
- * @param  int $tmpstus is test_tmp of status
- * @param  int $f_date is from date
- * @param  int $t_date is to date
- * @param  string $lang is language
- * @return array or bool
- */
-// function getListTestPsychologist($pat_id, $psy_id, $tid, $status, $tmpstus, $f_date, $t_date, $lang)
-// {
-//   global $debug, $connected, $limit, $offset, $total_data;
-//   $result = true;
-//   try{
-//     $condition = $where = '';
-//
-//     if(!empty($pat_id)) {
-//       $condition .= ' AND tpt.patient_id = :pat_id ';
-//     }
-//     if(!empty($psy_id)) {
-//       $condition .= ' AND pt.psychologist_id = :psy_id ';
-//     }
-//     if(!empty($tid)) {
-//       $condition .= ' AND tpt.test_id = :testid ';
-//     }
-//     if(!empty($status)) {
-//       $condition .= ' AND tpt.status = :status ';
-//     }
-//     if(!empty($tmpstus)) {
-//       //if eqaul 1 is pending
-//       if($tmpstus == 1) {
-//         $condition .= ' AND ttmp.status = :tmpstus ';
-//       }
-//       //if eqaul 2 is commpleted
-//       if($tmpstus == 2) {
-//         $condition .= ' AND ttmp.status = :tmpstus ';
-//       }
-//       //if eqaul 3 is new assign
-//       if($tmpstus == 3) {
-//         $condition .= ' AND ttmp.status IS NULL ';
-//       }
-//     }
-//     if(!empty($f_date) && empty($t_date)) {
-//       $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") >= :f_date ';
-//     }
-//     if(empty($f_date) && !empty($t_date)) {
-//       $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") <= :t_date ';
-//     }
-//     if(!empty($f_date) && !empty($t_date)) {
-//       $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") BETWEEN :f_date AND :t_date ';
-//     }
-//
-//     $sql =' SELECT tpsy.*, psy.username, t.category_id, t.title, t.descripsyion, c.name AS catName, ttmp.status AS test_tmp_status,
-//               (SELECT COUNT(*) FROM `test_psychologist` tpsy INNER JOIN psychologist psy ON psy.id = tpsy.psychologist_id INNER JOIN test t ON t.id = tpsy.test_id
-//               INNER JOIN category c ON c.id = t.category_id LEFT JOIN test_tmp ttmp ON ttmp.test_psychologist_id = tpsy.id WHERE t.lang = :lang '.$condition.') AS total_count
-//             FROM `test_patient` tpsy
-//               INNER JOIN psychologist psy ON psy.id = tpsy.psychologist_id
-//               INNER JOIN test t ON t.id = tpsy.test_id
-//               INNER JOIN category c ON c.id = t.category_id
-//               LEFT JOIN test_tmp ttmp ON ttmp.test_psychologist_id = tpsy.id WHERE t.lang = :lang '.$condition.' ORDER BY tpsy.created_at DESC LIMIT :offset, :limit ';
-//
-//     $stmt = $connected->prepare($sql);
-//
-//     if(!empty($tid))    $stmt->bindValue(':testid', $tid, PDO::PARAM_INT);
-//     if(!empty($pat_id)) $stmt->bindValue(':pat_id', $pat_id, PDO::PARAM_INT);
-//     if(!empty($psy_id)) $stmt->bindValue(':psy_id', $psy_id, PDO::PARAM_INT);
-//     if(!empty($status)) $stmt->bindValue(':status', $status, PDO::PARAM_INT);
-//     if(!empty($f_date)) $stmt->bindValue(':f_date', $f_date, PDO::PARAM_STR);
-//     if(!empty($t_date)) $stmt->bindValue(':t_date', $t_date, PDO::PARAM_STR);
-//     if(!empty($tmpstus))
-//     {
-//       if($tmpstus == 1 || $tmpstus = 2) $stmt->bindValue(':tmpstus', $tmpstus, PDO::PARAM_INT);
-//     }
-//     $stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
-//     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-//     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-//     $stmt->execute();
-//     $rows = $stmt->fetchAll();
-//     if (count($rows) > 0) $total_data = $rows[0]['total_count'];
-//     return $rows;
-//
-//   } catch (Exception $e) {
-//     $result = false;
-//     if($debug)  echo 'Errors: getListTestPatient'.$e->getMessage();
-//   }
-//   return $result;
-// }
-
 /**
  * listTestGroupByTestId
  * @param  int $id is test_id
@@ -1899,22 +1821,29 @@ function getResponseAnswerByTestPsychologist($test_id, $tpsy_id)
     $rows = $query->fetchAll();
 
     $newResult = array();
-    foreach ($rows as $k => $va) {
-      if($va['type'] == 4)
+    foreach ($rows as $k => $va)
+    {
+      $sql2 = ' SELECT * FROM `answer` WHERE test_question_id = :tqid ORDER BY view_order ASC ';
+      $query2 = $connected->prepare($sql2);
+      $query2->bindValue(':tqid', (int)$va['tqid'], PDO::PARAM_INT);
+      $query2->execute();
+      $rows2 = $query2->fetchAll();
+
+      $newResultAns = array();
+
+      foreach ($rows2 as $k => $v)
       {
-        $sql1 =' SELECT ans.title AS ans_title
-                FROM `response` r
-                  INNER JOIN response_answer ra ON ra.response_id = r.id
-                  INNER JOIN test_question tq ON tq.id = ra.test_question_id
-                  INNER JOIN question q ON q.id = tq.question_id
-                  LEFT JOIN answer ans ON ans.id = ra.answer_id
-                WHERE r.test_id = :test_id AND r.test_psychologist_id = :tpsy_id AND ra.test_question_id = :tqid ';
-        $query1 = $connected->prepare($sql1);
-        $query1->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
-        $query1->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
-        $query1->bindValue(':tqid', (int)$va['tqid'], PDO::PARAM_INT);
-        $query1->execute();
-        $rows1 = $query1->fetchAll();
+        $sql3 = ' SELECT ra.answer_id AS re_answer_id FROM `response` r
+                    INNER JOIN response_answer ra ON ra.response_id = r.id
+                  WHERE r.test_id = :test_id AND r.test_psychologist_id = :tpsy_id AND ra.test_question_id = :tqid AND ra.answer_id = :ans_id ';
+        $query3 = $connected->prepare($sql3);
+        $query3->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+        $query3->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
+        $query3->bindValue(':tqid', (int)$v['test_question_id'], PDO::PARAM_INT);
+        $query3->bindValue(':ans_id', (int)$v['id'], PDO::PARAM_INT);
+        $query3->execute();
+        $rows3 = $query3->fetch();
+        $newResultAns[] = array('id' => $v['id'], 'title' => $v['title'], 're_answer_id' => $rows3['re_answer_id']);
       }
 
       $newResult[] = array('content'      => $va['content'],
@@ -1927,7 +1856,7 @@ function getResponseAnswerByTestPsychologist($test_id, $tpsy_id)
                            'hide_title'   => $va['hide_title'],
                            'tqid'         => $va['tqid'],
                            'is_required'  => $va['is_required'],
-                           'result_answer' => $rows1);
+                           'result_answer' => $newResultAns);
     }
 
     return $newResult;
@@ -1939,7 +1868,14 @@ function getResponseAnswerByTestPsychologist($test_id, $tpsy_id)
   return $result;
 }
 
-
+/**
+ * getMessageResultTopic
+ * @param  int $tpid is topic_id
+ * @param  int $tpsy_id is test_psychologist_id
+ * @param  int $test_id is test_id
+ * @param  string $lang is language
+ * @return array or boolean
+ */
 function getMessageResultTopic($tpid, $tpsy_id, $test_id, $lang)
 {
   global $debug, $connected;
@@ -2786,7 +2722,14 @@ function check_code_pat($code)
 
   return $result;
 }
-
+/**
+ * getResponseByPatientId
+ * @param  int $pat_id is patient_id
+ * @param  int $tid is test_id
+ * @param  string $f_date is from date
+ * @param  string $t_date is to date
+ * @return array or boolean
+ */
 function getResponseByPatientId($pat_id, $tid, $f_date, $t_date)
 {
   global $debug, $connected, $limit, $offset, $total_data;
@@ -2835,6 +2778,14 @@ function getResponseByPatientId($pat_id, $tid, $f_date, $t_date)
 
   return $result;
 }
+/**
+ * getListResponseTopicByPatient
+ * @param  int $pat_id is patient_id
+ * @param  int $tid is test_id
+ * @param  string $f_date is from date
+ * @param  string $t_date is to date
+ * @return array or boolean
+ */
 function getListResponseTopicByPatient($pat_id, $tid, $f_date, $t_date)
 {
   global $debug, $connected, $limit, $offset, $total_data;

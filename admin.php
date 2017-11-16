@@ -4049,7 +4049,7 @@ if('test_psychologist' === $task)
   $psy_id = !empty($_GET['psy_id']) ? $_GET['psy_id'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
 
-  $results = getListTestPsychologist($psy_id, $tid, $cid, $status);
+  $results = getListTestPsychologist($psy_id, $tid, $cid, $status, $assign_to = '');
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -4421,8 +4421,83 @@ if('psychologist_activity' === $task)
   $smarty_appform->display('admin/admin_psychologist_activity.tpl');
   exit;
 }
+//Task: Result psychologist
+if('result_test_psychologist' === $task)
+{
+  //Check & Clean String
+  $tpsy_id  = $common->clean_string($_GET['id']);
+  $tid      = $common->clean_string($_GET['tid']);
+  $psy_id   = $common->clean_string($_GET['psy_id']);
+  $sumTotal = 0; $sumAssignWeight = 0; $sumDefault = 0; $diagram_width = 820;
+  $space_height = 50; $margin_left = 450; $space_row_col = 50;
+  $moveTo_left  = $margin_left + 90;
+  $moveTo_top   = 60;
+
+  // $resultTestPsychologist = getCheckTestPsyChologistByPsyChologist($_SESSION['is_psycho_login_id'], $tid, $tpsy_id);
+  // if(empty($resultTestPsychologist)) {
+  //   header('Location:'.$psychologist_file.'?task=page_not_found');
+  //   exit;
+  // }
+
+  //Get Result Answer Topic
+  $getResultTopic = getResultAnswerTopic('', $tpsy_id, $tid, '', '');
+  // var_dump($getResultTopic);
+  //Get List Topic in diagram second
+  $resultTopicDiagramSecond = getListTopicDiagramSecond($getResultTopic, 10, 240, $lang);
+  //Get List Topic Analysis
+  $resultTopicAnalysis= listTopicAnalysisDiagram($margin_left + 25, 203, $space_row_col, $tid);
+  //Get List Topic in diagram first
+  $resultTopicDiagram = getListTopicDiagram('', $tpsy_id, $tid,10, 140);
+  //Calculate width and height on canvas2
+  $resultWidthHeightSecond = calWidthHeightDiagramSecond(COUNT($resultTopicDiagramSecond), COUNT($resultTopicAnalysis), $space_height + 160, $margin_left, $space_result_topic = 150);
+  //Drawing Line Result Diagram Second
+  $resultDrawingLineResultDiagramSecond = drawingPointLineResultDiagramSecond($resultTopicDiagramSecond, $resultTopicAnalysis, $margin_left + 25, $margin_top = 235, $resultWidthHeightSecond['width'] - 145);
+
+  //Assign value to diagram first
+  $smarty_appform->assign('listXlineDiagram', listXlineDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height + 60));//Horizontal Line
+  $smarty_appform->assign('listXdiagramCenter', listXlineDiagramCenter(COUNT($resultTopicDiagram), $diagram_width - 70, $space_height + 85, $margin_left));//List Diagram Horizontal line center
+  $smarty_appform->assign('getWidthHeight', calWidthHeightDiagram(COUNT($resultTopicDiagram), $diagram_width, $space_height));//Calculate width and Height on canvas
+  $smarty_appform->assign('listNumberMinMax', listNumberMinMax($margin_left, $margin_top = 90));//List Text Number Min & Max
+  $smarty_appform->assign('listTextMinMax', listTextMinMax($margin_left, $margin_top = 75));//List Text Min & Max
+  $smarty_appform->assign('listBackgroudColor', listBackgroundColorDiagram($margin_left, 110, 50));//List backgroud diagram
+  $smarty_appform->assign('drawingPointLine', drawingPointLineResult($resultTopicDiagram, $margin_left - 100, $margin_top = 135, $tid));//Drawing point line
+  $smarty_appform->assign('listYLineDiagram', listYLineDiagram($margin_left, 50 + 50));//Vertical Line
+  $smarty_appform->assign('listYLineDiagramCenter', listYLineDiagramCenter($margin_left, 50 + 50));//Vertical Line center
+  $smarty_appform->assign('listSmallYLineDiagram', listSmall_YlineDiagram($margin_left, 90));//Vertical small Line
+  $smarty_appform->assign('listTopicDiagram', $resultTopicDiagram);
+  //end
+
+  //Assign value to diagram second
+  $smarty_appform->assign('getWidthHeightSecond', $resultWidthHeightSecond);
+  $smarty_appform->assign('listTopicDiagramSecond', $resultTopicDiagramSecond);
+  $smarty_appform->assign('listTopicAnalysis', $resultTopicAnalysis);
+  $smarty_appform->assign('drawingLineResultDiagramSecond', $resultDrawingLineResultDiagramSecond);
+  $smarty_appform->assign('listBackgroudColorSecond', listBackgroundColorDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160, $space_row_col));//List background color Diagram Second
+  $smarty_appform->assign('listXlineDiagramSecond', listXlineDiagram(COUNT($resultTopicDiagramSecond), $resultWidthHeightSecond['width'], $space_height + 160));//Horizontal line
+  $smarty_appform->assign('listXlineDiagramSecondCenter', listXlineDiagramCenter(COUNT($resultTopicDiagramSecond), $resultWidthHeightSecond['width'] - 150, $space_height + 185, $margin_left)); //List Diagram Second Horizontal line center
+  $smarty_appform->assign('listRotateLineDiagramSecond', listRotateLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160, $moveTo_left, $moveTo_top, $space_row_col));//List Rotate Line Diagram Second
+  $smarty_appform->assign('listYLineDiagramSecond', listYLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160));//Vertical Line
+  //end
+
+  $smarty_appform->assign('reponseAnswerByTestPsyt', getResponseAnswerByTestPsychologist($tid, $tpsy_id));
+  $smarty_appform->assign('messageResultTopic', getMessageResultTopic('', $tpsy_id, $tid, $lang));
+  $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = ['id' => $_SESSION['is_psycho_login_id']], $type = 'one'));
+  $smarty_appform->assign('test_psychologist', $common->find('test_psychologist', $condition = ['psychologist_id' => $_SESSION['is_psycho_login_id'], 'id' => $tpsy_id], $type = 'one'));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
+  $smarty_appform->display('admin/admin_result_test_psychologist.tpl');
+  exit;
+}
+
+$tid    = !empty($_GET['tid']) ? $common->clean_string($_GET['tid']) : '';
+$cid    = !empty($_GET['cid']) ? $common->clean_string($_GET['cid']) : '';
+$psy_id = !empty($_GET['psy_id']) ? $common->clean_string($_GET['psy_id']) : '';
 
 //task home
+$results = getListTestPsychologist($psy_id, $tid, $cid, '', $assign_to = 2);
+(0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+SmartyPaginate::assign($smarty_appform);
+
+$smarty_appform->assign('listTestPsychologist', $results);
 $smarty_appform->display('admin/index.tpl');
 exit;
 ?>

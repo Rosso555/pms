@@ -92,7 +92,7 @@ $(document).ready(function(){
 		});
 
 		//Run function when browser resizes
-		$(window).resize( resizeBrowser, resizeBrowserBoxTest );
+		$(window).resize( resizeBrowser, resizeBrowserBoxTest, resizeBrowserBoxResponseAnswer );
 
 		function resizeBrowser(){
 			var width = window.innerWidth;
@@ -104,8 +104,9 @@ $(document).ready(function(){
 				$('.select2_search_inline > .select2_search, .select2_search_inline > .select2-container').attr('style', 'width: 220px;');
 			}
 		}
-		
-    function resizeBrowserBoxTest() {
+
+    function resizeBrowserBoxTest()
+		{
       $('.body-test-body').removeAttr("style");
       var boxTestCenter = document.getElementsByClassName("body-test-body");
       var sumHight = 0;
@@ -117,9 +118,23 @@ $(document).ready(function(){
       $('.body-test-body').css({ 'height': sumHight+'px' });
     }
 
+		function resizeBrowserBoxResponseAnswer()
+		{
+			$('.response-ans-col').removeAttr("style");
+			var boxResponseAns= document.getElementsByClassName("response-ans-col");
+			var sumHight = 0;
+			for (var i = 0; i < boxResponseAns.length; i++) {
+				if(boxResponseAns[i].offsetHeight > sumHight) {
+					sumHight = boxResponseAns[i].offsetHeight;
+				}
+			}
+			$('.response-ans-col').css({ 'height': sumHight+'px' , 'margin-bottom': '10px' });
+		}
+
     //Run function after finished loading
     resizeBrowserBoxTest();
 		resizeBrowser();
+		resizeBrowserBoxResponseAnswer();
 
 });
 function NumAndTwoDecimals(e , field)

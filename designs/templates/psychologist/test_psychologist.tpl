@@ -60,6 +60,11 @@
               {else}
                 <span class="label label-success"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Completed</span>
               {/if}
+              {if $data.assign_to eq 1}
+                <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Assign (Uncompleted)</span>
+              {else}
+                <span class="label label-primary"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Assign (Completed)</span>
+              {/if}
               <!-- <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span> -->
             </p>
             <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
@@ -71,6 +76,13 @@
             </a>
             {else}
             <div class="row">
+              {if $data.assign_to eq 2}
+              <div class="col-md-12">
+                <a id="btn-test-footer" href="{$psychologist_file}?task=result_test_psychologist&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
+                  Check Result &nbsp;&nbsp;<i class="fa fa-registered" aria-hidden="true"></i>
+                </a>
+              </div>
+              {else}
               <div class="col-md-6">
                 <a id="btn-test-footer" href="{$psychologist_file}?task=result_test_psychologist&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
                   Check Result &nbsp;&nbsp;<i class="fa fa-registered" aria-hidden="true"></i>
@@ -78,10 +90,10 @@
               </div>
               <div class="col-md-6">
                 {if $data.assign_to eq 2}
-                <button id="btn-test-footer" type="button" class="btn btn-default btn-sm btn-block"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Assign (Completed)</button>
+                <button id="btn-test-footer" type="button" class="btn btn-default btn-sm btn-block"> Assign (Completed) &nbsp;&nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></button>
                 {else}
                 <!-- Trigger the modal with a button -->
-                <button id="btn-test-footer" type="button" class="btn btn-default btn-sm btn-block" data-toggle="modal" data-target="#myModalAssign_{$data.id}"><i class="fa fa-share-square-o" aria-hidden="true"></i> Assign to admin</button>
+                <button id="btn-test-footer" type="button" class="btn btn-default btn-sm btn-block" data-toggle="modal" data-target="#myModalAssign_{$data.id}"> Assign to admin &nbsp;&nbsp;<i class="fa fa-share-square-o" aria-hidden="true"></i></button>
                 {/if}
                 <!-- Modal -->
                 <div class="modal fade" id="myModalAssign_{$data.id}" role="dialog">
@@ -96,7 +108,7 @@
                         <p>Are you sure you want assign this test to admin?</p>
                       </div>
                       <div class="modal-footer">
-                        <a href="{$psychologist_file}?task=result_test_psychologist&amp;action=update_assign&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;">
+                        <a href="{$psychologist_file}?task=result_test_psychologist&amp;action=update_assign&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}&amp;cid={$smarty.get.cid}&amp;status={$smarty.get.status}" class="btn btn-danger btn-md" style="color: white;">
                           <i class="fa fa-check-circle-o" aria-hidden="true"></i> Sure
                         </a>
                         <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
@@ -105,8 +117,8 @@
                   </div>
                 </div>
                 <!-- Modal -->
-
               </div>
+              {/if}
             </div>
             {/if}
           </div>

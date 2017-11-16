@@ -120,38 +120,38 @@
   {else}
   <h2 class="text-center">This test does not complete.</h2>
   {/if}
-  <br><br>
-  <center>
-    <a href="{$admin_file}?task=test_psychologist" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
-
-    {if $test_psychologist.assign_to eq 2}
-    <button type="button" class="btn btn-info btn-sm"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Assign (Completed)</button>
-    {else}
-    <!-- Trigger the modal with a button -->
-    <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#myModalAssign"><i class="fa fa-share-square-o" aria-hidden="true"></i> Assign to admin</button>
-    {/if}
-    <!-- Modal -->
-    <div class="modal fade" id="myModalAssign" role="dialog">
-      <div class="modal-dialog">
-        <!-- Modal content-->
-        <div class="panel panel-primary modal-content">
-          <div class="panel-heading modal-header">
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="panel-title modal-title" style="text-align: left;">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate(Key Lang: text_confirmation){/if}</h4>
-          </div>
-          <div class="modal-body" style="text-align: left;">
-            <p>Are you sure you want assign this test to admin?</p>
-          </div>
-          <div class="modal-footer">
-            <a href="{$psychologist_file}?task=result_test_psychologist&amp;action=update_assign&amp;tid={$smarty.get.tid}&amp;psy_id={$smarty.get.psy_id}&amp;id={$smarty.get.id}" class="btn btn-danger btn-md" style="color: white;">
-              <i class="fa fa-check-circle-o" aria-hidden="true"></i> Sure</a>
-            <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
-          </div>
+  <br>
+  <hr>
+  <form class="" action="index.html" method="post">
+    <!-- <div class="box_title">
+      <div class="row">
+        <div class="col-md-4">
+          <span class="text-danger">{if $error.no_image}{if $multiLang.text_browse}{$multiLang.text_browse}{else}No Translate (Key Lang:text_browse){/if} {if $multiLang.text_upload_photos}{$multiLang.text_upload_photos}{else}No Translate (Key Lang:text_upload_photos){/if}.{/if}</span>
+          <input type="file" name="image" id="file" onchange="readURL(this);"/>
+          <button type="submit" name="button" class="btn btn-primary btn-sm">Submit</button>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" name="button" class="btn btn-primary btn-sm">Submit</button>
         </div>
       </div>
+    </div> -->
+    <div class="row">
+      <div class="col-md-3">&nbsp;</div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Analysis Document :</label></br>
+          <input type="file" name="analysis_file"/>
+        </div>
+        <div class="form-group">
+          <button type="submit" name="button" class="btn btn-primary btn-sm">Submit</button>
+        </div>
+      </div>
+      <div class="col-md-3">&nbsp;</div>
     </div>
-    <!-- Modal -->
-  </center>
+  </form>
+  <!-- <center>
+    <a href="{$admin_file}" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
+  </center> -->
   <br><br>
 </div>
 {/block}
