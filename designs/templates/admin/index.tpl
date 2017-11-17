@@ -46,16 +46,12 @@
             <p class="small-90">
               <i class="fa fa-tag" aria-hidden="true"></i> {$data.catName|escape} &nbsp;/&nbsp;
               <i class="fa fa-calendar" aria-hidden="true"></i> {$data.created_at|date_format:"%B %e, %Y"} &nbsp;/&nbsp;
-              {if $data.status eq 1}
-                {if $data.test_tmp_status}
-                <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span>
-                {else}
-                <span class="label label-info"><i class="fa fa-file-text" aria-hidden="true"></i> New Assign</span>
-                {/if}
+              <i class="fa fa-user-plus" aria-hidden="true"></i> <a href="{$admin_file}?psy_id={$data.psychologist_id}">{$data.first_name} {$data.last_name}</a> &nbsp;/&nbsp;
+              {if $data.analysis_file}
+                <span class="label label-success"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Analysis File (Completed)</span>
               {else}
-                <span class="label label-success"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Completed</span>
+                <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Analysis File (Uncompleted)</span>
               {/if}
-              <!-- <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span> -->
             </p>
             <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
           </div>

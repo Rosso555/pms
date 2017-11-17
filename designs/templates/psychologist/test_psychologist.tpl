@@ -59,13 +59,14 @@
                 {/if}
               {else}
                 <span class="label label-success"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Completed</span>
+
+                {if $data.assign_to eq 1}
+                  <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Assign (Uncompleted)</span>
+                {else}
+                  <span class="label label-success"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Assign (Completed)</span>
+                {/if}
               {/if}
-              {if $data.assign_to eq 1}
-                <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Assign (Uncompleted)</span>
-              {else}
-                <span class="label label-primary"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Assign (Completed)</span>
-              {/if}
-              <!-- <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Not Completed</span> -->
+
             </p>
             <p class="small">{$data.description|truncate:350:"...":true|escape}</p>
           </div>

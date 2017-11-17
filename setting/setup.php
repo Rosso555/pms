@@ -38,7 +38,9 @@ $allows   =   array(
     'audio' =>  array('audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/aac',
             'audio/webm'),
     'document'  =>  array('text/plain', 'application/pdf', 'application/msword',
-            'application/xml', 'application/zip', 'application/x-rar-compressed')
+            'application/xml', 'application/zip', 'application/x-rar-compressed', 'text/csv',
+            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   )
 );
 
@@ -64,6 +66,8 @@ Website: http://www.pms.e-khmer.com/
 $site_url = 'http://www.pms.e-khmer.com/';
 // define("IMAGE_FILES_PATH", "/home/scusersbnn/chapmeas.e-khmer.com/images/");
 define("IMAGE_PATH", "/home/scusersbnn/pms.e-khmer.com/images/staff/");
+define("ANALYSIS_FILE_PATH", "/home/scusersbnn/pms.e-khmer.com/documents/analysis_file/");
+define("CSV_DOWNLOAD_PATH", "/home/scusersbnn/pms.e-khmer.com/documents/csv_download/");
 
 //Thumbnail
 $thumbnail_width= 140;

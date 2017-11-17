@@ -122,31 +122,18 @@
   {/if}
   <br>
   <hr>
-  <form class="" action="index.html" method="post">
-    <!-- <div class="box_title">
-      <div class="row">
-        <div class="col-md-4">
-          <span class="text-danger">{if $error.no_image}{if $multiLang.text_browse}{$multiLang.text_browse}{else}No Translate (Key Lang:text_browse){/if} {if $multiLang.text_upload_photos}{$multiLang.text_upload_photos}{else}No Translate (Key Lang:text_upload_photos){/if}.{/if}</span>
-          <input type="file" name="image" id="file" onchange="readURL(this);"/>
-          <button type="submit" name="button" class="btn btn-primary btn-sm">Submit</button>
-        </div>
-        <div class="col-md-4">
-          <button type="submit" name="button" class="btn btn-primary btn-sm">Submit</button>
-        </div>
+  <form class="" action="{$admin_file}?task=result_test_psychologist&amp;action=analysis_file" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="tid" value="{$smarty.get.tid}">
+    <input type="hidden" name="psy_id" value="{$smarty.get.psy_id}">
+    <input type="hidden" name="tpsy_id" value="{$smarty.get.id}">
+    <div style="margin-left: 40%;">
+      <div class="form-group">
+        <label>Analysis Document :</label></br>
+        <input type="file" name="analysis_file" required/>
       </div>
-    </div> -->
-    <div class="row">
-      <div class="col-md-3">&nbsp;</div>
-      <div class="col-md-6">
-        <div class="form-group">
-          <label>Analysis Document :</label></br>
-          <input type="file" name="analysis_file"/>
-        </div>
-        <div class="form-group">
-          <button type="submit" name="button" class="btn btn-primary btn-sm">Submit</button>
-        </div>
+      <div class="form-group">
+        <button type="submit" name="button" class="btn btn-primary btn-sm">Submit</button>
       </div>
-      <div class="col-md-3">&nbsp;</div>
     </div>
   </form>
   <!-- <center>

@@ -4424,6 +4424,35 @@ if('psychologist_activity' === $task)
 //Task: Result psychologist
 if('result_test_psychologist' === $task)
 {
+
+  if('analysis_file' === $action)
+  {
+    $error = array();
+    if($_POST)
+    {
+      //Check & Clean String
+      $tpsy_id  = $common->clean_string($_POST['tpsy_id']);
+      $tid      = $common->clean_string($_POST['tid']);
+      $psy_id   = $common->clean_string($_POST['psy_id']);
+
+      if(!empty($_FILES['analysis_file']['name']))
+      {
+        if($_FILES['analysis_file']['size'] > $allows['SIZE'][0])  $error['size'] = 1;
+        if(!in_array($_FILES['analysis_file']['type'], $allows['TYPE']['document'])) $error['type'] = 1;
+      }
+
+      if(COUNT($error) === 0)
+      {
+        $analysis_file = $common->uploadFile($_FILES, time(), ANALYSIS_FILE_PATH, 'analysis_file');
+        $common->update('test_psychologist', $field = ['analysis_file' => $analysis_file], $condition = ['id' => $tpsy_id, 'psychologist_id' => $psy_id]);
+      }
+      //Redirect
+      header('location: '.$admin_file.'?task=result_test_psychologist&tid='.$tid.'&psy_id='.$psy_id.'&id='.$tpsy_id);
+      exit;
+    }
+
+  }
+
   //Check & Clean String
   $tpsy_id  = $common->clean_string($_GET['id']);
   $tid      = $common->clean_string($_GET['tid']);
@@ -4432,12 +4461,6 @@ if('result_test_psychologist' === $task)
   $space_height = 50; $margin_left = 450; $space_row_col = 50;
   $moveTo_left  = $margin_left + 90;
   $moveTo_top   = 60;
-
-  // $resultTestPsychologist = getCheckTestPsyChologistByPsyChologist($_SESSION['is_psycho_login_id'], $tid, $tpsy_id);
-  // if(empty($resultTestPsychologist)) {
-  //   header('Location:'.$psychologist_file.'?task=page_not_found');
-  //   exit;
-  // }
 
   //Get Result Answer Topic
   $getResultTopic = getResultAnswerTopic('', $tpsy_id, $tid, '', '');
@@ -4481,7 +4504,7 @@ if('result_test_psychologist' === $task)
 
   $smarty_appform->assign('reponseAnswerByTestPsyt', getResponseAnswerByTestPsychologist($tid, $tpsy_id));
   $smarty_appform->assign('messageResultTopic', getMessageResultTopic('', $tpsy_id, $tid, $lang));
-  $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = ['id' => $_SESSION['is_psycho_login_id']], $type = 'one'));
+  $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = ['id' => $psy_id], $type = 'one'));
   $smarty_appform->assign('test_psychologist', $common->find('test_psychologist', $condition = ['psychologist_id' => $_SESSION['is_psycho_login_id'], 'id' => $tpsy_id], $type = 'one'));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
   $smarty_appform->display('admin/admin_result_test_psychologist.tpl');
