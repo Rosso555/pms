@@ -725,30 +725,41 @@ function listTopicAnalysis($kwd, $lang)
  * @param  string $status
  * @return array or boolean
  */
-function getListTestPsychologist($psy_id, $tid, $cid, $status, $assign_to)
+function getListTestPsychologist($psy_id, $tid, $cid, $status, $assign_to, $stu_ana_file)
 {
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
     $condition = $where = '';
 
-    if(!empty($psy_id)){
+    if(!empty($psy_id))
+    {
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' tpsy.psychologist_id = :psy_id ';
     }
-    if(!empty($tid)){
+    if(!empty($tid))
+    {
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' tpsy.test_id = :testid ';
     }
-    if(!empty($status)){
+    if(!empty($status))
+    {
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' tpsy.status = :status ';
     }
-    if(!empty($assign_to)){
+    if(!empty($assign_to))
+    {
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' tpsy.assign_to = :assign_to ';
     }
-    if(!empty($cid)){
+    if(!empty($stu_ana_file))
+    {
+      if(!empty($condition)) $condition .= ' AND ';
+      if($stu_ana_file == 1) $condition .= ' tpsy.analysis_file IS NOT NULL ';
+      if($stu_ana_file == 2) $condition .= ' tpsy.analysis_file IS NULL ';
+    }
+    if(!empty($cid))
+    {
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' t.category_id = :cat_id ';
     }

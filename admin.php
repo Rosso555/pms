@@ -4049,7 +4049,7 @@ if('test_psychologist' === $task)
   $psy_id = !empty($_GET['psy_id']) ? $_GET['psy_id'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '';
 
-  $results = getListTestPsychologist($psy_id, $tid, $cid, $status, $assign_to = '');
+  $results = getListTestPsychologist($psy_id, $tid, $cid, $status, $assign_to = '', $stu_ana_file = '');
 
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
@@ -4514,13 +4514,18 @@ if('result_test_psychologist' === $task)
 $tid    = !empty($_GET['tid']) ? $common->clean_string($_GET['tid']) : '';
 $cid    = !empty($_GET['cid']) ? $common->clean_string($_GET['cid']) : '';
 $psy_id = !empty($_GET['psy_id']) ? $common->clean_string($_GET['psy_id']) : '';
+$stu_ana_file = !empty($_GET['stu_ana_file']) ? $common->clean_string($_GET['stu_ana_file']) : '';
+if(empty($stu_ana_file)) $stu_ana_file = 2;
 
 //task home
-$results = getListTestPsychologist($psy_id, $tid, $cid, '', $assign_to = 2);
+$results = getListTestPsychologist($psy_id, $tid, $cid, '', $assign_to = 2, $stu_ana_file);
 (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
 SmartyPaginate::assign($smarty_appform);
 
 $smarty_appform->assign('listTestPsychologist', $results);
+$smarty_appform->assign('category', $common->find('category', $condition = ['lang' => $lang], $type = 'all'));
+$smarty_appform->assign('psychologist', $common->find('psychologist', $condition = null, $type = 'all'));
+$smarty_appform->assign('test', $common->find('test', $condition = null, $type = 'all'));
 $smarty_appform->display('admin/index.tpl');
 exit;
 ?>

@@ -61,9 +61,9 @@
                 <span class="label label-success"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Completed</span>
 
                 {if $data.assign_to eq 1}
-                  <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Assign (Uncompleted)</span>
+                  <span class="label label-warning"><i class="fa fa-ban" aria-hidden="true"></i> Assign To (Uncompleted)</span>
                 {else}
-                  <span class="label label-success"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Assign (Completed)</span>
+                  <span class="label label-success"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Assign To (Completed)</span>
                 {/if}
               {/if}
 
@@ -78,11 +78,18 @@
             {else}
             <div class="row">
               {if $data.assign_to eq 2}
-              <div class="col-md-12">
-                <a id="btn-test-footer" href="{$psychologist_file}?task=result_test_psychologist&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
-                  Check Result &nbsp;&nbsp;<i class="fa fa-registered" aria-hidden="true"></i>
-                </a>
-              </div>
+                <div class="{if $data.analysis_file}col-md-6{else}col-md-12{/if}">
+                  <a id="btn-test-footer" href="{$psychologist_file}?task=result_test_psychologist&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">
+                    Check Result &nbsp;&nbsp;<i class="fa fa-registered" aria-hidden="true"></i>
+                  </a>
+                </div>
+                {if $data.analysis_file}
+                  <div class="col-md-6">
+                    <a href="{$site_url}/documents/analysis_file/{$data.analysis_file}" type="button" class="btn btn-primary btn-sm btn-block">
+                      Download Analysis File &nbsp;&nbsp;<i class="fa fa-download" aria-hidden="true"></i>
+                    </a>
+                  </div>
+                {/if}
               {else}
               <div class="col-md-6">
                 <a id="btn-test-footer" href="{$psychologist_file}?task=result_test_psychologist&amp;tid={$data.test_id}&amp;psy_id={$data.psychologist_id}&amp;id={$data.id}" type="button" class="btn btn-default btn-sm btn-block">

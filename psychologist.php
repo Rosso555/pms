@@ -766,7 +766,7 @@ if('test_psychologist' === $task)
   $cid    = !empty($_GET['cid']) ? $_GET['cid'] : '';
   $status = !empty($_GET['status']) ? $_GET['status'] : '1';
 
-  $results = getListTestPsychologist($_SESSION['is_psycho_login_id'], $tid, $cid, $status, $assign_to = '');
+  $results = getListTestPsychologist($_SESSION['is_psycho_login_id'], $tid, $cid, $status, $assign_to = '', $stu_ana_file = '');
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
 

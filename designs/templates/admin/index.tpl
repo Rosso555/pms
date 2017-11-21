@@ -15,6 +15,14 @@
             </select>
           </div>
           <div class="form-group select2_search_inline" style="margin-bottom:5px;">
+            <select class="form-control select2_search" name="psy_id">
+              <option value="">---Select Psychologist---</option>
+              {foreach from=$psychologist item=v}
+              <option value="{$v.id}" {if $smarty.get.psy_id eq $v.id}selected{/if}>{$v.first_name} {$v.last_name}</option>
+              {/foreach}
+            </select>
+          </div>
+          <div class="form-group select2_search_inline" style="margin-bottom:5px;">
             <select class="form-control select2_search" name="tid">
               <option value="">---Select Test---</option>
               {foreach from=$test item=v}
@@ -23,10 +31,10 @@
             </select>
           </div>
           <div class="form-group select2_search_inline" style="margin-bottom:5px;">
-            <select class="form-control select2_search" name="status">
-              <option value="">--- Select Status ---</option>
-              <option value="1" {if $smarty.get.status eq 1}selected{/if}>New & Pendding...</option>
-              <option value="2" {if $smarty.get.status eq 2}selected{/if}>Completed</option>
+            <select class="form-control select2_search" name="stu_ana_file">
+              <option value="">--- Analysis File Status ---</option>
+              <option value="1" {if $smarty.get.stu_ana_file eq 1}selected{/if}>Analysis File (Completed)</option>
+              <option value="2" {if $smarty.get.stu_ana_file eq 2}selected{/if}>Analysis File (Uncompleted)</option>
             </select>
           </div>
           <div class="form-group" style="margin-bottom:5px;">
