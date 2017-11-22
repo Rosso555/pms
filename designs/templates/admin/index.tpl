@@ -1,5 +1,9 @@
 {extends file="common/layout.tpl"}
 {block name="main"}
+<ul class="breadcrumb">
+  <li><a href="{$psychologist_file}"><i class="fa fa-fw fa-home"></i></a></li>
+  <li class="active">{if $multiLang.text_home}{$multiLang.text_home}{else}No Translate(Key Lang: text_home){/if}</li>
+</ul>
 <div class="panel panel-primary">
   <div class="panel-heading"><h3 class="panel-title">Welcome!</h3></div>
   <div class="panel-body">

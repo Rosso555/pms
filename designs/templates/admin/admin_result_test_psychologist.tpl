@@ -132,7 +132,11 @@
         <input type="file" name="analysis_file" required/>
       </div>
       <div class="form-group">
+        {if $test_psychologist.analysis_file}
+        <button type="button" name="button" class="btn btn-warning btn-sm" data-toggle1="tooltip" data-placement="top" title="Analysis File has been submited.">Submited</button>
+        {else}
         <button type="submit" name="button" class="btn btn-primary btn-sm">Submit</button>
+        {/if}
       </div>
     </div>
   </form>

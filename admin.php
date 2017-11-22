@@ -4424,7 +4424,6 @@ if('psychologist_activity' === $task)
 //Task: Result psychologist
 if('result_test_psychologist' === $task)
 {
-
   if('analysis_file' === $action)
   {
     $error = array();
@@ -4505,7 +4504,7 @@ if('result_test_psychologist' === $task)
   $smarty_appform->assign('reponseAnswerByTestPsyt', getResponseAnswerByTestPsychologist($tid, $tpsy_id));
   $smarty_appform->assign('messageResultTopic', getMessageResultTopic('', $tpsy_id, $tid, $lang));
   $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = ['id' => $psy_id], $type = 'one'));
-  $smarty_appform->assign('test_psychologist', $common->find('test_psychologist', $condition = ['psychologist_id' => $_SESSION['is_psycho_login_id'], 'id' => $tpsy_id], $type = 'one'));
+  $smarty_appform->assign('test_psychologist', $common->find('test_psychologist', $condition = ['psychologist_id' => $psy_id, 'id' => $tpsy_id], $type = 'one'));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
   $smarty_appform->display('admin/admin_result_test_psychologist.tpl');
   exit;
