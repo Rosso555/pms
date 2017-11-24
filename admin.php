@@ -1157,7 +1157,11 @@ if('psychologist' === $task)
     {
       //get value from form
       $id     = $common->clean_string($_POST['id']);
-      $username = $common->clean_string($_POST['username']);
+      $first_name = $common->clean_string($_POST['first_name']);
+      $last_name  = $common->clean_string($_POST['last_name']);
+      $village  = $common->clean_string($_POST['village']);
+      $gender   = $common->clean_string($_POST['gender']);
+      $age      = $common->clean_string($_POST['age']);
       $password = $common->clean_string($_POST['password']);
       $email    = $common->clean_string($_POST['email']);
       $job      = $common->clean_string($_POST['job']);
@@ -1166,7 +1170,11 @@ if('psychologist' === $task)
       //add value to session to use in template
       $_SESSION['psychologist'] = $_POST;
       //form validation
-      if(empty($username))  $error['username']  = 1;
+      if(empty($first_name))$error['first_name']  = 1;
+      if(empty($last_name)) $error['last_name']  = 1;
+      if(empty($village))   $error['village']  = 1;
+      if(empty($gender))    $error['gender']  = 1;
+      if(empty($age))       $error['age']  = 1;
       if(empty($password))  $error['password']  = 1;
       if(empty($email))     $error['email']   = 1;
       if(empty($job))       $error['job']   = 1;
