@@ -93,7 +93,7 @@
                         <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h4>
                       </div>
                       <div class="modal-body">
-                        <p>Are you sure you want to delete this category <b>({$data.name|escape})</b> ?</p>
+                        <p>Are you sure you want to delete this town/village <b>({$data.name|escape})</b> ?</p>
                       </div>
                       <div class="modal-footer">
                         <a href="{$psychologist_file}?task=town_village&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</i></a>

@@ -55,7 +55,7 @@
         {if $resultPsyActivity|@count gt 0}
           {foreach from=$resultPsyActivity item=v}
           <tr>
-            <td>{$v.username}</td>
+            <td>{$v.first_name} {$v.last_name}</td>
             <td>{$v.content}</td>
             <td>{$v.activity_date}</td>
           </tr>

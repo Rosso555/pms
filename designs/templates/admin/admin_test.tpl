@@ -139,7 +139,9 @@
                 <span class="collapse" id="collapseMore{$data.id}">
                     {$data.description|mb_substr:180:$sumChar}
                 </span>
-                <a onclick="read_more({$data.id});" id="read_more{$data.id}" data-toggle="collapse" href="#collapseMore{$data.id}" aria-expanded="false" aria-controls="collapseMore{$data.id}"><i class="fa fa-plus-circle" aria-hidden="true"></i> More...</a>
+                <a class="btn btn-warning btn-xs" onclick="read_more({$data.id});" id="read_more{$data.id}" data-toggle="collapse" href="#collapseMore{$data.id}" aria-expanded="false" aria-controls="collapseMore{$data.id}" style="font-size: 11px;">
+                  <i class="fa fa-plus-circle" aria-hidden="true"></i> More
+                </a>
                 {/if}
               </td>
               <td>
