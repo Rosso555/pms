@@ -1542,10 +1542,28 @@ function getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang)
     $rTestQueNotViewOrder = getTestQuestionViewOrder($tid);
 
     if(!empty($rTestQueNotViewOrder)){
-      foreach ($rTestQueNotViewOrder as $key => $va) {
-        if(empty($va['tq_view_order_id'])){
-          $result1 = getTestQuestionByTestQuesID($tid, $va['tqid'], $lang);
-          $resultJumpto = getJumpToTestQuestionById($va['tqid']);
+      foreach ($rTestQueNotViewOrder as $key => $va)
+      {
+        $result1 = getTestQuestionByTestQuesID($tid, $va['tqid'], $lang);
+
+        if($result1['flag'] == 1)
+        {
+          $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
+
+          foreach ($row2 as $k => $va) {
+            $resultJumpto = getJumpToTestQuestionById($va['test_question_id']);
+
+            $newdata[] = array('id'       => $va['id'],
+                            'title'       => $va['title'],
+                            'description' => $va['description'],
+                            'type'        => $va['type'],
+                            'view_order'  => $va['view_order'],
+                            'test_question_id'  => $va['test_question_id'],
+                            'jump_to'     => $resultJumpto);
+          }//End foreach
+
+        } else {
+          $resultJumpto = getJumpToTestQuestionById($result1['test_question_id']);
           $newdata[] = array('id'       => $result1['id'],
                           'title'       => $result1['title'],
                           'description' => $result1['description'],
