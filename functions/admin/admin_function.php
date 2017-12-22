@@ -2402,3 +2402,29 @@ function psychologist_activity($kwd, $psy_id, $gender)
  }
  return $result;
 }
+
+function getListSectionByTest($test_id, $parent_id)
+{
+  global $debug, $connected;
+  $result = true;
+  try
+  {
+    $condition = '';
+    if(!empty($parent_id)) {
+      $condition .=' AND parent_id = :parent_id ';
+    }
+
+    $sql = ' SELECT * FROM `section` WHERE test_id = :test_id '.$condition;
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+
+    return $rows;
+  }
+  catch (Exception $e)
+  {
+    if($debug) echo 'Error: getListSectionByTest'. $e->getMessage();
+  }
+  return $result;
+}

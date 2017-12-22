@@ -3855,6 +3855,171 @@ if('apitransaction' === $task)
   $smarty_appform->display('admin/admin_api_transcation.tpl');
   exit;
 }
+//Task: Section
+if('section' === $task)
+{
+  if(empty($_POST)) unset($_SESSION['section']);
+
+  $error = array();
+  //action add
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      //get value from form
+      $tid = $common->clean_string($_POST['tid']);
+      $name = $common->clean_string($_POST['name']);
+      //add value to session to use in template
+      $_SESSION['section'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //Add test
+      if(0 === count($error))
+      {
+        $common->save('section', $field = ['test_id' => $tid, 'name' => $name]);
+        //unset session
+        unset($_SESSION['section']);
+        //Redirect
+        header('location: '.$admin_file.'?task=section&tid='.$tid);
+        exit;
+      }
+    }
+  }
+
+  //action edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $tid = $common->clean_string($_POST['tid']);
+      $name = $common->clean_string($_POST['name']);
+      $id   = $common->clean_string($_POST['id']);
+      //add value to session to use in template
+      $_SESSION['section'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //update test
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('section', $field = ['test_id' => $tid, 'name' => $name], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['section']);
+        //Redirect
+        header('location: '.$admin_file.'?task=section&tid='.$tid);
+        exit;
+      }
+    }
+    $smarty_appform->assign('getSectionByID', $common->find('section', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  //action delete category
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $result = checkDeleteCategory($_GET['id']);
+    if('0' === $result['total_count'])
+    {
+      $common->delete('category', $field = ['id' => $_GET['id']]);
+    }else {
+      setcookie('checkCategory', $result['name'], time() + 5);
+    }
+    header('location: '.$admin_file.'?task=category');
+    exit;
+  }
+
+  $results = getListSectionByTest($_GET['tid'], $parent_id = 0);
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('listSectionByTest', $results);
+  $smarty_appform->display('admin/admin_section.tpl');
+  exit;
+}
+//Task: Section
+if('section_sub' === $task)
+{
+  if(empty($_POST)) unset($_SESSION['section_sub']);
+
+  $error = array();
+  //action add
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      //get value from form
+      $tid    = $common->clean_string($_POST['tid']);
+      $name   = $common->clean_string($_POST['name']);
+      $par_id = $common->clean_string($_POST['par_id']);
+      //add value to session to use in template
+      $_SESSION['section_sub'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //Add test
+      if(0 === count($error))
+      {
+        $common->save('section', $field = ['test_id' => $tid, 'name' => $name, 'parent_id' => $par_id]);
+        //unset session
+        unset($_SESSION['section']);
+        //Redirect
+        header('location: '.$admin_file.'?task=section_sub&tid='.$tid.'&par_id='.$par_id);
+        exit;
+      }
+    }
+  }
+
+  //action edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $tid = $common->clean_string($_POST['tid']);
+      $name = $common->clean_string($_POST['name']);
+      $id   = $common->clean_string($_POST['id']);
+      //add value to session to use in template
+      $_SESSION['section_sub'] = $_POST;
+      //form validation
+      if(empty($name))  $error['name']  = 1;
+
+      //update test
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('section', $field = ['test_id' => $tid, 'name' => $name], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['section_sub']);
+        //Redirect
+        header('location: '.$admin_file.'?task=section_sub&tid='.$tid.'&par_id='.$par_id);
+        exit;
+      }
+    }
+    $smarty_appform->assign('getSectionByID', $common->find('section', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  //action delete category
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $result = checkDeleteCategory($_GET['id']);
+    if('0' === $result['total_count'])
+    {
+      $common->delete('category', $field = ['id' => $_GET['id']]);
+    }else {
+      setcookie('checkCategory', $result['name'], time() + 5);
+    }
+    header('location: '.$admin_file.'?task=category');
+    exit;
+  }
+
+  $results = getListSectionByTest($_GET['tid'], $_GET['par_id']);
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('listSectionByTest', $results);
+  $smarty_appform->display('admin/admin_section_sub.tpl');
+  exit;
+}
 //Task: Respone
 if('response' === $task)
 {
