@@ -40,7 +40,7 @@
           {if $v.type eq 3}
             {foreach from=$v.result_answer item=ans}
             <div class="radio" style="margin-left: 16px;">
-              <label><input type="radio" name="answer_id[{$ans.id}]" {if $ans.re_answer_id}checked{/if}><span style="line-height: 1.2;">{$ans.title}</span></label>
+              <label><input type="radio" name="answer_id[{$v.tqid}]" {if $ans.re_answer_id}checked{/if}><span style="line-height: 1.2;">{$ans.title}</span></label>
             </div>
             {/foreach}
           {elseif $v.type eq 4}
