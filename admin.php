@@ -4189,17 +4189,17 @@ if('test_psychologist' === $task)
 
   if('send_mail' === $action)
   {
-    $error = array();
+    $error_smail = array();
     if($_POST)
     {
       $send_psy_id = $common->clean_string($_POST['send_psy_id']);
       $subject= $common->clean_string($_POST['subject']);
       $body   = $common->clean_string($_POST['message']);
 
-      if(empty($send_psy_id)) $error['send_psy_id'] = 1;
-      if(empty($subject))     $error['subject'] = 1;
+      if(empty($send_psy_id)) $error_smail['send_psy_id'] = 1;
+      if(empty($subject))     $error_smail['subject'] = 1;
 
-      if(COUNT($error) === 0)
+      if(COUNT($error_smail) === 0)
       {
         $resultPsy = $common->find('psychologist', $condition = ['id' => $send_psy_id], $type = 'one');
 
@@ -4210,11 +4210,13 @@ if('test_psychologist' === $task)
                 ->setBody($body);
 
         $result = $mailer->send($message);
+        setcookie('sendMailSucessfully', 1, time() + 5);
         //Redirect
         header('location: '.$admin_file.'?task=test_psychologist');
         exit;
       }
     }
+    $smarty_appform->assign('error_smail', $error_smail);
   }
 
   $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
@@ -4333,6 +4335,102 @@ if('test_patient' === $task)
   $smarty_appform->assign('test', $common->find('test', $condition = ['lang' => $lang, 'status' => 2], $type = 'all'));
   $smarty_appform->assign('patient', $common->find('patient', $condition = null, $type = 'all'));
   $smarty_appform->display('admin/admin_test_patient.tpl');
+  exit;
+}
+//Task: test question hide
+if('test_question_hide' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['view_order']);
+
+  $error = array();
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      $id       = $common->clean_string($_POST['id']);
+      $tid      = $common->clean_string($_GET['tid']);
+      $test_que_id = $common->clean_string($_POST['test_question']);
+
+      //add value to session to use in template
+      $_SESSION['test_que_hide'] = $_POST;
+      //form validation
+      if(empty($tid)) $error['tid'] = 1;
+      if(empty($test_que_id)) $error['test_question'] = 1;
+
+      if(isTestQuestionHideExist($tid, $test_que_id) > 0) $error['test_que_exist'] = 1;
+
+      //Add test
+      if(0 === count($error) && empty($id))
+      {
+        $common->save('test_question_hide', $field =['test_id' => $tid, 'test_question_id' => $test_que_id]);
+        //unset session
+        unset($_SESSION['test_que_hide']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_question_hide&tid='.$tid);
+        exit;
+      }
+    }
+    $smarty_appform->assign('error', $error);
+  }//End action: add
+
+  //action delete topic
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $id  = $common->clean_string($_GET['id']);
+    $common->delete('test_question_hide_condition', $field = ['test_question_hide_id' => $id]);
+    $common->delete('test_question_hide', $field = ['id' => $id]);
+    header('location: '.$admin_file.'?task=test_question_hide&tid='.$_GET['tid']);
+    exit;
+  }
+  //get edit test_topic_answer
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      $id       = $common->clean_string($_POST['id']);
+      $tid      = $common->clean_string($_GET['tid']);
+      $test_que_id = $common->clean_string($_POST['test_question']);
+
+      //add value to session to use in template
+      $_SESSION['test_que_hide'] = $_POST;
+      //form validation
+      if(empty($tid)) $error['tid'] = 1;
+      if(empty($test_que_id)) $error['test_question'] = 1;
+
+      $result = $common->find('test_question_hide', $condition = ['test_id' => $tid, 'test_question_id' => $id], $type = 'one');
+      if(!empty($test_que_id) && $result['test_question_id'] !== $test_que_id && isTestQuestionHideExist($tid, $test_que_id) > 0)
+      {
+        $error['test_que_exist'] = 1;
+      }
+
+      //update test
+      if(0 === count($error) && !empty($id))
+      {
+        $common->update('test_question_hide', $field =['test_id' => $tid, 'test_question_id' => $test_que_id], $condition = ['id' => $id]);
+        //unset session
+        unset($_SESSION['test_que_hide']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_question_hide&tid='.$tid);
+        exit;
+      }
+    }
+    $id  = $common->clean_string($_GET['id']);
+    $smarty_appform->assign('error', $error);
+    $smarty_appform->assign('getTestQueHideByID', $common->find('test_question_hide', $condition = ['id' => $id], $type = 'one'));
+  }
+
+  $tid  = $common->clean_string($_GET['tid']);
+
+  $results = getListTestQuestionHide($tid);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+  $smarty_appform->assign('listTestQueHide', $results);
+  // $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionGroupAnswer($tid));
+  $smarty_appform->assign('listTestQuestion', getListTestQuestion($kwd, $testid, '', '', $lang, $slimit = ''));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid'], 'lang' => $lang], $type = 'one'));
+  $smarty_appform->display('admin/admin_test_question_hide.tpl');
   exit;
 }
 // Task copy_test_question "Copy Test Question, Answer, Answer Topic to other Test"

@@ -7,6 +7,12 @@
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
   {/if}
 </ul>
+{if $smarty.cookies.sendMailSucessfully}
+<div class="alert alert-success alert-dismissable">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+  <strong>Successfully!</strong> sent mail to psychologist.
+</div>
+{/if}
 <div class="panel panel-primary">
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_test_psychologist}{$multiLang.text_test_psychologist}{else}No Translate(Key Lang: text_test_psychologist){/if}</h4></div>
   <div class="panel-body">
@@ -124,39 +130,10 @@
             </td>
             <td>
               <!-- Trigger the modal with a button -->
-              <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mySend_{$data.id}" data-toggle1="tooltip" data-placement="top"
-              title="Send mail to psychologist!"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
-              <!-- Modal -->
-              <div class="modal fade" id="mySend_{$data.id}" role="dialog">
-                <div class="modal-dialog">
-                  <!-- Modal content-->
-                  <div class="panel panel-primary modal-content">
-                    <div class="panel-heading modal-header">
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <h4 class="panel-title modal-title">Send Mail</h4>
-                    </div>
-                    <form id="send_mail" action="{$admin_file}?task=test_psychologist&amp;action=send_mail" method="post">
-                      <input type="hidden" name="send_psy_id" value="{$data.psychologist_id}">
-                      <div class="modal-body">
-                        <div class="form-group" id="error_subject">
-                          <label for="subject"><span style="color: red">*</span> Subject:</label>
-                          <span style="color:red" id="txt_error_subject"></span>
-                          <input type="text" class="form-control" id="subject" placeholder="Enter subject" name="subject">
-                        </div>
-                        <div class="form-group">
-                          <label for="comment">Message:</label>
-                          <textarea class="form-control" rows="5" id="comment" name="message"></textarea>
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="submit" class="btn btn-info btn-md"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send</i></Button>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-              <!-- Modal -->
+              <button type="button" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="Send mail to psychologist!" onclick="modalSendMail({$data.psychologist_id})">
+                <i class="fa fa-paper-plane" aria-hidden="true"></i>
+              </button>
+
               <a {if $data.status eq 1}href="{$admin_file}?task=test_psychologist&amp;action=edit&amp;id={$data.id}"{/if} class="btn btn-success btn-xs" {if $data.status eq 2}disabled{/if} data-toggle1="tooltip" data-placement="top"
               title="{if $data.status eq 1}{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate(Key Lang: button_edit){/if}{else}{if $multiLang.button_can_not_edit}{$multiLang.button_can_not_edit}{else}No Translate(Key Lang: button_can_not_edit){/if}{/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->
@@ -194,6 +171,38 @@
         </tr>
         {/if}
       </table>
+      <!-- Modal Send Mail-->
+      <div class="modal fade" id="mySendMail" role="dialog">
+        <div class="modal-dialog">
+          <!-- Modal content-->
+          <div class="panel panel-primary modal-content">
+            <div class="panel-heading modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="panel-title modal-title">Send Mail</h4>
+            </div>
+            <form id="send_mail" action="{$admin_file}?task=test_psychologist&amp;action=send_mail" method="post">
+              <input type="hidden" id="send_psy_id" name="send_psy_id" value="">
+              <div class="modal-body">
+                <div class="form-group" id="error_subject">
+                  <label for="subject"><span style="color: red">*</span> Subject:</label>
+                  <span style="color:red" id="txt_error_subject"></span>
+                  <input type="text" class="form-control" id="subject" placeholder="Enter subject" name="subject" value="">
+                </div>
+                <div class="form-group">
+                  <label for="comment">Message:</label>
+                  <textarea class="form-control" rows="5" id="comment" name="message"></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-info btn-md"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send</i></Button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate(Key Lang: button_close){/if}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- Modal -->
+
     </div><!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
@@ -201,6 +210,25 @@
 {/block}
 {block name="javascript"}
 <script>
+
+$(document).ready(function() {
+  {if $error_smail}
+    {if $error_smail.subject eq 1}
+    $("#error_subject").attr("class", "form-group has-error");
+    $("#txt_error_subject").text("Please enter subject !");
+    {/if}
+  $('#mySendMail').modal('show');
+  {/if}
+});
+
+function modalSendMail(psy_id)
+{
+  $('#send_psy_id').val(psy_id);
+  $("#error_subject").attr("class", "form-group");
+  $("#txt_error_subject").text("");
+  $('#mySendMail').modal('show');
+}
+
 $("#send_mail").submit(function( event )
 {
   var subject  = $("#subject").val();
@@ -208,11 +236,11 @@ $("#send_mail").submit(function( event )
   if(subject == ''){
     $("#error_subject").attr("class", "form-group has-error");
     $("#txt_error_subject").text("Please enter subject !");
-  }else {
+  } else {
     $("#error_subject").attr("class", "form-group has-success");
     $("#txt_error_subject").text("");
   }
-
+  
   //if ture is submit
   if(subject != '') return;
 

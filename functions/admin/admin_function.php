@@ -2428,3 +2428,66 @@ function getListSectionByTest($test_id, $parent_id)
   }
   return $result;
 }
+/**
+ * getListTestQuestionHide
+ * @param  int $test_id
+ * @return array or boolean
+ */
+function getListTestQuestionHide($test_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try{
+    $sql =' SELECT tqh.*, q.title AS que_title, q.description, ga.g_answer_title, COUNT(tqhc.id) AS total_tqh,
+              (SELECT COUNT(*) FROM `test_question_hide` tqh
+                INNER JOIN test_question tq ON tq.id = tqh.test_question_id
+                INNER JOIN question q ON q.id = tq.question_id
+                LEFT JOIN group_answer ga ON ga.test_question_id = tqh.test_question_id
+              WHERE tqh.test_id = :test_id) AS total
+            FROM `test_question_hide` tqh
+              INNER JOIN test_question tq ON tq.id = tqh.test_question_id
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN group_answer ga ON ga.test_question_id = tqh.test_question_id
+              LEFT JOIN test_question_hide_condition tqhc ON tqhc.test_question_hide_id = tqh.id
+            WHERE tqh.test_id = :test_id GROUP BY tqh.id LIMIT :offset, :limit ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestQuestionHide'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * is_view_order_exist
+ * @param  int  $test_id
+ * @param  int  $test_que_id
+ * @return array or boolean
+ */
+function isTestQuestionHideExist($test_id, $test_que_id)
+{
+  global $debug, $connected;
+  $result = true;
+  try
+  {
+    $sql= ' SELECT COUNT(*) AS total_count FROM `test_question_hide` WHERE test_id = :test_id AND test_question_id = :test_que_id ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':test_que_id', (int)$test_que_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: isTestQuestionHideExist'.$e->getMessage();
+  }
+  return $result;
+}

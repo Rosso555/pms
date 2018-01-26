@@ -55,7 +55,8 @@
 			reader.readAsDataURL(input.files[0]);
 		}
 	}
-$(document).ready(function(){
+$(document).ready(function()
+{
 		//Get Value From select2_placeholder On select2 multiple
 		var placeholder_val = $('#select2_placeholder').val();
 		// check animation icon
@@ -92,7 +93,11 @@ $(document).ready(function(){
 		});
 
 		//Run function when browser resizes
-		$(window).resize( resizeBrowser, resizeBrowserBoxTest, resizeBrowserBoxResponseAnswer );
+		$(window).resize(function(){
+	    resizeBrowser();
+			resizeBrowserBoxTest();
+			resizeBrowserBoxResponseAnswer();
+	  });
 
 		function resizeBrowser(){
 			var width = window.innerWidth;
@@ -100,7 +105,7 @@ $(document).ready(function(){
 
 			if(width < 768){
 				$('.select2_search_inline > .select2_search, .select2_search_inline > .select2-container').attr('style', 'width: 100%;');
-			}else {
+			} else {
 				$('.select2_search_inline > .select2_search, .select2_search_inline > .select2-container').attr('style', 'width: 220px;');
 			}
 		}
