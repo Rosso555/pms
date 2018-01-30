@@ -17,7 +17,7 @@
           <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
             {if $error.username eq 1} <i class="fa fa-exclamation"></i>&nbsp;Please enter your username. <br />{/if}
             {if $error.password eq 1} <i class="fa fa-exclamation"></i>&nbsp;Please enter your password. <br />{/if}
-            {if $error.login eq 1} <i class="fa fa-exclamation"></i>&nbsp;Wrong email or password or no permission. <br />{/if}
+            {if $error.login eq 1} <i class="fa fa-exclamation"></i>&nbsp;Wrong username or password or no permission. <br />{/if}
           </div>
         {/if}
         <div class="panel panel-primary">

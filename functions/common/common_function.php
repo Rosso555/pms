@@ -924,11 +924,12 @@ function getTestQuestionByTestQuesID($tid, $tqid, $lang)
   $result = true;
   try{
 
-    $sql= ' SELECT q.*, q.title AS que_title, tq.*, COUNT(asw.id) AS count_answer, tq.id AS test_question_id, ga.test_question_id AS g_ans_que_id, ga.flag, ga.sub_id, ga.id AS g_answer_id, ga.g_answer_title
+    $sql= ' SELECT q.*, q.title AS que_title, tq.*, COUNT(asw.id) AS count_answer, tq.id AS test_question_id, ga.test_question_id AS g_ans_que_id, ga.flag, ga.sub_id, ga.id AS g_answer_id, ga.g_answer_title, tqh.test_question_id AS t_que_hide_id
             FROM test_question tq
               INNER JOIN question q ON q.id = tq.question_id
               LEFT JOIN answer asw ON asw.test_question_id = tq.id
               LEFT JOIN group_answer ga ON ga.test_id = tq.test_id AND tq.id = ga.test_question_id
+              LEFT JOIN test_question_hide tqh ON tqh.test_question_id = tq.id
             WHERE tq.test_id = :tid AND tq.id = :tqid AND q.lang = :lang  GROUP BY tq.id ';
     $stmt = $connected->prepare($sql);
     $stmt->bindValue(':tqid', (int)$tqid, PDO::PARAM_INT);
@@ -957,11 +958,12 @@ function getTestQuestionBySubID($tid, $sub_id, $lang)
   $result = true;
   try{
 
-    $sql= ' SELECT q.*, q.title AS que_title, tq.*, COUNT(asw.id) AS count_answer, tq.id AS test_question_id, ga.test_question_id AS g_ans_que_id, ga.flag, ga.sub_id, ga.id AS g_answer_id, ga.g_answer_title
+    $sql= ' SELECT q.*, q.title AS que_title, tq.*, COUNT(asw.id) AS count_answer, tq.id AS test_question_id, ga.test_question_id AS g_ans_que_id, ga.flag, ga.sub_id, ga.id AS g_answer_id, ga.g_answer_title, tqh.test_question_id AS t_que_hide_id
             FROM test_question tq
               INNER JOIN question q ON q.id = tq.question_id
               LEFT JOIN answer asw ON asw.test_question_id = tq.id
               LEFT JOIN group_answer ga ON ga.test_id = tq.test_id AND tq.id = ga.test_question_id
+              LEFT JOIN test_question_hide tqh ON tqh.test_question_id = tq.id
             WHERE tq.test_id = :tid AND ga.sub_id = :sub_id AND  q.lang = :lang GROUP BY tq.id ORDER BY ga.flag DESC';
     $stmt = $connected->prepare($sql);
     $stmt->bindValue(':sub_id', (int)$sub_id, PDO::PARAM_INT);
@@ -1107,6 +1109,7 @@ function ListTestQuestion($tid, $lang)
                           'g_ans_que_id'      => $result1['g_ans_que_id'],
                           'flag'        => $result1['flag'],
                           'g_answer_title' => $result1['g_answer_title'],
+                          't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'       => $dataanwser,
                           'group_answer' => $row2);
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
@@ -1133,6 +1136,7 @@ function ListTestQuestion($tid, $lang)
                           'g_ans_que_id'      => $result1['g_ans_que_id'],
                           'flag'        => 0,
                           'g_answer_title' => $result1['g_answer_title'],
+                          't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'      => $dataanwser,
                           'group_answer' => '');
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
@@ -1173,6 +1177,7 @@ function ListTestQuestion($tid, $lang)
                             'g_ans_que_id'      => $result1['g_ans_que_id'],
                             'flag'        => $result1['flag'],
                             'g_answer_title' => $result1['g_answer_title'],
+                            't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'       => $dataanwser,
                             'group_answer' => $row2);
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
@@ -1199,6 +1204,7 @@ function ListTestQuestion($tid, $lang)
                             'g_ans_que_id'      => $result1['g_ans_que_id'],
                             'flag'        => 0,
                             'g_answer_title' => $result1['g_answer_title'],
+                            't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'      => $dataanwser,
                             'group_answer' => '');
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
@@ -1265,6 +1271,7 @@ function listTestGroupQuestion($id, $tid, $lang)
                           'g_ans_que_id'      => $result1['g_ans_que_id'],
                           'flag'        => $result1['flag'],
                           'g_answer_title' => $result1['g_answer_title'],
+                          't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'       => $dataanwser,
                           'group_answer' => $row2);
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
@@ -1291,6 +1298,7 @@ function listTestGroupQuestion($id, $tid, $lang)
                           'g_ans_que_id'      => $result1['g_ans_que_id'],
                           'flag'        => 0,
                           'g_answer_title' => $result1['g_answer_title'],
+                          't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'      => $dataanwser,
                           'group_answer' => '');
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
@@ -2955,6 +2963,215 @@ function getReponseById($rid)
   }
 
   return $result;
+}
+
+/**
+ * getTestQuestionHideShowCondition
+ * @param  int $test_id
+ * @return array or boolean
+ */
+function getTestQuestionHideShowCondition($test_id, $tpat_id, $tpsy_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try {
+
+    $sql =' SELECT tqh.*, q.title, q.description, q.type, q.is_email, tq.is_required FROM `test_question_hide` tqh INNER JOIN test_question tq ON tq.id = tqh.test_question_id INNER JOIN question q ON q.id = tq.question_id WHERE tqh.test_id = :test_id ';
+    $stmt = $connected->prepare($sql);
+    $stmt->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+
+    $rowsTestTmpp = 0;
+    if(!empty($unique_id))
+    {
+      $conditional = '';
+      if(!empty($tpat_id)) $conditional .= ' AND test_patient_id = :tpat_id ';
+      if(!empty($tpsy_id)) $conditional .= ' AND test_psychologist_id = :tpsy_id ';
+
+      $sqlTestTmp =' SELECT * FROM `test_tmp` WHERE test_id = :test_id '.$conditional;
+      $stmtTestTmpp = $connected->prepare($sqlTestTmp);
+      if(!empty($tpat_id)) $stmtTestTmpp->bindValue(':tpat_id', (int)$tpat_id, PDO::PARAM_INT);
+      if(!empty($tpsy_id)) $stmtTestTmpp->bindValue(':tpsy_id', (int)$tpsy_id, PDO::PARAM_INT);
+      $stmtTestTmpp->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+      $stmtTestTmpp->execute();
+      $rowsTestTmpp = $stmtTestTmpp->fetch();
+    }
+
+    $newResult = array();
+    foreach ($rows as $k => $va)
+    {
+      $sql1 = ' SELECT tqhc.*, ans.view_order FROM test_question_hide_condition tqhc
+                  LEFT JOIN test_tmp_question ttmq ON ttmq.test_question_id = tqhc.test_question_id AND ttmq.test_tmp_id = :ttmp_id
+                  LEFT JOIN answer ans ON ans.id = ttmq.answer_id
+                WHERE tqhc.test_question_hide_id = :tqh_id AND tqhc.id IN (SELECT max(id) as id FROM test_question_hide_condition WHERE test_question_hide_id = :tqh_id GROUP by test_question_id ORDER by id DESC)
+                ORDER BY tqhc.test_question_id ASC ';
+
+      // $sql1 =' SELECT * FROM test_question_hide_condition WHERE test_question_hide_id = :tqh_id AND id IN (SELECT max(id) as id FROM test_question_hide_condition WHERE test_question_hide_id = :tqh_id GROUP by test_question_id ORDER by id DESC) ORDER BY test_question_id ASC ';
+      $stmt1 = $connected->prepare($sql1);
+      $stmt1->bindValue(':tqh_id', (int)$va['id'], PDO::PARAM_INT);
+      $stmt1->bindValue(':ttmp_id', (int)$rowsTestTmpp['id'], PDO::PARAM_INT);
+      $stmt1->execute();
+      $rows1 = $stmt1->fetchAll();
+
+      $sumRow = COUNT($rows1) - 1;
+      $newTestque_con = array();
+      $newConditional = '';
+      $testQueNotBlank = '';
+      foreach ($rows1 as $key => $value)
+      {
+        $sql2 =' SELECT * FROM `test_question_hide_condition` WHERE test_question_hide_id = :tqh_id AND test_question_id = :tqid ORDER BY id ASC ';
+        $stmt2 = $connected->prepare($sql2);
+        $stmt2->bindValue(':tqh_id', (int)$value['test_question_hide_id'], PDO::PARAM_INT);
+        $stmt2->bindValue(':tqid', (int)$value['test_question_id'], PDO::PARAM_INT);
+        $stmt2->execute();
+        $rows2 = $stmt2->fetchAll();
+
+        $resultCondition = generateCondition($rows2);
+        $newTestque_con[] = array('id'                    => $value['id'],
+                                  'test_question_hide_id' => $value['test_question_hide_id'],
+                                  'test_question_id'      => $value['test_question_id'],
+                                  'conditional'           => $value['conditional'],
+                                  'operator'              => $value['operator'],
+                                  'value_condition'       => $value['value_condition'],
+                                  'ans_view_order'        => $value['view_order'],
+                                  'hide_show_condition'   => $resultCondition);
+        if($sumRow == $key)
+        {
+           $newConditional .= $resultCondition;
+           $testQueNotBlank .= 'tqhid_'.$value['test_question_hide_id'].'tqid_'.$value['test_question_id'].' != "")';
+        } else {
+          if($value['operator'] == 1) $newConditional .= $resultCondition.'&& ';
+          if($value['operator'] == 2) $newConditional .= $resultCondition.'|| ';
+          $testQueNotBlank .= '(tqhid_'.$value['test_question_hide_id'].'tqid_'.$value['test_question_id'].' != "" && ';
+        }
+
+      }
+      $rNewConditional = $newConditional.' && '.$testQueNotBlank;
+
+      $dataanwser = listAnswerByTestQuesId($va['test_question_id']);
+      $newResult[] = array('id' => $va['id'], 'test_id' => $va['test_id'], 'test_question_id' => $va['test_question_id'], 'type' => $va['type'], 'is_required' => $va['is_required'], 'testque_con' => $newTestque_con, 're_conditional' => $rNewConditional, 'answer' => $dataanwser);
+    }
+
+    return $newResult;
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getTestQuestionHideShowCondition'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * generateCondition
+ * @param  mix $array_val is value array
+ * @return string
+ */
+function generateCondition($array_val)
+{
+  $condition = '';
+  $sumRow = COUNT($array_val) - 1;
+
+  foreach ($array_val as $k => $va)
+  {
+    if($va['operator'] == 1)
+    {
+      if($va['conditional'] == 1)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' > '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' > '.$va['value_condition'].' && ';
+        }
+      }
+      if($va['conditional'] == 2)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' < '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' < '.$va['value_condition'].' && ';
+        }
+      }
+      if($va['conditional'] == 3)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' == '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' == '.$va['value_condition'].' && ';
+        }
+      }
+      if($va['conditional'] == 4)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' >= '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' >= '.$va['value_condition'].' && ';
+        }
+      }
+      if($va['conditional'] == 5)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' <= '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' <= '.$va['value_condition'].' && ';
+        }
+      }
+
+    } else {
+      if($va['conditional'] == 1)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' > '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' > '.$va['value_condition'].' || ';
+        }
+      }
+      if($va['conditional'] == 2)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' < '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' < '.$va['value_condition'].' || ';
+        }
+      }
+      if($va['conditional'] == 3)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' == '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' == '.$va['value_condition'].' || ';
+        }
+      }
+      if($va['conditional'] == 4)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' >= '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' >= '.$va['value_condition'].' || ';
+        }
+      }
+      if($va['conditional'] == 5)
+      {
+        if($k == $sumRow)
+        {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' <= '.$va['value_condition'].') ';
+        } else {
+          $condition .= 'tqhid_'.$va['test_question_hide_id'].'tqid_'.$va['test_question_id'].' <= '.$va['value_condition'].' || ';
+        }
+      }
+    }
+  }//End foreach
+  $ReCondional .= '('.$condition;
+
+  return $ReCondional;
 }
 
 ?>

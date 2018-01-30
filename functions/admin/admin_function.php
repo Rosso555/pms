@@ -2491,3 +2491,329 @@ function isTestQuestionHideExist($test_id, $test_que_id)
   }
   return $result;
 }
+/**
+ * getListTestQuesHideCondition
+ * @param  int $tqh_id is test_question_hide_id
+ * @param  int $group_by for setting group
+ * @param  int $slimit for setting limit
+ * @return array or boolean
+ */
+function getListTestQuesHideCondition($tqh_id, $group_by, $slimit)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try
+  {
+    if(!empty($slimit)) $limit = $slimit;
+    if(!empty($group_by)) $set_group_by .= ' GROUP BY test_question_id ';
+    if(!empty($slimit)) $setLimit .= ' LIMIT :offset, :limit ';
+
+    $sql =' SELECT tqhc.*, q.title AS q_title, q.description, q.type, q.is_email, q.hide_title, q.lang, tq.view_order,
+            (SELECT COUNT(*) FROM `test_question_hide_condition` tqhc INNER JOIN test_question tq ON tq.id = tqhc.test_question_id INNER JOIN question q ON q.id = tq.question_id WHERE tqhc.test_question_hide_id = :tqh_id) AS total
+            FROM `test_question_hide_condition` tqhc
+             INNER JOIN test_question tq ON tq.id = tqhc.test_question_id
+             INNER JOIN question q ON q.id = tq.question_id
+            WHERE tqhc.test_question_hide_id = :tqh_id '.$set_group_by.' ORDER BY tq.id ASC '.$setLimit;
+    $query = $connected->prepare($sql);
+    $query->bindValue(':tqh_id', $tqh_id, PDO::PARAM_INT);
+    if(!empty($slimit))
+    {
+      $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+      $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    }
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestQuesHideCondition'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getViewTestQuestionHideCondition
+ * @param  int $tqh_id is test_question_hide_id
+ * @return array or boolean
+ */
+function getViewTestQuestionHideCondition($tqh_id)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try
+  {
+    $resultTestQHideCon = getListTestQuesHideCondition($tqh_id, $group_by = 1, '');
+    $sumRowsTestQCon = COUNT($resultTestQHideCon) - 1;
+
+    $ReCondional = '';
+
+    foreach ($resultTestQHideCon as $key => $value) {
+
+      $sql =' SELECT tqhc.*, q.title AS q_title, q.description
+              FROM `test_question_hide_condition` tqhc
+                INNER JOIN test_question tq ON tq.id = tqhc.test_question_id
+                INNER JOIN question q ON q.id = tq.question_id
+              WHERE tqhc.test_question_hide_id = :tqh_id AND tqhc.test_question_id = :tqid ORDER BY tqhc.id ASC ';
+      $query = $connected->prepare($sql);
+      $query->bindValue(':tqh_id', $tqh_id, PDO::PARAM_INT);
+      $query->bindValue(':tqid', $value['test_question_id'], PDO::PARAM_INT);
+      $query->execute();
+      $rows = $query->fetchAll();
+
+      $sumRow = COUNT($rows) - 1;
+
+      $condition = '';
+
+      foreach ($rows as $k => $va) {
+        if($va['operator'] == 1){
+
+          if($va['conditional'] == 1){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' > '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' > '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' > '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' > '.$va['value_condition'].' AND ';
+              }
+
+            }
+
+          }//End conditional eq 1
+
+          if($va['conditional'] == 2){
+
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' < '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' < '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' < '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' < '.$va['value_condition'].' AND ';
+              }
+            }
+
+          }//End conditional eq 2
+
+          if($va['conditional'] == 3){
+
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' = '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' = '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' = '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' = '.$va['value_condition'].' AND ';
+              }
+            }
+
+          }//End conditional eq 3
+
+          if($va['conditional'] == 4){
+
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].' AND ';
+              }
+            }
+
+          }//End conditional eq 4
+
+          if($va['conditional'] == 5){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].' AND ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].') AND ';
+              }else {
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].' AND ';
+              }
+            }
+
+          }//End conditional eq 5
+
+        }else {
+
+          if($va['conditional'] == 1){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' > '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' > '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' > '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' > '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 1
+
+          if($va['conditional'] == 2){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' < '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' < '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' < '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' < '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 2
+
+          if($va['conditional'] == 3){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' = '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' = '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' = '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' = '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 3
+
+          if($va['conditional'] == 4){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' >= '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 3
+
+          if($va['conditional'] == 5){
+            if($sumRowsTestQCon == $key){
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].') ';
+              }else {
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].' OR ';
+              }
+
+            }else {
+
+              if($k == $sumRow){
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].') OR ';
+              }else {
+                $condition .= $va['q_title'].' <= '.$va['value_condition'].' OR ';
+              }
+            }
+
+          }//End conditional eq 5
+
+        }
+      }//End foreach
+
+      $ReCondional .= '('.$condition;
+    }
+    return $ReCondional;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getViewCondtionTestQuestion'.$e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getListTestQuestionByNonHide
+ * @param  int $test_id
+ * @return array or boolean
+ */
+function getListTestQuestionByNonHide($test_id, $tqid)
+{
+  global $debug, $connected;
+  $result = true;
+  try
+  {
+    $sql= ' SELECT q.*, tqh.*, tq.id AS tq_id FROM `test_question` tq
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN test_question_hide tqh ON tqh.test_question_id = tq.id
+            WHERE tq.test_id = :test_id AND q.type = 3 AND (tqh.test_question_id != :tqid OR tqh.id IS NULL) ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':test_id', (int)$test_id, PDO::PARAM_INT);
+    $query->bindValue(':tqid', (int)$tqid, PDO::PARAM_INT);
+    $query->execute();
+
+    return $query->fetchAll();
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestQuestionByNonHide'.$e->getMessage();
+  }
+  return $result;
+}

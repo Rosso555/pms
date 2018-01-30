@@ -50,10 +50,12 @@ if('login' === $task)
     if(empty($username))  $error['username']  = 1;
     if(empty($password))  $error['password']  = 1;
 
-    if(0 === count($error)){
+    if(0 === count($error))
+    {
       $resultAdminLogin = admin_login($username, $password);
       //compare username and password in form
-      if(!empty($resultAdminLogin)){
+      if(!empty($resultAdminLogin))
+      {
         //assign value to session
         $_SESSION['is_admin_login'] = $resultAdminLogin['id'];
         $_SESSION['staff_login_role'] = $resultAdminLogin['staff_role_id'];
@@ -68,10 +70,11 @@ if('login' === $task)
         //redirect to admin.php
         header('Location:'.$admin_file);
         exit;
+      } else {
+        //wrong username and password
+        $error['login'] = 1;
       }
     }
-    //wrong username and password
-    $error['login'] = 1;
   }
   //default of login task
   $smarty_appform->assign('error', $error);
@@ -4428,9 +4431,111 @@ if('test_question_hide' === $task)
   SmartyPaginate::assign($smarty_appform);
   $smarty_appform->assign('listTestQueHide', $results);
   // $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionGroupAnswer($tid));
-  $smarty_appform->assign('listTestQuestion', getListTestQuestion($kwd, $testid, '', '', $lang, $slimit = ''));
+  $smarty_appform->assign('listTestQuestion', getListTestQuestion($kwd, $tid, '', '', $lang, $slimit = ''));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid'], 'lang' => $lang], $type = 'one'));
   $smarty_appform->display('admin/admin_test_question_hide.tpl');
+  exit;
+}
+//Task: Test Question Hide condition
+if('test_question_hide_condition' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['test_que_hide_con']);
+
+  $error = array();
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      //get value from form
+      $tqhc_id    = $common->clean_string($_POST['tqhc_id']);
+      $tqh_id     = $common->clean_string($_POST['tqh_id']);
+      $tqid       = $common->clean_string($_POST['tqid']);
+      $value      = $common->clean_string($_POST['value']);
+      $conditional  = $common->clean_string($_POST['conditional']);
+      $operator     = $common->clean_string($_POST['operator']);
+
+      //add value to session to use in template
+      $_SESSION['test_que_hide_con'] = $_POST;
+      //form validation
+      if(empty($tqh_id))      $error['tqh_id'] = 1;
+      if(empty($tqid))        $error['tqid'] = 1;
+      if(empty($conditional)) $error['conditional'] = 1;
+      if(empty($operator))    $error['operator']  = 1;
+
+      //Add result
+      if(0 === count($error) && empty($tqhc_id))
+      {
+        $common->save('test_question_hide_condition', $field = ['test_question_hide_id' => $tqh_id, 'test_question_id' => $tqid, 'conditional' => $conditional, 'operator' => $operator, 'value_condition' => $value]);
+        //unset session
+        unset($_SESSION['test_que_hide_con']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_question_hide_condition&tid='.$_GET['tid'].'&tqid='.$_GET['tqid'].'&tqh_id='.$_GET['tqh_id']);
+        exit;
+      }
+    }
+  }
+  //action delete result
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $id   = $common->clean_string($_GET['id']);
+    $tid  = $common->clean_string($_GET['tid']);
+    $tqid = $common->clean_string($_GET['tqid']);
+    $tqh_id = $common->clean_string($_GET['tqh_id']);
+
+    $common->delete('test_question_hide_condition', $field = ['id' => $id]);
+    header('location: '.$admin_file.'?task=test_question_hide_condition&tid='.$tid.'&tqid='.$tqid.'&tqh_id='.$tqh_id);
+    exit;
+  }
+  //get edit test question condition
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $tqhc_id    = $common->clean_string($_POST['tqhc_id']);
+      $tqh_id     = $common->clean_string($_POST['tqh_id']);
+      $tqid       = $common->clean_string($_POST['tqid']);
+      $value      = $common->clean_string($_POST['value']);
+      $conditional  = $common->clean_string($_POST['conditional']);
+      $operator     = $common->clean_string($_POST['operator']);
+
+      //add value to session to use in template
+      $_SESSION['test_que_hide_con'] = $_POST;
+      //form validation
+      if(empty($tqh_id))      $error['tqh_id'] = 1;
+      if(empty($tqid))        $error['tqid'] = 1;
+      if(empty($conditional)) $error['conditional'] = 1;
+      if(empty($operator))    $error['operator']  = 1;
+
+      //update result
+      if(0 === count($error) && !empty($tqhc_id))
+      {
+        $common->update('test_question_hide_condition', $field = ['test_question_hide_id' => $tqh_id, 'test_question_id' => $tqid, 'conditional' => $conditional, 'operator' => $operator, 'value_condition' => $value], $condition = ['id' => $tqhc_id]);
+        //unset session
+        unset($_SESSION['test_que_hide_con']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_question_hide_condition&tid='.$_GET['tid'].'&tqid='.$_GET['tqid'].'&tqh_id='.$_GET['tqh_id']);
+        exit;
+      }
+    }
+    $smarty_appform->assign('getTestQuesHideConByID', $common->find('test_question_hide_condition', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $tid  = $common->clean_string($_GET['tid']);
+  $tqid = $common->clean_string($_GET['tqid']);
+  $tqh_id = $common->clean_string($_GET['tqh_id']);
+
+  $results = getListTestQuesHideCondition($tqh_id, '', $slimit = 10);
+
+  $reTestQue = $common->find('test_question', $condition = ['id' => $tqid], $type = 'one');
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('listTestQuestionHideCon', $results);
+  $smarty_appform->assign('viewTestQueHideCondition', getViewTestQuestionHideCondition($tqh_id));
+  $smarty_appform->assign('listTestQuestionByNonHide', getListTestQuestionByNonHide($tid, $tqid));
+  $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
+  $smarty_appform->assign('question', $common->find('question', $condition = ['id' => $reTestQue['question_id']], $type = 'one'));
+  $smarty_appform->display('admin/admin_test_question_hide_condition.tpl');
   exit;
 }
 // Task copy_test_question "Copy Test Question, Answer, Answer Topic to other Test"

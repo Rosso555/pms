@@ -349,6 +349,9 @@ if('test_question' === $task)
   } else {
     $smarty_appform->assign('testTmpQuestion', getTestTmpQuestion($tpid, $tid));
   }
+
+  $smarty_appform->assign('testQuestionHideShowCondition', getTestQuestionHideShowCondition($tid, $tpid, ''));
+// var_dump($result);
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('ResultJumpTo', json_encode($newResultJumpTo));
   $smarty_appform->assign('totalAnswer', $total_data);
@@ -361,7 +364,7 @@ if('test_question' === $task)
   $smarty_appform->assign('resultTestGroupTmpQue', COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''))); //For Check Show Button Next Or Finish
   $smarty_appform->assign('testQueGroup', COUNT($resultTestGroup));
   $smarty_appform->assign('resultStep', $sumStep);
-  $smarty_appform->display('common/test_question_responsive_patient.tpl');
+  $smarty_appform->display('common/test_question_responsive.tpl');
   exit;
 }
 

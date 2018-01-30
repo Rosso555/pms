@@ -628,6 +628,8 @@ if('test_question_psychologist' === $task)
     $smarty_appform->assign('testTmpQuestion', getTestTmpQuestionPsy($tpsy_id, $tid));
   }
 
+  $smarty_appform->assign('testQuestionHideShowCondition', getTestQuestionHideShowCondition($tid, '', $tpsy_id));
+
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('ResultJumpTo', json_encode($newResultJumpTo));
   $smarty_appform->assign('totalAnswer', $total_data);
@@ -640,7 +642,7 @@ if('test_question_psychologist' === $task)
   $smarty_appform->assign('resultTestGroupTmpQue', COUNT(getListTestGroupByTmpQuestionPsy($tid, $tpsy_id, $status = 2, $fetch_type = 'all', $slimit = ''))); //For Check Show Button Next Or Finish
   $smarty_appform->assign('testQueGroup', COUNT($resultTestGroup));
   $smarty_appform->assign('resultStep', $sumStep);
-  $smarty_appform->display('psychologist/test_question_responsive_psychologist.tpl');
+  $smarty_appform->display('common/test_question_responsive.tpl');
   exit;
 }
 //Task: test save draft
@@ -728,7 +730,7 @@ if('test_save_draft' === $task)
 
   }
   header('Content-type: application/json');
-  echo json_encode($resultValue);
+  echo json_encode(array('status' => $resultValue));
   exit;
 }
 //Task: Back Step Test Question
@@ -853,7 +855,7 @@ if('result_test_psychologist' === $task)
   $smarty_appform->assign('listRotateLineDiagramSecond', listRotateLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160, $moveTo_left, $moveTo_top, $space_row_col));//List Rotate Line Diagram Second
   $smarty_appform->assign('listYLineDiagramSecond', listYLineDiagramSecond(COUNT($resultTopicAnalysis), $margin_left, $space_height + 160));//Vertical Line
   //end
-  
+
   $smarty_appform->assign('reponseAnswerByTestPsyt', getResponseAnswerByTestPsychologist($tid, $tpsy_id));
   $smarty_appform->assign('messageResultTopic', getMessageResultTopic('', $tpsy_id, $tid, $lang));
   $smarty_appform->assign('psychologist', $common->find('psychologist', $condition = ['id' => $_SESSION['is_psycho_login_id']], $type = 'one'));
@@ -1194,7 +1196,7 @@ if('test_question_patient' === $task)
   $smarty_appform->assign('resultTestGroupTmpQue', COUNT(getListTestGroupByTmpQuestion($tid, $tpid, $status = 2, $fetch_type = 'all', $slimit = ''))); //For Check Show Button Next Or Finish
   $smarty_appform->assign('testQueGroup', COUNT($resultTestGroup));
   $smarty_appform->assign('resultStep', $sumStep);
-  $smarty_appform->display('common/test_question_responsive_patient.tpl');
+  $smarty_appform->display('common/test_question_responsive.tpl');
   exit;
 }
 //task: town_village
