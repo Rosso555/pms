@@ -7,7 +7,6 @@
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
   {/if}
 </ul>
-
 <div class="panel panel-primary">
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</h4></div>
   <div class="panel-body">
@@ -16,7 +15,7 @@
         <div class="row">
           <div class="col-sm-12">
             <form class="form-inline" action="{$admin_file}?task=section" method="get">
-              <input type="hidden" name="task" value="category">
+              <input type="hidden" name="task" value="section">
               <div class="form-group" style="margin-bottom:5px;">
                 <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                   <i class="fa fa-plus-circle"></i> Add Section
@@ -40,7 +39,6 @@
               {else}
               <form class="form" role="form" action="{$admin_file}?task=section&amp;action=add&amp;tid={$smarty.get.tid}" method="post">
               {/if}
-                <input type="hidden" name="tid" value="{$smarty.get.tid}">
                 <div class="form-group">
                   <label for="name"><span style="color: red">*</span> {if $multiLang.text_title}{$multiLang.text_title}{else}No Translate (Key Lang:text_title){/if}:</label>
                   <input type="text" name="name" class="form-control" value="{$getSectionByID.name}" id="name" placeholder="Enter title" required>
@@ -67,6 +65,7 @@
         <thead>
           <tr bgcolor="#eeeeee">
             <th>{if $multiLang.text_category_name}{$multiLang.text_category_name}{else}No Translate (Key Lang:text_category_name){/if}</th>
+            <th>{if $multiLang.text_sub_section}{$multiLang.text_sub_section}{else}No Translate (Key Lang:text_sub_section){/if}</th>
             <th width="130">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if}</th>
           </tr>
         </thead>
@@ -75,8 +74,9 @@
           {foreach from = $listSectionByTest item = data key=k}
           <tr>
             <td>{$data.name}</td>
+            <td><span class="badge">{$data.members}</span></td>
             <td>
-              <a href="{$admin_file}?task=section&amp;action=edit&amp;tid={$smarty.get.tid}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
+              <a href="{$admin_file}?task=section&amp;action=edit&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->
               <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$data.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}"><i class="fa fa-trash-o"></i></button>
               <!-- Modal -->
@@ -89,10 +89,10 @@
                       <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h4>
                     </div>
                     <div class="modal-body">
-                      <p>Are you sure you want to delete this category <b>({$data.name|escape})</b> ?</p>
+                      <p>Are you sure you want to delete this section <b>({$data.name|escape})</b> ?</p>
                     </div>
                     <div class="modal-footer">
-                      <a href="{$admin_file}?task=section&amp;action=delete&amp;tid={$smarty.get.tid}&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</i></a>
+                      <a href="{$admin_file}?task=section&amp;action=delete&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</i></a>
                       <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</i></button>
                     </div>
                   </div>
@@ -100,8 +100,7 @@
               </div>
               <!-- Modal -->
 
-              <a href="{$admin_file}?task=section_sub&amp;tid={$smarty.get.tid}&amp;par_id={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="Add Sub Section"><i class="fa fa-plus-circle"></i></a>
-
+              <a href="{$admin_file}?task=section_sub&amp;par_id={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="Add Sub Section"><i class="fa fa-plus-circle"></i></a>
             </td>
           </tr>
           {/foreach}

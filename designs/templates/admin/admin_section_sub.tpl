@@ -2,7 +2,8 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</li>
+  <li><a id="bCrumbTest" href="{$admin_file}?task=test">{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</li></a>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_sub_section}{$multiLang.text_sub_section}{else}No Translate (Key Lang:text_sub_section){/if}</li>
   {if $smarty.get.action eq 'edit'}
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
   {/if}
@@ -11,6 +12,9 @@
 <div class="panel panel-primary">
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</h4></div>
   <div class="panel-body">
+    <div class="box_title">
+      <b>{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if} {if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}:</b> {$test.title}
+    </div>
     <div class="panel panel-default">
       <div class="panel-body">
         <div class="row">
@@ -77,7 +81,7 @@
           <tr>
             <td>{$data.name}</td>
             <td>
-              <a href="{$admin_file}?task=section&amp;action=edit&amp;tid={$smarty.get.tid}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
+              <a href="{$admin_file}?task=section&amp;action=edit&amp;par_id={$data.parent_id}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->
               <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$data.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}"><i class="fa fa-trash-o"></i></button>
               <!-- Modal -->
@@ -90,10 +94,10 @@
                       <h4 class="panel-title modal-title">{if $multiLang.text_confirmation}{$multiLang.text_confirmation}{else}No Translate (Key Lang:text_confirmation){/if}</h4>
                     </div>
                     <div class="modal-body">
-                      <p>Are you sure you want to delete this category <b>({$data.name|escape})</b> ?</p>
+                      <p>Are you sure you want to delete this section sub <b>({$data.name|escape})</b> ?</p>
                     </div>
                     <div class="modal-footer">
-                      <a href="{$admin_file}?task=section&amp;action=delete&amp;tid={$smarty.get.tid}&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</i></a>
+                      <a href="{$admin_file}?task=section_sub&amp;action=delete&amp;par_id={$smarty.get.par_id}&amp;id={$data.id}" class="btn btn-danger btn-md" style="color: white;"><i class="fa fa-trash-o"> {if $multiLang.button_yes}{$multiLang.button_yes}{else}No Translate (Key Lang:button_yes){/if}</i></a>
                       <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"> {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</i></button>
                     </div>
                   </div>
@@ -101,7 +105,7 @@
               </div>
               <!-- Modal -->
 
-              <a href="{$admin_file}?task=section_sub&amp;tid={$smarty.get.tid}&amp;par_id={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="Add Section Sub"><i class="fa fa-plus-circle"></i></a>
+              <a href="{$admin_file}?task=section_sub&amp;par_id={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="Add Section Sub"><i class="fa fa-plus-circle"></i></a>
 
             </td>
           </tr>
@@ -113,8 +117,25 @@
         </tr>
         {/if}
       </table>
+      <a id="btnBack" href="{$admin_file}?task=test" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
     </div><!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->
+{/block}
+{block name="javascript"}
+<script>
+  //Get previous url
+  var urlBack =  document.referrer;
+  var url = '';
+  if(urlBack !== '') url = getUrlPrevious(urlBack);
+  if(url.task === 'section') localStorage.setItem('urlTest',urlBack);
+  //Get session url
+  var getUrlBack = localStorage.getItem('urlTest');
+  if(getUrlBack !== null){
+    $("#btnBack").attr("href", getUrlBack);
+    $("#bCrumbTest").attr("href", getUrlBack);
+  }
+  //End previous url
+</script>
 {/block}

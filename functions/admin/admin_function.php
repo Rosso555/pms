@@ -2402,29 +2402,41 @@ function psychologist_activity($kwd, $psy_id, $gender)
  }
  return $result;
 }
-
-function getListSectionByTest($test_id, $parent_id)
+/**
+ * getListSection
+ * @param  string $kwd
+ * @param  int $parent_id
+ * @return array or boolean
+ */
+function getListSection($kwd, $parent_id)
 {
-  global $debug, $connected;
+  global $debug, $connected, $total_data, $limit, $offset;
   $result = true;
   try
   {
     $condition = '';
-    if(!empty($parent_id)) {
-      $condition .=' AND parent_id = :parent_id ';
+    if(!empty($kwd))
+    {
+      $condition .=' AND name LIKE :kwd ';
     }
 
-    $sql = ' SELECT * FROM `section` WHERE test_id = :test_id '.$condition;
+    $sql =' SELECT *, id AS parent, (SELECT COUNT(*) FROM section WHERE parent_id = parent) AS members,
+              (SELECT COUNT(*) FROM section WHERE parent_id = :parent_id '.$condition.') AS total
+            FROM `section`
+            WHERE parent_id = :parent_id '.$condition.' LIMIT :offset, :limit ';
     $query = $connected->prepare($sql);
-    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    if(!empty($kwd)) $query->bindValue(':kwd', '%'.$kwd.'%', PDO::PARAM_STR);
+    $query->bindValue(':parent_id', $parent_id, PDO::PARAM_INT);
+    $query->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
     $query->execute();
     $rows = $query->fetchAll();
-
+    if(count($rows) > 0) $total_data = $rows[0]['total'];
     return $rows;
   }
   catch (Exception $e)
   {
-    if($debug) echo 'Error: getListSectionByTest'. $e->getMessage();
+    if($debug) echo 'Error: getListSection'. $e->getMessage();
   }
   return $result;
 }
