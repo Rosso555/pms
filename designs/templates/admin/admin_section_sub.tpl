@@ -13,7 +13,10 @@
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</h4></div>
   <div class="panel-body">
     <div class="box_title">
-      <b>{if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang: text_test){/if} {if $multiLang.text_title}{$multiLang.text_title}{else}No Translate(Key Lang: text_title){/if}:</b> {$test.title}
+      <b>{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate(Key Lang: text_section){/if}:</b>
+      {foreach from=$mainSubR.mainSub item=data}
+        {$data.name}
+      {/foreach}
     </div>
     <div class="panel panel-default">
       <div class="panel-body">

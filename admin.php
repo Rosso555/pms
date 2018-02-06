@@ -3929,6 +3929,7 @@ if('section' === $task)
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
 
+  unset($_SESSION['section_id']);
   $smarty_appform->assign('listSectionByTest', $results);
   $smarty_appform->display('admin/admin_section.tpl');
   exit;
@@ -4033,13 +4034,22 @@ if('section_sub' === $task)
     header('location: '.$admin_file.'?task=section_sub&par_id='.$par_id);
     exit;
   }
-
+  
+   $_SESSION['section_id'][$_GET['par_id']] = $_GET['par_id'];
+   $id = $_SESSION['section_id'];
+   foreach ($id as $key => $value) {
+        $results = $common->find('section', $condition = ['id' => $value], $type = 'one');
+        $mainSubResult['mainSub'][] = array('name' => $results['name'] );
+   }
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
-
-  $results = getListSection($kwd, $_GET['par_id']);
+  $id = $common->clean_string($_GET['par_id']);
+  $results = getListSection($kwd, $id);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
-  getViewSectionSub();
+
+  // $par_id = getViewSectionSub($_SESSION['section_id']);
+  // var_dump($par_id);
+  $smarty_appform->assign('mainSubR', $mainSubResult);
   $smarty_appform->assign('listSectionByTest', $results);
   $smarty_appform->display('admin/admin_section_sub.tpl');
   exit;
