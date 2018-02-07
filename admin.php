@@ -4034,22 +4034,78 @@ if('section_sub' === $task)
     header('location: '.$admin_file.'?task=section_sub&par_id='.$par_id);
     exit;
   }
-  
+
    $_SESSION['section_id'][$_GET['par_id']] = $_GET['par_id'];
    $id = $_SESSION['section_id'];
    foreach ($id as $key => $value) {
         $results = $common->find('section', $condition = ['id' => $value], $type = 'one');
-        $mainSubResult['mainSub'][] = array('name' => $results['name'] );
+        $mainSubResult['mainSub'][] = array('name' => $results['name']);
    }
+
+   $id = $_SESSION['section_id'];
+   foreach ($id as $key => $value) {
+       $arrayName[] = array('par_id' => $key);
+   }
+
+   foreach ($arrayName as $index => $value) {
+       $index = count($_SESSION['section_id']) - 2;
+   }
+   echo $index;
+   // Action: back
+   if ('back' == $action && !empty($_GET['key'])) {
+       // $id = $_SESSION['section_id'];
+       // foreach ($id as $key => $value) {
+       //     $arrayName[] = array('par_id' => $key);
+       // }
+       //
+       // foreach ($arrayName as $index => $value) {
+       //     $index = count($_SESSION['section_id']) - 2;
+       // }
+       // $_SESSION['index'] = $index;
+       // if ($index == 0) {
+       //     header('location:'.$admin_file.'?task=section');
+       //     exit;
+       // }else {
+       //     $id = $arrayName[$index]['par_id'];
+       //     header('location:'.$admin_file.'?task=section_sub&par_id='.$id);
+       //     exit;
+       // }
+       header('location:'.$admin_file.'?task=section_sub&par_id='.$_GET['key']);
+       exit;
+   }
+
+   $id = $_SESSION['section_id'];
+   foreach ($id as $key => $value) {
+       $arrayName[] = array('par_id' => $key);
+   }
+
+   foreach ($arrayName as $index => $value) {
+       $index = count($_SESSION['section_id']) - 2;
+   }
+   echo $index;
+   // if ($index == 0) {
+   //     header('location:'.$admin_file.'?task=section');
+   //     exit;
+   // }elseif ($index >= 0) {
+   //     $id = $arrayName[$index]['par_id'];
+   //     header('location:'.$admin_file.'?task=section_sub&par_id='.$id);
+   //     exit;
+   // }
+   // if (!empty($_GET['key'])) {
+   //     if (!empty($index)) {
+   //         $id = $arrayName[$index]['par_id'];
+   //             header('location:'.$admin_file.'?task=section_sub&par_id='.$id);
+   //             exit;
+   //     }
+   // }
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $id = $common->clean_string($_GET['par_id']);
   $results = getListSection($kwd, $id);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
-
-  // $par_id = getViewSectionSub($_SESSION['section_id']);
-  // var_dump($par_id);
+  // echo $test['name'];
   $smarty_appform->assign('mainSubR', $mainSubResult);
+  $smarty_appform->assign('key', $index);
   $smarty_appform->assign('listSectionByTest', $results);
   $smarty_appform->display('admin/admin_section_sub.tpl');
   exit;

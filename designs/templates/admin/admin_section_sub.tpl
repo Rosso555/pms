@@ -75,6 +75,7 @@
         <thead>
           <tr bgcolor="#eeeeee">
             <th>{if $multiLang.text_category_name}{$multiLang.text_category_name}{else}No Translate (Key Lang:text_category_name){/if}</th>
+            <th>{if $multiLang.text_sub_section}{$multiLang.text_sub_section}{else}No Translate (Key Lang:text_sub_section){/if}</th>
             <th width="130">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if}</th>
           </tr>
         </thead>
@@ -83,6 +84,7 @@
           {foreach from = $listSectionByTest item = data key=k}
           <tr>
             <td>{$data.name}</td>
+            <td><span class="badge">{$data.members}</span></td>
             <td>
               <a href="{$admin_file}?task=section&amp;action=edit&amp;par_id={$data.parent_id}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->
@@ -120,14 +122,14 @@
         </tr>
         {/if}
       </table>
-      <a id="btnBack" href="{$admin_file}?task=test" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
+      <a id="btnBack" href="{$admin_file}?task=section_sub&amp;action=back&amp;key={$key}" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
     </div><!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->
 {/block}
 {block name="javascript"}
-<script>
+<!-- <script>
   //Get previous url
   var urlBack =  document.referrer;
   var url = '';
@@ -140,5 +142,5 @@
     $("#bCrumbTest").attr("href", getUrlBack);
   }
   //End previous url
-</script>
+</script> -->
 {/block}
