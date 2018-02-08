@@ -3986,6 +3986,7 @@ if('section_sub' === $task)
       //get value from form
       $name = $common->clean_string($_POST['name']);
       $id   = $common->clean_string($_POST['id']);
+      $par_id = $common->clean_string($_GET['par_id']);
       //add value to session to use in template
       $_SESSION['section_sub'] = $_POST;
       //form validation
@@ -4002,7 +4003,7 @@ if('section_sub' === $task)
         exit;
       }
     }
-    $smarty_appform->assign('getSectionByID', $common->find('section', $condition = ['id' => $_GET['id']], $type = 'one'));
+    $smarty_appform->assign('getSectionSubByID', $common->find('section', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
   //action delete section_sub
@@ -4034,78 +4035,26 @@ if('section_sub' === $task)
     header('location: '.$admin_file.'?task=section_sub&par_id='.$par_id);
     exit;
   }
+  //unset sesesion
+  if($_GET['un_par_id']) {
+    unset($_SESSION['section_id'][$_GET['un_par_id']]);
+    header('location: '.$admin_file.'?task=section_sub&par_id='.$_GET['par_id']);
+  }
+  //add value to session
+  $_SESSION['section_id'][$_GET['par_id']] = $_GET['par_id'];
 
-   $_SESSION['section_id'][$_GET['par_id']] = $_GET['par_id'];
-   $id = $_SESSION['section_id'];
-   foreach ($id as $key => $value) {
-        $results = $common->find('section', $condition = ['id' => $value], $type = 'one');
-        $mainSubResult['mainSub'][] = array('name' => $results['name']);
-   }
+  foreach ($_SESSION['section_id'] as $key => $value) {
+      $results = $common->find('section', $condition = ['id' => $value], $type = 'one');
+      $mainSubResult[] = array('id' => $results['id'], 'name' => $results['name']);
+  }
 
-   $id = $_SESSION['section_id'];
-   foreach ($id as $key => $value) {
-       $arrayName[] = array('par_id' => $key);
-   }
-
-   foreach ($arrayName as $index => $value) {
-       $index = count($_SESSION['section_id']) - 2;
-   }
-   echo $index;
-   // Action: back
-   if ('back' == $action && !empty($_GET['key'])) {
-       // $id = $_SESSION['section_id'];
-       // foreach ($id as $key => $value) {
-       //     $arrayName[] = array('par_id' => $key);
-       // }
-       //
-       // foreach ($arrayName as $index => $value) {
-       //     $index = count($_SESSION['section_id']) - 2;
-       // }
-       // $_SESSION['index'] = $index;
-       // if ($index == 0) {
-       //     header('location:'.$admin_file.'?task=section');
-       //     exit;
-       // }else {
-       //     $id = $arrayName[$index]['par_id'];
-       //     header('location:'.$admin_file.'?task=section_sub&par_id='.$id);
-       //     exit;
-       // }
-       header('location:'.$admin_file.'?task=section_sub&par_id='.$_GET['key']);
-       exit;
-   }
-
-   $id = $_SESSION['section_id'];
-   foreach ($id as $key => $value) {
-       $arrayName[] = array('par_id' => $key);
-   }
-
-   foreach ($arrayName as $index => $value) {
-       $index = count($_SESSION['section_id']) - 2;
-   }
-   echo $index;
-   // if ($index == 0) {
-   //     header('location:'.$admin_file.'?task=section');
-   //     exit;
-   // }elseif ($index >= 0) {
-   //     $id = $arrayName[$index]['par_id'];
-   //     header('location:'.$admin_file.'?task=section_sub&par_id='.$id);
-   //     exit;
-   // }
-   // if (!empty($_GET['key'])) {
-   //     if (!empty($index)) {
-   //         $id = $arrayName[$index]['par_id'];
-   //             header('location:'.$admin_file.'?task=section_sub&par_id='.$id);
-   //             exit;
-   //     }
-   // }
   $kwd = !empty($_GET['kwd']) ? $_GET['kwd'] : '';
   $id = $common->clean_string($_GET['par_id']);
   $results = getListSection($kwd, $id);
   (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
   SmartyPaginate::assign($smarty_appform);
-  // echo $test['name'];
+
   $smarty_appform->assign('mainSubR', $mainSubResult);
-  $smarty_appform->assign('key', $index);
   $smarty_appform->assign('listSectionByTest', $results);
   $smarty_appform->display('admin/admin_section_sub.tpl');
   exit;
@@ -4163,6 +4112,13 @@ if('response_answer' === $task)
   $smarty_appform->assign('listResponseAnswer', $result);
   $smarty_appform->assign('reponseById', getReponseById($rid));
   $smarty_appform->display('admin/admin_response_answer.tpl');
+  exit;
+}
+//Task: Test Question Section
+if('test_question_section' === $task)
+{
+
+  $smarty_appform->display('admin/admin_test_question_section.tpl');
   exit;
 }
 //Task: Download List

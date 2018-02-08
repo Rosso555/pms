@@ -39,6 +39,7 @@
             <li><a href="{$admin_file}?task=test"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test}{$multiLang.menu_test}{else}No Translate (Key Lang: menu_test){/if}</a></li>
             <li><a href="{$admin_file}?task=test_question"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_question}{$multiLang.menu_test_question}{else}No Translate (Key Lang: menu_test_question){/if}</a></li>
             <li><a href="{$admin_file}?task=test_group"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_group}{$multiLang.menu_test_group}{else}No Translate (Key Lang: menu_test_group){/if}</a></li>
+            <li><a href="{$admin_file}?task=test_question_section"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_question_section}{$multiLang.menu_test_question_section}{else}No Translate (Key Lang: menu_test_question_section){/if}</a></li>
           </ul>
         </li>
         <li class="dropdown">
@@ -120,6 +121,7 @@
             {if $staffPermission.test}<li><a href="{$admin_file}?task=test"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test}{$multiLang.menu_test}{else}No Translate (Key Lang: menu_test){/if}</a></li>{/if}
             {if $staffPermission.test_question}<li><a href="{$admin_file}?task=test_question"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_question}{$multiLang.menu_test_question}{else}No Translate (Key Lang: menu_test_question){/if}</a></li>{/if}
             {if $staffPermission.test_group}<li><a href="{$admin_file}?task=test_group"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_group}{$multiLang.menu_test_group}{else}No Translate (Key Lang: menu_test_group){/if}</a></li>{/if}
+            {if $staffPermission.test_question_section}<li><a href="{$admin_file}?task=test_question_section"><i class="fa fa-clone fa-fw"></i> {if $multiLang.menu_test_question_section}{$multiLang.menu_test_question_section}{else}No Translate (Key Lang: menu_test_question_section){/if}</a></li>{/if}
           </ul>
         </li>
         {/if}

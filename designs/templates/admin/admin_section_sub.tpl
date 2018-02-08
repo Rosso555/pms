@@ -12,18 +12,19 @@
 <div class="panel panel-primary">
   <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</h4></div>
   <div class="panel-body">
-    <div class="box_title">
-      <b>{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate(Key Lang: text_section){/if}:</b>
-      {foreach from=$mainSubR.mainSub item=data}
-        {$data.name}
+    <b>{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate(Key Lang: text_section){/if}:</b>
+    <div class="box_title" style="padding: 10px;">
+      {foreach from=$mainSubR item=data key=k}
+        <p>{for $foo=0 to $k}&nbsp;&nbsp; {/for}* {$data.name}</a></p>
       {/foreach}
     </div>
     <div class="panel panel-default">
       <div class="panel-body">
         <div class="row">
           <div class="col-sm-12">
-            <form class="form-inline" action="{$admin_file}?task=section" method="get">
-              <input type="hidden" name="task" value="category">
+            <form class="form-inline" action="{$admin_file}?task=section_sub" method="get">
+              <input type="hidden" name="task" value="section_sub">
+              <input type="hidden" name="par_id" value="{$smarty.get.par_id}">
               <div class="form-group" style="margin-bottom:5px;">
                 <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                   <i class="fa fa-plus-circle"></i> Add Sub Section
@@ -57,7 +58,7 @@
                 <div class="form-group" style="margin-bottom:5px;">
                   <input type="hidden" name="id" value="{$getSectionSubByID.id}" />
                   <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate (Key Lang:button_update){/if}</button>
-                  <a href="{$admin_file}?task=section&amp;tid={$smarty.get.tid}" class="btn btn-danger"><i class="fa fa-close"></i>  {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</a>
+                  <a href="{$admin_file}?task=section_sub&amp;par_id={$smarty.get.par_id}" class="btn btn-danger"><i class="fa fa-close"></i>  {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</a>
                 </div>
                 {else}
                 <div class="form-group" style="margin-bottom:5px;">
@@ -74,7 +75,7 @@
       <table class="table table-striped">
         <thead>
           <tr bgcolor="#eeeeee">
-            <th>{if $multiLang.text_category_name}{$multiLang.text_category_name}{else}No Translate (Key Lang:text_category_name){/if}</th>
+            <th>{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</th>
             <th>{if $multiLang.text_sub_section}{$multiLang.text_sub_section}{else}No Translate (Key Lang:text_sub_section){/if}</th>
             <th width="130">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if}</th>
           </tr>
@@ -86,7 +87,7 @@
             <td>{$data.name}</td>
             <td><span class="badge">{$data.members}</span></td>
             <td>
-              <a href="{$admin_file}?task=section&amp;action=edit&amp;par_id={$data.parent_id}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
+              <a href="{$admin_file}?task=section_sub&amp;action=edit&amp;par_id={$data.parent_id}&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->
               <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$data.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}"><i class="fa fa-trash-o"></i></button>
               <!-- Modal -->
@@ -122,25 +123,37 @@
         </tr>
         {/if}
       </table>
-      <a id="btnBack" href="{$admin_file}?task=section_sub&amp;action=back&amp;key={$key}" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
+      <a id="btnBack" href="javascript:history.back()" class="btn btn-warning btn-sm"><i class="fa fa-backward" aria-hidden="true"></i> {if $multiLang.text_back}{$multiLang.text_back}{else}No Translate(Key Lang: text_back){/if}</a>
     </div><!--table-responsive  -->
     {include file="common/paginate.tpl"}
   </div><!--end panel-body  -->
 </div><!--end panel panel-primary  -->
 {/block}
 {block name="javascript"}
-<!-- <script>
+<script>
   //Get previous url
   var urlBack =  document.referrer;
   var url = '';
   if(urlBack !== '') url = getUrlPrevious(urlBack);
-  if(url.task === 'section') localStorage.setItem('urlTest',urlBack);
+
+  var getUrlBackSecSub = localStorage.getItem('urlSecSub_{$smarty.get.par_id}');
+  if(url.task === 'section') localStorage.setItem('urlSection', urlBack);
+  if(url.task === 'section_sub' && getUrlBackSecSub == null && {$smarty.session.section_id|@COUNT} > 1) localStorage.setItem('urlSecSub_{$smarty.get.par_id}', urlBack);
   //Get session url
-  var getUrlBack = localStorage.getItem('urlTest');
-  if(getUrlBack !== null){
-    $("#btnBack").attr("href", getUrlBack);
-    $("#bCrumbTest").attr("href", getUrlBack);
+  var getUrlBackSection = localStorage.getItem('urlSection');
+  var getUrlBackSecSub = localStorage.getItem('urlSecSub_{$smarty.get.par_id}');
+
+  if(getUrlBackSection !== null && {$smarty.session.section_id|@COUNT} == 1)
+  {
+    $("#btnBack").attr("href", getUrlBackSection);
+    $("#bCrumbTest").attr("href", getUrlBackSection);
   }
+  if(getUrlBackSecSub !== null && {$smarty.session.section_id|@COUNT} > 1)
+  {
+    $("#btnBack").attr("href", getUrlBackSecSub+'&un_par_id={$smarty.get.par_id}');
+    $("#bCrumbTest").attr("href", getUrlBackSecSub);
+  }
+
   //End previous url
-</script> -->
+</script>
 {/block}
