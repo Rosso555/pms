@@ -2,13 +2,13 @@
 {block name="main"}
 <ul class="breadcrumb">
   <li><a href="{$admin_file}"><i class="fa fa-fw fa-home"></i></a></li>
-  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</li>
+  <li {if $smarty.get.action neq 'edit'}class="active"{/if}>{if $multiLang.text_test_question_section}{$multiLang.text_test_question_section}{else}No Translate (Key Lang:text_test_question_section){/if}</li>
   {if $smarty.get.action eq 'edit'}
   <li class="active">{if $multiLang.text_edit}{$multiLang.text_edit}{else}No Translate(Key Lang: text_edit){/if}</li>
   {/if}
 </ul>
 <div class="panel panel-primary">
-  <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</h4></div>
+  <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_test_question_section}{$multiLang.text_test_question_section}{else}No Translate (Key Lang:text_test_question_section){/if}</h4></div>
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
@@ -18,7 +18,7 @@
               <input type="hidden" name="task" value="section">
               <div class="form-group" style="margin-bottom:5px;">
                 <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                  <i class="fa fa-plus-circle"></i> Add Section
+                  <i class="fa fa-plus-circle"></i> {if $multiLang.button_add_test_question_section}{$multiLang.button_add_test_question_section}{else}No Translate (Key Lang:button_add_test_question_section){/if}
                 </button>
               </div>
               &nbsp;&nbsp;&nbsp;
@@ -40,8 +40,17 @@
               <form class="form" role="form" action="{$admin_file}?task=section&amp;action=add&amp;tid={$smarty.get.tid}" method="post">
               {/if}
                 <div class="form-group">
-                  <label for="name"><span style="color: red">*</span> {if $multiLang.text_title}{$multiLang.text_title}{else}No Translate (Key Lang:text_title){/if}:</label>
-                  <input type="text" name="name" class="form-control" value="{$getSectionByID.name}" id="name" placeholder="Enter title" required>
+                  <label for="title"><span style="color: red">*</span> {if $multiLang.text_main}{$multiLang.text_main}{else}No Translate(Key Lang:text_main){/if} {if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}:</label>
+                  {if $error.test}
+                    <span style="color: red">{if $multiLang.text_test_empty}{$multiLang.text_test_empty}{else}No Translate(Key Lang:text_test_empty){/if}.</span>
+                  {/if}
+                  <br>
+                  <select class="form-control select2" name="test" style="width:100%">
+                    <option value="">--- {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang:text_test){/if} ---</option>
+                    {foreach from=$listSection item=data}
+                    <option value="{$data.id}">{$data.name}</option>
+                    {/foreach}
+                  </select>
                 </div>
                 {if $getSectionByID.id}
                 <div class="form-group" style="margin-bottom:5px;">

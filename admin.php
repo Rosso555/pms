@@ -4118,6 +4118,7 @@ if('response_answer' === $task)
 if('test_question_section' === $task)
 {
 
+  $smarty_appform->assign('listSection', getListSectionAndSub($parent_id=0));
   $smarty_appform->display('admin/admin_test_question_section.tpl');
   exit;
 }

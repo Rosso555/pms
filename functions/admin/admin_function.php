@@ -2441,6 +2441,44 @@ function getListSection($kwd, $parent_id)
   return $result;
 }
 /**
+ * getListSection
+ * @param  string $kwd
+ * @param  int $parent_id
+ * @return array or boolean
+ */
+function getListSectionAndSub($parent_id)
+{
+  global $debug, $connected, $total_data, $limit, $offset;
+  $result = true;
+  try
+  {
+    $sql =' SELECT *, id AS parent FROM `section`  WHERE parent_id = :parent_id ';
+
+    $query = $connected->prepare($sql);
+    $query->bindValue(':parent_id', $parent_id, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+
+    // foreach ($rows as $key => $value) {
+    //   if(!empty($value['sub_id']))
+    //   {
+    //     $sql1 =' SELECT *, id AS parent FROM `section`  WHERE parent_id = :parent_id ';
+    //     $query1 = $connected->prepare($sql1);
+    //     $query->bindValue(':parent_id', $value[''], PDO::PARAM_INT);
+    //     $query->execute();
+    //     $rows = $query->fetchAll();
+    //   }
+    //
+    // }
+    return $rows;
+  }
+  catch (Exception $e)
+  {
+    if($debug) echo 'Error: getListSectionAndSub'. $e->getMessage();
+  }
+  return $result;
+}
+/**
  * getListTestQuestionHide
  * @param  int $test_id
  * @return array or boolean
