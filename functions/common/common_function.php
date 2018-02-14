@@ -1034,23 +1034,35 @@ function listAnswerByTestQuesId($test_questionid)
 /**
  * getTestQuestionViewOrder
  * @param  int $test_id
+ * @param  string $lang
  * @return array or boolean
  */
-function getTestQuestionViewOrder($test_id)
+function getTestQuestionViewOrder($test_id, $lang)
 {
   global $debug, $connected;
   $result = true;
 
   try{
-    $sql =' SELECT tq.id AS tqid, q.title AS que_title, q.description, ga.g_answer_title, tqvo.id AS tq_view_order_id, tgq.id AS test_ques_group
+    $condition = $gr_ans_join = $t_que_view_order_join = '';
+
+    if(!empty($test_id))
+    {
+      $condition .= ' tq.test_id = :test_id AND ';
+      $gr_ans_join .= ' AND ga.test_id = :test_id ';
+      $t_que_view_order_join .= ' AND tqvo.test_id = :test_id ';
+    }
+
+    $sql =' SELECT tq.id AS tqid, q.title AS que_title, q.description, ga.g_answer_title, tqvo.id AS tq_view_order_id, tgq.id AS test_ques_group, t.title AS test_title
             FROM `test_question` tq
               INNER JOIN question q ON q.id = tq.question_id
-              LEFT JOIN group_answer ga ON ga.test_id = :test_id AND ga.test_question_id = tq.id
-              LEFT JOIN test_question_view_order tqvo ON tqvo.test_id = :test_id AND tqvo.test_question_id = tq.id
+              INNER JOIN test t ON t.id = tq.test_id AND t.lang = :lang
+              LEFT JOIN group_answer ga ON ga.test_question_id = tq.id '.$gr_ans_join.'
+              LEFT JOIN test_question_view_order tqvo ON tqvo.test_question_id = tq.id '.$t_que_view_order_join.'
               LEFT JOIN test_group_question tgq ON tgq.test_question_id = tq.id
-            WHERE tq.test_id = :test_id AND ga.test_question_id IS NULL OR ga.flag = 1 ORDER BY (tqvo.view_order IS NULL), tqvo.view_order ASC ';
+            WHERE '.$condition.' ga.test_question_id IS NULL OR ga.flag = 1 ORDER BY (tqvo.view_order IS NULL), tqvo.view_order ASC ';
     $query = $connected->prepare($sql);
-    $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    if(!empty($test_id)) $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
+    $query->bindValue(':lang', $lang, PDO::PARAM_STR);
     $query->execute();
     return $query->fetchAll();
   }
@@ -1145,7 +1157,7 @@ function ListTestQuestion($tid, $lang)
       }//End fetch rows
     }
     //Get Test Question No in View Order
-    $rTestQueNotViewOrder = getTestQuestionViewOrder($tid);
+    $rTestQueNotViewOrder = getTestQuestionViewOrder($tid, $lang);
 
     if(!empty($rTestQueNotViewOrder)) {
 
@@ -1547,7 +1559,7 @@ function getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang)
       }//End fetch rows
     }
     //Get Test Question No in View Order
-    $rTestQueNotViewOrder = getTestQuestionViewOrder($tid);
+    $rTestQueNotViewOrder = getTestQuestionViewOrder($tid, $lang);
 
     if(!empty($rTestQueNotViewOrder)){
       foreach ($rTestQueNotViewOrder as $key => $va)

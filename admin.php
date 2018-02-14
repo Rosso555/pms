@@ -3275,7 +3275,7 @@ if('test_group_question' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listTestGroupQuestion', $result);
-  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid']));
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $lang));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->assign('test_group', $common->find('test_group', $condition = ['id' => $_GET['tgid']], $type = 'one'));
   $smarty_appform->display('admin/admin_test_group_question.tpl');
@@ -3608,7 +3608,7 @@ if('test_question_view_order' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listTestQestionViewOrder', $results);
-  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid']));
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $lang));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->display('admin/admin_test_que_view_order.tpl');
   exit;
@@ -4117,8 +4117,73 @@ if('response_answer' === $task)
 //Task: Test Question Section
 if('test_question_section' === $task)
 {
+  if(empty($_POST)) unset($_SESSION['t_que_section']);
 
-  $smarty_appform->assign('listSection', getListSectionAndSub($parent_id=0));
+  $error = array();
+  //action add
+  if('add' === $action)
+  {
+    if($_POST)
+    {
+      //get value from form
+      $t_qu_se_id = $common->clean_string($_POST['t_que_sec_id']);
+      $section_id = $common->clean_string($_POST['section_id']);
+      $test_qu_id = $common->clean_string_array($_POST['test_question']);
+      //add value to session to use in template
+      $_SESSION['t_que_section'] = $_POST;
+      //form validation
+      if(empty($section_id))  $error['section_id']  = 1;
+      if(empty($test_qu_id))  $error['test_qu_id']  = 1;
+
+      //Add test
+      if(0 === count($error) && empty($t_qu_se_id))
+      {
+        foreach ($test_qu_id as $key => $value) {
+          $common->save('section_test_question', $field = ['section_id' => $section_id, 'test_question_id' => $value]);
+        }
+        //unset session
+        unset($_SESSION['t_que_section']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_question_section');
+        exit;
+      }
+    }
+  }
+
+  //action edit
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    if($_POST)
+    {
+      //get value from form
+      $t_qu_se_id = $common->clean_string($_POST['t_que_sec_id']);
+      $section_id = $common->clean_string($_POST['section_id']);
+      $test_qu_id = $common->clean_string_array($_POST['test_question']);
+      //add value to session to use in template
+      $_SESSION['t_que_section'] = $_POST;
+      //form validation
+      if(empty($section_id))  $error['section_id']  = 1;
+      if(empty($test_qu_id))  $error['test_qu_id']  = 1;
+
+      //Add test
+      if(0 === count($error) && empty($t_qu_se_id))
+      {
+        $common->update('section_test_question', $field = ['section_id' => $section_id, 'test_question_id' => $test_qu_id], $condition = ['id' => $t_qu_se_id]);
+        //unset session
+        unset($_SESSION['t_que_section']);
+        //Redirect
+        header('location: '.$admin_file.'?task=test_question_section');
+        exit;
+      }
+    }
+    $smarty_appform->assign('getSecTestQueByID', $common->find('section_test_question', $condition = ['id' => $_GET['id']], $type = 'one'));
+  }
+
+  $results  = getListSectionTestQuestion();
+
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $lang));
+  $smarty_appform->assign('listSection', getListSectionAndSub($parent_id = 0));
+  $smarty_appform->assign('listSectionTestQuestion', $results);
   $smarty_appform->display('admin/admin_test_question_section.tpl');
   exit;
 }

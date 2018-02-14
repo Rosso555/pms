@@ -2444,7 +2444,7 @@ function getListSection($kwd, $parent_id)
  * getListSection
  * @param  string $kwd
  * @param  int $parent_id
- * @return array or boolean
+ * @return string
  */
 function getListSectionAndSub($parent_id)
 {
@@ -2452,25 +2452,20 @@ function getListSectionAndSub($parent_id)
   $result = true;
   try
   {
-    $sql =' SELECT *, id AS parent FROM `section`  WHERE parent_id = :parent_id ';
-
+    $sql =' SELECT * FROM `section` ';
     $query = $connected->prepare($sql);
-    $query->bindValue(':parent_id', $parent_id, PDO::PARAM_INT);
     $query->execute();
     $rows = $query->fetchAll();
 
-    // foreach ($rows as $key => $value) {
-    //   if(!empty($value['sub_id']))
-    //   {
-    //     $sql1 =' SELECT *, id AS parent FROM `section`  WHERE parent_id = :parent_id ';
-    //     $query1 = $connected->prepare($sql1);
-    //     $query->bindValue(':parent_id', $value[''], PDO::PARAM_INT);
-    //     $query->execute();
-    //     $rows = $query->fetchAll();
-    //   }
-    //
-    // }
-    return $rows;
+    $section = array('section' => array(), 'parent_sec' => array());
+
+    foreach ($rows as $key => $row)
+    {
+      $section['section'][$row['id']] = $row;
+      $section['parent_sec'][$row['parent_id']][] = $row['id'];
+    }
+    
+    return buildSectionUlHTML($parent_id, $section);
   }
   catch (Exception $e)
   {
@@ -2478,6 +2473,84 @@ function getListSectionAndSub($parent_id)
   }
   return $result;
 }
+
+function buildSectionUlHTML($parent, $section)
+{
+  $html = "";
+  // if (isset($section['parent_sec'][$parent]))
+  // {
+  //     $html .= "<ul>\n";
+  //     foreach ($section['parent_sec'][$parent] as $cat_id)
+  //     {
+  //         if (!isset($section['parent_sec'][$cat_id]))
+  //         {
+  //             $html .= "<li>\n  <a href='" . $section['section'][$cat_id]['id'] . "'> A" . $section['section'][$cat_id]['name'] . "</a>\n</li> \n";
+  //         }
+  //
+  //         if (isset($section['parent_sec'][$cat_id]))
+  //         {
+  //             $html .= "<li>\n  <a href='" . $section['section'][$cat_id]['id'] . "'> B" . $section['section'][$cat_id]['name'] . "</a> \n";
+  //             $html .= buildCategory($cat_id, $section);
+  //             $html .= "</li> \n";
+  //         }
+  //
+  //     }
+  //     $html .= "</ul> \n";
+  // }
+
+  if (isset($section['parent_sec'][$parent]))
+  {
+    $html .= "<ul class='ul_section'>\n";
+    foreach ($section['parent_sec'][$parent] as $cat_id)
+    {
+      if (!isset($section['parent_sec'][$cat_id]))
+      {
+        $html .= "<li>\n <div class='radio'><label><input type='radio' name='section_id' value='".$section['section'][$cat_id]['id']."'>".$section['section'][$cat_id]['name']."</label></div> \n</li> \n";
+      }
+
+      if (isset($section['parent_sec'][$cat_id]))
+      {
+        $html .= "<li>\n <div class='radio'><label><input type='radio' name='section_id' value='".$section['section'][$cat_id]['id']."'>".$section['section'][$cat_id]['name']."</label></div> ";
+        $html .= buildSectionUlHTML($cat_id, $section);
+        $html .= "</li> \n";
+      }
+    }
+    $html .= "</ul> \n";
+  }
+  return $html;
+}
+
+/**
+ * getListSection
+ * @param  string $kwd
+ * @param  int $parent_id
+ * @return string
+ */
+function getListSectionTestQuestion()
+{
+  global $debug, $connected, $total_data, $limit, $offset;
+  $result = true;
+  try
+  {
+    $sql =' SELECT stq.*, s.name, t.title AS test_title, q.title AS que_title
+            FROM `section_test_question` stq
+              INNER JOIN section s ON s.id = stq.section_id
+              INNER JOIN test_question tq ON tq.id = stq.test_question_id
+              INNER JOIN test t ON t.id = tq.test_id
+              INNER JOIN question q ON q.id = tq.question_id ';
+    $query = $connected->prepare($sql);
+    $query->execute();
+    $rows = $query->fetchAll();
+
+    return $rows;
+  }
+  catch (Exception $e)
+  {
+    if($debug) echo 'Error: getListSectionTestQuestion'. $e->getMessage();
+  }
+  return $result;
+}
+
 /**
  * getListTestQuestionHide
  * @param  int $test_id

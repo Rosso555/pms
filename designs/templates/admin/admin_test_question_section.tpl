@@ -33,11 +33,11 @@
             </form>
           </div>
           <div class="col-md-12">
-            <div class="collapse {if $error Or $getSectionByID.id}in{/if}" id="collapseExample" style="margin-top: 10px;">
-              {if $getSectionByID.id}
-              <form class="form" role="form" action="{$admin_file}?task=section&amp;action=edit&amp;tid={$smarty.get.tid}&amp;id=$getSectionByID.id" method="post">
+            <div class="collapse {if $error Or $getSecTestQueByID.id}in{/if}" id="collapseExample" style="margin-top: 10px;">
+              {if $getSecTestQueByID.id}
+              <form class="form" role="form" action="{$admin_file}?task=test_question_section&amp;action=edit&amp;id={$getSecTestQueByID.id}" method="post">
               {else}
-              <form class="form" role="form" action="{$admin_file}?task=section&amp;action=add&amp;tid={$smarty.get.tid}" method="post">
+              <form class="form" role="form" action="{$admin_file}?task=test_question_section&amp;action=add" method="post">
               {/if}
                 <div class="form-group">
                   <label for="title"><span style="color: red">*</span> {if $multiLang.text_main}{$multiLang.text_main}{else}No Translate(Key Lang:text_main){/if} {if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}:</label>
@@ -45,16 +45,36 @@
                     <span style="color: red">{if $multiLang.text_test_empty}{$multiLang.text_test_empty}{else}No Translate(Key Lang:text_test_empty){/if}.</span>
                   {/if}
                   <br>
-                  <select class="form-control select2" name="test" style="width:100%">
-                    <option value="">--- {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_test}{$multiLang.text_test}{else}No Translate(Key Lang:text_test){/if} ---</option>
-                    {foreach from=$listSection item=data}
-                    <option value="{$data.id}">{$data.name}</option>
+                  <div style="margin-left: -30px;">
+                    {$listSection}
+                  </div>
+                </div>
+                <div class="form-group multi_select2">
+                  <input type="hidden" id="select2_placeholder" value="{if $multiLang.text_select}{$multiLang.text_select}{else}No Translate (Key Lang:text_select){/if} {if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}">
+                  <label for="title"><span style="color: red">*</span> {if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}:</label>
+                  {if $error.test_question}
+                    <span style="color: red">{if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if}</span>
+                  {/if}
+                  {if $error.is_exist_test_group_que}
+                    <span style="color: red">{if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate(Key Lang: text_test_question){/if} {if $multiLang.text_is_existed}{$multiLang.text_is_existed}{else}No Translate(Key Lang: text_is_existed){/if}</span>
+                  {/if}
+                  <select class="form-control select2_mul" multiple="multiple" name="test_question[]" style="width:100%">
+                    {foreach from=$listTestQueGroupAnswer item=data}
+                    <option value="{$data.tqid}">
+                      TEST Name: {$data.test_title} /
+                      {if $data.g_answer_title}
+                        (Group Question): {$data.g_answer_title}
+                      {else}
+                        (Question): {$data.que_title} / (Description): {$data.description}
+                      {/if}
+                    </option>
+
                     {/foreach}
                   </select>
                 </div>
-                {if $getSectionByID.id}
+                {if $getSecTestQueByID.id}
                 <div class="form-group" style="margin-bottom:5px;">
-                  <input type="hidden" name="id" value="{$getSectionByID.id}" />
+                  <input type="hidden" name="id" value="{$getSecTestQueByID.id}" />
                   <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate (Key Lang:button_update){/if}</button>
                   <a href="{$admin_file}?task=section&amp;tid={$smarty.get.tid}" class="btn btn-danger"><i class="fa fa-close"></i>  {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</a>
                 </div>
@@ -74,16 +94,16 @@
         <thead>
           <tr bgcolor="#eeeeee">
             <th>{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</th>
-            <th>{if $multiLang.text_sub_section}{$multiLang.text_sub_section}{else}No Translate (Key Lang:text_sub_section){/if}</th>
+            <th>{if $multiLang.text_test_question}{$multiLang.text_test_question}{else}No Translate (Key Lang:text_test_question){/if}</th>
             <th width="130">{if $multiLang.text_action}{$multiLang.text_action}{else}No Translate (Key Lang:text_action){/if}</th>
           </tr>
         </thead>
-        {if $listSectionByTest|@count gt 0}
+        {if $listSectionTestQuestion|@count gt 0}
         <tbody>
-          {foreach from = $listSectionByTest item = data key=k}
+          {foreach from=$listSectionTestQuestion item=data key=k}
           <tr>
             <td>{$data.name}</td>
-            <td><span class="badge">{$data.members}</span></td>
+            <td><span class="badge">{$data.que_title}</span></td>
             <td>
               <a href="{$admin_file}?task=section&amp;action=edit&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
               <!-- Trigger the modal with a button -->

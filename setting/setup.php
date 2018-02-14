@@ -25,6 +25,7 @@ $debug = true;
 $offset = 0;
 $limit = 10;
 $total_data = null;
+$space = '';
 $allows   =   array(
   'EXT'   =>  array('jpg', 'png','jpeg', 'gif', 'tiff', 'bmp', 'ico', 'flv', 'mp4', 'ogg',
     'webm', 'qt', 'mp3', 'wav', 'acc', 'pdf', 'doc', 'mov', 'txt', 'xml',

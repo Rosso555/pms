@@ -44,7 +44,7 @@
           <div class="col-md-12">
             <div class="collapse {if $error Or $getSectionSubByID.id}in{/if}" id="collapseExample" style="margin-top: 10px;">
               {if $getSectionSubByID.id}
-              <form class="form" role="form" action="{$admin_file}?task=section_sub&amp;action=edit&amp;tid={$smarty.get.tid}&amp;par_id={$smarty.get.par_id}&amp;id=$getSectionSubByID.id" method="post">
+              <form class="form" role="form" action="{$admin_file}?task=section_sub&amp;action=edit&amp;tid={$smarty.get.tid}&amp;par_id={$smarty.get.par_id}&amp;id={$getSectionSubByID.id}" method="post">
               {else}
               <form class="form" role="form" action="{$admin_file}?task=section_sub&amp;action=add&amp;tid={$smarty.get.tid}&amp;par_id={$smarty.get.par_id}" method="post">
               {/if}

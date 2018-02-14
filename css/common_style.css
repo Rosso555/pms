@@ -105,3 +105,8 @@ p {
 .response-ans-col {
   border: 1px solid #fff;
 }
+
+.ul_section
+{
+  list-style: none;
+}
