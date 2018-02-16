@@ -1972,6 +1972,8 @@ if('test' === $task)
   //Clear session
   if(!$_POST) unset($_SESSION['test']);
 
+  print_r($_POST);
+
   $error = array();
   //action add
   if('add' === $action)
@@ -4117,9 +4119,11 @@ if('response_answer' === $task)
 //Task: Test Question Section
 if('test_question_section' === $task)
 {
+  //Clear session
   if(empty($_POST)) unset($_SESSION['t_que_section']);
 
   $error = array();
+  $data_sec = array();
   //action add
   if('add' === $action)
   {
@@ -4132,8 +4136,17 @@ if('test_question_section' === $task)
       //add value to session to use in template
       $_SESSION['t_que_section'] = $_POST;
       //form validation
-      if(empty($section_id))  $error['section_id']  = 1;
-      if(empty($test_qu_id))  $error['test_qu_id']  = 1;
+      if(!empty($section_id)) $data_sec['sec_id'] = $section_id;
+      if(empty($section_id))  $error['section_id'] = 1;
+      if(empty($test_qu_id))  $error['test_qu_id'] = 1;
+      foreach ($test_qu_id as $key => $value)
+      {
+        $reSecTQue = $common->find('section_test_question', $condition = ['test_question_id' => $value], $type = 'all');
+        if(!empty($reSecTQue))
+        {
+          $error['is_exist_test_group_que'] = 1;
+        }
+      }
 
       //Add test
       if(0 === count($error) && empty($t_qu_se_id))
@@ -4148,6 +4161,7 @@ if('test_question_section' === $task)
         exit;
       }
     }
+    $smarty_appform->assign('data_sec', $data_sec);
   }
 
   //action edit
@@ -4158,15 +4172,27 @@ if('test_question_section' === $task)
       //get value from form
       $t_qu_se_id = $common->clean_string($_POST['t_que_sec_id']);
       $section_id = $common->clean_string($_POST['section_id']);
-      $test_qu_id = $common->clean_string_array($_POST['test_question']);
+      $test_qu_id = $common->clean_string($_POST['test_question']);
       //add value to session to use in template
       $_SESSION['t_que_section'] = $_POST;
       //form validation
-      if(empty($section_id))  $error['section_id']  = 1;
-      if(empty($test_qu_id))  $error['test_qu_id']  = 1;
+      if(!empty($section_id)) $data_sec['sec_id'] = $section_id;
+      if(empty($section_id))  $error['section_id'] = 1;
+      if(empty($test_qu_id))  $error['test_qu_id'] = 1;
+
+      $reSecTQue = $common->find('section_test_question', $condition = ['id' => $t_qu_se_id], $type = 'one');
+
+      if($reSecTQue['test_question_id'] != $test_qu_id)
+      {
+        $reSecTQue = $common->find('section_test_question', $condition = ['test_question_id' => $test_qu_id], $type = 'one');
+        if(!empty($reSecTQue))
+        {
+          $error['is_exist_test_group_que'] = 1;
+        }
+      }
 
       //Add test
-      if(0 === count($error) && empty($t_qu_se_id))
+      if(0 === count($error) && !empty($t_qu_se_id))
       {
         $common->update('section_test_question', $field = ['section_id' => $section_id, 'test_question_id' => $test_qu_id], $condition = ['id' => $t_qu_se_id]);
         //unset session
@@ -4176,11 +4202,25 @@ if('test_question_section' === $task)
         exit;
       }
     }
+    $smarty_appform->assign('data_sec', $data_sec);
     $smarty_appform->assign('getSecTestQueByID', $common->find('section_test_question', $condition = ['id' => $_GET['id']], $type = 'one'));
   }
 
-  $results  = getListSectionTestQuestion();
+  //action delete topic
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('section_test_question', $field = ['id' => $_GET['id']]);
+    //Redirect
+    header('location: '.$admin_file.'?task=test_question_section');
+    exit;
+  }
 
+  $kwd = !empty($_GET['kwd']) ? $common->clean_string($_GET['kwd']) : '';
+  $results  = getListSectionTestQuestion($kwd);
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $lang));
   $smarty_appform->assign('listSection', getListSectionAndSub($parent_id = 0));
   $smarty_appform->assign('listSectionTestQuestion', $results);

@@ -47,7 +47,7 @@
                 <div class="form-group" style="margin-bottom:5px;">
                   <input type="hidden" name="id" value="{$getSectionByID.id}" />
                   <button type="submit" class="btn btn-success"><i class="fa fa-pencil-square-o"></i> {if $multiLang.button_update}{$multiLang.button_update}{else}No Translate (Key Lang:button_update){/if}</button>
-                  <a href="{$admin_file}?task=section&amp;tid={$smarty.get.tid}" class="btn btn-danger"><i class="fa fa-close"></i>  {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</a>
+                  <a href="{$admin_file}?task=section" class="btn btn-danger"><i class="fa fa-close"></i>  {if $multiLang.button_cancel}{$multiLang.button_cancel}{else}No Translate (Key Lang:button_cancel){/if}</a>
                 </div>
                 {else}
                 <div class="form-group" style="margin-bottom:5px;">

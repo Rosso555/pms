@@ -1052,15 +1052,17 @@ function getTestQuestionViewOrder($test_id, $lang)
       $t_que_view_order_join .= ' AND tqvo.test_id = :test_id ';
     }
 
-    $sql =' SELECT tq.id AS tqid, q.title AS que_title, q.description, ga.g_answer_title, tqvo.id AS tq_view_order_id, tgq.id AS test_ques_group, t.title AS test_title
+    $sql =' SELECT tq.id AS tqid, q.title AS que_title, q.description, ga.g_answer_title, tqvo.id AS tq_view_order_id, tgq.id AS test_ques_group, t.title AS test_title, stq.id AS sec_t_que_id
             FROM `test_question` tq
               INNER JOIN question q ON q.id = tq.question_id
               INNER JOIN test t ON t.id = tq.test_id AND t.lang = :lang
               LEFT JOIN group_answer ga ON ga.test_question_id = tq.id '.$gr_ans_join.'
               LEFT JOIN test_question_view_order tqvo ON tqvo.test_question_id = tq.id '.$t_que_view_order_join.'
               LEFT JOIN test_group_question tgq ON tgq.test_question_id = tq.id
+              LEFT JOIN section_test_question stq ON stq.test_question_id = tq.id
             WHERE '.$condition.' ga.test_question_id IS NULL OR ga.flag = 1 ORDER BY (tqvo.view_order IS NULL), tqvo.view_order ASC ';
     $query = $connected->prepare($sql);
+
     if(!empty($test_id)) $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
     $query->bindValue(':lang', $lang, PDO::PARAM_STR);
     $query->execute();

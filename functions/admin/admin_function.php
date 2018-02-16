@@ -2464,7 +2464,7 @@ function getListSectionAndSub($parent_id)
       $section['section'][$row['id']] = $row;
       $section['parent_sec'][$row['parent_id']][] = $row['id'];
     }
-    
+
     return buildSectionUlHTML($parent_id, $section);
   }
   catch (Exception $e)
@@ -2505,12 +2505,12 @@ function buildSectionUlHTML($parent, $section)
     {
       if (!isset($section['parent_sec'][$cat_id]))
       {
-        $html .= "<li>\n <div class='radio'><label><input type='radio' name='section_id' value='".$section['section'][$cat_id]['id']."'>".$section['section'][$cat_id]['name']."</label></div> \n</li> \n";
+        $html .= "<li>\n <div class='radio' id='div_sec_".$section['section'][$cat_id]['id']."'><label><input type='radio' id='sec_".$section['section'][$cat_id]['id']."' name='section_id' value='".$section['section'][$cat_id]['id']."'>".$section['section'][$cat_id]['name']."</label></div> \n</li> \n";
       }
 
       if (isset($section['parent_sec'][$cat_id]))
       {
-        $html .= "<li>\n <div class='radio'><label><input type='radio' name='section_id' value='".$section['section'][$cat_id]['id']."'>".$section['section'][$cat_id]['name']."</label></div> ";
+        $html .= "<li>\n <div class='radio' id='div_sec_".$section['section'][$cat_id]['id']."'><label><input type='radio' id='sec_".$section['section'][$cat_id]['id']."' name='section_id' value='".$section['section'][$cat_id]['id']."'>".$section['section'][$cat_id]['name']."</label></div> ";
         $html .= buildSectionUlHTML($cat_id, $section);
         $html .= "</li> \n";
       }
@@ -2526,22 +2526,32 @@ function buildSectionUlHTML($parent, $section)
  * @param  int $parent_id
  * @return string
  */
-function getListSectionTestQuestion()
+function getListSectionTestQuestion($kwd)
 {
   global $debug, $connected, $total_data, $limit, $offset;
   $result = true;
   try
   {
-    $sql =' SELECT stq.*, s.name, t.title AS test_title, q.title AS que_title
+    if(!empty($kwd)) $where .= ' WHERE s.name LIKE :kwd OR t.title LIKE :kwd OR q.title LIKE :kwd ';
+
+    $sql =' SELECT stq.*, s.name, t.title AS test_title, q.title AS que_title, ga.g_answer_title,
+              (SELECT COUNT(*) FROM `section_test_question` stq
+                INNER JOIN section s ON s.id = stq.section_id
+                INNER JOIN test_question tq ON tq.id = stq.test_question_id
+                INNER JOIN test t ON t.id = tq.test_id
+                INNER JOIN question q ON q.id = tq.question_id
+                LEFT JOIN group_answer ga ON ga.test_question_id = stq.test_question_id '.$where.') AS total
             FROM `section_test_question` stq
               INNER JOIN section s ON s.id = stq.section_id
               INNER JOIN test_question tq ON tq.id = stq.test_question_id
               INNER JOIN test t ON t.id = tq.test_id
-              INNER JOIN question q ON q.id = tq.question_id ';
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN group_answer ga ON ga.test_question_id = stq.test_question_id '.$where;
     $query = $connected->prepare($sql);
+    if(!empty($kwd)) $query->bindValue(':kwd', '%'.$kwd.'%', PDO::PARAM_STR);
     $query->execute();
     $rows = $query->fetchAll();
-
+    if(count($rows) > 0) $total_data = $rows[0]['total'];
     return $rows;
   }
   catch (Exception $e)
