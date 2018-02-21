@@ -1972,8 +1972,6 @@ if('test' === $task)
   //Clear session
   if(!$_POST) unset($_SESSION['test']);
 
-  print_r($_POST);
-
   $error = array();
   //action add
   if('add' === $action)
@@ -4214,6 +4212,8 @@ if('test_question_section' === $task)
     header('location: '.$admin_file.'?task=test_question_section');
     exit;
   }
+
+  $resultSecTesting = getSectionTestQue($tqid = 4);
 
   $kwd = !empty($_GET['kwd']) ? $common->clean_string($_GET['kwd']) : '';
   $results  = getListSectionTestQuestion($kwd);

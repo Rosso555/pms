@@ -134,8 +134,6 @@
                 </div>
               </div>
               <!-- Modal -->
-
-              <a href="{$admin_file}?task=section_sub&amp;par_id={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="Add Sub Section"><i class="fa fa-plus-circle"></i></a>
             </td>
           </tr>
           {/foreach}
