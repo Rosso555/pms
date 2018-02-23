@@ -10,7 +10,7 @@
 </ul>
 
 <div class="panel panel-primary">
-  <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate (Key Lang:text_section){/if}</h4></div>
+  <div class="panel-heading"><h4 class="panel-title">{if $multiLang.text_sub_section}{$multiLang.text_sub_section}{else}No Translate (Key Lang:text_sub_section){/if}</h4></div>
   <div class="panel-body">
     <b>{if $multiLang.text_section}{$multiLang.text_section}{else}No Translate(Key Lang: text_section){/if}:</b>
     <div class="box_title" style="padding: 10px;">
