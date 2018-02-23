@@ -2525,7 +2525,7 @@ function getSectionTestQue($tqid)
   $result = true;
   try
   {
-    $sql =' SELECT * FROM `section_test_question` stq INNER JOIN section s ON s.id = stq.section_id WHERE stq.test_question_id = :tqid ';
+    $sql =' SELECT s.* FROM `section_test_question` stq INNER JOIN section s ON s.id = stq.section_id WHERE stq.test_question_id = :tqid ';
     // $sql =' SELECT * FROM `section` WHERE id = :sid ';
     $query = $connected->prepare($sql);
     $query->bindValue(':tqid', $tqid, PDO::PARAM_INT);
@@ -2539,7 +2539,7 @@ function getSectionTestQue($tqid)
     $query1->execute();
     $rows1 = $query1->fetchAll();
 
-    print_r($rows1);
+    // print_r($rows1);
 
     return $newResult;
   }
