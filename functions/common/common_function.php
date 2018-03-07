@@ -186,17 +186,22 @@ function is_staff_function_exits($task, $action)
   try{
     $condition = $where = '';
 
-    if(!empty($task)){
+    if(!empty($task)) {
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' task_name = :task ';
     }
-    if(!empty($action)){
+    if(empty($action)) {
+      if(!empty($condition)) $condition .= ' AND ';
+      $condition .= ' action_name = "" ';
+    }
+    if(!empty($action)) {
       if(!empty($condition)) $condition .= ' AND ';
       $condition .= ' action_name = :action ';
     }
     if(!empty($condition)) $where .=' WHERE '.$condition;
 
     $sql= ' SELECT COUNT(*) AS total_count FROM `staff_function` '.$where;
+    // echo $sql;
     $query = $connected->prepare($sql);
     if(!empty($task)) $query->bindValue(':task', (string)$task, PDO::PARAM_STR);
     if(!empty($action)) $query->bindValue(':action', (string)$action, PDO::PARAM_STR);
@@ -1102,6 +1107,7 @@ function ListTestQuestion($tid, $lang)
           $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
 
           $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
+          $reSectionTestQue = getSectionTestQue($result1['test_question_id']);
 
           $newdata[] = array('id'       => $result1['id'],
                           'title'       => $result1['title'],
@@ -1125,10 +1131,12 @@ function ListTestQuestion($tid, $lang)
                           'g_answer_title' => $result1['g_answer_title'],
                           't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'       => $dataanwser,
+                          'sec_tes_que'  => $reSectionTestQue,
                           'group_answer' => $row2);
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
         } else {
           $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
+          $reSectionTestQue = getSectionTestQue($result1['test_question_id']);
 
           $newdata[] = array('id'       => $result1['id'],
                           'title'       => $result1['title'],
@@ -1152,6 +1160,7 @@ function ListTestQuestion($tid, $lang)
                           'g_answer_title' => $result1['g_answer_title'],
                           't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'      => $dataanwser,
+                          'sec_tes_que'  => $reSectionTestQue,
                           'group_answer' => '');
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
         }
@@ -1170,6 +1179,8 @@ function ListTestQuestion($tid, $lang)
             $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
 
             $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
+            $reSectionTestQue = getSectionTestQue($result1['test_question_id']);
+
 
             $newdata[] = array('id'       => $result1['id'],
                             'title'       => $result1['title'],
@@ -1193,10 +1204,12 @@ function ListTestQuestion($tid, $lang)
                             'g_answer_title' => $result1['g_answer_title'],
                             't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'       => $dataanwser,
+                            'sec_tes_que'  => $reSectionTestQue,
                             'group_answer' => $row2);
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
           }else {
             $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
+            $reSectionTestQue = getSectionTestQue($result1['test_question_id']);
 
             $newdata[] = array('id'       => $result1['id'],
                             'title'       => $result1['title'],
@@ -1220,6 +1233,7 @@ function ListTestQuestion($tid, $lang)
                             'g_answer_title' => $result1['g_answer_title'],
                             't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'      => $dataanwser,
+                            'sec_tes_que'  => $reSectionTestQue,
                             'group_answer' => '');
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
           }
@@ -3186,6 +3200,76 @@ function generateCondition($array_val)
   $ReCondional .= '('.$condition;
 
   return $ReCondional;
+}
+/**
+ * getSectionTestQue
+ * @param  int $tqid is test question id
+ * @return array or boolean
+ */
+function getSectionTestQue($tqid)
+{
+  global $debug, $connected, $total_data, $limit, $offset;
+  $result = true;
+  try
+  {
+    $sql =' SELECT s.* FROM `section_test_question` stq INNER JOIN section s ON s.id = stq.section_id WHERE stq.test_question_id = :tqid ';
+    // $sql =' SELECT * FROM `section` WHERE id = :sid ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':tqid', $tqid, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+
+    $newResult = getSectionTestQueMainSub($rows['id']);
+    if(!empty($newResult))
+    {
+        $sql1 =' SELECT * FROM `section` WHERE id IN ('.$newResult.') ';
+        $query1 = $connected->prepare($sql1);
+        $query1->execute();
+        $rows1 = $query1->fetchAll();
+    }
+
+    return $rows1;
+  }
+  catch (Exception $e)
+  {
+    if($debug) echo 'Error: getSectionTestQue'. $e->getMessage();
+  }
+  return $result;
+}
+/**
+ * getSectionTestQueMainSub
+ * @param  int $sid section_id
+ * @return array or boolean
+ */
+function getSectionTestQueMainSub($sid)
+{
+  global $debug, $connected, $total_data, $limit, $offset;
+  $result = true;
+  try
+  {
+    $sql =' SELECT * FROM `section` WHERE id = :sid ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':sid', $sid, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+
+    $resultSec = '';
+
+    if($rows['parent_id'] && $rows['parent_id'] != 0)
+    {
+      $resultSec .= $rows['id'].',';
+      $resultSec .= getSectionTestQueMainSub($rows['parent_id']);
+    } else {
+      $resultSec .= $rows['id'];
+    }
+
+    return $resultSec;
+  }
+  catch (Exception $e)
+  {
+    if($debug) echo 'Error: getSectionTestQueMainSub'. $e->getMessage();
+  }
+  return $result;
 }
 
 ?>

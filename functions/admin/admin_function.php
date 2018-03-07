@@ -2518,69 +2518,6 @@ function buildSectionUlHTML($parent, $section)
   }
   return $html;
 }
-
-function getSectionTestQue($tqid)
-{
-  global $debug, $connected, $total_data, $limit, $offset;
-  $result = true;
-  try
-  {
-    $sql =' SELECT s.* FROM `section_test_question` stq INNER JOIN section s ON s.id = stq.section_id WHERE stq.test_question_id = :tqid ';
-    // $sql =' SELECT * FROM `section` WHERE id = :sid ';
-    $query = $connected->prepare($sql);
-    $query->bindValue(':tqid', $tqid, PDO::PARAM_INT);
-    $query->execute();
-    $rows = $query->fetch();
-
-    $newResult = getSectionTestQueMainSub($rows['id']);
-
-    $sql1 =' SELECT * FROM `section` WHERE id IN ('.$newResult.') ';
-    $query1 = $connected->prepare($sql1);
-    $query1->execute();
-    $rows1 = $query1->fetchAll();
-
-    // print_r($rows1);
-
-    return $newResult;
-  }
-  catch (Exception $e)
-  {
-    if($debug) echo 'Error: getSectionTestQue'. $e->getMessage();
-  }
-  return $result;
-}
-
-function getSectionTestQueMainSub($sid)
-{
-  global $debug, $connected, $total_data, $limit, $offset;
-  $result = true;
-  try
-  {
-    $sql =' SELECT * FROM `section` WHERE id = :sid ';
-    $query = $connected->prepare($sql);
-    $query->bindValue(':sid', $sid, PDO::PARAM_INT);
-    $query->execute();
-    $rows = $query->fetch();
-
-    $resultSec = '';
-
-    if($rows['parent_id'] && $rows['parent_id'] != 0)
-    {
-      $resultSec .= $rows['id'].',';
-      $resultSec .= getSectionTestQueMainSub($rows['parent_id']);
-    } else {
-      $resultSec .= $rows['id'];
-    }
-
-    return $resultSec;
-  }
-  catch (Exception $e)
-  {
-    if($debug) echo 'Error: getSectionTestQueMainSub'. $e->getMessage();
-  }
-  return $result;
-}
-
 /**
  * getListSection
  * @param  string $kwd

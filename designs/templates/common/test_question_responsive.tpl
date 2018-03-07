@@ -32,6 +32,10 @@
     <input type="hidden" id="test_group_id" name="test_group_id" value="{$test_group_id|escape}">
   {if $result|@COUNT gt 0}
     {foreach item = v from=$result key=id name=first_foo}
+
+      {foreach from=$v.sec_tes_que item=sec}
+        {$sec.name}<br>
+      {/foreach}
       {if $v.flag eq 1}
       {$totalC = 100 / $v.answer|@count}
       <div class="row">

@@ -2,7 +2,7 @@
   "type": "ftp",
   "host": "pms.e-khmer.com",
   "username": "scusersbnn",
-  "password": "xA3kFnfC",
+  "password": "54wRKRAx",
   "port": 21,
   "remotePath": "./pms.e-khmer.com",
   "uploadOnSave": true
