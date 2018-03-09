@@ -4213,7 +4213,7 @@ if('test_question_section' === $task)
     exit;
   }
 
-  $resultSecTesting = getSectionTestQue($tqid = 4);
+  $resultSecTesting = getSectionTestQue($tid = 4, $tqid = 11, $lang);
 
   $kwd = !empty($_GET['kwd']) ? $common->clean_string($_GET['kwd']) : '';
   $results  = getListSectionTestQuestion($kwd);

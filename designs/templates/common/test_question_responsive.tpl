@@ -33,9 +33,10 @@
   {if $result|@COUNT gt 0}
     {foreach item = v from=$result key=id name=first_foo}
 
-      {foreach from=$v.sec_tes_que item=sec}
-        {$sec.name}<br>
-      {/foreach}
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12"><p style="margin-top: 20px; margin-bottom: -5px; color: #278ed2;"><b> {$v.section_name}</b></p></div>
+      </div>
+
       {if $v.flag eq 1}
       {$totalC = 100 / $v.answer|@count}
       <div class="row">

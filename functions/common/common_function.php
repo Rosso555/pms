@@ -50,6 +50,71 @@ function auth($role_id, $task, $action = '')
  return $result;
 }
 /**
+ * getListTestQuestion
+ * @param  string $kwd
+ * @param  int $testid
+ * @param  int $type_check
+ * @param  int $test_g_ques is test group question id
+ * @param  string $lang is language
+ * @param  string $slimit for setLimit
+ * @return array or boolean
+ */
+function getListTestQuestion($kwd, $testid, $type_check, $test_g_ques, $lang, $slimit = '')
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+
+    if(!empty($slimit))
+    {
+      $limit = $slimit;
+      $setLimit = ' LIMIT :offset, :limit ';
+    }
+
+    if(!empty($kwd)) $condition .= ' AND q.title LIKE :kwd ';
+    if(!empty($testid)) $condition .= ' AND tq.test_id = :testid ';
+    if(!empty($test_g_ques)) $condition .= ' AND tgq.id IS NULL ';
+    //$type_check eq 1 OR 2 is text free
+    if(!empty($type_check) && $type_check == 1 || $type_check == 2) $condition .= ' AND (q.type = 1 OR q.type = 2) ';
+    //$type_check eq 3 OR 4 is check box
+    if(!empty($type_check) && $type_check == 3 || $type_check == 4) $condition .= ' AND (q.type = 3 OR q.type = 4) ';
+
+    $sql= ' SELECT tq.id, tq.test_id, tq.question_id, tq.is_required, tq.view_order, t.title AS test_title,
+              q.title AS q_title, q.type, t.lang AS test_lang, q.lang AS q_lang, tq.parent AS parent_id, COUNT(asw.id) AS count_answer,
+              (SELECT COUNT(*) FROM `test_question` tq INNER JOIN test t ON t.id = tq.test_id INNER JOIN question q ON q.id = tq.question_id WHERE t.lang = :lang '.$condition.') AS total_count
+            FROM `test_question` tq
+              INNER JOIN test t ON t.id = tq.test_id
+              INNER JOIN question q ON q.id = tq.question_id
+              LEFT JOIN answer asw ON asw.test_question_id = tq.id
+              LEFT JOIN test_group_question tgq ON tgq.test_question_id = tq.id
+            WHERE t.lang = :lang '.$condition.' GROUP BY tq.id
+            ORDER BY tq.test_id ASC, tq.view_order ASC'.$setLimit;
+
+    $query = $connected->prepare($sql);
+
+    if (!empty($kwd)) $query->bindValue(':kwd', '%'.$kwd.'%', PDO::PARAM_STR);
+    if (!empty($topic_id)) $query->bindValue(':topic_id', (int)$topic_id, PDO::PARAM_INT);
+    if (!empty($testid)) $query->bindValue(':testid', (int)$testid, PDO::PARAM_INT);
+
+    $query->bindValue(':lang', (string)$lang, PDO::PARAM_STR);
+    if(!empty($slimit))
+    {
+      $query->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+      $query->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+    }
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total_count'];
+    return $rows;
+
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListTestQuestion'.$e->getMessage();
+  }
+  return $result;
+}
+/**
  * getMailerLiteByTestId
  * @param  int $testid is test_id
  * @return array or boolean
@@ -1107,7 +1172,7 @@ function ListTestQuestion($tid, $lang)
           $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
 
           $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-          $reSectionTestQue = getSectionTestQue($result1['test_question_id']);
+          $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
 
           $newdata[] = array('id'       => $result1['id'],
                           'title'       => $result1['title'],
@@ -1131,12 +1196,12 @@ function ListTestQuestion($tid, $lang)
                           'g_answer_title' => $result1['g_answer_title'],
                           't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'       => $dataanwser,
-                          'sec_tes_que'  => $reSectionTestQue,
+                          'section_name'  => $reSectionTestQue['name'],
                           'group_answer' => $row2);
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
         } else {
           $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-          $reSectionTestQue = getSectionTestQue($result1['test_question_id']);
+          $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
 
           $newdata[] = array('id'       => $result1['id'],
                           'title'       => $result1['title'],
@@ -1160,7 +1225,7 @@ function ListTestQuestion($tid, $lang)
                           'g_answer_title' => $result1['g_answer_title'],
                           't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'      => $dataanwser,
-                          'sec_tes_que'  => $reSectionTestQue,
+                          'section_name'  => $reSectionTestQue['name'],
                           'group_answer' => '');
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
         }
@@ -1179,7 +1244,7 @@ function ListTestQuestion($tid, $lang)
             $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
 
             $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-            $reSectionTestQue = getSectionTestQue($result1['test_question_id']);
+            $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
 
 
             $newdata[] = array('id'       => $result1['id'],
@@ -1204,12 +1269,12 @@ function ListTestQuestion($tid, $lang)
                             'g_answer_title' => $result1['g_answer_title'],
                             't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'       => $dataanwser,
-                            'sec_tes_que'  => $reSectionTestQue,
+                            'section_name'  => $reSectionTestQue['name'],
                             'group_answer' => $row2);
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
           }else {
             $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-            $reSectionTestQue = getSectionTestQue($result1['test_question_id']);
+            $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
 
             $newdata[] = array('id'       => $result1['id'],
                             'title'       => $result1['title'],
@@ -1233,7 +1298,7 @@ function ListTestQuestion($tid, $lang)
                             'g_answer_title' => $result1['g_answer_title'],
                             't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'      => $dataanwser,
-                            'sec_tes_que'  => $reSectionTestQue,
+                            'section_name'  => $reSectionTestQue['name'],
                             'group_answer' => '');
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
           }
@@ -3206,33 +3271,158 @@ function generateCondition($array_val)
  * @param  int $tqid is test question id
  * @return array or boolean
  */
-function getSectionTestQue($tqid)
+function getSectionTestQue($tid, $tqid, $lang)
+{
+  global $debug, $connected, $total_data, $limit, $offset;
+  $result = true;
+  try
+  {
+    $resultTestQue = getListTestQuestion($kwd, $tid, '', '', $lang, $slimit = '');
+    $section = array();
+    $sectId = array();
+
+    foreach ($resultTestQue as $key => $value)
+    {
+      $sql =' SELECT s.* FROM `section_test_question` stq INNER JOIN section s ON s.id = stq.section_id WHERE stq.test_question_id = :tqid ';
+      $query = $connected->prepare($sql);
+      $query->bindValue(':tqid', $value['id'], PDO::PARAM_INT);
+      $query->execute();
+      $rows = $query->fetch();
+
+      $newResult = getSectionTestQueMainSub($rows['id']);
+
+      if(!empty($newResult))
+      {
+        $sql1 =' SELECT * FROM `section` WHERE id IN ('.$newResult.') ';
+        $query1 = $connected->prepare($sql1);
+        $query1->execute();
+        $rows1 = $query1->fetchAll();
+
+        $parent_id = 0;
+        foreach ($rows1 as $key => $va)
+        {
+          if($va['parent_id'] == 0)
+          {
+            $parent_id = $va['id'];
+            $sectId[$va['id']] = $va['id'];
+          }
+          $section[$parent_id][$parent_id.'_'.$va['id']] = $va;
+        }
+      }
+    }
+
+    $newdata = array();
+    foreach ($sectId as $k => $value)
+    {
+      foreach ($section[$value] as $key => $sec)
+      {
+        $sql2 =' SELECT * FROM `section_test_question` WHERE section_id = :sec_id ';
+        $query2 = $connected->prepare($sql2);
+        $query2->bindValue(':sec_id', $sec['id'], PDO::PARAM_INT);
+        $query2->execute();
+        $rows2 = $query2->fetchAll();
+
+        $dataTestQue = array();
+
+        foreach ($rows2 as $key => $va)
+        {
+          $result1 = getTestQuestionByTestQuesID($tid, $va['test_question_id'], $lang);
+
+          if($result1['flag'] == 1)
+          {
+            $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
+
+            $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
+            $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
+
+            $dataTestQue[] = array('id'       => $result1['id'],
+                            'title'       => $result1['title'],
+                            'description' => $result1['description'],
+                            'type'        => $result1['type'],
+                            'is_email'    => $result1['is_email'],
+                            'hide_title'  => $result1['hide_title'],
+                            'lang'        => $result1['lang'],
+                            'que_title'   => $result1['que_title'],
+                            'test_id'     => $result1['test_id'],
+                            'question_id' => $result1['question_id'],
+                            'is_required' => $result1['is_required'],
+                            'view_order'  => $result1['view_order'],
+                            'jump_condition_answer' => $result1['jump_condition_answer'],
+                            'jump_condition_value'  => $result1['jump_condition_value'],
+                            'parent'      => $result1['parent'],
+                            'count_answer'      => $result1['count_answer'],
+                            'test_question_id'  => $result1['test_question_id'],
+                            'g_ans_que_id'      => $result1['g_ans_que_id'],
+                            'flag'        => $result1['flag'],
+                            'g_answer_title' => $result1['g_answer_title'],
+                            't_que_hide_id'  => $result1['t_que_hide_id'],
+                            'answer'       => $dataanwser,
+                            'section_name'  => $reSectionTestQue['name'],
+                            'group_answer' => $row2);
+            if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
+          } else {
+            $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
+            $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
+
+            $dataTestQue[] = array('id'       => $result1['id'],
+                            'title'       => $result1['title'],
+                            'description' => $result1['description'],
+                            'type'        => $result1['type'],
+                            'is_email'    => $result1['is_email'],
+                            'hide_title'  => $result1['hide_title'],
+                            'lang'        => $result1['lang'],
+                            'que_title'   => $result1['que_title'],
+                            'test_id'     => $result1['test_id'],
+                            'question_id' => $result1['question_id'],
+                            'is_required' => $result1['is_required'],
+                            'view_order'  => $result1['view_order'],
+                            'jump_condition_answer' => $result1['jump_condition_answer'],
+                            'jump_condition_value'  => $result1['jump_condition_value'],
+                            'parent'      => $result1['parent'],
+                            'count_answer'      => $result1['count_answer'],
+                            'test_question_id'  => $result1['test_question_id'],
+                            'g_ans_que_id'      => $result1['g_ans_que_id'],
+                            'flag'        => 0,
+                            'g_answer_title' => $result1['g_answer_title'],
+                            't_que_hide_id'  => $result1['t_que_hide_id'],
+                            'answer'      => $dataanwser,
+                            'section_name'  => $reSectionTestQue['name'],
+                            'group_answer' => '');
+            if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
+          }
+        }
+
+        $newdata[] = array('section_name' => $sec['name'], 'test_que' => $dataTestQue);
+      }
+    }
+
+    // print_r($newdata);
+
+    return $reSce;
+  }
+  catch (Exception $e)
+  {
+    if($debug) echo 'Error: getSectionTestQue'. $e->getMessage();
+  }
+  return $result;
+}
+
+function getSectionTestQueByID($tqid)
 {
   global $debug, $connected, $total_data, $limit, $offset;
   $result = true;
   try
   {
     $sql =' SELECT s.* FROM `section_test_question` stq INNER JOIN section s ON s.id = stq.section_id WHERE stq.test_question_id = :tqid ';
-    // $sql =' SELECT * FROM `section` WHERE id = :sid ';
     $query = $connected->prepare($sql);
     $query->bindValue(':tqid', $tqid, PDO::PARAM_INT);
     $query->execute();
     $rows = $query->fetch();
-
-    $newResult = getSectionTestQueMainSub($rows['id']);
-    if(!empty($newResult))
-    {
-        $sql1 =' SELECT * FROM `section` WHERE id IN ('.$newResult.') ';
-        $query1 = $connected->prepare($sql1);
-        $query1->execute();
-        $rows1 = $query1->fetchAll();
-    }
-
-    return $rows1;
+    return $rows;
   }
   catch (Exception $e)
   {
-    if($debug) echo 'Error: getSectionTestQue'. $e->getMessage();
+    if($debug) echo 'Error: getSectionTestQueByID'. $e->getMessage();
   }
   return $result;
 }
