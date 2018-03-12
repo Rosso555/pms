@@ -1104,16 +1104,17 @@ function listAnswerByTestQuesId($test_questionid)
 /**
  * getTestQuestionViewOrder
  * @param  int $test_id
+ * @param  int $sec if has value, condition is "stq.id IS NULL"
  * @param  string $lang
  * @return array or boolean
  */
-function getTestQuestionViewOrder($test_id, $lang)
+function getTestQuestionViewOrder($test_id, $sec, $lang)
 {
   global $debug, $connected;
   $result = true;
 
   try{
-    $condition = $gr_ans_join = $t_que_view_order_join = '';
+    $condition = $gr_ans_join = $t_que_view_order_join = $sec_con = '';
 
     if(!empty($test_id))
     {
@@ -1121,6 +1122,8 @@ function getTestQuestionViewOrder($test_id, $lang)
       $gr_ans_join .= ' AND ga.test_id = :test_id ';
       $t_que_view_order_join .= ' AND tqvo.test_id = :test_id ';
     }
+
+    if(!empty($sec)) $sec_con .= ' stq.id IS NULL AND ';
 
     $sql =' SELECT tq.id AS tqid, q.title AS que_title, q.description, ga.g_answer_title, tqvo.id AS tq_view_order_id, tgq.id AS test_ques_group, t.title AS test_title, stq.id AS sec_t_que_id
             FROM `test_question` tq
@@ -1130,7 +1133,7 @@ function getTestQuestionViewOrder($test_id, $lang)
               LEFT JOIN test_question_view_order tqvo ON tqvo.test_question_id = tq.id '.$t_que_view_order_join.'
               LEFT JOIN test_group_question tgq ON tgq.test_question_id = tq.id
               LEFT JOIN section_test_question stq ON stq.test_question_id = tq.id
-            WHERE '.$condition.' ga.test_question_id IS NULL OR ga.flag = 1 ORDER BY (tqvo.view_order IS NULL), tqvo.view_order ASC ';
+            WHERE '.$condition.$sec_con.' ga.test_question_id IS NULL OR ga.flag = 1 ORDER BY (tqvo.view_order IS NULL), tqvo.view_order ASC ';
     $query = $connected->prepare($sql);
 
     if(!empty($test_id)) $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
@@ -1156,7 +1159,10 @@ function ListTestQuestion($tid, $lang)
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
-    $sql= ' SELECT * FROM `test_question_view_order` WHERE test_id = :tid ORDER BY view_order ASC ';
+    // $sql= ' SELECT * FROM `test_question_view_order` WHERE test_id = :tid ORDER BY view_order ASC ';
+    $sql= ' SELECT tqvo.* FROM `test_question_view_order` tqvo
+              LEFT JOIN section_test_question stq ON stq.test_question_id = tqvo.test_question_id
+            WHERE tqvo.test_id = :tid AND stq.id IS NULL ORDER BY tqvo.view_order ASC ';
     $stmt = $connected->prepare($sql);
     $stmt->bindValue(':tid', (int)$tid, PDO::PARAM_INT);
     $stmt->execute();
@@ -1172,7 +1178,6 @@ function ListTestQuestion($tid, $lang)
           $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
 
           $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-          $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
 
           $newdata[] = array('id'       => $result1['id'],
                           'title'       => $result1['title'],
@@ -1196,12 +1201,10 @@ function ListTestQuestion($tid, $lang)
                           'g_answer_title' => $result1['g_answer_title'],
                           't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'       => $dataanwser,
-                          'section_name'  => $reSectionTestQue['name'],
                           'group_answer' => $row2);
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
         } else {
           $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-          $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
 
           $newdata[] = array('id'       => $result1['id'],
                           'title'       => $result1['title'],
@@ -1225,7 +1228,6 @@ function ListTestQuestion($tid, $lang)
                           'g_answer_title' => $result1['g_answer_title'],
                           't_que_hide_id'  => $result1['t_que_hide_id'],
                           'answer'      => $dataanwser,
-                          'section_name'  => $reSectionTestQue['name'],
                           'group_answer' => '');
           if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
         }
@@ -1233,7 +1235,7 @@ function ListTestQuestion($tid, $lang)
       }//End fetch rows
     }
     //Get Test Question No in View Order
-    $rTestQueNotViewOrder = getTestQuestionViewOrder($tid, $lang);
+    $rTestQueNotViewOrder = getTestQuestionViewOrder($tid, $sec = 1, $lang);
 
     if(!empty($rTestQueNotViewOrder)) {
 
@@ -1244,8 +1246,6 @@ function ListTestQuestion($tid, $lang)
             $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
 
             $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-            $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
-
 
             $newdata[] = array('id'       => $result1['id'],
                             'title'       => $result1['title'],
@@ -1269,12 +1269,10 @@ function ListTestQuestion($tid, $lang)
                             'g_answer_title' => $result1['g_answer_title'],
                             't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'       => $dataanwser,
-                            'section_name'  => $reSectionTestQue['name'],
                             'group_answer' => $row2);
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
           }else {
             $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-            $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
 
             $newdata[] = array('id'       => $result1['id'],
                             'title'       => $result1['title'],
@@ -1298,15 +1296,16 @@ function ListTestQuestion($tid, $lang)
                             'g_answer_title' => $result1['g_answer_title'],
                             't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'      => $dataanwser,
-                            'section_name'  => $reSectionTestQue['name'],
                             'group_answer' => '');
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
           }
         }
       }//End fetch rows
     }
-
+    $sectionTestQue = getSectionTestQue($tid, $lang);
+    $newdata['section'] = $sectionTestQue;
     // print_r($newdata);
+
     return $newdata;
   } catch (Exception $e) {
     $result = false;
@@ -1640,7 +1639,7 @@ function getListQuestionByViewOrderGroupNonGroupJumpTo($tid, $lang)
       }//End fetch rows
     }
     //Get Test Question No in View Order
-    $rTestQueNotViewOrder = getTestQuestionViewOrder($tid, $lang);
+    $rTestQueNotViewOrder = getTestQuestionViewOrder($tid, $sec = '', $lang);
 
     if(!empty($rTestQueNotViewOrder)){
       foreach ($rTestQueNotViewOrder as $key => $va)
@@ -3271,7 +3270,7 @@ function generateCondition($array_val)
  * @param  int $tqid is test question id
  * @return array or boolean
  */
-function getSectionTestQue($tid, $tqid, $lang)
+function getSectionTestQue($tid, $lang)
 {
   global $debug, $connected, $total_data, $limit, $offset;
   $result = true;
@@ -3333,7 +3332,6 @@ function getSectionTestQue($tid, $tqid, $lang)
             $row2 = getTestQuestionBySubID($tid, $result1['g_answer_id'], $lang);
 
             $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-            $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
 
             $dataTestQue[] = array('id'       => $result1['id'],
                             'title'       => $result1['title'],
@@ -3357,12 +3355,10 @@ function getSectionTestQue($tid, $tqid, $lang)
                             'g_answer_title' => $result1['g_answer_title'],
                             't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'       => $dataanwser,
-                            'section_name'  => $reSectionTestQue['name'],
                             'group_answer' => $row2);
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
           } else {
             $dataanwser = listAnswerByTestQuesId($result1['test_question_id']);
-            $reSectionTestQue = getSectionTestQueByID($result1['test_question_id']);
 
             $dataTestQue[] = array('id'       => $result1['id'],
                             'title'       => $result1['title'],
@@ -3386,7 +3382,6 @@ function getSectionTestQue($tid, $tqid, $lang)
                             'g_answer_title' => $result1['g_answer_title'],
                             't_que_hide_id'  => $result1['t_que_hide_id'],
                             'answer'      => $dataanwser,
-                            'section_name'  => $reSectionTestQue['name'],
                             'group_answer' => '');
             if(!empty($dataanwser)) $total_data = COUNT($dataanwser);
           }
@@ -3397,8 +3392,7 @@ function getSectionTestQue($tid, $tqid, $lang)
     }
 
     // print_r($newdata);
-
-    return $reSce;
+    return $newdata;
   }
   catch (Exception $e)
   {

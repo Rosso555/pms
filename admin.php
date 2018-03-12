@@ -3275,7 +3275,7 @@ if('test_group_question' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listTestGroupQuestion', $result);
-  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $lang));
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $sec = '', $lang));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->assign('test_group', $common->find('test_group', $condition = ['id' => $_GET['tgid']], $type = 'one'));
   $smarty_appform->display('admin/admin_test_group_question.tpl');
@@ -3608,7 +3608,7 @@ if('test_question_view_order' === $task)
 
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('listTestQestionViewOrder', $results);
-  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $lang));
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $sec = '', $lang));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $_GET['tid']], $type = 'one'));
   $smarty_appform->display('admin/admin_test_que_view_order.tpl');
   exit;
@@ -4213,7 +4213,7 @@ if('test_question_section' === $task)
     exit;
   }
 
-  $resultSecTesting = getSectionTestQue($tid = 4, $tqid = 11, $lang);
+  // $resultSecTesting = getSectionTestQue($tid = 4, $lang);
 
   $kwd = !empty($_GET['kwd']) ? $common->clean_string($_GET['kwd']) : '';
   $results  = getListSectionTestQuestion($kwd);
@@ -4221,7 +4221,7 @@ if('test_question_section' === $task)
   SmartyPaginate::assign($smarty_appform);
 
   $smarty_appform->assign('error', $error);
-  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $lang));
+  $smarty_appform->assign('listTestQueGroupAnswer', getTestQuestionViewOrder($_GET['tid'], $sec = '', $lang));
   $smarty_appform->assign('listSection', getListSectionAndSub($parent_id = 0));
   $smarty_appform->assign('listSectionTestQuestion', $results);
   $smarty_appform->display('admin/admin_test_question_section.tpl');

@@ -642,7 +642,7 @@ if('test_question_psychologist' === $task)
   $smarty_appform->assign('resultTestGroupTmpQue', COUNT(getListTestGroupByTmpQuestionPsy($tid, $tpsy_id, $status = 2, $fetch_type = 'all', $slimit = ''))); //For Check Show Button Next Or Finish
   $smarty_appform->assign('testQueGroup', COUNT($resultTestGroup));
   $smarty_appform->assign('resultStep', $sumStep);
-  $smarty_appform->display('common/test_question_responsive.tpl');
+  $smarty_appform->display('common/test_question_responsive_testing.tpl');
   exit;
 }
 //Task: test save draft
