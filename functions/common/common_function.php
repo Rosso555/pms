@@ -1133,7 +1133,7 @@ function getTestQuestionViewOrder($test_id, $sec, $lang)
               LEFT JOIN test_question_view_order tqvo ON tqvo.test_question_id = tq.id '.$t_que_view_order_join.'
               LEFT JOIN test_group_question tgq ON tgq.test_question_id = tq.id
               LEFT JOIN section_test_question stq ON stq.test_question_id = tq.id
-            WHERE '.$condition.$sec_con.' ga.test_question_id IS NULL OR ga.flag = 1 ORDER BY (tqvo.view_order IS NULL), tqvo.view_order ASC ';
+            WHERE '.$condition.$sec_con.' (ga.test_question_id IS NULL OR ga.flag = 1) ORDER BY (tqvo.view_order IS NULL), tqvo.view_order ASC ';
     $query = $connected->prepare($sql);
 
     if(!empty($test_id)) $query->bindValue(':test_id', $test_id, PDO::PARAM_INT);
@@ -3296,7 +3296,6 @@ function getSectionTestQue($tid, $lang)
         $query1 = $connected->prepare($sql1);
         $query1->execute();
         $rows1 = $query1->fetchAll();
-
         $parent_id = 0;
         foreach ($rows1 as $key => $va)
         {
@@ -3315,9 +3314,10 @@ function getSectionTestQue($tid, $lang)
     {
       foreach ($section[$value] as $key => $sec)
       {
-        $sql2 =' SELECT * FROM `section_test_question` WHERE section_id = :sec_id ';
+        $sql2 =' SELECT stq.* FROM `section_test_question` stq INNER JOIN test_question tq ON tq.id = stq.test_question_id WHERE stq.section_id = :sec_id AND tq.test_id = :tid ';
         $query2 = $connected->prepare($sql2);
         $query2->bindValue(':sec_id', $sec['id'], PDO::PARAM_INT);
+        $query2->bindValue(':tid', $tid, PDO::PARAM_INT);
         $query2->execute();
         $rows2 = $query2->fetchAll();
 
