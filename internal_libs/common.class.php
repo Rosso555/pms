@@ -282,6 +282,22 @@ class common
     }
     return true;
   }
+  //Check password
+  function checkPasswordWithLen($pwd, $len) {
+    if (strlen($pwd) < $len) {
+        //'Password too short!'
+        return false;
+    }
+    if (!preg_match("#[0-9]+#", $pwd)) {
+        //'Password must include at least one number!';
+        return false;
+    }
+    if (!preg_match("#[a-zA-Z]+#", $pwd)) {
+        //'Password must include at least one letter!';
+        return false;
+    }
+    return true;
+  }
 
   /**
    * Globle Save function

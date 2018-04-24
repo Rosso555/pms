@@ -79,10 +79,10 @@
             </div>
             <div class="form-group" id="error_pwd">
               <label for="pwd"><span style="color:red">*</span> Password:</label>
-              <span style="color:red" id="txt_error_pwd">{if $error.password}Please enter password !{/if} {if $error.not_match_password}Your password does not match. Please try again.{/if} {if $error.less_password}Your password less than 8 or not with number and letter.{/if}</span>
+              <span style="color:red" id="txt_error_pwd">{if $error.password}Please enter password !{/if} {if $error.not_match_password}Your password does not match. Please try again.{/if} {if $error.less_password}Your password less than 7 or not with number and letter.{/if}</span>
 
               <input type="password" class="form-control" id="pwd" name="password" onkeyup="checkPassword('pwd');" value="{$smarty.session.user_register.password}">
-              <span style="color:red">More than 8 characters with number and letter</span>
+              <span style="color:red">More than 7 characters with number and letter</span>
             </div>
             <div class="form-group" id="error_re_pwd">
               <label for="re_pwd"><span style="color:red">*</span> Re-Password:</label>
@@ -329,6 +329,19 @@ $("form").submit(function( event )
   event.preventDefault();
 });
 
+function NumAndTwoDecimals(e , field)
+{
+  var val = field.value;
+  var reg = /^([0-9]+[\.]?[0-9]?[0-9]?|[0-9]+)/g;
+  val = reg.exec(val);
+  if (val) {
+    field.value = val[0];
+  }
+  else
+  {
+    field.value = "";
+  }
+}
 
 </script>
 

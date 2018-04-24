@@ -660,6 +660,7 @@ if('staff_info' === $task)
     {
       $id       = $common->clean_string($_POST['id']);
       $name     = $common->clean_string($_POST['name']);
+      $email    = $common->clean_string($_POST['email']);
       $pass     = $common->clean_string($_POST['password']);
       $gender   = $common->clean_string($_POST['gender']);
       $phone    = $common->clean_string($_POST['phone']);
@@ -670,6 +671,7 @@ if('staff_info' === $task)
       $_SESSION['staff_info'] = $_POST;
       //check validate form
       if(empty($name))   $error['name'] = 1;
+      if(empty($email))  $error['email'] = 1;
       if(empty($pass))   $error['pass'] = 1;
       if(empty($phone))  $error['phone'] = 1;
       if(empty($staff_role))  $error['staff_role'] = 1;
@@ -703,12 +705,13 @@ if('staff_info' === $task)
         }
 
         $common->save('staff', $field =['name'      => $name,
-        'password'  => $pass,
-        'gender'    => $gender,
-        'phone'     => $phone,
-        'status'    => 1,
-        'photo'     => $image,
-        'staff_role_id' =>$staff_role]);
+                                        'password'  => $pass,
+                                        'gender'    => $gender,
+                                        'email'     => $email,
+                                        'phone'     => $phone,
+                                        'status'    => 1,
+                                        'photo'     => $image,
+                                        'staff_role_id' =>$staff_role]);
         $_SESSION['staff_info'] = '';
         unset($_SESSION['staff_info']);
         //Redirect
@@ -726,6 +729,7 @@ if('staff_info' === $task)
     {
       $id       = $common->clean_string($_POST['id']);
       $name     = $common->clean_string($_POST['name']);
+      $email    = $common->clean_string($_POST['email']);
       $pass     = $common->clean_string($_POST['password']);
       $gender   = $common->clean_string($_POST['gender']);
       $phone    = $common->clean_string($_POST['phone']);
@@ -736,6 +740,7 @@ if('staff_info' === $task)
       $_SESSION['staff_info'] = $_POST;
       //check validate form
       if(empty($name))   $error['name'] = 1;
+      if(empty($email))  $error['email'] = 1;
       if(empty($pass))   $error['pass'] = 1;
       if(empty($phone))  $error['phone'] = 1;
       if(empty($staff_role))  $error['staff_role'] = 1;
@@ -775,12 +780,13 @@ if('staff_info' === $task)
             $images->GenerateThumbFile(IMAGE_PATH.$image, $thumbnail_image);
           }
         }
-        $common->update('staff', $field =['name'      => $name,
-        'password'  => $pass,
-        'gender'    => $gender,
-        'phone'     => $phone,
-        'photo'     => $image,
-        'staff_role_id' =>$staff_role], $condition = ['id' => $id]);
+        $common->update('staff', $field=['name'     => $name,
+                                        'password'  => $pass,
+                                        'gender'    => $gender,
+                                        'email'     => $email,
+                                        'phone'     => $phone,
+                                        'photo'     => $image,
+                                        'staff_role_id' => $staff_role], $condition = ['id' => $id]);
         $_SESSION['staff_info'] = '';
         unset($_SESSION['staff_info']);
         //Redirect
@@ -789,7 +795,7 @@ if('staff_info' === $task)
       }
       $smarty_appform->assign('error', $error);
     }
-    $smarty_appform->assign('edit',$common->find('staff', $condition = ['id' => $_GET['id']], $type='one'));
+    $smarty_appform->assign('edit', $common->find('staff', $condition = ['id' => $_GET['id']], $type='one'));
   }//action edit
 
   //action change status

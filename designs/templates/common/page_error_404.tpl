@@ -8,7 +8,7 @@
   <i class="fa fa-info-circle" aria-hidden="true" style="color: red; font-size:40px;"></i>
     <h2>Page Not Found!</h2>
     <p>Sorry! We can't find result.</p>
-    <a href="{if $mode eq 'patient'}{$patient_file}{/if}{if $mode eq 'psychologist'}{$psychologist_file}{/if}" class="btn btn-primary btn-sm">Home <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
+    <a href="{if $mode eq 'index'}{$index_file}{/if}{if $mode eq 'patient'}{$patient_file}{/if}{if $mode eq 'psychologist'}{$psychologist_file}{/if}" class="btn btn-primary btn-sm">Home <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
 </div>
 
 {/block}

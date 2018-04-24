@@ -1,4 +1,5 @@
 <?php
+ini_set('display_errors', 1);
 //start session
 session_start();
 //require configuration file
@@ -29,6 +30,8 @@ $smarty_appform->assign('multiLang', getMultilang($lang));
 
 if('user_register' === $task)
 {
+  if(empty($_POST)) unset($_SESSION['user_register']);
+
   $error = array();
   if($_POST)
   {
@@ -44,7 +47,7 @@ if('user_register' === $task)
     $re_email    = $common->clean_string($_POST['re_email']);
     $job         = $common->clean_string($_POST['job']);
     $address     = $common->clean_string($_POST['address']);
-    $secretkey   = time();
+    $secretkey   = md5(time());
     //add value to session to use in template
     $_SESSION['user_register'] = $_POST;
     //form validation
@@ -63,7 +66,7 @@ if('user_register' === $task)
     if(!empty($password) && !empty($re_password) && $password !== $re_password){
       $error['not_match_password'] = 1;
     }
-    if(!empty($password) && !$common->checkPassword($password)){
+    if(!empty($password) && !$common->checkPasswordWithLen($password, $len = 7)){
       $error['less_password'] = 1;
     }
     if(!empty($email) && !empty($re_email) && $email != $re_email){
@@ -83,7 +86,7 @@ if('user_register' === $task)
 
       $psy_id = $common->save('psychologist', $field = ['first_name'  => $first_name,
                                                         'last_name'   => $last_name,
-                                                        'village_id'  => $village,
+                                                        'village_name'=> $village,
                                                         'password'    => $password,
                                                         'email'   => $email,
                                                         'job'     => $job,
@@ -103,7 +106,7 @@ Password： '.$password.'
 
 To verify your identity, please click the link below for confirm your email:
 
-'.$site_url.$index_file.'?task=user_register&action=verify&secretkey='.$secretkey.'&psy_id='.$psy_id.'
+'.$site_url.$index_file.'?task=user_register&action=verify&secretkey='.$secretkey.'
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -130,13 +133,40 @@ Best Regard,
 
   if('verify' === $action)
   {
-    $psy_id = $common->clean_string($_GET['psy_id']);
+    // $psy_id = $common->clean_string($_GET['psy_id']);
     $secretkey = $common->clean_string($_GET['secretkey']);
 
-    $existSecretkey = checkSecretkeyPsychologist($psy_id, $secretkey);
+    $existSecretkey = checkSecretkeyPsychologist($secretkey);
 
-    if($secretkey && $psy_id && $existSecretkey > 0){
-      $common->update('psychologist', $field = ['secretkey' => NULL, 'status' => 2], $condition = ['id' => $psy_id]);
+    if($secretkey && $existSecretkey['total_count'] > 0){
+      $common->update('psychologist', $field = ['secretkey' => NULL, 'status' => 2], $condition = ['id' => $existSecretkey['id']]);
+
+      $resultPsy = $common->find('psychologist', $condition = ['id' => $existSecretkey['id']], $type='one');
+      //Get staff super admin
+      $resultStaff = $common->find('staff', $condition = ['staff_role_id' => 1], $type='all');
+      if(!empty($resultStaff))
+      {
+        //Send email
+        $body = 'Dear,
+
+Psychologist '.$resultPsy['first_name'].' has been confirmed.
+
+Thanks.
+
+Best Regard,
+        '.$mail_signature;
+
+        foreach ($resultStaff as $key => $value)
+        {
+          $message = Swift_Message::newInstance()
+                  ->setSubject('Psychologist comfirm Psychology Management System (PMS)')
+                  ->setFrom(array('noreply@e-khmer.com' => 'Psychology Management System (PMS)'))
+                  ->setTo(array($value['email'] => $value['name']))
+                  ->setBody($body);
+
+        $result 	= $mailer->send($message);
+        }
+      }
       header('location: '.$index_file);
       exit;
     }else {
@@ -154,13 +184,15 @@ Best Regard,
 //Task: froget
 if('forget' === $task)
 {
+  if(empty($_POST)) unset($_SESSION['forget']);
+
   $error = array();
   if($_POST)
   {
     //get value from form
     $email     = $common->clean_string($_POST['email']);
     $user_role = $common->clean_string($_POST['user_role']);
-    $secretkey = time();
+    $secretkey = md5(time());
     //add value to session to use in template
     $_SESSION['forget'] = $_POST;
     //form validation
@@ -193,7 +225,7 @@ Welcome to Psychology Management System (PMS).
 
 You recently requested to reset your PMS password. Please click on the link below:
 
-'.$site_url.$index_file.'?task=new_password&secretkey='.$secretkey.'&user_role='.$user_role.'&id='.$result['id'].'
+'.$site_url.$index_file.'?task=new_password&secretkey='.$secretkey.'&user_role='.$user_role.'
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -228,15 +260,13 @@ if('new_password' === $task)
   if($_POST)
   {
     //get value from form
-    $id        = $common->clean_string($_POST['id']);
     $user_role = $common->clean_string($_POST['user_role']);
-    $secretkey = $common->clean_string($_POST['user_role']);
+    $secretkey = $common->clean_string($_POST['secretkey']);
     $password    = $common->clean_string($_POST['password']);
     $re_password = $common->clean_string($_POST['re_password']);
     //add value to session to use in template
     $_SESSION['new_password'] = $_POST;
     //form validation
-    if(empty($id))       $error['id']  = 1;
     if(empty($user_role))   $error['user_role'] = 1;
     if(empty($password))    $error['password']  = 1;
     if(empty($re_password)) $error['re_password']  = 1;
@@ -244,18 +274,26 @@ if('new_password' === $task)
     {
       $error['not_match_password'] = 1;
     }
-    if(!empty($password) && !$common->checkPassword($password))
+    if(!empty($password) && !$common->checkPasswordWithLen($password, $len = 7))
     {
       $error['less_password_not_letter'] = 1;
     }
-
     if(COUNT($error) == 0)
     {
       if($user_role == 1)
       {
-        $common->update('patient', $field = ['password' => $password, 'secretkey' => NULL], $condition = ['id' => $id]);
+        $existSecretkey = checkSecretkeyPatient($secretkey);
+        if(!empty($secretkey) && $existSecretkey['total_count'] > 0)
+        {
+          $common->update('patient', $field = ['password' => $password, 'secretkey' => NULL], $condition = ['id' => $existSecretkey['id']]);
+        }
       } else {
-        $common->update('psychologist', $field = ['password' => $password, 'secretkey' => NULL], $condition = ['id' => $id]);
+        $existSecretkey = checkSecretkeyPsychologist($secretkey);
+        if(!empty($secretkey) && $existSecretkey['total_count'] > 0)
+        {
+          $common->update('psychologist', $field = ['password' => $password, 'secretkey' => NULL], $condition = ['id' => $existSecretkey['id']]);
+
+        }
       }
 
       setcookie('completed', 'new_password', time() + 50);
@@ -269,19 +307,16 @@ if('new_password' === $task)
   }
 
   $secretkey = $common->clean_string($_GET['secretkey']);
+  $user_role = $common->clean_string($_GET['user_role']);
 
-  if($_GET['user_role'] == 1)
+  if($user_role == 1)
   {
-    $pat_id = $common->clean_string($_GET['id']);
-
-    $existSecretkey = checkSecretkeyPatient($pat_id, $secretkey);
+    $existSecretkey = checkSecretkeyPatient($secretkey);
   } else {
-    $psy_id = $common->clean_string($_GET['id']);
-
-    $existSecretkey = checkSecretkeyPsychologist($psy_id, $secretkey);
+    $existSecretkey = checkSecretkeyPsychologist($secretkey);
   }
 
-  if($secretkey && $_GET['id'] && $existSecretkey == 0)
+  if($secretkey && $existSecretkey['total_count'] == 0)
   {
     setcookie('page_error', 'new_password', time() + 50);
     header('location: '.$index_file.'?task=page_not_found');
@@ -301,7 +336,7 @@ if('completed' === $task)
 //Task: page not found
 if('page_not_found' === $task)
 {
-  $smarty_appform->display('index/page_error_404.tpl');
+  $smarty_appform->display('common/page_error_404.tpl');
   exit;
 }
 //task: login

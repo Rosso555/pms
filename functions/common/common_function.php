@@ -598,19 +598,18 @@ function getDataByUserRole($user_role, $email)
  * @param  string $secretkey
  * @return array or boolean
  */
-function checkSecretkeyPsychologist($psy_id, $secretkey)
+function checkSecretkeyPsychologist($secretkey)
 {
   global $debug, $connected, $total_data;
   $result = true;
   try{
-    $sql = ' SELECT COUNT(*) AS total_count FROM `psychologist` WHERE id = :psy_id AND secretkey = :secretkey ';
+    $sql = ' SELECT *, COUNT(*) AS total_count FROM `psychologist` WHERE secretkey = :secretkey ';
     $query = $connected->prepare($sql);
     $query->bindValue(':secretkey', (string)$secretkey, PDO::PARAM_STR);
-    $query->bindValue(':psy_id', $psy_id, PDO::PARAM_INT);
     $query->execute();
     $rows = $query->fetch();
-    return $rows['total_count'];
 
+    return $rows;
   }catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: checkSecretkeyPsychologist'.$e->getMessage();
@@ -624,19 +623,18 @@ function checkSecretkeyPsychologist($psy_id, $secretkey)
  * @param  string $secretkey
  * @return array or boolean
  */
-function checkSecretkeyPatient($p_id, $secretkey)
+function checkSecretkeyPatient($secretkey)
 {
   global $debug, $connected, $total_data;
   $result = true;
   try{
-    $sql = ' SELECT COUNT(*) AS total_count FROM `patient` WHERE id = :p_id AND secretkey = :secretkey ';
+    $sql = ' SELECT *, COUNT(*) AS total_count FROM `patient` WHERE secretkey = :secretkey ';
     $query = $connected->prepare($sql);
     $query->bindValue(':secretkey', (string)$secretkey, PDO::PARAM_STR);
-    $query->bindValue(':p_id', $p_id, PDO::PARAM_INT);
     $query->execute();
     $rows = $query->fetch();
-    return $rows['total_count'];
 
+    return $rows;
   }catch (Exception $e) {
     $result = false;
     if($debug)  echo 'Errors: checkSecretkeyPatient'.$e->getMessage();
