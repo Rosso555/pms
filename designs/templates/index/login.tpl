@@ -41,10 +41,10 @@
               <label class="radio-inline"><input type="radio" name="user_role" value="1" {if $smarty.session.user_login.user_role eq 1}checked{/if}>Patient</label>
               <label class="radio-inline"><input type="radio" name="user_role" value="2" {if $smarty.session.user_login.user_role eq 2}checked{/if}>Psychologist</label>
             </p>
-            <div class="form-group {if $error.email eq 1}has-error{/if}">
+            <div class="form-group {if $error.code_email eq 1}has-error{/if}">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-user" aria-hidden="true"></i></span>
-                <input type="text" class="form-control" name="email" placeholder="example@domain.com" value="{$smarty.session.user_login.email}" autofocus>
+                <input type="text" class="form-control" name="code_email" placeholder="code or example@domain.com" value="{$smarty.session.user_login.code_email}" autofocus>
               </div>
             </div>
             <div class="form-group {if $error.password eq 1}has-error{/if}">

@@ -311,13 +311,13 @@ if('login' === $task)
   if($_POST)
   {
     //get value from form
-    $email      = $common->clean_string($_POST['email']);
+    $code_email = $common->clean_string($_POST['code_email']);
     $password   = $common->clean_string($_POST['password']);
     $user_role  = $common->clean_string($_POST['user_role']);
     //add value to session to use in template
     $_SESSION['user_login'] = $_POST;
     //form validation
-    if(empty($email))     $error['email']  = 1;
+    if(empty($code_email))$error['code_email']  = 1;
     if(empty($password))  $error['password']  = 1;
     if(empty($user_role)) $error['user_role']  = 1;
 
@@ -327,7 +327,7 @@ if('login' === $task)
       //$user_role eqaul 1 patient
       if($user_role == 1)
       {
-        $patient_login = patient_login($email, $password);
+        $patient_login = patient_login($code_email, $password);
 
         if(!empty($patient_login))
         {
@@ -335,6 +335,7 @@ if('login' === $task)
           $_SESSION['is_patient_login_id'] = $patient_login['id'];
           $_SESSION['is_patient_username'] = $patient_login['username'];
           $_SESSION['is_patient_email']    = $patient_login['email'];
+          $_SESSION['is_patient_code']    = $patient_login['code'];
           //remove session to clear data
           unset($_SESSION['user_login']);
           //redirect to admin.php
@@ -346,7 +347,7 @@ if('login' === $task)
         }
 
       }else {
-        $psy_login = psychologist_login($email, $password);
+        $psy_login = psychologist_login($code_email, $password);
 
         if(!empty($psy_login)){
           //Record Activity

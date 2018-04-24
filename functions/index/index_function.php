@@ -33,16 +33,16 @@ function psychologist_login($email, $password)
  * @param  string $password
  * @return array or boolean
  */
-function patient_login($email, $password)
+function patient_login($code_email, $password)
 {
   global $debug, $connected, $total_data;
   $result = true;
 
   try{
 
-    $sql = ' SELECT * FROM `patient` WHERE email = :email AND password = :password AND status = 1 AND deleted_at IS NULL ';
+    $sql = ' SELECT * FROM `patient` WHERE (email = :code_email OR code = :code_email) AND password = :password AND status = 1 AND deleted_at IS NULL ';
     $query = $connected->prepare($sql);
-    $query->bindValue(':email', (string)$email, PDO::PARAM_STR);
+    $query->bindValue(':code_email', (string)$code_email, PDO::PARAM_STR);
     $query->bindValue(':password', (string)$password, PDO::PARAM_STR);
     $query->execute();
 

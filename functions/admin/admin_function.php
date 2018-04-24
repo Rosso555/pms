@@ -389,7 +389,7 @@ function listPatientAdmin($kwd, $psychologist_id, $gender, $status){
     $condition = $where = '';
     if(!empty($kwd)) {
       if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' p.username LIKE :kwd ';
+      $condition .= ' p.code LIKE :kwd ';
     }
     if(!empty($psychologist_id)) {
       if(!empty($condition)) $condition .= ' AND ';

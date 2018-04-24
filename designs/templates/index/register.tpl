@@ -46,13 +46,16 @@
             </div>
             <div class="form-group" id="error_village">
               <label for="village"><span style="color:red;">*</span> Town/Village:</label>
-              <span style="color:red" id="txt_error_village">{if $error.village}Please select town/village !{/if}</span>
-              <select class="form-control" name="village" id="village">
-                <option value="">---Select---</option>
+              <span style="color:red" id="txt_error_village">{if $error.village}Please enter town/village !{/if}</span>
+              <input type="text" class="form-control" id="village" name="village" value="{$smarty.session.user_register.village}">
+
+              <!-- <select class="form-control" name="village" id="village">
+                <option value="">-Select-</option>
                 {foreach from=$village item=v}
                 <option value="{$v.id}" {if $smarty.session.user_register.village eq $v.id}selected{/if}>{$v.name}</option>
                 {/foreach}
-              </select>
+              </select> -->
+
             </div>
             <div class="row">
               <div class="col-md-6">
@@ -70,7 +73,7 @@
                 <div class="form-group" id="error_age">
                   <label for="gender"><span style="color:red;">*</span> Age:</label>
                   <span style="color:red" id="txt_error_age">{if $error.empty_age}Please enter age !{elseif $error.is_string_age}Please enter number !{/if}</span>
-                  <input type="text" name="age" class="form-control" value="{$smarty.session.user_register.age}" id="age">
+                  <input type="text" name="age" class="form-control" value="{$smarty.session.user_register.age}" id="age" onkeyup="NumAndTwoDecimals(event , this);">
                 </div>
               </div>
             </div>

@@ -1,4 +1,6 @@
 <?php
+//for show message error
+ini_set('display_errors', 1);
 //start session
 session_start();
 
@@ -944,11 +946,12 @@ if('patient' === $task)
       //add value to session to use in template
       $_SESSION['patient'] = $_POST;
       //form validation
-      if(empty($username))  $error['username']  = 1;
-      if(empty($email))   $error['email']   = 1;
-      if(empty($phone))   $error['phone']   = 1;
-      if(empty($gender))  $error['gender']  = 1;
-      if(empty($age))     $error['age']     = 1;
+      if(empty($psy_id))  $error['psy_id']  = 1;
+      // if(empty($username))$error['username']  = 1;
+      // if(empty($email))   $error['email']   = 1;
+      // if(empty($phone))   $error['phone']   = 1;
+      // if(empty($gender))  $error['gender']  = 1;
+      // if(empty($age))     $error['age']     = 1;
       if(empty($code))    $error['code']  = 1;
       if(empty($password))$error['password']  = 1;
       if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
