@@ -2809,8 +2809,8 @@ function getPsychologistByIdCodePat($psy_id)
   global $debug, $connected, $limit, $offset, $total_data;
   $result = true;
   try{
-    $sql =' SELECT psy.*, CONCAT(SUBSTRING(psy.last_name, 1, 4),"",SUBSTRING(v.name, 1, 3)) as code_pat FROM `psychologist` psy
-              INNER JOIN village v ON v.id = psy.village_id
+    $sql =' SELECT psy.*, CONCAT(SUBSTRING(psy.last_name, 1, 4),"",SUBSTRING(psy.village_name, 1, 3)) as code_pat FROM `psychologist` psy
+              -- INNER JOIN village v ON v.id = psy.village_id
             WHERE psy.id = :psy_id ';
     $stmt = $connected->prepare($sql);
     $stmt->bindValue(':psy_id', (int)$psy_id, PDO::PARAM_INT);

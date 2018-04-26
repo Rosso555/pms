@@ -75,11 +75,11 @@ if('patient' === $task)
       //add value to session to use in template
       $_SESSION['patient'] = $_POST;
       //form validation
-      if(empty($username))$error['username']  = 1;
-      if(empty($email))   $error['email'] = 1;
-      if(empty($phone))   $error['phone'] = 1;
-      if(empty($gender))  $error['gender']  = 1;
-      if(empty($age))     $error['age'] = 1;
+      // if(empty($username))$error['username']  = 1;
+      // if(empty($email))   $error['email'] = 1;
+      // if(empty($phone))   $error['phone'] = 1;
+      // if(empty($gender))  $error['gender']  = 1;
+      // if(empty($age))     $error['age'] = 1;
       if(empty($code))    $error['code']  = 1;
       if(empty($password))$error['password']  = 1;
       if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
@@ -91,8 +91,12 @@ if('patient' === $task)
           $error['exist_email'] = 1;
         }
       }
-      if(check_code_pat($r_code) > 0) $error['code_existed']  = 1;
-
+      if(check_code_pat($r_code) > 0)
+      {
+        $reDuplication = $common->find('patient', $condition = ['code' => $r_code], $type = 'all');
+        $error['code_existed']  = 1;
+        $error['code_existed_data']  = $reDuplication;
+      }
       //Save
       if(empty($id) && COUNT($error) === 0)
       {
@@ -180,11 +184,11 @@ if('patient' === $task)
       //add value to session to use in template
       $_SESSION['patient'] = $_POST;
       //form validation
-      if(empty($username))$error['username']  = 1;
-      if(empty($email))   $error['email']   = 1;
-      if(empty($phone))   $error['phone']   = 1;
-      if(empty($gender))  $error['gender']  = 1;
-      if(empty($age))     $error['age']     = 1;
+      // if(empty($username))$error['username']  = 1;
+      // if(empty($email))   $error['email']   = 1;
+      // if(empty($phone))   $error['phone']   = 1;
+      // if(empty($gender))  $error['gender']  = 1;
+      // if(empty($age))     $error['age']     = 1;
       if(empty($code))    $error['code']  = 1;
       if(empty($password))$error['password']  = 1;
       if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
@@ -197,7 +201,12 @@ if('patient' === $task)
         }
       }
       $resultPat = $common->find('patient', $condition = ['id' => $id], $type = 'one');
-      if($resultPat['code'] !== $r_code && check_code_pat($r_code) > 0) $error['code_existed']  = 1;
+      if($resultPat['code'] !== $r_code && check_code_pat($r_code) > 0)
+      {
+        $reDuplication = $common->find('patient', $condition = ['code' => $r_code], $type = 'all');
+        $error['code_existed']  = 1;
+        $error['code_existed_data']  = $reDuplication;
+      }
 
       //Update
       if(!empty($id) && COUNT($error) === 0)

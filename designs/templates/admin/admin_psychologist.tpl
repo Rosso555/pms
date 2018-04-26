@@ -26,7 +26,7 @@
                 <select class="form-control select2_search" name="psy_id" style="width:100%;">
                   <option value="">---Select Psychologist---</option>
                   {foreach from=$listPsychologist item=v}
-                  <option value="{$v.id}" {if $smarty.get.psy_id eq $v.id}selected{/if}>{$v.username}</option>
+                  <option value="{$v.id}" {if $smarty.get.psy_id eq $v.id}selected{/if}>{$v.first_name} {$v.last_name}</option>
                   {/foreach}
                 </select>
               </div>

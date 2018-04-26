@@ -25,12 +25,6 @@
 			</ul>
 
       <ul class="nav navbar-nav navbar-right">
-        <li class="dropdown" id="animated">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-cog" aria-hidden="true"></i> {if $multiLang.menu_setting}{$multiLang.menu_setting}{else}No Translate (Key Lang:menu_setting){/if} <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="{$psychologist_file}?task=town_village"><i class="fa fa-bars" aria-hidden="true"></i>&nbsp;{if $multiLang.menu_town_village}{$multiLang.menu_town_village}{else}No Translate (Key Lang: menu_town_village){/if}</a></li>
-          </ul>
-        </li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-language" aria-hidden="true"></i> {if $multiLang.menu_language}{$multiLang.menu_language}{else}No Translate (Key Lang: menu_language){/if} <span class="caret"></span></a>
           <ul class="dropdown-menu">

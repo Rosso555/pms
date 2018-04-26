@@ -44,22 +44,22 @@
           {else}
           <form action="{$psychologist_file}?task=patient&amp;action=add" method="post">
           {/if}
+            {if $error.code_existed}
+            <br>
             <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="username"><span style="color:red">*</span> Name:</label>
-                  {if $error.username}<span style="color:red">Please enter username!</span>{/if}
-                  <input type="text" class="form-control" id="username" placeholder="Enter name" name="username" value="{if $editPatient.username}{$editPatient.username}{else}{$smarty.session.patient.username}{/if}">
+              <div class="col-md-12">
+                <div class="alert alert-danger alert-dismissible">
+                  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                  * Code is existed, such as:<br>
+                  {foreach from=$error.code_existed_data item=v}
+                    &nbsp;&nbsp;- {$v.code}<br>
+                  {/foreach}
                 </div>
               </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="pwd"><span style="color:red">*</span> Password:</label>
-                  {if $error.password}<span style="color:red">Please enter password!</span>{/if}
-                  <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
-                </div>
-              </div>
-              <div class="col-md-4">
+            </div>
+            {/if}
+            <div class="row">
+              <div class="col-md-6">
                 <div class="form-group" style="margin-bottom: 0px;">
                   <label for="code"><span style="color:red">*</span> Code:</label>
                   {if $error.code}<span style="color:red">Please enter code!</span>{/if}
@@ -71,12 +71,27 @@
                   <span style="color:red">Please enter code one letter and 6 number.</span>
                 </div>
               </div>
+              <!-- <div class="col-md-4">
+                <div class="form-group">
+                  <label for="username"><span style="color:red">*</span> Name:</label>
+                  {if $error.username}<span style="color:red">Please enter username!</span>{/if}
+                  <input type="text" class="form-control" id="username" placeholder="Enter name" name="username" value="{if $editPatient.username}{$editPatient.username}{else}{$smarty.session.patient.username}{/if}">
+                </div>
+              </div> -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="pwd"><span style="color:red">*</span> Password:</label>
+                  {if $error.password}<span style="color:red">Please enter password!</span>{/if}
+                  <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="password" value="{if $editPatient.password}{$editPatient.password}{else}{$smarty.session.patient.password}{/if}">
+                </div>
+              </div>
+
             </div>
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="email"><span style="color:red">*</span> Email:</label>
-                  {if $error.email}<span style="color:red">Please enter email!</span>{/if}
+                  <label for="email">Email:</label>
+                  <!-- {if $error.email}<span style="color:red">Please enter email!</span>{/if} -->
                   {if $error.invalid_email}<span style="color:red">Your email is not valid!</span>{/if}
                   {if $error.exist_email}<span style="color:red">Your email is existed!</span>{/if}
                   <input type="email" class="form-control" id="email" placeholder="example@domain.com" name="email" value="{if $editPatient.email}{$editPatient.email}{else}{$smarty.session.patient.email}{/if}">
@@ -84,8 +99,8 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="phone"><span style="color:red">*</span> Phone:</label>
-                  {if $error.phone}<span style="color:red">Please enter phone!</span>{/if}
+                  <label for="phone"> Phone:</label>
+                  <!-- {if $error.phone}<span style="color:red">Please enter phone!</span>{/if} -->
                   <input type="text" class="form-control" id="phone" placeholder="Enter phone" name="phone" value="{if $editPatient.phone}{$editPatient.phone}{else}{$smarty.session.patient.phone}{/if}">
                 </div>
               </div>
@@ -93,8 +108,8 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="email"><span style="color:red">*</span> Gender:</label>
-                  {if $error.gender}<span style="color:red">Please choose gender!</span>{/if}
+                  <label for="email"> Gender:</label>
+                  <!-- {if $error.gender}<span style="color:red">Please choose gender!</span>{/if} -->
                   <div class="box">
                     <label class="radio-inline"><input type="radio" name="gender" value="1" {if $editPatient.gender}{if $editPatient.gender eq 1}checked{/if}{else}{if $smarty.session.patient.gender eq 1}checked{/if}{/if}> Male</label>
                     <label class="radio-inline"><input type="radio" name="gender" value="2" {if $editPatient.gender}{if $editPatient.gender eq 2}checked{/if}{else}{if $smarty.session.patient.gender eq 2}checked{/if}{/if}> Female</label>
@@ -103,8 +118,8 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="age"><span style="color:red">*</span> Age:</label>
-                  {if $error.age}<span style="color:red">Please enter age!</span>{/if}
+                  <label for="age"> Age:</label>
+                  <!-- {if $error.age}<span style="color:red">Please enter age!</span>{/if} -->
                   <input type="text" class="form-control" id="age" placeholder="Example: 123..." name="age" value="{if $editPatient.age}{$editPatient.age}{else}{$smarty.session.patient.age}{/if}" onkeyup="NumAndTwoDecimals(event , this);">
                 </div>
               </div>
@@ -131,11 +146,9 @@
       <table class="table table-striped">
         <thead>
           <tr bgcolor="#eeeeee">
-            <th>Name</th>
-            <th>Email</th>
-            <th>Password</th>
             <th>Code</th>
-            <th>Phone</th>
+            <th>Password</th>
+            <th>Email</th>
             <th>Gender</th>
             <th>Age</th>
             <th>Status</th>
@@ -146,12 +159,10 @@
         {if $listPatient|@count gt 0}
           {foreach from=$listPatient item=v}
           <tr>
-            <td>{$v.username}</td>
-            <td>{$v.email}</td>
-            <td>{$v.password}</td>
             <td>{$v.code}</td>
-            <td>{$v.phone}</td>
-            <td>{if $v.gender eq 1}Male{else}Female{/if}</td>
+            <td>{$v.password}</td>
+            <td>{$v.email}</td>
+            <td>{if $v.gender eq 1}Male{elseif $v.gender eq 2}Female{else}~{/if}</td>
             <td>{$v.age}</td>
             <td>
               {if $v.status eq 1}
