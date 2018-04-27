@@ -655,7 +655,7 @@ function listPatient($kwd, $psychologist_id, $gender, $status)
     $condition = $where = '';
     if(!empty($kwd)) {
       if(!empty($condition)) $condition .= ' AND ';
-      $condition .= ' username LIKE :kwd ';
+      $condition .= ' (code LIKE :kwd OR email LIKE :kwd OR age LIKE :kwd) ';
     }
     if(!empty($psychologist_id)) {
       if(!empty($condition)) $condition .= ' AND ';
@@ -3450,6 +3450,24 @@ function getSectionTestQueMainSub($sid)
   catch (Exception $e)
   {
     if($debug) echo 'Error: getSectionTestQueMainSub'. $e->getMessage();
+  }
+  return $result;
+}
+
+function resetAutoIncrement($table, $value)
+{
+  global $debug, $connected;
+  $result = true;
+  try
+  {
+    $sql =' ALTER TABLE '.$table.' AUTO_INCREMENT = :value ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':value', $value, PDO::PARAM_INT);
+    return $query->execute();
+  }
+  catch (Exception $e)
+  {
+    if($debug) echo 'Error: resetAutoIncrement'. $e->getMessage();
   }
   return $result;
 }

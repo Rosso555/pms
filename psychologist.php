@@ -651,7 +651,7 @@ if('test_question_psychologist' === $task)
   $smarty_appform->assign('resultTestGroupTmpQue', COUNT(getListTestGroupByTmpQuestionPsy($tid, $tpsy_id, $status = 2, $fetch_type = 'all', $slimit = ''))); //For Check Show Button Next Or Finish
   $smarty_appform->assign('testQueGroup', COUNT($resultTestGroup));
   $smarty_appform->assign('resultStep', $sumStep);
-  $smarty_appform->display('common/test_question_responsive_testing.tpl');
+  $smarty_appform->display('common/test_question_responsive.tpl');
   exit;
 }
 //Task: test save draft
@@ -678,7 +678,10 @@ if('test_save_draft' === $task)
           foreach ($resultTestTmpQue as $k => $va) {
             //Delete: test_tmp_question
             $common->delete('test_tmp_question', $field = ['id' => $va['id']]);
+            $value = $va['id'];
           }
+          echo "string=".$value;
+          // resetAutoIncrement($table = 'test_tmp_question', $value = 60);
         }
         $test_tmp_id = $resultTestTmp['id'];
       } else {
@@ -713,6 +716,7 @@ if('test_save_draft' === $task)
       //Delete: test_tmp & test_tmp_question
       $common->delete('test_tmp', $field = ['id' => $resultTestTmp['id']]);
       $common->delete('test_tmp_question', $field = ['test_tmp_id' => $resultTestTmp['id']]);
+
       $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $test_id, 'test_psychologist_id' => $test_psy_id]);
 
       if(!empty($test_que_data))
@@ -1322,6 +1326,15 @@ if('response_answer' === $task)
   $smarty_appform->display('psychologist/response_answer.tpl');
   exit;
 }
+//Task: Ajax
+if('ajax' === $task)
+{
+
+  header('Content-type: application/json');
+  echo json_encode(array('status' => $resultValue));
+  exit;
+}
+
 $tid    = !empty($_GET['tid']) ? $_GET['tid'] : '';
 $pat_id = !empty($_GET['pat_id']) ? $_GET['pat_id'] : '';
 

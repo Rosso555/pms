@@ -31,12 +31,159 @@
   {/if}
     <input type="hidden" id="test_group_id" name="test_group_id" value="{$test_group_id|escape}">
   {if $result|@COUNT gt 0}
-    {foreach item = v from=$result key=id name=first_foo}
-
+    <!-- list question section -->
+    {foreach item = sec from=$result.section key=id name=first_foo}
       <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12"><p style="margin-top: 20px; margin-bottom: -5px; color: #278ed2;"><b> {$v.section_name}</b></p></div>
+        <div class="col-md-12 col-sm-12 col-xs-12"><p style="margin-top: 20px; margin-bottom: -5px; color: #278ed2;"><b> {$sec.section_name}</b></p></div>
       </div>
+      {foreach from=$sec.test_que item=v key=id name=first_foo}
+        {if $v.flag eq 1}
+        {$totalC = 100 / $v.answer|@count}
+        <div class="row">
+          <div class="col-md-12 col-sm-12 col-xs-12"><p style="margin-top: 20px; margin-bottom: -10px;"><b> {$v.g_answer_title}</b></p></div>
+        </div>
+        <div class="row">
+          <div class="col-md-5 col-sm-12 col-xs-12">&nbsp;</div>
+          <div class="col-md-7 col-sm-12 col-xs-12">
+            {foreach item=value from=$v.answer name=foo}
+              <div style="width:{$totalC}%; float: left; padding-left: 7px; margin-top: 10px;"><p>{$value.title}</p></div>
+            {/foreach}
+          </div>
+        </div>
+        {if $v.group_answer}
+          {foreach item=va from=$v.group_answer name=foo}
+          <div class="row" {if $va.t_que_hide_id}style="display: none;"{/if} id="row_tque{$va.id}">
+            <div class="col-md-5 col-sm-12 col-xs-12">
+              <p style="margin-left: 10px; margin-top: 5px;" class="answer_responsive">
+                {if $va.is_required eq 1}<span style="color:red;" id="required_{$va.id}">*</span>{/if}
+                {if $va.hide_title eq 0}{$va.que_title}{else}{$va.description}{/if}
+              </p>
+            </div>
+            <div class="col-md-7 col-sm-12 col-xs-12">
+              <table class="table tbl_ans_color" style="border-radius: 5px;">
+                <tr>
+                <!-- check $va.answer -->
+                {if $va.answer}
+                {foreach item=ans from=$va.answer name=foo}
+                  <td>
+                  {if $va.type eq 3}
+                    <label for="radio{$ans.id}_{$va.id}" class="radio-inline" style="margin-bottom: 10px;">
+                      {if $smarty.foreach.foo.first}
+                      {if $va.is_required eq 1}<input type="hidden" name="is_required[]" id="is_required{$va.id}" value="{$va.is_required|escape}"/>{/if}
+                      <!-- hidden test_question_id -->
+                      <input type="hidden" id="tq_id{$va.id}" name="tq_id[]" value="{$va.test_question_id|escape}" disabled>
+                      <input type="hidden" id="rais_email{$va.id}" name="is_email[]" value="{if $va.is_email eq 1}1{else}0{/if}" disabled>
+                      <input type="hidden" id="raanswer_id{$va.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
+                      <input type="hidden" id="racontent{$va.id}" name="content[]" value="NULL" disabled>
+                      <input type="hidden" id="jumping_to{$v.id}" name="jump_to[]" value="0">
+                      {/if}
+                      <input type="hidden" id="answer_value{$va.id}_{$ans.id}" name="answer_value[]" value="{$ans.view_order}">
+                      <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$va.id}" name="answer[{$va.id}]" class="check_value{$va.id}" value="{$ans.id|escape}" onclick="removeRequired({$va.id}, {$ans.id}, {$va.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$va.is_required|escape})" {if $va.is_required eq 1}required{/if}>
+                    </label>
 
+                  {elseif $va.type eq 4}
+                    <label for="checkbox{$ans.id}_{$va.id}" class="checkbox-inline" style="margin-bottom: 10px;">
+                      {if $va.is_required eq 1}<input type="hidden" name="is_required[]" class="chk_box_is_required{$va.id}" id="is_required{$va.id}" value="{$va.is_required|escape}"/>{/if}
+                      <!-- hidden test_question_id -->
+                      <input type="hidden" id="chk_tqid{$va.id}{$ans.id}" name="tq_id[]" value="{$va.test_question_id|escape}" disabled>
+                      <input type="hidden" id="is_email{$va.id}{$ans.id}" name="is_email[]" value="{if $va.is_email eq 1}1{else}0{/if}" disabled>
+                      <input type="hidden" id="answer_id{$va.id}{$ans.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
+                      <input type="hidden" id="content{$va.id}{$ans.id}" name="content[]" value="NULL" disabled>
+
+                      <input style="margin-top: -4px;" type="checkbox" id="checkbox{$ans.id}_{$va.id}" name="answer[]" class="check_box_value{$va.id}" value="{$ans.id|escape}" onclick="removeRequired({$va.id}, {$ans.id}, {$va.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$va.is_required|escape})" {if $va.is_required eq 1}required{/if}>
+                    </label>
+                  {/if}
+                  </td>
+                {/foreach}
+                {/if}
+                <!--end check $va.answer -->
+                </tr>
+              </table>
+            </div>
+          </div>
+          {/foreach}
+        {/if}
+
+        {else}
+        <div class="row" {if $v.t_que_hide_id}style="display: none;"{/if} id="row_tque{$v.id}">
+          <div class="col-md-12 col-sm-12 col-xs-12">
+            <p style="margin-top: 20px; {if $v.hide_title eq 1}margin-bottom: 0px;{/if}">{if $v.is_required eq 1}<span style="color:red;" id="required_{$v.id}">*</span>{/if}<b> {if $v.hide_title eq 0}{$v.que_title}{else}{$v.description}{/if}</b></p>
+            {if $v.hide_title eq 0}<p style="margin-left: 16px;">{$v.description}</p>{/if}
+            <!-- check answer -->
+            {if $v.answer}
+            <div style="margin-left: 5px;">
+              <!-- fetch answer -->
+              {foreach item=ans from=$v.answer name=foo}
+                {if $v.type eq 3}
+                <div class="radio" >
+                  <label for="radio{$ans.id}_{$v.id}" class="radio-inline" style="margin-bottom: 10px;">
+                    {if $smarty.foreach.foo.first}
+                    {if $v.is_required eq 1}<input type="hidden" name="is_required[]" id="is_required{$v.id}" value="{$v.is_required|escape}"/>{/if}
+                    <!-- hidden test_question_id -->
+                    <input type="hidden" id="tq_id{$v.id}" name="tq_id[]" value="{$v.test_question_id|escape}" disabled>
+                    <input type="hidden" id="rais_email{$v.id}" name="is_email[]" value="{if $v.is_email eq 1}1{else}0{/if}" disabled>
+                    <input type="hidden" id="raanswer_id{$v.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
+                    <input type="hidden" id="racontent{$v.id}" name="content[]" value="NULL" disabled>
+                    <input type="hidden" id="jumping_to{$v.id}" name="jump_to[]" value="0">
+                    {/if}
+                    <input type="hidden" id="answer_value{$v.id}_{$ans.id}" name="answer_value[]" value="{$ans.view_order}">
+                    <input style="margin-top: -4px;" type="radio" id="radio{$ans.id}_{$v.id}" name="answer[{$v.id}]" class="check_value{$v.id}" value="{$ans.id|escape}" onclick="removeRequired({$v.id}, {$ans.id}, {$v.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$v.is_required|escape})" {if $v.is_required eq 1}required{/if}>
+                    <span style="line-height: 1.2;">{$ans.title}</span>
+                  </label>
+                </div>
+                {elseif $v.type eq 4}
+                <div class="checkbox">
+                  <label for="checkbox{$ans.id}_{$v.id}" class="checkbox-inline" style="margin-bottom: 10px;">
+                    {if $v.is_required eq 1}<input type="hidden" name="is_required[]" class="chk_box_is_required{$v.id}" id="is_required{$v.id}" value="{$v.is_required|escape}"/>{/if}
+                    <!-- hidden test_question_id -->
+                    <input type="hidden" id="chk_tqid{$v.id}{$ans.id}" name="tq_id[]" value="{$v.test_question_id|escape}" disabled>
+                    <input type="hidden" id="is_email{$v.id}{$ans.id}" name="is_email[]" value="{if $v.is_email eq 1}1{else}0{/if}" disabled>
+                    <input type="hidden" id="answer_id{$v.id}{$ans.id}" name="answer_id[]" value="{$ans.id|escape}" disabled>
+                    <input type="hidden" id="content{$v.id}{$ans.id}" name="content[]" value="NULL" disabled>
+
+                    <input style="margin-top: -4px;" type="checkbox" id="checkbox{$ans.id}_{$v.id}" name="answer[]" class="check_box_value{$v.id}" value="{$ans.id|escape}" onclick="removeRequired({$v.id},{$ans.id}, {$v.type}, {if $ans.jump_to}{$ans.jump_to}{else}0{/if}, {$v.is_required|escape})" {if $v.is_required eq 1}required{/if}>
+                    <span style="line-height: 1.2;">{$ans.title}</span>
+                  </label>
+                </div>
+                {/if}
+
+              {/foreach}
+            </div>
+            {/if}
+            <!-- end check answer -->
+            <!-- text free input -->
+            {if $v.type eq 1}
+            <p style="margin-left: 16px; margin-top: 15px;">
+              {if $v.is_required eq 1}<input type="hidden" name="is_required[]" id="text_is_required_{$v.id}" value="{$v.is_required|escape}"/>{/if}
+              <!-- hidden test_question_id -->
+              <input type="hidden" id="tq_id_{$v.id}" name="tq_id[]" value="{$v.test_question_id|escape}" disabled>
+              <input type="hidden" id="is_email_{$v.id}" name="is_email[]" value="{if $v.is_email eq 1}1{else}0{/if}" disabled>
+              <input type="hidden" id="answer_id_{$v.id}" name="answer_id[]" value="NULL" disabled>
+              <input type="hidden" id="content_{$v.id}" name="content[]" value="{foreach from=$sessionContent item=va}{if $va.id eq $ans.id}{$va.content}{/if}{/foreach}" disabled>
+
+              <input {if $v.is_email eq 1}type="email"{else}type="text"{/if} class="form-control check_value{$v.id}" onchange="checkvalue_text(event, this, {$v.id}, {$v.is_required});" id="test{$v.id}" {if $v.is_required eq 1}required{/if} value="">
+            </p>
+            {elseif $v.type eq 2}
+            <p style="margin-left: 16px; margin-top: 15px;">
+              {if $v.is_required eq 1}<input type="hidden" name="is_required[]" id="text_is_required_{$v.id}" value="{$v.is_required|escape}"/>{/if}
+              <!-- hidden test_question_id -->
+              <input type="hidden" id="tq_id_{$v.id}" name="tq_id[]" value="{$v.test_question_id|escape}" disabled>
+              <input type="hidden" id="is_email_{$v.id}" name="is_email[]" value="{if $v.is_email eq 1}1{else}0{/if}" disabled>
+              <input type="hidden" id="answer_id_{$v.id}" name="answer_id[]" value="NULL" disabled>
+              <input type="hidden" id="content_{$v.id}" name="content[]" value="{foreach from=$sessionContent item=va}{if $va.id eq $ans.id}{$va.content}{/if}{/foreach}" disabled>
+
+              <textarea class="form-control check_value{$v.id}" onkeyup="checkvalue_text(event, this, {$v.id}, {$v.is_required});" id="test{$v.id}" {if $v.is_required eq 1}required{/if} rows="3"></textarea>
+            </p><!-- end text free input -->
+            {/if}
+          </div>
+
+        </div>
+        {/if}
+      {/foreach}
+
+    {/foreach}
+
+    {foreach item = v from=$result key=id name=first_foo}
       {if $v.flag eq 1}
       {$totalC = 100 / $v.answer|@count}
       <div class="row">
@@ -513,6 +660,7 @@ function removeRequired(id, ansid, type, jump_to, is_required)
   //End: Block jump to test_question
 
   testQuestionHideShow();
+  save_draft();
 }
 
 //Event: check jumping to
