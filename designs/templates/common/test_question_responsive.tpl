@@ -517,7 +517,7 @@ function save_draft()
       error: function(){
         //Show error here
         alert("Cannot save data. Please try again later.");
-        location.reload();
+        // location.reload();
       }
     });//End Ajax
   } else {

@@ -1,4 +1,6 @@
 <?php
+//for show message error
+ini_set('display_errors', 1);
 //start session
 session_start();
 //require configuration file
@@ -680,8 +682,6 @@ if('test_save_draft' === $task)
             $common->delete('test_tmp_question', $field = ['id' => $va['id']]);
             $value = $va['id'];
           }
-          echo "string=".$value;
-          // resetAutoIncrement($table = 'test_tmp_question', $value = 60);
         }
         $test_tmp_id = $resultTestTmp['id'];
       } else {
@@ -716,6 +716,17 @@ if('test_save_draft' === $task)
       //Delete: test_tmp & test_tmp_question
       $common->delete('test_tmp', $field = ['id' => $resultTestTmp['id']]);
       $common->delete('test_tmp_question', $field = ['test_tmp_id' => $resultTestTmp['id']]);
+
+      $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $test_id, 'test_psychologist_id' => $test_psy_id], $type = 'one');
+
+      $reGetOrderByTMP = getOrderByDESC($table='test_tmp');
+      $reGetOrderByTmpQ = getOrderByDESC($table='test_tmp_question');
+
+      $vaIncrementTMP = $reGetOrderByTMP['id'] + 1;
+      $vaIncrementTmpQ = $reGetOrderByTmpQ['id'] + 1;
+
+      resetAutoIncrement($table = 'test_tmp', $vaIncrementTMP);
+      resetAutoIncrement($table = 'test_tmp_question', $vaIncrementTmpQ);
 
       $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $test_id, 'test_psychologist_id' => $test_psy_id]);
 

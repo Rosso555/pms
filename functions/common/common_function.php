@@ -3472,4 +3472,25 @@ function resetAutoIncrement($table, $value)
   return $result;
 }
 
+function getOrderByDESC($table)
+{
+  global $debug, $connected;
+  $result = true;
+  try
+  {
+    $sql =' SELECT * FROM '.$table.' ORDER BY id DESC LIMIT 0, 1 ';
+    $query = $connected->prepare($sql);
+    $query->execute();
+    $row = $query->fetch();
+
+    return $row;
+  }
+  catch (Exception $e)
+  {
+    if($debug) echo 'Error: getOrderByDESC'. $e->getMessage();
+  }
+  return $result;
+}
+
+
 ?>
