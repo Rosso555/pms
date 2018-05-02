@@ -688,6 +688,10 @@ if('test_save_draft' === $task)
         $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $test_id, 'test_psychologist_id' => $test_psy_id]);
       }
 
+      $reGetOrderByTmpQ = getOrderByDESC($table='test_tmp_question');
+      $vaIncrementTmpQ = $reGetOrderByTmpQ['id'] + 1;
+      resetAutoIncrement($table = 'test_tmp_question', $vaIncrementTmpQ);
+
       if(!empty($test_que_data))
       {
         foreach ($test_que_data as $v)
@@ -716,8 +720,6 @@ if('test_save_draft' === $task)
       //Delete: test_tmp & test_tmp_question
       $common->delete('test_tmp', $field = ['id' => $resultTestTmp['id']]);
       $common->delete('test_tmp_question', $field = ['test_tmp_id' => $resultTestTmp['id']]);
-
-      $resultTestTmp = $common->find('test_tmp', $condition = ['test_id' => $test_id, 'test_psychologist_id' => $test_psy_id], $type = 'one');
 
       $reGetOrderByTMP = getOrderByDESC($table='test_tmp');
       $reGetOrderByTmpQ = getOrderByDESC($table='test_tmp_question');
@@ -1335,14 +1337,6 @@ if('response_answer' === $task)
   $smarty_appform->assign('listResponseAnswer', $result);
   $smarty_appform->assign('reponseById', getReponseById($rid));
   $smarty_appform->display('psychologist/response_answer.tpl');
-  exit;
-}
-//Task: Ajax
-if('ajax' === $task)
-{
-
-  header('Content-type: application/json');
-  echo json_encode(array('status' => $resultValue));
   exit;
 }
 

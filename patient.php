@@ -351,7 +351,7 @@ if('test_question' === $task)
   }
 
   $smarty_appform->assign('testQuestionHideShowCondition', getTestQuestionHideShowCondition($tid, $tpid, ''));
-// var_dump($result);
+
   $smarty_appform->assign('error', $error);
   $smarty_appform->assign('ResultJumpTo', json_encode($newResultJumpTo));
   $smarty_appform->assign('totalAnswer', $total_data);
@@ -465,6 +465,16 @@ if('test_save_draft' === $task)
       //Delete: test_tmp & test_tmp_question
       $common->delete('test_tmp', $field = ['id' => $resultTestTmp['id']]);
       $common->delete('test_tmp_question', $field = ['test_tmp_id' => $resultTestTmp['id']]);
+
+      $reGetOrderByTMP = getOrderByDESC($table='test_tmp');
+      $reGetOrderByTmpQ = getOrderByDESC($table='test_tmp_question');
+
+      $vaIncrementTMP = $reGetOrderByTMP['id'] + 1;
+      $vaIncrementTmpQ = $reGetOrderByTmpQ['id'] + 1;
+
+      resetAutoIncrement($table = 'test_tmp', $vaIncrementTMP);
+      resetAutoIncrement($table = 'test_tmp_question', $vaIncrementTmpQ);
+
       $test_tmp_id = $common->save('test_tmp', $field = ['test_id' => $test_id, 'test_patient_id' => $test_pat_id]);
 
       if(!empty($test_que_data))
