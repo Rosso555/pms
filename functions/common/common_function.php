@@ -917,7 +917,7 @@ function getListTestPatient($pat_id, $psy_id, $tid, $status, $tmpstus, $f_date, 
       $condition .= ' AND DATE_FORMAT(tpt.created_at , "%Y-%m-%d") BETWEEN :f_date AND :t_date ';
     }
 
-    $sql =' SELECT tpt.*, pt.username, t.category_id, t.title, t.description, c.name AS catName, ttmp.status AS test_tmp_status,
+    $sql =' SELECT tpt.*, pt.username, pt.code AS patient_code, t.category_id, t.title, t.description, c.name AS catName, ttmp.status AS test_tmp_status,
               (SELECT COUNT(*) FROM `test_patient` tpt INNER JOIN patient pt ON pt.id = tpt.patient_id INNER JOIN test t ON t.id = tpt.test_id
               INNER JOIN category c ON c.id = t.category_id LEFT JOIN test_tmp ttmp ON ttmp.test_patient_id = tpt.id WHERE t.lang = :lang '.$condition.') AS total_count
             FROM `test_patient` tpt

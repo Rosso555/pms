@@ -76,7 +76,7 @@
                   <select class="form-control select2" name="pat_id" style="width:100%">
                     <option value="">--- {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_patient}{$multiLang.text_patient}{else}No Translate(Key Lang: text_patient){/if} ---</option>
                     {foreach from=$patient item=data}
-                    <option value="{$data.id}" {if $smarty.session.test_patient.pat_id}{if $smarty.session.test_patient.pat_id eq $data.id}selected{/if}{else}{if $getTestPat.patient_id eq $data.id}selected{/if}{/if}>{$data.username}</option>
+                    <option value="{$data.id}" {if $smarty.session.test_patient.pat_id}{if $smarty.session.test_patient.pat_id eq $data.id}selected{/if}{else}{if $getTestPat.patient_id eq $data.id}selected{/if}{/if}>{$data.code}</option>
                     {/foreach}
                   </select>
                 </div>
@@ -113,7 +113,7 @@
         <tbody>
         {foreach from = $testPatient item = data key=k}
           <tr>
-            <td>{$data.username}</td>
+            <td>{$data.patient_code}</td>
             <td>{$data.title}</td>
             <td>
               {if $data.status eq 1}
