@@ -404,6 +404,11 @@ $(document).ready( function()
     {foreach from=$testTmpQuestion item=v}
 
       {if $v.type == 1 || $v.type == 2}
+        // var msg = $("#area").val().replace(/\n/g, "");
+        var txt_draft = '{$v.content}';
+        var noLineBreaks = txt_draft.replace(/\n/g,'');
+        console.log(noLineBreaks0);
+
         $('#text_is_required_{$v.tqid}').val(0);
         $('#tq_id_{$v.tqid}').removeAttr('disabled');
         $('#is_email_{$v.tqid}').removeAttr('disabled');
@@ -411,7 +416,7 @@ $(document).ready( function()
         $('#content_{$v.tqid}').removeAttr('disabled');
         $('#content_{$v.tqid}').val('{$v.content}');
         $('#test{$v.tqid}').removeAttr('required');
-        $('#test{$v.tqid}').val('{$v.content}');
+        $('#test{$v.tqid}').val(txt_draft);
       {/if}
 
       {if $v.type == 3}
@@ -552,6 +557,7 @@ function checkvalue_text(e, field, id, is_required)
       if(is_required == 1) $('#test'+id).attr('required', true);
     }
     $('#content_'+id).val(text);
+    save_draft();
 }
 
 //Remove Requeired and check box, radio & jumping to
