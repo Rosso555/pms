@@ -172,7 +172,7 @@
               <input type="hidden" id="answer_id_{$v.id}" name="answer_id[]" value="NULL" disabled>
               <input type="hidden" id="content_{$v.id}" name="content[]" value="{foreach from=$sessionContent item=va}{if $va.id eq $ans.id}{$va.content}{/if}{/foreach}" disabled>
 
-              <textarea class="form-control check_value{$v.id}" onkeyup="checkvalue_text(event, this, {$v.id}, {$v.is_required});" id="test{$v.id}" {if $v.is_required eq 1}required{/if} rows="3"></textarea>
+              <textarea class="form-control check_value{$v.id}" onchange="checkvalue_text(event, this, {$v.id}, {$v.is_required});" id="test{$v.id}" {if $v.is_required eq 1}required{/if} rows="3"></textarea>
             </p><!-- end text free input -->
             {/if}
           </div>
@@ -319,7 +319,7 @@
             <input type="hidden" id="answer_id_{$v.id}" name="answer_id[]" value="NULL" disabled>
             <input type="hidden" id="content_{$v.id}" name="content[]" value="{foreach from=$sessionContent item=va}{if $va.id eq $ans.id}{$va.content}{/if}{/foreach}" disabled>
 
-            <textarea class="form-control check_value{$v.id}" onkeyup="checkvalue_text(event, this, {$v.id}, {$v.is_required});" id="test{$v.id}" {if $v.is_required eq 1}required{/if} rows="3"></textarea>
+            <textarea class="form-control check_value{$v.id}" onchange="checkvalue_text(event, this, {$v.id}, {$v.is_required});" id="test{$v.id}" {if $v.is_required eq 1}required{/if} rows="3"></textarea>
           </p><!-- end text free input -->
           {/if}
         </div>
@@ -344,7 +344,7 @@
         {else}
         <button type="submit" class="btn btn-success"> {if $multiLang.button_show_my_score}{$multiLang.button_show_my_score}{else}No Translate (Key Lang: button_show_my_score){/if}</button>
         {/if}
-        <button type="button" class="btn btn-warning" onclick="save_draft();"> {if $multiLang.button_save_draft}{$multiLang.button_save_draft}{else}No Translate (Key Lang: button_save_draft){/if}</button>
+        <!-- <button type="button" class="btn btn-warning" onclick="save_draft();"> {if $multiLang.button_save_draft}{$multiLang.button_save_draft}{else}No Translate (Key Lang: button_save_draft){/if}</button> -->
       </div>
   </form>
 </div>
@@ -404,19 +404,14 @@ $(document).ready( function()
     {foreach from=$testTmpQuestion item=v}
 
       {if $v.type == 1 || $v.type == 2}
-        // var msg = $("#area").val().replace(/\n/g, "");
-        var txt_draft = '{$v.content}';
-        var noLineBreaks = txt_draft.replace(/\n/g,'');
-        console.log(noLineBreaks0);
-
         $('#text_is_required_{$v.tqid}').val(0);
         $('#tq_id_{$v.tqid}').removeAttr('disabled');
         $('#is_email_{$v.tqid}').removeAttr('disabled');
         $('#answer_id_{$v.tqid}').removeAttr('disabled');
         $('#content_{$v.tqid}').removeAttr('disabled');
-        $('#content_{$v.tqid}').val('{$v.content}');
+        $('#content_{$v.tqid}').val('{$v.content|escape:javascript}');
         $('#test{$v.tqid}').removeAttr('required');
-        $('#test{$v.tqid}').val(txt_draft);
+        $('#test{$v.tqid}').val('{$v.content|escape:javascript}');
       {/if}
 
       {if $v.type == 3}
