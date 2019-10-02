@@ -80,12 +80,13 @@
                   <div class="form-group">
                     <label for="village"><span style="color:red">*</span> Village:</label>
                     {if $error.village}<span style="color:red">Please enter village!</span>{/if}
-                    <select class="form-control" name="village" id="village">
-                      <option value="">---Select---</option>
+                    <input type="text" class="form-control" id="village" placeholder="" name="village" value="{if $editPsychologist.village_name}{$editPsychologist.village_name}{else}{$smarty.session.psychologist.village_name}{/if}">
+                    <!-- <select class="form-control" name="village" id="village">
+                      <option value="">-Select-</option>
                       {foreach from=$village item=v}
                       <option value="{$v.id}" {if $editPsychologist.village_id}{if $editPsychologist.village_id eq $v.id}selected{/if}{else}{if $smarty.session.psychologist.village eq $v.id}selected{/if}{/if}>{$v.name}</option>
                       {/foreach}
-                    </select>
+                    </select> -->
                   </div>
                 </div>
                 <div class="col-md-4">
@@ -168,93 +169,93 @@
           <tbody>
             {if $listPsychologistData|@count gt 0}
             {foreach from=$listPsychologistData item=v}
-            <tr>
-              <td>{$v.first_name}</td>
-              <td>{$v.last_name}</td>
-              <td>{$v.email}</td>
-              <td>{$v.password}</td>
-              <td>
-                {if $v.status eq 1}
-                <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
-                  <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Unconfirm Or Stop
-                </button>
-                {else}
-                <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
-                  <i class="fa fa-check-circle"></i> Confirm Or Active
-                </button>
-                {/if}
+              <tr>
+                <td>{$v.first_name}</td>
+                <td>{$v.last_name}</td>
+                <td>{$v.email}</td>
+                <td>{$v.password}</td>
+                <td>
+                  {if $v.status eq 1}
+                  <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
+                    <i class="fa fa-stop-circle-o" aria-hidden="true"></i> Unconfirm Or Stop
+                  </button>
+                  {else}
+                  <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#status_{$v.id}" data-toggle1="tooltip" data-placement="top" title="Click Change Status">
+                    <i class="fa fa-check-circle"></i> Confirm Or Active
+                  </button>
+                  {/if}
 
-                <!-- Modal -->
-                <div class="modal fade" id="status_{$v.id}" role="dialog">
-                  <div class="modal-dialog">
-                    <!-- Modal content-->
-                    <div class="panel panel-primary modal-content">
-                      <div class="panel-heading modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="panel-title modal-title">Confirmation</h4>
-                      </div>
-                      <div class="modal-body">
-                        <p>
-                          Are you sure you want to change status to <b>{if $v.status eq 2}Stop{else}Active{/if}</b>?
-                        </p>
-                      </div>
-                      <div class="modal-footer">
-                        <a href="{$admin_file}?task=psychologist&amp;action=change_status&amp;id={$v.id|escape}&amp;status={$v.status|escape}" class="btn btn-danger btn-md" style="color: white;">
-                          <i class="fa fa-check-circle-o"></i> Yes
-                        </a>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> Discard</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- Modal -->
-              </td>
-              <td class="text-center">
-                <button href="#View_Profile_{$v.id}" class= "btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_view_pro}{$multiLang.button_view_pro}{else}No Translate (Key Lang:button_view_pro){/if}" data-toggle= "modal"><i class="fa fa-eye"></i></button>
-                <!-- Modal -->
-                <div class="modal fade" id="View_Profile_{$v.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">{if $multiLang.text_pro_info}{$multiLang.text_pro_info}{else}No Translate (Key Lang:text_pro_info){/if}</h4>
-                      </div>
-                      <div class="modal-body">
-                        <dl class="dl-horizontal">
-                          <dt>{if $multiLang.text_first_name}{$multiLang.text_first_name}{else}No Translate (Key Lang:text_first_name){/if}:</dt>
-                          <dd class="text-left">{$v.first_name}</dd>
-
-                          <dt>{if $multiLang.text_last_name}{$multiLang.text_last_name}{else}No Translate (Key Lang:text_last_name){/if}:</dt>
-                          <dd class="text-left">{$v.last_name}</dd>
-
-                          <dt>{if $multiLang.text_gender}{$multiLang.text_gender}{else}No Translate (Key Lang:text_gender){/if}:</dt>
-                          <dd class="text-left">{if $v.gender eq 1}Male{elseif $v.gender eq 2}Female{else}Other{/if}</dd>
-
-                          <dt>{if $multiLang.text_age}{$multiLang.text_age}{else}No Translate (Key Lang:text_age){/if}:</dt>
-                          <dd class="text-left">{$v.age}</dd>
-
-                          <dt>{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}:</dt>
-                          <dd class="text-left">{$v.password}</dd>
-
-                          <dt>{if $multiLang.text_email}{$multiLang.text_email}{else}No Translate (Key Lang:text_email){/if}:<dt>
-                          <dd class="text-left">{$v.email}</dd>
-
-                          <dt>{if $multiLang.text_job}{$multiLang.text_job}{else}No Translate (Key Lang:text_job){/if}:</dt>
-                          <dd class="text-left">{$v.job}</dd>
-
-                          <dt>{if $multiLang.text_address}{$multiLang.text_address}{else}No Translate (Key Lang:text_address){/if}:</dt>
-                          <dd class="text-left">{$v.address}</dd>
-                        </dl>
-                      </div>
-                      <div class="modal-footer">
-                        <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success"><i class="fa fa-edit"></i> {if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}</a>
-                        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times-circle" aria-hidden="true"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
+                  <!-- Modal -->
+                  <div class="modal fade" id="status_{$v.id}" role="dialog">
+                    <div class="modal-dialog">
+                      <!-- Modal content-->
+                      <div class="panel panel-primary modal-content">
+                        <div class="panel-heading modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="panel-title modal-title">Confirmation</h4>
+                        </div>
+                        <div class="modal-body">
+                          <p>
+                            Are you sure you want to change status to <b>{if $v.status eq 2}Stop{else}Active{/if}</b>?
+                          </p>
+                        </div>
+                        <div class="modal-footer">
+                          <a href="{$admin_file}?task=psychologist&amp;action=change_status&amp;id={$v.id|escape}&amp;status={$v.status|escape}" class="btn btn-danger btn-md" style="color: white;">
+                            <i class="fa fa-check-circle-o"></i> Yes
+                          </a>
+                          <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="fa fa-remove"></i> Discard</button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
+                  <!-- Modal -->
                 </td>
+                <td class="text-center">
+                  <button href="#View_Profile_{$v.id}" class= "btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_view_pro}{$multiLang.button_view_pro}{else}No Translate (Key Lang:button_view_pro){/if}" data-toggle= "modal"><i class="fa fa-eye"></i></button>
+                  <!-- Modal -->
+                  <div class="modal fade" id="View_Profile_{$v.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                          <h4 class="modal-title" id="myModalLabel">{if $multiLang.text_pro_info}{$multiLang.text_pro_info}{else}No Translate (Key Lang:text_pro_info){/if}</h4>
+                        </div>
+                        <div class="modal-body">
+                          <dl class="dl-horizontal">
+                            <dt>{if $multiLang.text_first_name}{$multiLang.text_first_name}{else}No Translate (Key Lang:text_first_name){/if}:</dt>
+                            <dd class="text-left">{$v.first_name}</dd>
+
+                            <dt>{if $multiLang.text_last_name}{$multiLang.text_last_name}{else}No Translate (Key Lang:text_last_name){/if}:</dt>
+                            <dd class="text-left">{$v.last_name}</dd>
+
+                            <dt>{if $multiLang.text_gender}{$multiLang.text_gender}{else}No Translate (Key Lang:text_gender){/if}:</dt>
+                            <dd class="text-left">{if $v.gender eq 1}Male{elseif $v.gender eq 2}Female{else}Other{/if}</dd>
+
+                            <dt>{if $multiLang.text_age}{$multiLang.text_age}{else}No Translate (Key Lang:text_age){/if}:</dt>
+                            <dd class="text-left">{$v.age}</dd>
+
+                            <dt>{if $multiLang.text_password}{$multiLang.text_password}{else}No Translate (Key Lang:text_password){/if}:</dt>
+                            <dd class="text-left">{$v.password}</dd>
+
+                            <dt>{if $multiLang.text_email}{$multiLang.text_email}{else}No Translate (Key Lang:text_email){/if}:<dt>
+                            <dd class="text-left">{$v.email}</dd>
+
+                            <dt>{if $multiLang.text_job}{$multiLang.text_job}{else}No Translate (Key Lang:text_job){/if}:</dt>
+                            <dd class="text-left">{$v.job}</dd>
+
+                            <dt>{if $multiLang.text_address}{$multiLang.text_address}{else}No Translate (Key Lang:text_address){/if}:</dt>
+                            <dd class="text-left">{$v.address}</dd>
+                          </dl>
+                        </div>
+                        <div class="modal-footer">
+                          <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success"><i class="fa fa-edit"></i> {if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}</a>
+                          <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times-circle" aria-hidden="true"></i> {if $multiLang.button_close}{$multiLang.button_close}{else}No Translate (Key Lang:button_close){/if}</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <a href="{$admin_file}?task=psychologist&amp;action=edit&amp;id={$v.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
+                  </td>
               </tr>
               {/foreach}
               {else}
@@ -262,11 +263,11 @@
                 <td colspan="8"><h4 style="text-align:center">There is no record</h4></td>
               </tr>
               {/if}
-            </tbody>
-          </table>
-          {include file="common/paginate.tpl"}
-        </div><!--table-responsive  -->
-      </div><!--End panel-heading-->
-    </div><!--End panel panel-primary-->
+          </tbody>
+        </table>
+        {include file="common/paginate.tpl"}
+      </div><!--table-responsive  -->
+  </div><!--End panel-heading-->
+</div><!--End panel panel-primary-->
 
-    {/block}
+{/block}

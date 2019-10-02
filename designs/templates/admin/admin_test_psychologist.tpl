@@ -69,7 +69,7 @@
                   <select class="form-control select2" name="psy_id" style="width:100%">
                     <option value="">--- {if $multiLang.text_please_select}{$multiLang.text_please_select}{else}No Translate(Key Lang: text_please_select){/if} {if $multiLang.text_psychologist}{$multiLang.text_psychologist}{else}No Translate(Key Lang: text_psychologist){/if} ---</option>
                     {foreach from=$psychologist item=data}
-                    <option value="{$data.id}" {if $smarty.session.test_psy.psy_id}{if $smarty.session.test_psy.psy_id eq $data.id}selected{/if}{else}{if $getTestPsy.psychologist_id eq $data.id}selected{/if}{/if}>{$data.first_name} {$data.last_name}</option>
+                    <option value="{$data.id}" {if $smarty.session.test_psy.psy_id}{if $smarty.session.test_psy.psy_id eq $data.id}selected{/if}{else}{if $getTestPsy.psychologist_id eq $data.id}selected{/if}{/if}>{$data.first_name} {$data.last_name} / {$data.email}</option>
                     {/foreach}
                   </select>
                 </div>
@@ -212,13 +212,26 @@
 <script>
 
 $(document).ready(function() {
-  {if $error_smail}
-    {if $error_smail.subject eq 1}
-    $("#error_subject").attr("class", "form-group has-error");
-    $("#txt_error_subject").text("Please enter subject !");
+    $('#comment').summernote({
+      height: 150,
+      toolbar: [
+        // [groupName, [list of button]]
+        ['style', ['bold', 'italic', 'underline', 'clear']],
+        ['font', ['strikethrough', 'superscript', 'subscript']],
+        ['fontsize', ['fontsize']],
+        ['color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['height', ['height']]
+      ]
+    });
+
+    {if $error_smail}
+        {if $error_smail.subject eq 1}
+            $("#error_subject").attr("class", "form-group has-error");
+            $("#txt_error_subject").text("Please enter subject !");
+        {/if}
+        $('#mySendMail').modal('show');
     {/if}
-  $('#mySendMail').modal('show');
-  {/if}
 });
 
 function modalSendMail(psy_id)
@@ -240,7 +253,7 @@ $("#send_mail").submit(function( event )
     $("#error_subject").attr("class", "form-group has-success");
     $("#txt_error_subject").text("");
   }
-  
+
   //if ture is submit
   if(subject != '') return;
 

@@ -80,6 +80,7 @@
             <tr>
               <td>{$data.name}</td>
               <td>
+                <a href="{$admin_file}?task=templatemail&amp;cid={$data.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_templatemail}{$multiLang.button_templatemail}{else}No Translate(Key Lang:button_templatemail){/if}"><i class="fa fa-plus-circle"></i></a>
                 <a href="{$admin_file}?task=category&amp;action=edit&amp;id={$data.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_edit}{$multiLang.button_edit}{else}No Translate (Key Lang:button_edit){/if}"><i class="fa fa-edit"></i></a>
                 <!-- Trigger the modal with a button -->
                 <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#myModal_{$data.id}" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_delete}{$multiLang.button_delete}{else}No Translate (Key Lang:button_delete){/if}"><i class="fa fa-trash-o"></i></button>

@@ -126,6 +126,7 @@
                 <!-- Modal -->
                 <!-- <a href="{$admin_file}?task=mailerlitegroup&amp;mlid={$mailerlite.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_mailerlitegroup}{$multiLang.button_add_mailerlitegroup}{else}No Translate(Key Lang: button_add_mailerlitegroup){/if}"><i class="fa fa-plus-circle" aria-hidden="true"></i></a> -->
                 <a href="{$admin_file}?task=apitransaction&amp;mlid={$mailerlite.id}" class="btn btn-success btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_transaction}{$multiLang.button_add_transaction}{else}No Translate(Key Lang: button_add_transaction){/if}"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+                <a href="{$admin_file}?task=apitransaction_email&amp;mlid={$mailerlite.id}" class="btn btn-info btn-xs" data-toggle1="tooltip" data-placement="top" title="{if $multiLang.button_add_email_transaction}{$multiLang.button_add_email_transaction}{else}No Translate(Key Lang: button_add_email_transaction){/if}"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
               </td>
             </tr>
           {/foreach}

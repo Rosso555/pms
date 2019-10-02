@@ -18,6 +18,10 @@
 <link rel="stylesheet" href="/css/common_style.css" type="text/css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
+<!-- include summernote css/js -->
+<link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.12/summernote.css" rel="stylesheet">
+
+
 <title>{block name="title"}{/block}PMS-ADMIN</title>
 <script>
 	$(window).load(function() { $(".loader").fadeOut("slow"); });
@@ -45,6 +49,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
+<!-- include summernote js -->
+<!-- <script src="https://cdnjs.c/loudflare.com/ajax/libs/summernote/0.8.11/summernote.js"></script> -->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.12/summernote.js"></script>
+
 <script type="text/javascript">
 	function readURL(input) {
 		if (input.files && input.files[0]) {

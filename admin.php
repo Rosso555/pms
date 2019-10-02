@@ -1158,7 +1158,7 @@ if('psychologist' === $task)
       if(empty($id) && COUNT($error) === 0){
         $common->save('psychologist', $field = ['first_name'  => $first_name,
                                                 'last_name'   => $last_name,
-                                                'village_id'  => $village,
+                                                'village_name'  => $village,
                                                 'gender'  => $gender,
                                                 'age'     => $age,
                                                 'email'   => $email,
@@ -1215,11 +1215,15 @@ if('psychologist' === $task)
       }
       //Update
       if(!empty($id) && COUNT($error) === 0){
-        $common->update('psychologist', $field=['username' => $username,
-        'email'    => $email,
-        'job'      => $job,
-        'password' => $password,
-        'address'  => $address], $condition = ['id' => $id]);
+        $common->update('psychologist', $field = ['first_name'  => $first_name,
+                                                'last_name'   => $last_name,
+                                                'village_name'  => $village,
+                                                'gender'  => $gender,
+                                                'age'     => $age,
+                                                'email'   => $email,
+                                                'job'     => $job,
+                                                'password'=> $password,
+                                                'address' => $address], $condition = ['id' => $id]);
         //unset session
         unset($_SESSION['psychologist']);
         //Redirect
@@ -5053,6 +5057,253 @@ if('result_test_psychologist' === $task)
   $smarty_appform->assign('test_psychologist', $common->find('test_psychologist', $condition = ['psychologist_id' => $psy_id, 'id' => $tpsy_id], $type = 'one'));
   $smarty_appform->assign('test', $common->find('test', $condition = ['id' => $tid, 'lang' => $lang], $type = 'one'));
   $smarty_appform->display('admin/admin_result_test_psychologist.tpl');
+  exit;
+}
+
+if('templatemail' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['email_temp']);
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $subject  = $common->clean_string($_POST['subject']);
+    $content  = $_POST['content'];
+    $cid      = $common->clean_string($_POST['cid']);
+    $id       = $common->clean_string($_POST['id']);
+
+    if(empty($id))
+    {
+      $result = $common->find('email_template', $condition = ['category_id' => $cid], $type = 'one');
+      if(!empty($result))   $error['exists']  = 1;
+    }
+
+    //add value to session to use in template
+    $_SESSION['email_temp'] = $_POST;
+    //form validation
+    if(empty($subject))   $error['subject'] = 1;
+    if(empty($content))   $error['content']  = 1;
+
+    //Add question
+    if(0 === count($error) && empty($id))
+    {
+      $common->save('email_template', $field = ['category_id' => $cid, 'subject' => $subject, 'content' => $content]);
+      //unset session
+      unset($_SESSION['email_temp']);
+      //Redirect
+      header('location: '.$admin_file.'?task=templatemail&cid='.$cid);
+      exit;
+    }
+
+    //update question
+    if(0 === count($error) && !empty($id))
+    {
+      $common->update('email_template', $field = ['subject' => $subject, 'content' => $content], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['email_temp']);
+      //Redirect
+      header('location: '.$admin_file.'?task=templatemail&cid='.$cid);
+      exit;
+    }
+
+  }
+
+  //action delete question
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $id = $common->clean_string($_GET['id']);
+    $cid = $common->clean_string($_GET['cid']);
+    $common->delete('email_template', $field = ['id' => $id]);
+    header('location: '.$admin_file.'?task=templatemail&cid='.$cid);
+    exit;
+  }
+
+  //get edit question
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $getQuestionByID = $common->find('email_template', $condition = ['id' => $_GET['id']], $type = 'one');
+    $smarty_appform->assign('getEmailTemByID', $getQuestionByID);
+  }
+
+  $result = $common->find('email_template', $condition = ['category_id' => $_GET['cid']], $type = 'one');
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('resultemail', $result);
+  $smarty_appform->display('admin/admin_templatemail.tpl');
+  exit;
+}
+
+//Task: Api email translate
+if('apitransaction_email' === $task)
+{
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['apitransaction']);
+  setcookie('status', 1, time() - 5);
+  setcookie('status', 2, time() - 5);
+
+  $result_mailer = $common->find('mailerlite', $condition = ['id' => $_GET['mlid']], $type = 'one');
+  if(!empty($result_mailer['api_key'])){
+    $groupsApi = (new \MailerLiteApi\MailerLite($result_mailer['api_key']))->groups();
+    $allGroups = $groupsApi->get();
+  }
+
+  $error = array();
+  if($_POST)
+  {
+    //get value from form
+    $title   = $common->clean_string($_POST['title']);
+    $catid   = $common->clean_string($_POST['catid']);
+    $ml_id   = $common->clean_string($_GET['mlid']);
+    $id      = $common->clean_string($_POST['id']);
+
+    //add value to session to use in template
+    $_SESSION['apitran_email'] = $_POST;
+    //form validation
+    if(empty($title))  $error['title']  = 1;
+    if(empty($ml_id))  $error['mlid']   = 1;
+    if(empty($catid))  $error['catid']  = 1;
+    if(empty($_POST['groupid'])) $error['groupid']   = 1;
+
+    $result_trans = $common->find('apitransaction_email', $condition = ['id' => $id], $type = 'one');
+
+    if($result_trans['category_id'] !== $catid && is_exist_transaction_email($catid, $ml_id) > 0) {
+      $result_cat = $common->find('category', $condition = ['id' => $catid], $type = 'one');
+      $error['is_exist_cat']   = 1;
+      $error['catid'] = $result_cat['id'];
+      $error['cat_title'] = $result_cat['name'];
+    }
+    //Add apitransaction
+    if(0 === count($error) && empty($id))
+    {
+      //Add data to apitransaction
+      $transaction_id = $common->save('apitransaction_email', $field = ['category_id' => $catid, 'ml_id' => $ml_id, 'title' => $title]);
+
+      foreach ($allGroups as $value) {
+        foreach ($_POST['groupid'] as $key => $v) {
+          if($v == $value->id){
+            //Add data to mailerlite_group
+            $common->save('mailerlite_group_email', $field = ['transaction_email_id' => $transaction_id, 'group_title' => $value->name, 'group_id' => $value->id]);
+          }
+        }
+      }
+      //unset session
+      unset($_SESSION['apitran_email']);
+      //Redirect
+      header('location: '.$admin_file.'?task=apitransaction_email&mlid='.$ml_id);
+      exit;
+    }
+    //update mailerlite
+    if(0 === count($error) && !empty($id))
+    {
+      //Delete: mailerlite group
+      $common->delete('mailerlite_group_email', $field = ['transaction_email_id' => $id]);
+
+      $common->update('apitransaction_email', $field = ['category_id' => $catid, 'title' => $title], $condition = ['id' => $id]);
+
+      foreach ($allGroups as $value) {
+        foreach ($_POST['groupid'] as $key => $v) {
+          if($v == $value->id){
+            //Add data to mailerlite_group
+            $common->save('mailerlite_group_email', $field = ['transaction_email_id' => $id, 'group_title' => $value->name, 'group_id' => $value->id]);
+          }
+        }
+      }
+
+      //unset session
+      unset($_SESSION['apitran_email']);
+      //Redirect
+      header('location: '.$admin_file.'?task=apitransaction_email&mlid='.$ml_id);
+      exit;
+    }
+  }
+  if('detail' === $action && !empty($_GET['trid']))
+  {
+    $result_detail = $common->find('mailerlite_group_email', $condition = ['transaction_email_id' => $_GET['trid']], $type = 'all');
+    header('Content-type: application/json');
+   	echo json_encode($result_detail);
+   	exit;
+  }
+  //Delete: mailerlite
+  if('delete' === $action && !empty($_GET['id']))
+  {
+    $common->delete('apitransaction_email', $field = ['id' => $_GET['id']]);
+    $common->delete('mailerlite_group_email', $field = ['transaction_email_id' => $_GET['id']]);
+    header('location: '.$admin_file.'?task=apitransaction_email&mlid='.$_GET['mlid']);
+    exit;
+  }
+
+  if('delete_mgroup' === $action)
+  {
+    $result = $common->delete('mailerlite_group_email', $field = ['id' => $_GET['mgid']]);
+    $countMG = countMailerLiteGroupEmail($_GET['trid']);
+
+    if($countMG == 0){
+      $common->delete('apitransaction_email', $field = ['id' => $_GET['trid']]);
+    }
+
+    header('Content-type: application/json');
+   	echo json_encode(array('status' => $result, 'countMG' => $countMG));
+   	exit;
+  }
+  //get edit apitransaction
+  if('edit' === $action && !empty($_GET['id']))
+  {
+    $smarty_appform->assign('getEmailApiTranByID', $common->find('apitransaction_email', $condition = ['id' => $_GET['id']], $type = 'one'));
+    $smarty_appform->assign('listEditMailerlite', $common->find('mailerlite_group_email', $condition = ['transaction_email_id' => $_GET['id']], $type = 'all'));
+  }
+
+  $catid = !empty($_GET['cid']) ? $_GET['cid'] : '';
+  $result = getListEmailTransaction($_GET['mlid'], $catid, $lang);
+
+  (0 < $total_data) ? SmartyPaginate::setTotal($total_data) : SmartyPaginate::setTotal(1) ;
+  SmartyPaginate::assign($smarty_appform);
+
+  // $smarty_appform->assign('testQuestionIsEmail', getListTestQuestionByIsEmail());
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('mailerliteGroup', $allGroups);
+  $smarty_appform->assign('listTransaction', $result);
+  $smarty_appform->assign('listCategory', $common->find('category', $condition = ['lang' => $lang], $type = 'all'));
+  $smarty_appform->assign('mailerLite', $common->find('mailerlite', $condition = ['id' => $_GET['mlid']], $type = 'one'));
+  $smarty_appform->display('admin/admin_api_email_transcation.tpl');
+  exit;
+}
+
+//Task: submit mailerLite
+if('submit_mailerlite_email' === $task)
+{
+
+  if('detail' === $action && !empty($_GET['trid']))
+  {
+    $result_detail = $common->find('mailerlite_group_email', $condition = ['transaction_email_id' => $_GET['trid']], $type = 'all');
+    $resultCountEmailTestCat = getCountEmailTestCategory($_GET['cid']);
+
+    header('Content-type: application/json');
+   	echo json_encode(array('countEmailTest' => $resultCountEmailTestCat['total_data'], 'mailer_group' => $result_detail));
+   	exit;
+  }
+  $error = array();
+  if($_POST)
+  {
+    $catid   = $common->clean_string($_POST['catid']);
+    $mlid     = $common->clean_string($_GET['mlid']);
+    $groupMid = $common->clean_string_array($_POST['groupid']);
+    if(empty($catid)) $error['catid'] = 1;
+    if(empty($groupMid)) $error['groupid'] = 1;
+
+    // Get Mailer Key
+    // $rMalierLiteKey = $common->find('mailerlite', $condition = ['id' => $_GET['mlid']], $type = 'one');
+
+    if(COUNT($error) === 0)
+    {
+      exec($path_exec.'/send_emailbycategory.php '.$_GET['mlid'].' '.$catid.' '.json_encode($groupMid).' > /dev/null &');
+      setcookie('status', 1, time() + 5);
+    }else {
+      setcookie('status', 2, time() + 5);
+    }
+  }
+
+  header('location: '.$admin_file.'?task=apitransaction_email&mlid='.$_GET['mlid']);
   exit;
 }
 

@@ -44,6 +44,77 @@ if(empty($_SESSION['is_psycho_login_id']))
   header('Location:'.$index_file.'?task=login');
   exit;
 }
+//Task: patient
+if('profile' === $task)
+{
+  //Clear session
+  if(!$_POST) unset($_SESSION['profile']);
+
+  $error = array();
+
+  if($_POST)
+  {
+    //get value from form
+    $id     = $_SESSION['is_psycho_login_id'];
+    $first_name = $common->clean_string($_POST['first_name']);
+    $last_name  = $common->clean_string($_POST['last_name']);
+    $village  = $common->clean_string($_POST['village']);
+    $gender   = $common->clean_string($_POST['gender']);
+    $age      = $common->clean_string($_POST['age']);
+    $password = $common->clean_string($_POST['password']);
+    $email    = $common->clean_string($_POST['email']);
+    $job      = $common->clean_string($_POST['job']);
+    $address  = $common->clean_string($_POST['address']);
+
+    //add value to session to use in template
+    $_SESSION['profile'] = $_POST;
+    //form validation
+    if(empty($first_name))$error['first_name']  = 1;
+    if(empty($last_name)) $error['last_name']  = 1;
+    if(empty($village))   $error['village']  = 1;
+    if(empty($gender))    $error['gender']  = 1;
+    if(empty($age))       $error['age']  = 1;
+    if(empty($password))  $error['password']  = 1;
+    if(empty($email))     $error['email']   = 1;
+    if(empty($job))       $error['job']   = 1;
+    if(empty($address))   $error['address']   = 1;
+
+    if(!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)){
+      $error['invalid_email'] = 1;
+    }
+    if(!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)){
+      $result = $common->find('psychologist', $condition = ['id' => $id], $type='one');
+      if($result['email'] !== $email &&  check_psychologist_email($email) > 0){
+        $error['exist_email'] = 1;
+      }
+    }
+    //Update
+    if(!empty($id) && COUNT($error) === 0){
+      $common->update('psychologist', $field = ['first_name'  => $first_name,
+                                              'last_name'   => $last_name,
+                                              'village_name'  => $village,
+                                              'gender'  => $gender,
+                                              'age'     => $age,
+                                              'email'   => $email,
+                                              'job'     => $job,
+                                              'password'=> $password,
+                                              'address' => $address], $condition = ['id' => $id]);
+      //unset session
+      unset($_SESSION['profile']);
+      //Redirect
+      header('location: '.$psychologist_file.'?task=profile');
+      exit;
+    }
+  }
+
+  //Clear session
+  if(empty($_POST)) unset($_SESSION['profile']);
+
+  $smarty_appform->assign('error', $error);
+  $smarty_appform->assign('editPsychologist', $common->find('psychologist', $condition = ['id' => $_SESSION['is_psycho_login_id']], $type='one'));
+  $smarty_appform->display('psychologist/profile.tpl');
+  exit;
+}
 //Task: page not found
 if('page_not_found' === $task)
 {

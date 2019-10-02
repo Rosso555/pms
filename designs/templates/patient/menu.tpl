@@ -31,7 +31,7 @@
 						{$smarty.session.is_patient_username} <span class="caret"></span>
 					</a>
 	        <ul class="dropdown-menu">
-						<li><a href="#"><i class="fa fa-envelope" aria-hidden="true"></i> {$smarty.session.is_patient_email}</a></li>
+						<li><a href="#"><i class="fa fa-key" aria-hidden="true"></i> {$smarty.session.is_patient_code}</a></li>
             <li><a href="{$patient_file}?task=logout"><i class="fa fa-sign-out" aria-hidden="true"></i> logout</a></li>
 					</ul>
 				</li>

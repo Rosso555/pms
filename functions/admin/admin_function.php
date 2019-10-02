@@ -2883,3 +2883,112 @@ function getListTestQuestionByNonHide($test_id, $tqid)
   }
   return $result;
 }
+/**
+ * [getListEmailTransaction description]
+ * @param  int $mlid  is mailerLite_id
+ * @param  int $catid is category_id
+ * @param  string $lang is language
+ * @return array or boolean
+ */
+function getListEmailTransaction($mlid, $catid, $lang)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+  try{
+    $condition = '';
+
+    if(!empty($catid)) $condition = ' AND apit.category_id = :catid';
+
+    $sql =' SELECT apit.*, c.name AS cat_title, COUNT(gm.transaction_email_id) AS count_group,
+              (SELECT COUNT(*) FROM (SELECT COUNT(*) FROM `apitransaction_email` apit
+                INNER JOIN mailerlite_group_email gm ON gm.transaction_email_id = apit.id
+                INNER JOIN category c ON c.id = apit.category_id
+              WHERE apit.ml_id = :mlid '.$condition.' GROUP BY apit.id) AS group_by) AS total
+            FROM `apitransaction_email` apit
+              INNER JOIN mailerlite_group_email gm ON gm.transaction_email_id = apit.id
+              INNER JOIN category c ON c.id = apit.category_id
+            WHERE apit.ml_id = :mlid AND c.lang = :lang '.$condition.' GROUP BY apit.id LIMIT :offset, :limit';
+    $query = $connected->prepare($sql);
+    // echo $sql;
+    if(!empty($catid)) $query->bindValue(':catid', $catid, PDO::PARAM_INT);
+
+    $query->bindValue(':mlid', $mlid, PDO::PARAM_INT);
+    $query->bindValue(':lang', $lang, PDO::PARAM_STR);
+    $query->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetchAll();
+    if (count($rows) > 0) $total_data = $rows[0]['total'];
+    return $rows;
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getListEmailTransaction'.$e->getMessage();
+  }
+
+  return $result;
+}
+/**
+ * [is_exist_transaction_email description]
+ * @param  int  $catid is category_id
+ * @param  int  $mlid is mailerLite_id
+ * @return boolean
+ */
+function is_exist_transaction_email($catid, $mlid)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count FROM `apitransaction_email` WHERE category_id = :catid AND ml_id = :mlid ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':catid', (int)$catid, PDO::PARAM_INT);
+    $query->bindValue(':mlid', (int)$mlid, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: is_exist_transaction_email'.$e->getMessage();
+  }
+  return $result;
+}
+function countMailerLiteGroupEmail($trid)
+{
+  global $debug, $connected;
+  $result = true;
+  try{
+    $sql= ' SELECT COUNT(*) AS total_count FROM `mailerlite_group_email` WHERE transaction_email_id = :trid ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':trid', (int)$trid, PDO::PARAM_INT);
+    $query->execute();
+    $rows = $query->fetch();
+    return $rows['total_count'];
+  } catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: countMailerLiteGroupEmail'.$e->getMessage();
+  }
+  return $result;
+}
+function getCountEmailTestCategory($catid)
+{
+  global $debug, $connected, $limit, $offset, $total_data;
+  $result = true;
+
+  try{
+    $sql =' SELECT COUNT(*) AS total_data FROM `response` r
+            INNER JOIN response_answer ra ON ra.response_id = r.id
+            INNER JOIN test t ON t.id = r.test_id
+            WHERE t.category_id = :catid AND ra.is_email = 1 AND ra.content IS NOT NULL ';
+    $query = $connected->prepare($sql);
+    $query->bindValue(':catid', $catid, PDO::PARAM_INT);
+    $query->execute();
+
+    return $query->fetch();
+  }
+  catch (Exception $e) {
+    $result = false;
+    if($debug)  echo 'Errors: getCountEmailTestCategory'.$e->getMessage();
+  }
+
+  return $result;
+}
